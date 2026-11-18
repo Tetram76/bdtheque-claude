@@ -1,8 +1,8 @@
 ---
 type: Modèle métier
 title: 'Relations et cardinalités'
-description: 'Relations et cardinalités de chaque entité, contraintes des intentions d''achat, du suivi de l''outil et des visites.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:00:00Z }
+description: 'Relations et cardinalités de chaque entité, contraintes des intentions d''acquisition, du suivi de l''outil et des visites.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Relations et cardinalités
@@ -42,20 +42,20 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T17:00:00Z }
 | --- | --- | --- |
 | Univers → Univers parent | 0..1 | Relation récursive permettant une hiérarchie d'univers. Acyclicité obligatoire : un univers ne peut pas être son propre ancêtre (auto-référence interdite, cycles interdits). |
 
-## Intention d'achat — relations
+## Intention d'acquisition — relations
 
 | Relation | Cardinalité | Remarques |
 | --- | --- | --- |
-| Intention d'achat → Album | 0..1 | Renseignée si l'intention porte sur un album (toute édition acceptable). |
-| Intention d'achat → Édition | 0..1 | Renseignée si l'intention porte sur une édition spécifique. |
+| Intention d'acquisition → Album | 0..1 | Renseignée si l'intention porte sur un album (toute édition acceptable). |
+| Intention d'acquisition → Édition | 0..1 | Renseignée si l'intention porte sur une édition spécifique. |
 
 > **Contraintes :**
 >
-> - Une intention d'achat doit cibler exactement l'un des deux : un Album ou une Édition, jamais les deux, jamais aucun.
-> - Une cible ne fait l'objet que d'**une seule** intention d'achat : un album est visé par au plus une intention, une édition par au plus une intention.
+> - Une intention d'acquisition doit cibler exactement l'un des deux : un Album ou une Édition, jamais les deux, jamais aucun.
+> - Une cible ne fait l'objet que d'**une seule** intention d'acquisition : un album est visé par au plus une intention, une édition par au plus une intention.
 > - Pour un même album, l'intention porte **soit** sur l'album, **soit** sur ses éditions, jamais les deux : un album visé par une intention ne peut pas avoir en même temps une de ses éditions visée par une autre intention, et réciproquement.
-> - Un album visé par une intention portant sur lui-même n'a **aucune édition**, possédée ou non (voir [Intention d'achat](../fonctionnel/regles-metier/intention-d-achat.md)).
-> - Une édition **possédée** (`Mode d'acquisition` renseigné) ne peut pas être visée par une intention d'achat.
+> - Un album visé par une intention portant sur lui-même n'a **aucune édition**, possédée ou non (voir [Intention d'acquisition](../fonctionnel/regles-metier/intention-d-acquisition.md)).
+> - Une édition **possédée** (`Mode d'acquisition` renseigné) ne peut pas être visée par une intention d'acquisition.
 
 ## Jeton d'accès et suivi de l'outil — relations
 

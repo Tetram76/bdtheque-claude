@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''une série : pile de couvertures, avancement, auteurs, albums dans l''ordre de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T11:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Contenu
@@ -24,5 +24,5 @@ De haut en bas :
 - **Combien d'albums ?** : le décompte (tomes, intégrales, hors-séries), puis les albums **dans l'ordre de la série** ([Ordre des albums dans une série](../../fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md)), en deux groupes : **Tomes et intégrales**, puis **Hors-séries**. Chaque album est une carte, en grille, qui mène à sa fiche :
   - sa couverture, son tome ([Représentation du tome selon le type d'album](../../fonctionnel/presentation/libelle-d-un-album.md#représentation-du-tome-selon-le-type-dalbum)) et son titre ; un album sans titre propre est nommé par son tome seul (« Tome 3 »), la série étant évidente, sans répéter son tome à part ([Libellé d'un album](../../fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte)) ;
   - son appréciation, en étoiles, lorsqu'elle est renseignée ;
-  - sa **possession** : étiquette pleine « Possédé », ou étiquette en tirets « Non possédé » ou « Intention d'achat » ([États d'un album](../../fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album)).
+  - sa **possession** : étiquette pleine « Possédé », ou étiquette en tirets « Non possédé » ou « Intention d'acquisition » ([États d'un album](../../fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album)).
 - **Pied de page** : les dates de création et de modification de la série, introduites par ce qu'elles concernent (« Série créée le …, modifiée le … »), jamais par « Fiche ».

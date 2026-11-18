@@ -2,7 +2,7 @@
 type: Modèle métier
 title: 'Glossaire des entités'
 description: 'Définition de chaque entité du domaine ; point d''entrée du modèle.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Glossaire des entités
@@ -19,7 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
 | **Genre** | Catégorie de contenu (aventure, SF, humour, etc.). |
 | **Univers** | Cadre fictionnel auquel albums/séries peuvent être rattachés, avec hiérarchie possible. |
 | **Visuel d'édition** | Média rattaché à une édition avec un type de visuel. |
-| **Intention d'achat** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
+| **Intention d'acquisition** | Souhait d'acquisition portant sur un album (toute édition) ou sur une édition spécifique. |
 | **Recherche enregistrée** | Recherche avancée nommée par l'administrateur, rejouable en consultation (voir [Recherche avancée](../fonctionnel/recherche-avancee/recherche-avancee.md)). |
 | **Paramétrage de l'application** | Réglages de l'application, fixés par l'administrateur dans le bloc « Paramétrage » de l'administration. Fiche unique. |
 | **Jeton d'accès** | Jeton généré par l'administrateur, sans lequel l'outil pour agents IA n'est pas utilisable ; il détermine le niveau d'accès de l'agent (voir [Interface pour agents IA](../fonctionnel/agents-ia/interface-pour-agents-ia.md)). |

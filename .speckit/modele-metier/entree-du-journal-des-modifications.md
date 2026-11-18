@@ -5,14 +5,14 @@ description: 'Attributs d''une entrée du journal des modifications et ses règl
 applies_to:
   - 'src/Bdtheque.Domain/Entities/ChangeLogEntry.cs'
   - 'src/Bdtheque.Domain/Entities/ChangeLogValue.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Entrée du journal des modifications
 
 | Attribut | Type | Obligatoire | Remarques |
 | --- | --- | --- | --- |
-| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'achat` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage` / `Jeton d'accès`. |
+| Type de fiche | énuméré | oui | `Album` / `Édition` / `Série` / `Intention d'acquisition` / `Auteur` / `Éditeur` / `Collection éditeur` / `Genre` / `Univers` / `Recherche enregistrée` / `Paramétrage` / `Jeton d'accès`. |
 | Fiche | identifiant | oui | Identifiant de la fiche écrite. Conservé après la suppression de la fiche : aucune contrainte d'intégrité référentielle. |
 | Libellé | composantes du libellé | oui | Données qui composent le libellé de la fiche (ex. titre, série et tome d'un album, cf. [Libellé d'un album](../fonctionnel/presentation/libelle-d-un-album.md)), relevées au moment de l'écriture, pour qu'une fiche supprimée reste identifiable. Le libellé en est construit à la consultation. |
 | Opération | énuméré | oui | `Création` / `Modification` / `Suppression` / `Reprise` (reprise d'une ancienne donnée depuis l'application existante). |

@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes de la saisie d''une édition.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Maquettes
@@ -13,7 +13,7 @@ Réglages de la source commune :
 
 | Réglage | Valeurs |
 | --- | --- |
-| `exemple` | `modification` (par défaut) : une édition possédée, avec onze visuels ; `creation` : une nouvelle édition, pré-remplie d'après la série de l'album ; `nouvelleIntention` : une nouvelle édition visée par une intention d'achat, créée avec elle ; `intention` : une édition visée par une intention d'achat, donc non possédée |
+| `exemple` | `modification` (par défaut) : une édition possédée, avec onze visuels ; `creation` : une nouvelle édition, pré-remplie d'après la série de l'album ; `nouvelleIntention` : une nouvelle édition visée par une intention d'acquisition, créée avec elle ; `intention` : une édition visée par une intention d'acquisition, donc non possédée |
 | `mode` | `achat` (par défaut) ou `offerte` : le mode d'acquisition, dont suivent les libellés de la date et du montant |
 | `gratuite` | édition gratuite (avec le mode `offerte`) |
 | `isbn` | `valide` (par défaut) ou `incoherent` : chiffre de contrôle incohérent |

@@ -1,6 +1,6 @@
 # Règles métier
 
-* [Appartenance à la collection](appartenance-a-la-collection.md) - Un album fait partie de la collection s'il a une édition possédée ; seules les éditions d'intention ne sont pas possédées ; trois états (Possédé, Intention d'achat, Non possédé), de même nom et de même sens partout où la possession d'un album est présentée, comptée ou filtrée.
+* [Appartenance à la collection](appartenance-a-la-collection.md) - Un album fait partie de la collection s'il a une édition possédée ; seules les éditions d'intention ne sont pas possédées ; trois états (Possédé, Intention d'acquisition, Non possédé), de même nom et de même sens partout où la possession d'un album est présentée, comptée ou filtrée.
 * [Périmètre de la consultation](perimetre-de-la-consultation.md) - Base documentaire et inventaire : tout est consultable, l'appartenance est signalée, les statistiques ne portent que sur la collection.
 * [Initialisation d'une nouvelle édition depuis la série](initialisation-d-une-nouvelle-edition-depuis-la-serie.md) - Pré-remplissage d'une nouvelle édition par le template de la série, ou les valeurs par défaut.
 * [Initialisation des contributions depuis la série](initialisation-des-contributions-depuis-la-serie.md) - Contributions de la série recopiées sur un album rattaché qui n'en a pas, ou, à sa création, qui n'a que celles de la série choisie précédemment.
@@ -12,5 +12,5 @@
 * [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.
 * [Validation de l'ISBN](validation-de-l-isbn.md) - ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l'enregistrement.
 * [Séquence théorique de tomes d'une série](sequence-theorique-de-tomes-d-une-serie.md) - Séquence des tomes attendus d'une série, référence des manquants et des rythmes de parution.
-* [Suppression des entités](suppression-des-entites.md) - Confirmation, impact par type d'entité (édition visée comptée comme intention d'achat), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.
-* [Intention d'achat](intention-d-achat.md) - Intention sur un album ou une édition, exclusions, conversion, édition non possédée indissociable, réalisation d'une intention.
+* [Suppression des entités](suppression-des-entites.md) - Confirmation, impact par type d'entité (édition visée comptée comme intention d'acquisition), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.
+* [Intention d'acquisition](intention-d-acquisition.md) - Intention sur un album ou une édition, exclusions, conversion, édition non possédée indissociable, réalisation d'une intention.

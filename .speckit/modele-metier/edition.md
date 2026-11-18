@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Domain/Entities/Edition.cs'
   - 'src/Bdtheque.Domain/Entities/EditionAcquisition.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/EditionConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Édition
@@ -27,7 +27,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
 | Mode d'acquisition | énuméré | conditionnel | `Achat` / `Offerte` / `Échange` / `Gagnée` / `Héritée`. Obligatoire si l'édition est possédée. Conditionne le libellé de la date et du montant en interface (voir [Libellés contextuels sur l'édition](../fonctionnel/presentation/libelles-contextuels-sur-l-edition.md)). |
 | D'occasion | booléen | oui | `false` = neuve, `true` = occasion. |
 | Date d'acquisition | date | non | Date à laquelle l'utilisateur a obtenu l'édition. |
-| Date d'entrée dans la collection | date et heure | conditionnel | Renseignée automatiquement, jamais saisie, au moment où l'édition devient possédée (création d'une édition possédée, ou confirmation de l'achat d'une édition visée par une intention d'achat) ; absente tant que l'édition n'est pas possédée. Contrairement à la date d'acquisition, facultative, elle est toujours connue pour une édition possédée : elle sert à repérer les dernières entrées dans la collection. Pour une édition reprise de l'application existante, c'est la date de la reprise. |
+| Date d'entrée dans la collection | date et heure | conditionnel | Renseignée automatiquement, jamais saisie, au moment où l'édition devient possédée (création d'une édition possédée, ou confirmation de l'acquisition d'une édition visée par une intention d'acquisition) ; absente tant que l'édition n'est pas possédée. Contrairement à la date d'acquisition, facultative, elle est toujours connue pour une édition possédée : elle sert à repérer les dernières entrées dans la collection. Pour une édition reprise de l'application existante, c'est la date de la reprise. |
 | Nombre de mises à la une | calculé | — | Nombre de jours où l'édition a été mise à la une du dashboard, dont le tirage privilégie les éditions les moins souvent présentées (voir [Page d'accueil](../fonctionnel/page-accueil.md)). Déduit de l'historique des mises à la une ([Édition « À la une » : mise en œuvre](../choix-implementation/domaine/edition-a-la-une-mise-en-oeuvre.md)), non stocké sur l'édition : un tirage n'est jamais une écriture sur la fiche. |
 | Prix d'acquisition | montant + devise (code **ISO 4217 alpha-3**, cf. [Représentation de la devise](../choix-implementation/domaine/representation-de-la-devise.md), ou **ancien franc**, cf. [Gestion des devises](../fonctionnel/valorisation/gestion-des-devises.md)) | non | Optionnel. `null` = aucun montant enregistré (prix inconnu ou non applicable). Pour une édition achetée, c'est le prix payé au moment de l'acquisition. Pour les modes sans transaction financière (ex. `Offerte`, `Héritée`), le champ peut accueillir une valeur marchande connue. Stocké dans sa devise ; converti en euro à l'usage, au taux de sa date de référence (cf. [Gestion des devises](../fonctionnel/valorisation/gestion-des-devises.md)). |
 | Gratuite | booléen | oui | `false` par défaut. Indique que l'édition **n'a pas de valeur** : aucun montant n'est enregistré (ni prix payé, ni valeur marchande, ni valeur initiale) et aucune valeur n'est estimée. Interdit pour une édition achetée. Si `true`, le prix d'acquisition et la valeur initiale doivent être `null` (contrainte d'intégrité) ; ces champs sont désactivés et vidés en interface. |
@@ -40,7 +40,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:00:00Z }
 
 > **Contraintes d'intégrité :**
 >
-> - Si `Mode d'acquisition` est `null` (édition non possédée, ex. issue d'une intention d'achat), alors `Date d'acquisition`, `Prix d'acquisition` et `Valeur initiale` doivent également être `null` : une édition non possédée n'a pas de valeur.
+> - Si `Mode d'acquisition` est `null` (édition non possédée, ex. issue d'une intention d'acquisition), alors `Date d'acquisition`, `Prix d'acquisition` et `Valeur initiale` doivent également être `null` : une édition non possédée n'a pas de valeur.
 > - Si `Gratuite` est `true`, alors `Prix d'acquisition` et `Valeur initiale` doivent être `null` : une édition gratuite n'a pas de valeur.
 > - Si `Mode d'acquisition` est `Achat`, alors `Gratuite` doit être `false` : une édition achetée ne peut pas être gratuite.
 > - Si `Prix d'acquisition` est renseigné, au moins une de ses dates de référence doit être connue : `Date d'acquisition`, `Année d'édition` ou `Date de première publication` de l'album.

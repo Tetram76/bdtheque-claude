@@ -3,7 +3,7 @@
 * [Outil pour agents IA](agents-ia.md) - Outil pour agents IA (Phase 6) : MCP, conteneur mcp, outils, jetons d'accès et de session, relevé de l'utilisation, archivage et réarmement.
 * [API](api/index.md) - Organisation de l'API, navigation par initiale et recherche simple.
 * [Déploiement](deploiement/index.md) - Images de base des conteneurs, frontend derrière le reverse proxy du NAS, plusieurs versions sur le NAS, publication des images Docker, version de PostgreSQL, application du schéma au démarrage et environnement de validation fonctionnelle.
-* [Règles du domaine](domaine/index.md) - Intention d'achat, valeur d'une édition, devises, journal des modifications, paramétrage de l'application, édition « À la une », validation de l'ISBN et visuels.
+* [Règles du domaine](domaine/index.md) - Intention d'acquisition, valeur d'une édition, devises, journal des modifications, paramétrage de l'application, édition « À la une », validation de l'ISBN et visuels.
 * [Erreurs et suppressions](ecritures/index.md) - Erreurs métier, fonctionnelles et techniques, et suppression des entités.
 * [Choix d'Implémentation](perimetre.md) - Ce que recense choix-implementation/ : choix de l'agent, leur raison et les alternatives écartées, rien de ce que le code montre ; remis en cause s'il le faut.
 * [Organisation du code](organisation-du-code.md) - Projets de la solution et leur rôle, projets de tests ; à lire pour ajouter un projet ou placer du code.

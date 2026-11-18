@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Éditions et intentions d'achat d'un album — administration</title>
+<title>Éditions et intentions d'acquisition d'un album — administration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
 <style>
@@ -99,7 +99,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         </nav>
         <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 16px">
           <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
-            <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Éditions et intentions d'achat</h1>
+            <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Éditions et intentions d'acquisition</h1>
             <span style="font-size: 14px; font-weight: 700">{{x.label}}</span>
           </div>
           <div style="display: flex; align-items: center; gap: 6px">
@@ -123,7 +123,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             </span>
           </div>
         </div>
-        <span style="{{help}}">L'album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d'achat.</span>
+        <span style="{{help}}">L'album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d'acquisition.</span>
       </section>
 
       <section aria-labelledby="s-eds" style="{{block}}">
@@ -166,7 +166,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
       <section aria-labelledby="s-intents" style="{{block}}">
         <span style="{{kickStyle}}">{{k.intents}}</span>
-        <h2 id="s-intents" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les intentions d'achat</h2>
+        <h2 id="s-intents" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les intentions d'acquisition</h2>
         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
           <span style="font-size: 13px; font-weight: 700">{{intentCount}}</span>
           <sc-if value="{{intentDirect}}">
@@ -174,10 +174,10 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           </sc-if>
           <sc-if value="{{intentMenu}}">
             <span style="position: relative; display: inline-flex">
-              <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle intention d'achat<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+              <button type="button" aria-haspopup="menu" aria-expanded="{{intentExpanded}}" onClick="{{toggleIntent}}" style="{{secBtn}} background: {{intentBg}}; color: {{intentFg}}; font-family: {{t.fb}}; cursor: pointer"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nouvelle intention d'acquisition<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
               <sc-if value="{{intentOpen}}">
                 <span aria-hidden="true" onClick="{{closeIntent}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
-                <div role="menu" aria-label="Nouvelle intention d'achat" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 300px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                <div role="menu" aria-label="Nouvelle intention d'acquisition" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 300px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
                   <sc-for list="{{intentChoices}}" as="o">
                     <a href="#" role="menuitem" style="display: flex; flex-direction: column; gap: 1px; padding: 6px 10px; border-radius: {{t.btnR}}; color: {{t.text}}; text-decoration: none">
                       <span style="font-weight: 700; font-size: 14px">{{o.label}}</span>
@@ -191,7 +191,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
         </div>
 
         <sc-if value="{{hasIntents}}">
-          <div role="table" aria-label="Intentions d'achat sur l'album" style="display: flex; flex-direction: column">
+          <div role="table" aria-label="Intentions d'acquisition sur l'album" style="display: flex; flex-direction: column">
             <sc-for list="{{intents}}" as="i">
               <div role="row" class="ea-irow" style="padding: 8px 0; border-bottom: {{t.rowB}}; font-size: 14px">
                 <span role="cell" style="grid-area: main; min-width: 0; display: flex; flex-direction: column; gap: 2px">
@@ -200,7 +200,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                 </span>
                 <span role="cell" style="grid-area: meta; font-size: 12px; color: {{t.muted}}">Posée le {{i.date}}</span>
                 <span role="cell" style="grid-area: act; position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
-                  <a href="#" aria-label="Confirmer l'achat : {{i.text}}" style="{{rowBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg><span class="ea-act-label">Confirmer l'achat</span></a>
+                  <a href="#" aria-label="Confirmer : {{i.text}}" style="{{rowBtn}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"></path></svg><span class="ea-act-label">Confirmer</span></a>
                   <button type="button" aria-label="Autres actions sur l'intention" aria-haspopup="menu" aria-expanded="{{i.menuExpanded}}" onClick="{{i.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{i.moreBg}}; color: {{i.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
                   <sc-if value="{{i.menuOpen}}">
                     <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
@@ -216,7 +216,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             </sc-for>
           </div>
         </sc-if>
-        <sc-if value="{{noIntent}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune intention d'achat.</span></sc-if>
+        <sc-if value="{{noIntent}}"><span style="padding: 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; color: {{t.muted}}; font-size: 13px; text-align: center">Aucune intention d'acquisition.</span></sc-if>
         <span style="{{help}}">{{intentHelp}}</span>
       </section>
       <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{x.meta}}</p>
@@ -430,7 +430,7 @@ const menuOf = (t, current) => {
   });
   return [
     { label: 'Accueil', items: [item('Tableau de bord', ''), item('Nouvelle édition', '')] },
-    { label: 'Collection', items: [item('Albums', '2 847'), item('Séries', '412'), item('Éditions', '2 913'), item("Intentions d'achat", '18')] },
+    { label: 'Collection', items: [item('Albums', '2 847'), item('Séries', '412'), item('Éditions', '2 913'), item("Intentions d'acquisition", '18')] },
     { label: 'Auteurs et éditeurs', items: [item('Auteurs', '1 106'), item('Éditeurs', '96')] },
     { label: 'Référentiels', items: [item('Genres', '24'), item('Univers', '37')] },
     { label: 'Réglages', items: [item('Paramétrage', ''), item('Statistiques privées', '')] }
@@ -457,7 +457,7 @@ const errorOf = (key, t, business) => ({
 // An album without any edition nor intent, an album with two editions and an intent on a third one,
 // and an untitled omnibus aimed at by an intent on the album itself, without any edition.
 // An intent is never one of the editions: it is listed among the intents, with what it aims at
-// (fonctionnel/regles-metier.md § Intention d'achat).
+// (fonctionnel/regles-metier.md § Intention d'acquisition).
 const EXAMPLES = {
   sansEdition: {
     label: 'Le Château des étoiles (Le Château des étoiles - T. 8)', credits: 'Alex Alice', date: '2026', inCollection: 'Hors collection', cover: false,
@@ -476,7 +476,7 @@ const EXAMPLES = {
     meta: 'Album créé le 4 mars 2026, modifié hier à 21:08.'
   },
   integrale: {
-    label: 'Blacksad - Intégrale [1 à 5]', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'octobre 2023', inCollection: 'Intention d\'achat', cover: false,
+    label: 'Blacksad - Intégrale [1 à 5]', credits: 'Juan Díaz Canales · Juanjo Guarnido', date: 'octobre 2023', inCollection: 'Intention d\'acquisition', cover: false,
     count: 'Aucune édition',
     editions: [], intents: [{ album: true, date: '8 octobre 2026' }],
     meta: 'Album créé le 8 octobre 2026, modifié le 8 octobre 2026.'
@@ -524,7 +524,7 @@ class View extends Mockup {
       t, x, editions, intents,
       icons: { ...ICONS, edit: 'M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4' },
       // The mention above a block title says what kind of data the block holds, never the title again.
-      k: { album: kick(1, 'Identification'), eds: kick(2, 'Exemplaires'), intents: kick(3, 'Achats prévus') },
+      k: { album: kick(1, 'Identification'), eds: kick(2, 'Exemplaires'), intents: kick(3, 'Acquisitions prévues') },
       albumCover: x.cover ? 'hsl(20, 42%, 36%)' : generic,
       badge, albumBadge: x.inCollection === 'Dans la collection' ? owned : dashed,
       hasEditions: editions.length > 0,
@@ -532,11 +532,11 @@ class View extends Mockup {
       // An album aimed at by an intent on itself has no edition: its first one comes with the purchase.
       canAddEdition: !albumIntent,
       editionHelp: albumIntent
-        ? 'L\'album est visé par une intention d\'achat : sa première édition s\'ajoute en confirmant l\'achat.'
+        ? 'L\'album est visé par une intention d\'acquisition : sa première édition s\'ajoute en confirmant l\'acquisition.'
         : 'Chaque édition, avec ses visuels, se saisit sur sa propre fiche.',
       hasIntents: n > 0,
       noIntent: n === 0,
-      intentCount: n === 0 ? 'Aucune intention d\'achat' : n + (n > 1 ? ' intentions d\'achat' : ' intention d\'achat'),
+      intentCount: n === 0 ? 'Aucune intention d\'acquisition' : n + (n > 1 ? ' intentions d\'acquisition' : ' intention d\'acquisition'),
       intentHelp: 'Une intention ne vise l\'album entier que tant qu\'il n\'a aucune édition, possédée ou visée ; ensuite, elle vise une édition précise, saisie sans exemplaire ni valeur.',
       // An album aimed at by an intent on itself cannot have its editions aimed at too, and the reverse:
       // the album can be aimed at while nothing is, a new edition while the album itself is not.
@@ -549,7 +549,7 @@ class View extends Mockup {
       closeIntent: () => this.setState({ intentOpen: false }),
       intentChoices: [
         // Only an album without any edition, owned or aimed at, may be aimed at as a whole
-        // (fonctionnel/regles-metier.md § Intention d'achat): once one is known, the intent names a precise edition.
+        // (fonctionnel/regles-metier.md § Intention d'acquisition): once one is known, the intent names a precise edition.
         { label: 'Sur l\'album…', help: 'Toute édition de l\'album fera l\'affaire.' },
         { label: 'Sur une nouvelle édition…', help: 'Une édition précise, saisie sans exemplaire ni valeur.' }
       ],

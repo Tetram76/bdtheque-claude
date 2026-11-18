@@ -532,21 +532,21 @@ const EXAMPLES = {
   // A new edition aimed at by a purchase intent: no copy and no value, only what describes the
   // edition (fonctionnel/regles-metier.md § Réalisation d'une intention, minimum of fields).
   nouvelleIntention: {
-    existing: false, creating: true, intent: true, heading: "Nouvelle intention d'achat", crumb: "Nouvelle intention d'achat",
+    existing: false, creating: true, intent: true, heading: "Nouvelle intention d'acquisition", crumb: "Nouvelle intention d'acquisition",
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     prefill: 'Pré-remplie d\'après la série Tintin : éditeur, catégorie, format, reliure, orientation, sens de lecture et couleur. Ce ne sont que des propositions : chaque valeur reste modifiable.',
     publisher: 'Casterman', collection: '', year: '', isbn: '', category: '—',
     format: 'Normal (A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '', color: true,
     visuals: {}, meta: '',
-    dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'intention d\'achat'
+    dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'intention d\'acquisition'
   },
   intention: {
-    existing: true, intent: true, heading: "Modifier l'intention d'achat", crumb: 'Casterman (Fac-similé) [2013]',
+    existing: true, intent: true, heading: "Modifier l'intention d'acquisition", crumb: 'Casterman (Fac-similé) [2013]',
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     publisher: 'Casterman', collection: 'Fac-similé', year: '2013', isbn: '978-2-203-03312-4', category: 'Édition spéciale',
     format: 'Grand (> A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '62', color: true,
     visuals: { 'Couverture': 1 },
-    meta: 'Intention d\'achat posée le 8 octobre 2026, modifiée le 12 octobre 2026.',
+    meta: 'Intention d\'acquisition posée le 8 octobre 2026, modifiée le 12 octobre 2026.',
     dirty: false, status: 'Aucune modification', statusShort: 'À jour', save: 'Enregistrer'
   }
 };
@@ -706,7 +706,7 @@ class View extends Mockup {
       barB: t.cBT !== '0' ? t.cBT : '2px solid ' + t.line,
       menu: [
         { label: 'Accueil', items: [menuItem('Tableau de bord', '', false), menuItem('Nouvelle édition', '', false)] },
-        { label: 'Collection', items: [menuItem('Albums', '2 847', true), menuItem('Séries', '412', false), menuItem('Éditions', '2 913', false), menuItem("Intentions d'achat", '18', false)] },
+        { label: 'Collection', items: [menuItem('Albums', '2 847', true), menuItem('Séries', '412', false), menuItem('Éditions', '2 913', false), menuItem("Intentions d'acquisition", '18', false)] },
         { label: 'Auteurs et éditeurs', items: [menuItem('Auteurs', '1 106', false), menuItem('Éditeurs', '96', false)] },
         { label: 'Référentiels', items: [menuItem('Genres', '24', false), menuItem('Univers', '37', false)] },
         { label: 'Réglages', items: [menuItem('Paramétrage', '', false), menuItem('Statistiques privées', '', false)] }

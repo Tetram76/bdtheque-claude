@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Identification des albums manquants dans une série'
 description: 'Tomes manquants d''une série, intervalles, options sur les intégrales et les intentions.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Identification des albums manquants dans une série
@@ -24,4 +24,4 @@ Les tomes manquants consécutifs sont regroupés et affichés sous forme d'inter
 **Options utilisateur :**
 
 - **Exclure les intégrales** : les intégrales ne couvrent plus leur plage (pour posséder chaque tome en album individuel).
-- **Exclure les intentions d'achat** : les intentions ne comblent plus les trous — affiche tous les manquants réels, intentions incluses.
+- **Exclure les intentions d'acquisition** : les intentions ne comblent plus les trous — affiche tous les manquants réels, intentions incluses.
