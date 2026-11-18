@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-18
+
+* **Décision de l'utilisateur** : la possession d'un album s'intitule « Possession », ses états « Possédé », « Intention d'achat » et « Non possédé », partout où elle est présentée, comptée ou filtrée ; « Collection » ne désigne plus, dans les libellés, que la collection d'un éditeur, filtres des listes compris ; colonne « Avancement » de la liste des séries, mention « Suivi » du bloc « Avancement » de la saisie d'une série (#535).
+
 ## 2026-11-17
 
 * **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, l'utilisateur peut restreindre les chantiers candidats à un périmètre, qui s'ajoute aux autres critères ; toute session du lot prévient l'orchestrateur de chaque évènement majeur (fin, abandon, problème, découpage ou ticket créé, attente de l'utilisateur), et seulement alors, jamais de son avancement ; les sessions échangent entre elles l'information utile au regard de leur brief ; chaque session mène elle-même les surveillances de son chantier, bornées dans le temps, l'état réel étant relu à l'expiration de leur délai. Le skill `chantiers-paralleles` les met en œuvre (#528).
