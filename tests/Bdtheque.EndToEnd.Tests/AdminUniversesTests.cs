@@ -84,7 +84,8 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel univers" }).ClickAsync();
         var name = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" }).GetByRole(AriaRole.Textbox, new() { Name = "Nom" });
         await name.FillAsync($"LES MONDES D'ALDEBARAN {_marker}");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'univers" }).ClickAsync();
+        // Enter sends the form of the panel, which holds its submission (wwwroot/modal-dialog.js).
+        await name.PressAsync("Enter");
 
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
         await Assertions.Expect(panel).ToContainTextAsync(

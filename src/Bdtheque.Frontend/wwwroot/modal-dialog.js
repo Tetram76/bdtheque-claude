@@ -23,15 +23,16 @@ function open(element) {
     dialog.showModal();
 }
 
-// Enter in a field of the dialog that belongs to a form of the page behind it (the dialog of a record created on the spot,
-// within the form of the record that cites it) would submit that form, saving the record without what the dialog adds: it
-// performs the main action of the dialog instead. A dialog with a form of its own (a confirmation) keeps its submission.
+// Enter in a field of the dialog whose form the dialog does not send (the dialog of a record created on the spot, within the
+// form of the record that cites it, sent by its save bar or its side panel) would submit that form, saving the record without
+// what the dialog adds: it performs the main action of the dialog instead. A dialog that holds the submission of the form of
+// its field (a side panel, a confirmation) keeps it.
 const fieldsSubmittingOnEnter = "input:not([type=checkbox], [type=radio], [type=button], [type=submit], [type=reset], [type=image], [type=file])";
 
 function submitsThePageBehind(dialog, event) {
     const field = event.target;
     return event.key === "Enter" && !event.defaultPrevented && !event.isComposing && field.matches?.(fieldsSubmittingOnEnter)
-        && field.form !== null && !dialog.contains(field.form);
+        && field.form !== null && ![...field.form.elements].some(element => element.type === "submit" && dialog.contains(element));
 }
 
 customElements.define("app-modal-dialog", class extends HTMLElement {
