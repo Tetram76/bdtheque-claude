@@ -1,6 +1,6 @@
 # Règles métier
 
-* [Appartenance à la collection](appartenance-a-la-collection.md) - Un album fait partie de la collection s'il a une édition possédée ; seules les éditions d'intention ne sont pas possédées ; trois états, de même sens partout où l'appartenance d'un album est présentée, comptée ou filtrée.
+* [Appartenance à la collection](appartenance-a-la-collection.md) - Un album fait partie de la collection s'il a une édition possédée ; seules les éditions d'intention ne sont pas possédées ; trois états (Possédé, Intention d'achat, Non possédé), de même nom et de même sens partout où la possession d'un album est présentée, comptée ou filtrée.
 * [Périmètre de la consultation](perimetre-de-la-consultation.md) - Base documentaire et inventaire : tout est consultable, l'appartenance est signalée, les statistiques ne portent que sur la collection.
 * [Initialisation d'une nouvelle édition depuis la série](initialisation-d-une-nouvelle-edition-depuis-la-serie.md) - Pré-remplissage d'une nouvelle édition par le template de la série, ou les valeurs par défaut.
 * [Initialisation des contributions depuis la série](initialisation-des-contributions-depuis-la-serie.md) - Contributions de la série recopiées sur un album rattaché qui n'en a pas, ou, à sa création, qui n'a que celles de la série choisie précédemment.
