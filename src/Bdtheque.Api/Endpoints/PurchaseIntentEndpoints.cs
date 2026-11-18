@@ -14,7 +14,7 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// Purchase intents (fonctionnel/regles-metier/intention-d-achat.md): their administration
+/// Purchase intents (fonctionnel/regles-metier/intention-d-acquisition.md): their administration
 /// (<c>/admin/albums/{albumId}/purchase-intents</c>) and their public list (<c>/catalog/purchase-intents</c>).
 /// The intents belong to the aggregate of their album, which alone sees them all: every write on them
 /// locks the album and checks its version (choix-implementation/persistance/concurrence-d-acces.md). Their
@@ -128,7 +128,7 @@ internal static class PurchaseIntentEndpoints
     /// <summary>
     /// Converts an intent on an edition into an intent on the whole album: the edition targeted is
     /// deleted with its visuals, as by the deletion of the intent, whose impact the user confirmed
-    /// (fonctionnel/regles-metier/intention-d-achat.md).
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md).
     /// </summary>
     private static async Task<PurchaseIntentsForm> ConvertToAlbumAsync(
         Guid rootId, Guid id, ConvertPurchaseIntentToAlbumRequest request, BdthequeDbContext context, VisualStorage storage,
@@ -168,7 +168,7 @@ internal static class PurchaseIntentEndpoints
                 p.Album.CollectionState(),
                 p.Edition == null ? null : p.Edition.ToSummary(),
                 CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
-                // fonctionnel/regles-metier/intention-d-achat.md: an intent on an edition turns into one on the album only when
+                // fonctionnel/regles-metier/intention-d-acquisition.md: an intent on an edition turns into one on the album only when
                 // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.
                 p.EditionId == null || p.Album.Editions.Count == 1,
                 p.CreatedAt,
@@ -178,7 +178,7 @@ internal static class PurchaseIntentEndpoints
         intents.OrderByAlbum(p => p.Album).ThenBy(p => p.Id);
 
     // Entered with the minimum of fields: the traits of the copy keep the values of an edition not
-    // owned (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
+    // owned (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention).
     private static Task<Edition> AddEditionAsync(
         BdthequeDbContext context, ContentFields fields, Album album, PurchaseIntentEditionContent edition,
         CancellationToken cancellationToken) =>

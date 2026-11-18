@@ -79,11 +79,11 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
     {
         var heading = Open("").Find(".list-heading");
 
-        Assert.Equal(["Administration", "Intentions d'achat"], heading.QuerySelectorAll(".breadcrumb li").Select(Text));
-        Assert.Equal(("Intentions d'achat", "18"), (heading.QuerySelector("h1")!.FirstChild!.TextContent.Trim(), Text(heading.QuerySelector(".list-heading-count")!)));
+        Assert.Equal(["Administration", "Intentions d'acquisition"], heading.QuerySelectorAll(".breadcrumb li").Select(Text));
+        Assert.Equal(("Intentions d'acquisition", "18"), (heading.QuerySelector("h1")!.FirstChild!.TextContent.Trim(), Text(heading.QuerySelector(".list-heading-count")!)));
         Assert.Empty(heading.QuerySelectorAll("a.button"));
         Assert.Equal(
-            "Une intention se pose depuis la page des éditions et intentions d'achat de son album.",
+            "Une intention se pose depuis la page des éditions et intentions d'acquisition de son album.",
             Text(heading.QuerySelector(".list-heading-note")!));
     }
 
@@ -117,9 +117,9 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Intention d'achat", "Posée le 08/10/2026"),
+                ("Blacksad - INT. [1 à 5]", "Album", "toute édition", "Intention d'acquisition", "Posée le 08/10/2026"),
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Édition", "Casterman (Fac-similé) [2013]", "Possédé", "Posée le 08/10/2026"),
-                ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention d'achat", "Posée le 09/10/2026"),
+                ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention d'acquisition", "Posée le 09/10/2026"),
             ],
             rows);
     }
@@ -141,15 +141,17 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         // The menu alone leads to the editions and intents of the album: the entry of the row is no link
         // (visuel/listes/principes-communs.md, Entrée en texte simple).
         Assert.Equal(
-            ["Éditions et intentions d'achat"],
+            ["Éditions et intentions d'acquisition"],
             rows[0].QuerySelectorAll($"a[href='{AppPaths.AdminAlbumEditions(Blacksad.Id)}']").Select(Text));
         var confirm = rows[0].QuerySelector(".intent-actions a.button")!;
         Assert.Equal(
-            ("Confirmer l'achat", "Confirmer l'achat de Blacksad - INT. [1 à 5]", AppPaths.AdminConfirmPurchase(Blacksad.Id, id)),
+            ("Confirmer", "Confirmer l'acquisition : Blacksad - INT. [1 à 5]", AppPaths.AdminConfirmPurchase(Blacksad.Id, id)),
             (Text(confirm), Normalized(confirm.GetAttribute("aria-label")!), confirm.GetAttribute("href")));
+        // The text alone would read as confirming the intent: its full name is told on hover too (#534).
+        Assert.Equal(confirm.GetAttribute("aria-label"), confirm.GetAttribute("title"));
         Assert.Equal(
             [
-                ("Éditions et intentions d'achat", AppPaths.AdminAlbumEditions(Blacksad.Id)),
+                ("Éditions et intentions d'acquisition", AppPaths.AdminAlbumEditions(Blacksad.Id)),
                 ("Viser plutôt une édition…", AppPaths.AdminConvertPurchaseIntent(Blacksad.Id, id)),
                 ("Retirer l'intention…", $"{AppPaths.AdminPurchaseIntents}?q=Bla&delete={id}"),
             ],
@@ -178,7 +180,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         var empty = Open("q=Zorglub").Find(".empty-list");
 
-        Assert.Equal("Aucune intention d'achat ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("Aucune intention d'acquisition ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
         Assert.Equal([("Effacer la recherche", AppPaths.AdminPurchaseIntents)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
@@ -189,7 +191,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         var empty = Open("").Find(".empty-list");
 
-        Assert.Equal("Aucune intention d'achat.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("Aucune intention d'acquisition.", Text(empty.QuerySelector("strong")!));
         Assert.Empty(empty.QuerySelectorAll("a"));
     }
 
@@ -202,7 +204,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         var dialog = Open($"delete={id}").Find("dialog");
 
-        Assert.Equal(("Retirer cette intention d'achat ?", "Buddy Longway - T. 2 · Dupuis [1974]"),
+        Assert.Equal(("Retirer cette intention d'acquisition ?", "Buddy Longway - T. 2 · Dupuis [1974]"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
         // An edition not owned goes with its intent (fonctionnel/regles-metier/suppression-des-entites.md).
         Assert.Equal(["Suppression aussi de 1 édition"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
@@ -274,8 +276,8 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
         var empty = Open("entry=X").Find(".empty-list");
 
-        Assert.Equal("Aucune intention d'achat sous cette entrée.", Text(empty.QuerySelector("strong")!));
-        Assert.Equal([("Toutes les intentions d'achat", AppPaths.AdminPurchaseIntents)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+        Assert.Equal("Aucune intention d'acquisition sous cette entrée.", Text(empty.QuerySelector("strong")!));
+        Assert.Equal([("Toutes les intentions d'acquisition", AppPaths.AdminPurchaseIntents)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
     [Fact]

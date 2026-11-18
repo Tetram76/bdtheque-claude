@@ -180,7 +180,7 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task DeletionImpact_OfAPublisherOfAnEditionTargetedByAnIntent_CountsTheIntent_NeverTheEdition()
     {
-        // fonctionnel/regles-metier/suppression-des-entites.md: « utilisé par 2 éditions et 1 intention d'achat ».
+        // fonctionnel/regles-metier/suppression-des-entites.md: « utilisé par 2 éditions et 1 intention d'acquisition ».
         var publisher = await CreateAsync("Les Éditions de la Cerise", "Cerise noire");
         await SeedReferencesAsync(publisher.Id, publisher.Collections.Single().Id, editions: 2, series: 0, intents: 1);
 

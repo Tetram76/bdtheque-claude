@@ -32,7 +32,7 @@ public static class EntityCounts
 {
     public static string Form(int count) => count == 1 ? "One" : "Other";
 
-    /// <summary>« 2 éditions », « 1 intention d'achat ».</summary>
+    /// <summary>« 2 éditions », « 1 intention d'acquisition ».</summary>
     public static string Of(this IStringLocalizer<EntityNames> names, ImpactCount count) =>
         names[$"{count.Kind}.{Form(count.Count)}", count.Count];
 }

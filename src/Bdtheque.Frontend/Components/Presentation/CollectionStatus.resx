@@ -13,7 +13,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Intent" xml:space="preserve">
-    <value>Intention d&apos;achat</value>
+    <value>Intention d&apos;acquisition</value>
   </data>
   <data name="Intent.Detail" xml:space="preserve">
     <value>Cet album est souhaité : aucune de ses éditions n&apos;est encore dans la collection.</value>

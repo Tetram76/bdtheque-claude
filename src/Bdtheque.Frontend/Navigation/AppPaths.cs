@@ -161,13 +161,13 @@ public static class AppPaths
 
     /// <summary>
     /// The confirmation of the purchase that realizes an intent, addressed by its album
-    /// (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention), which no mockup presents yet.
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention), which no mockup presents yet.
     /// </summary>
     public static string AdminConfirmPurchase(Guid albumId, Guid id) => NotYetImplemented;
 
     /// <summary>
     /// The conversion of an intent into one on the other target, an edition or the whole album, addressed by its album
-    /// (fonctionnel/regles-metier/intention-d-achat.md), which no mockup presents yet.
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md), which no mockup presents yet.
     /// </summary>
     public static string AdminConvertPurchaseIntent(Guid albumId, Guid id) => NotYetImplemented;
 

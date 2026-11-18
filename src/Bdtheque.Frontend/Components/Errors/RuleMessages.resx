@@ -46,16 +46,16 @@
     <value>L&apos;année de première publication doit être supérieure à zéro.</value>
   </data>
   <data name="PurchaseIntent.AlbumAlreadyTargeted" xml:space="preserve">
-    <value>Cet album fait déjà l&apos;objet d&apos;une intention d&apos;achat.</value>
+    <value>Cet album fait déjà l&apos;objet d&apos;une intention d&apos;acquisition.</value>
   </data>
   <data name="PurchaseIntent.AlbumHasEditions" xml:space="preserve">
-    <value>Cet album a déjà une édition : l&apos;intention d&apos;achat doit porter sur une édition précise.</value>
+    <value>Cet album a déjà une édition : l&apos;intention d&apos;acquisition doit porter sur une édition précise.</value>
   </data>
   <data name="PurchaseIntent.EditionAlreadyTargeted" xml:space="preserve">
-    <value>Cette édition fait déjà l&apos;objet d&apos;une intention d&apos;achat.</value>
+    <value>Cette édition fait déjà l&apos;objet d&apos;une intention d&apos;acquisition.</value>
   </data>
   <data name="PurchaseIntent.EditionAlreadyOwned" xml:space="preserve">
-    <value>Cette édition est déjà dans la collection : elle ne peut pas faire l&apos;objet d&apos;une intention d&apos;achat.</value>
+    <value>Cette édition est déjà dans la collection : elle ne peut pas faire l&apos;objet d&apos;une intention d&apos;acquisition.</value>
   </data>
   <data name="Edition.AlreadyOwned" xml:space="preserve">
     <value>Cette édition est déjà dans la collection.</value>
@@ -199,7 +199,7 @@
     <value>Cette recherche a déjà une variable de ce nom.</value>
   </data>
   <data name="SavedSearch.PurchaseIntentDesignated" xml:space="preserve">
-    <value>Une recherche enregistrée ne peut pas désigner une intention d&apos;achat précise.</value>
+    <value>Une recherche enregistrée ne peut pas désigner une intention d&apos;acquisition précise.</value>
   </data>
   <data name="SavedSearch.DesignatedRecordRemoved" xml:space="preserve">
     <value>Une recherche enregistrée désigne cette fiche : modifiez d&apos;abord la recherche.</value>

@@ -175,7 +175,7 @@ internal static class AlbumEndpoints
                 Edition = p.Edition == null ? null : p.Edition.ToSummary(),
                 Category = p.Edition == null ? null : p.Edition.Category,
                 Binding = p.Edition == null ? null : p.Edition.Binding,
-                // fonctionnel/regles-metier/intention-d-achat.md: an intent on an edition turns into one on the album only when
+                // fonctionnel/regles-metier/intention-d-acquisition.md: an intent on an edition turns into one on the album only when
                 // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.
                 IsConvertible = p.EditionId == null || p.Album.Editions.Count == 1,
                 p.CreatedAt,

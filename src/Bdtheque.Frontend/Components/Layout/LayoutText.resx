@@ -34,7 +34,7 @@
     <value>Auteurs</value>
   </data>
   <data name="Menu.PurchaseIntents" xml:space="preserve">
-    <value>Intentions d&apos;achat</value>
+    <value>Intentions d&apos;acquisition</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Rechercher</value>
@@ -100,7 +100,7 @@
     <value>Éditions</value>
   </data>
   <data name="Admin.PurchaseIntents" xml:space="preserve">
-    <value>Intentions d&apos;achat</value>
+    <value>Intentions d&apos;acquisition</value>
   </data>
   <data name="Admin.Authors" xml:space="preserve">
     <value>Auteurs</value>

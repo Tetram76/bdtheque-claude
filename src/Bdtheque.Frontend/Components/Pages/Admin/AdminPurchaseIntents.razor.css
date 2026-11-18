@@ -9,7 +9,7 @@
 .intent-rows {
     container: intent-rows / inline-size;
     /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own,
-       so that their columns line up. It holds « Confirmer l'achat » and the « ⋯ » button. */
+       so that their columns line up. It holds « Confirmer » and the « ⋯ » button. */
     --intent-actions-width: 13rem;
 }
 

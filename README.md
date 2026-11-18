@@ -27,7 +27,7 @@ Ce document présente l'application, son installation et son exploitation. Pour 
 - Détection des albums manquants dans une série
 - Estimation de la valeur des éditions (Random Forest via ML.NET)
 - Estimation de la date de sortie du prochain tome d'une série
-- Gestion des intentions d'achat
+- Gestion des intentions d'acquisition
 - Interface d'administration (compte unique, authentification par cookie)
 
 ## Stack

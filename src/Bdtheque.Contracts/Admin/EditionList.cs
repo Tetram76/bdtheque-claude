@@ -11,7 +11,7 @@ public sealed record EditionAdminList(Page<EditionAdminListItem> Editions, Editi
 
 /// <summary>
 /// An edition of the collection as a row of the list of the administration presents it; an edition targeted by a purchase
-/// intent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md).
+/// intent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md).
 /// </summary>
 /// <param name="Cover">Its first cover (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md); <c>null</c> for the generic visual.</param>
 /// <param name="AcquisitionYear">The year of its acquisition date, if known.</param>

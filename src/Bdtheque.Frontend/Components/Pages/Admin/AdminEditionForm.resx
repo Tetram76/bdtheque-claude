@@ -28,19 +28,19 @@
     <value>Nouvelle édition</value>
   </data>
   <data name="New.PurchaseIntent" xml:space="preserve">
-    <value>Nouvelle intention d'achat</value>
+    <value>Nouvelle intention d'acquisition</value>
   </data>
   <data name="Edit.Edition" xml:space="preserve">
     <value>Modifier l'édition</value>
   </data>
   <data name="Edit.PurchaseIntent" xml:space="preserve">
-    <value>Modifier l'intention d'achat</value>
+    <value>Modifier l'intention d'acquisition</value>
   </data>
   <data name="Create.Edition" xml:space="preserve">
     <value>Créer l'édition</value>
   </data>
   <data name="Create.PurchaseIntent" xml:space="preserve">
-    <value>Créer l'intention d'achat</value>
+    <value>Créer l'intention d'acquisition</value>
   </data>
   <data name="Save" xml:space="preserve">
     <value>Enregistrer</value>
@@ -241,7 +241,7 @@
     <value>, modifiée le</value>
   </data>
   <data name="Dates.IntentSet" xml:space="preserve">
-    <value>Intention d'achat posée le</value>
+    <value>Intention d'acquisition posée le</value>
   </data>
   <data name="Visuals" xml:space="preserve">
     <value>Visuels</value>

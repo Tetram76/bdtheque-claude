@@ -163,7 +163,7 @@ public sealed class AdminEditionsTests(ApplicationHost application) : BrowserTes
         {
             await Assertions.Expect(albumButton).ToBeHiddenAsync();
             await page.Locator(".edition-actions .actions-menu-toggle").ClickAsync();
-            await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Éditions et intentions d'achat de l'album" })).ToBeVisibleAsync();
+            await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Éditions et intentions d'acquisition de l'album" })).ToBeVisibleAsync();
         }
         else if (width == 1440)
         {

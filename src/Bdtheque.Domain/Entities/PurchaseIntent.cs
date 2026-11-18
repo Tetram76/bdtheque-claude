@@ -3,7 +3,7 @@ using Bdtheque.Domain.Entities.Common;
 namespace Bdtheque.Domain.Entities;
 
 /// <summary>
-/// A wish to acquire (Intention d'achat) either an <see cref="Entities.Album"/> as a whole —
+/// A wish to acquire (Intention d'acquisition) either an <see cref="Entities.Album"/> as a whole —
 /// any edition will do — or one specific <see cref="Entities.Edition"/> of it. Created only by the
 /// album aggregate (<see cref="Album.AddPurchaseIntent()"/> and its conversions), which enforces the
 /// per-album rules.
@@ -12,7 +12,7 @@ namespace Bdtheque.Domain.Entities;
 /// <see cref="AlbumId"/> is set for both kinds of intent (for an edition intent, it is the
 /// edition's album): the target is the edition when <see cref="EditionId"/> is set, the album
 /// otherwise. Storing the album in both cases is what lets the album aggregate — and the
-/// database — see every intent concerning it (see choix-implementation/domaine/intention-d-achat-agregat-porte-par-l-album.md).
+/// database — see every intent concerning it (see choix-implementation/domaine/intention-d-acquisition-agregat-porte-par-l-album.md).
 /// </remarks>
 public sealed class PurchaseIntent : EntityBase
 {

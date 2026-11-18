@@ -26,10 +26,10 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Plan de l'administration" })
-            .GetByRole(AriaRole.Link, new() { Name = "Intentions d'achat" }).ClickAsync();
+            .GetByRole(AriaRole.Link, new() { Name = "Intentions d'acquisition" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
-        await Assertions.Expect(page.Locator("h1")).ToContainTextAsync("Intentions d'achat");
+        await Assertions.Expect(page.Locator("h1")).ToContainTextAsync("Intentions d'acquisition");
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Administration" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
     }
@@ -44,8 +44,8 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await CreateAlbumIntentAsync(await CreateAlbumAsync($"Les Vieux Fourneaux {_marker}"));
         var page = await OpenAsync(theme, AppPaths.AdminPurchaseIntents);
 
-        await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une intention d'achat" }).FillAsync($"Château des étoiles {_marker}");
-        await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une intention d'achat" }).PressAsync("Enter");
+        await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une intention d'acquisition" }).FillAsync($"Château des étoiles {_marker}");
+        await page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une intention d'acquisition" }).PressAsync("Enter");
 
         await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Le Château des étoiles {_marker} - T. 4"]);
     }
@@ -73,16 +73,16 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
             new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), await AlbumVersionAsync(album.Id)));
         var page = await OpenAsync(theme, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
 
-        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention d'achat de Buddy Longway {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention d'acquisition de Buddy Longway {_marker}" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
-        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'achat ?" });
+        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'acquisition ?" });
         // The edition targeted is the intent itself, which is not counted in what it takes along
         // (fonctionnel/regles-metier/suppression-des-entites.md); without visuals, nothing else is concerned.
         await Assertions.Expect(dialog).ToContainTextAsync("Aucune autre fiche n'est concernée.");
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents, $"?q={_marker}"));
-        await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucune intention d'achat ne correspond à « {_marker} ».");
+        await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucune intention d'acquisition ne correspond à « {_marker} ».");
     }
 
     [Theory]
@@ -121,7 +121,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         return page;
     }
 
-    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Intentions d'achat" }).Locator(".row-entry");
+    private static ILocator Labels(IPage page) => page.GetByRole(AriaRole.Table, new() { Name = "Intentions d'acquisition" }).Locator(".row-entry");
 
     private Task<AlbumForm> CreateAlbumAsync(string? title, Guid? seriesId = null, int? volume = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(

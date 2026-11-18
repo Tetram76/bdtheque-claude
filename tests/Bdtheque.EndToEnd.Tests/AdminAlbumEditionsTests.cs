@@ -24,11 +24,11 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await CreateAlbumAsync($"Le Château des étoiles {_marker}");
         var page = await OpenAsync(theme, $"{AppPaths.AdminAlbums}?q={_marker}");
 
-        await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'achat de Le Château des étoiles {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'acquisition de Le Château des étoiles {_marker}" }).ClickAsync();
 
-        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Éditions et intentions d'achat");
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Éditions et intentions d'acquisition");
         await Assertions.Expect(page.Locator(".album-editions-subject")).ToHaveTextAsync($"Le Château des étoiles {_marker}");
-        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Intentions d'achat" }).ClickAsync();
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Intentions d'acquisition" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
     }
 
@@ -44,7 +44,7 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
             album.Version));
         var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?albumId={album.Id}");
 
-        await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'achat de Aldébaran {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Éditions et intentions d'acquisition de Aldébaran {_marker}" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".album-editions-subject")).ToHaveTextAsync($"Aldébaran {_marker}");
@@ -57,15 +57,15 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         var album = await CreateAlbumAsync($"Blacksad {_marker}");
         var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
-        await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'acquisition" }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Sur l'album…" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".intent-row")).ToContainTextAsync("toute édition");
-        await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Intention d'achat");
+        await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Intention d'acquisition");
         // An album itself targeted: neither a new edition nor another intent; its first edition comes with the purchase.
         await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Nouvelle édition" })).ToHaveCountAsync(0);
-        await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" })).ToHaveCountAsync(0);
+        await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'acquisition" })).ToHaveCountAsync(0);
     }
 
     [Theory, InEachTheme]
@@ -101,16 +101,16 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention : Dupuis {_marker} [1974]" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
-        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'achat ?" });
+        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'acquisition ?" });
         // The edition targeted is the intent itself, which is not counted in what it takes along
         // (fonctionnel/regles-metier/suppression-des-entites.md); without visuals, nothing else is concerned.
         await Assertions.Expect(dialog).ToContainTextAsync("Aucune autre fiche n'est concernée.");
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
-        await Assertions.Expect(page.Locator(".album-editions-none").Last).ToHaveTextAsync("Aucune intention d'achat.");
+        await Assertions.Expect(page.Locator(".album-editions-none").Last).ToHaveTextAsync("Aucune intention d'acquisition.");
         // Without any edition again, the album itself may be targeted: the choice of the two targets is back.
-        await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'acquisition" })).ToBeVisibleAsync();
     }
 
     [Theory, InEachTheme]
@@ -133,11 +133,11 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
 
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention : Lagune {_marker} [2023]" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer l'intention…" }).ClickAsync();
-        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'achat ?" });
+        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Retirer cette intention d'acquisition ?" });
         await dialog.GetByRole(AriaRole.Button, new() { Name = "Supprimer définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
-        await Assertions.Expect(page.Locator(".album-editions-none")).ToHaveTextAsync(["Aucune édition dans la collection.", "Aucune intention d'achat."]);
+        await Assertions.Expect(page.Locator(".album-editions-none")).ToHaveTextAsync(["Aucune édition dans la collection.", "Aucune intention d'acquisition."]);
     }
 
     [Theory]

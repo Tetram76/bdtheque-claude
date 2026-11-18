@@ -9649,7 +9649,7 @@
             "format": "uint32"
           }
         },
-        "description": "Confirms the purchase of an edition targeted by an intent\n(fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention): the edition, with its\nacquisition, which realizes the intent."
+        "description": "Confirms the purchase of an edition targeted by an intent\n(fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the edition, with its\nacquisition, which realizes the intent."
       },
       "AcquisitionMode": {
         "enum": [
@@ -10307,7 +10307,7 @@
             "description": "Its purchase intents, in the order they were set."
           }
         },
-        "description": "The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): the album in brief, as a row\nof the list of the albums presents it, its editions of the collection and its purchase intents. An edition targeted by an\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md)."
+        "description": "The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): the album in brief, as a row\nof the list of the albums presents it, its editions of the collection and its purchase intents. An edition targeted by an\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md)."
       },
       "AlbumForm": {
         "required": [
@@ -10597,7 +10597,7 @@
           },
           "isConvertible": {
             "type": "boolean",
-            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent\non the album; for an intent on an edition, only when that edition is the only one of its album."
+            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-acquisition.md): always for an intent\non the album; for an intent on an edition, only when that edition is the only one of its album."
           },
           "createdAt": {
             "type": "string",
@@ -12281,7 +12281,7 @@
             "format": "uint32"
           }
         },
-        "description": "An edition of the collection as a row of the list of the administration presents it; an edition targeted by a purchase\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md)."
+        "description": "An edition of the collection as a row of the list of the administration presents it; an edition targeted by a purchase\nintent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md)."
       },
       "EditionCategory": {
         "enum": [
@@ -14998,7 +14998,7 @@
               "integer",
               "string"
             ],
-            "description": "Its editions in the collection, an edition targeted by a purchase intent being none\n(fonctionnel/regles-metier/intention-d-achat.md).",
+            "description": "Its editions in the collection, an edition targeted by a purchase intent being none\n(fonctionnel/regles-metier/intention-d-acquisition.md).",
             "format": "int32"
           },
           "modifiedAt": {
@@ -15292,7 +15292,7 @@
           },
           "isConvertible": {
             "type": "boolean",
-            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent\non the album; for an intent on an edition, only when that edition is the only one of its album."
+            "description": "Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-acquisition.md): always for an intent\non the album; for an intent on an edition, only when that edition is the only one of its album."
           },
           "createdAt": {
             "type": "string",
@@ -15432,7 +15432,7 @@
             ]
           }
         },
-        "description": "The edition an intent targets, entered with the minimum of fields: those of the published edition,\nwithout the traits of the copy once owned (condition, second hand, dedication, freeness,\nacquisition, personal reference and notes —\nfonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention)."
+        "description": "The edition an intent targets, entered with the minimum of fields: those of the published edition,\nwithout the traits of the copy once owned (condition, second hand, dedication, freeness,\nacquisition, personal reference and notes —\nfonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention)."
       },
       "PurchaseIntentForm": {
         "required": [

@@ -280,7 +280,7 @@ public sealed class ControlsTests : BunitContext
 
         Assert.Equal(
             [
-                "Suppression aussi de 2 éditions, 1 intention d'achat et 5 visuels",
+                "Suppression aussi de 2 éditions, 1 intention d'acquisition et 5 visuels",
                 "Retrait de l'association avec 2 genres",
                 "Sortie de la collection de 1 album",
             ],

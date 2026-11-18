@@ -13,7 +13,7 @@
 
 @* The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md), the only access to the
    creation of an edition and of an intent: the album in brief, its editions of the collection and its intents, an edition
-   targeted by an intent being one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md).
+   targeted by an intent being one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md).
    Nothing is saved on it, so it has no save bar. Rendered statically, its dialogs — the deletion of an edition, the removal
    of an intent, a new intent on the whole album — are carried by its address (Navigation/AlbumEditionsQuery.cs). Its styles
    read the contracts of the base theme only (visuel/editions-album/declinaison-par-theme.md). *@
@@ -123,7 +123,7 @@ else if (_page is { } page)
         <Block Title="@L["Block.Intents"]" Kicker="@L["Kicker.Intents"]">
             <div class="album-editions-toolbar">
                 <span class="album-editions-count">@IntentCount()</span>
-                @* fonctionnel/regles-metier/intention-d-achat.md: the album itself may be targeted only while it has no edition, owned
+                @* fonctionnel/regles-metier/intention-d-acquisition.md: the album itself may be targeted only while it has no edition, owned
                    or targeted; once one is known, a precise edition is; an album itself targeted, nothing more. *@
                 @if (page.Editions.Count == 0 && page.PurchaseIntents.Count == 0)
                 {
@@ -176,7 +176,7 @@ else if (_page is { } page)
                             <span class="intent-created" role="cell">@($"{L["Intent.Created"]} ")<LocalDateTime Value="row.CreatedAt" DateOnly="true" /></span>
                             <span class="intent-actions" role="cell">
                                 <Button Href="@AppPaths.AdminConfirmPurchase(Id, row.Id)" Icon="IconName.Check" Label="@L["Confirm"]"
-                                        IconOnlyOnSmartphone="true" aria-label="@L["Confirm.Label", target]" />
+                                        IconOnlyOnSmartphone="true" aria-label="@L["Confirm.Label", target]" title="@L["Confirm.Label", target]" />
                                 <ActionsMenu Id="@($"intent-actions-{row.Id:N}")" Label="@L["More.Intent", target]">
                                     @if (row.Edition is { } edition)
                                     {
@@ -262,7 +262,7 @@ else if (_page is { } page)
 
     private string Authors => string.Join(" · ", _page!.Album.Authors.Select(Labels.Author));
 
-    // An album targeted by an intent on itself, which has no edition (fonctionnel/regles-metier/intention-d-achat.md).
+    // An album targeted by an intent on itself, which has no edition (fonctionnel/regles-metier/intention-d-acquisition.md).
     private bool IsAlbumTargeted => _page!.PurchaseIntents.Any(intent => intent.Edition is null);
 
     protected override async Task OnInitializedAsync()

@@ -150,7 +150,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Theory]
-    [InlineData(AlbumCollectionState.PurchaseIntent, "intent", "Intention d'achat")]
+    [InlineData(AlbumCollectionState.PurchaseIntent, "intent", "Intention d'acquisition")]
     [InlineData(AlbumCollectionState.OutsideCollection, "out", "Non possédé")]
     public void Album_NotInTheCollection_IsMarkedByABanner(AlbumCollectionState state, string status, string name)
     {

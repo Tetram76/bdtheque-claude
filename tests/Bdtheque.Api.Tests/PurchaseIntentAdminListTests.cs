@@ -40,7 +40,7 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
         Assert.Null(row.Edition);
         // An album without an edition has no cover: the generic visual stands for it.
         Assert.Null(row.Cover);
-        // An intent on the album always turns into one on an edition (fonctionnel/regles-metier/intention-d-achat.md).
+        // An intent on the album always turns into one on an edition (fonctionnel/regles-metier/intention-d-acquisition.md).
         Assert.True(row.IsConvertible);
         // The version of the album, which the removal of its intent sends back.
         Assert.Equal(version, row.AlbumVersion);

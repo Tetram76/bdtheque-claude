@@ -2,7 +2,7 @@
 @inject IStringLocalizer<CollectionStateTag> L
 
 @* Where an album stands with regard to the collection, at first glance (visuel/liste-albums/contenu.md): « Possédé »
-   filled, « Non possédé » dashed, « Intention d'achat » dashed with its own icon. *@
+   filled, « Non possédé » dashed, « Intention d'acquisition » dashed with its own icon. *@
 <Tag Text="@L[State.ToString()]" Variant="@(State == AlbumCollectionState.InCollection ? TagVariant.Filled : TagVariant.Dashed)"
      Icon="@(State == AlbumCollectionState.PurchaseIntent ? IconName.PurchaseIntent : null)" />
 

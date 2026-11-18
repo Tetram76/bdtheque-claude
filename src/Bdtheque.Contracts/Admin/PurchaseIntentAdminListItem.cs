@@ -13,7 +13,7 @@ namespace Bdtheque.Contracts.Admin;
 /// <param name="Edition">The edition targeted; <c>null</c> for an intent on the whole album, any edition doing.</param>
 /// <param name="Cover">The cover of the album (fonctionnel/regles-metier/couverture-d-un-album.md); <c>null</c> for the generic visual.</param>
 /// <param name="IsConvertible">
-/// Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent
+/// Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-acquisition.md): always for an intent
 /// on the album; for an intent on an edition, only when that edition is the only one of its album.
 /// </param>
 /// <param name="CreatedAt">When the intent was set.</param>

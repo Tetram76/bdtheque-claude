@@ -42,7 +42,7 @@
             (Nature.Leaving, Impact.LeavingCollection),
         }.Where(line => line.Counts.Count > 0).ToList();
 
-    // « 2 éditions, 5 visuels et 1 intention d'achat ».
+    // « 2 éditions, 5 visuels et 1 intention d'acquisition ».
     private string Enumeration(IReadOnlyList<ImpactCount> counts)
     {
         var texts = counts.Select(Entities.Of).ToList();

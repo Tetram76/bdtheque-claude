@@ -42,7 +42,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
     private static readonly EditionListFilters NoFilters = new(null, null, null, null);
 
-    private const string EnteredFromItsAlbum = "Une édition se saisit depuis la page des éditions et intentions d'achat de son album.";
+    private const string EnteredFromItsAlbum = "Une édition se saisit depuis la page des éditions et intentions d'acquisition de son album.";
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
@@ -123,14 +123,14 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("Modifier Glénat [2004] - ISBN 978-2-7234-4567-1", AppPaths.AdminEditEdition(Lunes.Id, id)),
-                ("Éditions et intentions d'achat de ...Et après (Les Lunes de Saturne - T. 1)", AppPaths.AdminAlbumEditions(Lunes.Id)),
+                ("Éditions et intentions d'acquisition de ...Et après (Les Lunes de Saturne - T. 1)", AppPaths.AdminAlbumEditions(Lunes.Id)),
             ],
             row.QuerySelectorAll(".edition-actions > a.button").Select(button => (Normalized(button.GetAttribute("aria-label")!), button.GetAttribute("href"))));
         // On a smartphone, the editions and purchase intents of the album lead the menu in place of their button, which the
         // styles of the page show at one width or the other.
         Assert.Equal(
             [
-                ("Éditions et intentions d'achat de l'album", AppPaths.AdminAlbumEditions(Lunes.Id)),
+                ("Éditions et intentions d'acquisition de l'album", AppPaths.AdminAlbumEditions(Lunes.Id)),
                 ("Voir l'album dans la consultation", AppPaths.Album(Lunes.Id)),
                 ("Fusionner avec une autre édition…", $"{AppPaths.AdminEditions}?q=978&merge={id}"),
                 ("Supprimer…", $"{AppPaths.AdminEditions}?q=978&delete={id}"),

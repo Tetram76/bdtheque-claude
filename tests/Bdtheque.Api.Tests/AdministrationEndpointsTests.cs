@@ -29,7 +29,7 @@ public sealed class AdministrationEndpointsTests(ApiWebApplicationFactory factor
         var wanted = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Le Prisonnier du Bouddha"));
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>($"/admin/albums/{wanted.Id}/purchase-intents", new(null, wanted.Version));
         // An edition targeted by an intent is one of the intents, never one of the editions
-        // (fonctionnel/regles-metier/intention-d-achat.md).
+        // (fonctionnel/regles-metier/intention-d-acquisition.md).
         var targeted = await PostAsync<AlbumContent, AlbumForm>("/admin/albums", Album("Les Voleurs de Marsupilamis"));
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>($"/admin/albums/{targeted.Id}/purchase-intents",
             new(new PurchaseIntentEditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, true), targeted.Version));
