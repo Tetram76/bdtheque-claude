@@ -110,7 +110,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
         // At the width of the mockups' desktop, the table has all its columns, the membership of the collection included.
         if (width == 1440)
-            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Collection" })).ToBeVisibleAsync();
+            await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Possession" })).ToBeVisibleAsync();
     }
 
     private async Task<IPage> OpenAsync(string theme, string path)

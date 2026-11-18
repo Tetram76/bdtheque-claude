@@ -2,6 +2,7 @@
 
 ## 2026-11-18
 
+* **Décision de l'utilisateur** : la possession d'un album s'intitule « Possession », ses états « Possédé », « Intention d'achat » et « Non possédé », partout où elle est présentée, comptée ou filtrée ; « Collection » ne désigne plus, dans les libellés, que la collection d'un éditeur, filtres des listes compris ; colonne « Avancement » de la liste des séries, mention « Suivi » du bloc « Avancement » de la saisie d'une série (#535).
 * **Décision de l'utilisateur** : les listes des éditeurs et des genres de l'administration proposent la navigation par initiale, sur le nom de l'éditeur et le libellé du genre, comme toute liste triée par nom ; celles des éditions et des intentions d'achat, rangées dans l'ordre des albums, la navigation par initiale de l'album ; son utilisation est suivie par la mesure d'audience ; seuls les univers, rangés selon leur hiérarchie, n'en ont pas. **Choix** : entrée stockée et indexée des éditeurs et des genres, calculée par le domaine depuis le nom ou le libellé ; éditions et intentions rangées sous l'entrée de leur album, par une expression partagée avec la liste des albums ; clé de tri propre et entrée recopiée écartées (#421, #478).
 
 ## 2026-11-17

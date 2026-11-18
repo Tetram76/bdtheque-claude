@@ -138,11 +138,11 @@ public sealed class PresentationTests : BunitContext
     [InlineData(TagVariant.Dashed, "dashed")]
     public void Tag_CarriesItsVariant_AndNoRemovalByDefault(TagVariant variant, string expected)
     {
-        var tag = Render<Tag>(parameters => parameters.Add(p => p.Variant, variant).Add(p => p.Text, "Dans la collection"));
+        var tag = Render<Tag>(parameters => parameters.Add(p => p.Variant, variant).Add(p => p.Text, "Possédé"));
 
         var element = tag.Find(".tag");
         Assert.Equal(expected, element.GetAttribute("data-variant"));
-        Assert.Equal("Dans la collection", element.TextContent.Trim());
+        Assert.Equal("Possédé", element.TextContent.Trim());
         Assert.Empty(tag.FindAll("a"));
     }
 

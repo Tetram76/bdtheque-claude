@@ -80,6 +80,15 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Header_NamesTheColumns_TheProgressOfTheSeriesNotItsCollection()
+    {
+        // « Collection » names the collection of a publisher only (visuel/listes/liste-par-liste.md, #425).
+        Assert.Equal(
+            ["Couvertures", "Série", "Statut", "Albums", "Avancement", "Modifiée", "Actions"],
+            Open("").FindAll(".series-row-head [role='columnheader']").Select(Text));
+    }
+
+    [Fact]
     public void Rows_TheSeriesItsStatusItsAlbumsAndWhetherItIsComplete()
     {
         var rows = Open("").FindAll(".series-row:not(.series-row-head)").Select(row => (
@@ -159,7 +168,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
         var form = Open($"filters=open&genreId={Genre}").Find("form.list-search");
 
         Assert.Equal("true", form.QuerySelector("button[aria-controls]")!.GetAttribute("aria-expanded"));
-        Assert.Equal(["Auteur", "Éditeur", "Collection éditeur", "Genre", "Univers"], form.QuerySelectorAll(".list-filters label").Select(Text));
+        Assert.Equal(["Auteur", "Éditeur", "Collection", "Genre", "Univers"], form.QuerySelectorAll(".list-filters label").Select(Text));
         Assert.Equal(
             ["authorId", "publisherId", "publisherCollectionId", "genreId", "universeId"],
             form.QuerySelectorAll(".list-filters input[type='hidden']").Select(input => input.GetAttribute("name")));

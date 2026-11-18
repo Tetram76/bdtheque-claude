@@ -50,7 +50,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(page.GetByLabel("Reliure")).ToHaveValueAsync(nameof(BindingType.Hardcover));
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
-        var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
+        var collectionField = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
         await Assertions.Expect(collectionField).ToBeEnabledAsync();
         await collectionField.ClickAsync();
         await page.GetByRole(AriaRole.Option, new() { Name = $"Collection{_marker}", Exact = true }).ClickAsync();
@@ -84,10 +84,10 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await Assertions.Expect(dialog).ToHaveCountAsync(0);
         await Assertions.Expect(publisher).ToHaveValueAsync($"Éditeur{_marker}");
         // Not created yet, it has no collection.
-        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
+        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
         await Assertions.Expect(collection).ToBeEnabledAsync();
         await collection.ClickAsync();
-        await Assertions.Expect(page.GetByRole(AriaRole.Listbox, new() { Name = "Collection éditeur" }).GetByRole(AriaRole.Option))
+        await Assertions.Expect(page.GetByRole(AriaRole.Listbox, new() { Name = "Collection" }).GetByRole(AriaRole.Option))
             .ToHaveTextAsync(["—", "Nouvelle collection…"]);
         await collection.PressAsync("Escape");
         using (var api = Application.CreateApiClient())
@@ -111,7 +111,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         var page = await OpenAsync(theme, AppPaths.AdminNewSeries);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var publisher = page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true });
-        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
+        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
         await Assertions.Expect(collection).ToBeDisabledAsync();
 
         await publisher.PressSequentiallyAsync($"Premier{_marker}");
@@ -140,7 +140,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await page.GetByLabel("Titre").FillAsync($"Série {_marker}");
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
-        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection éditeur" });
+        var collection = page.GetByRole(AriaRole.Combobox, new() { Name = "Collection" });
         await Assertions.Expect(collection).ToBeEnabledAsync();
 
         await collection.FocusAsync();

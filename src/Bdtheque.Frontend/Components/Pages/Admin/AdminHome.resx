@@ -67,7 +67,7 @@
     <value>Albums</value>
   </data>
   <data name="Records.Albums.Detail" xml:space="preserve">
-    <value>dont {0} hors de la collection</value>
+    <value>non possédés : {0}</value>
   </data>
   <data name="Records.New.Albums" xml:space="preserve">
     <value>Nouvel album</value>
@@ -100,7 +100,7 @@
     <value>Éditeurs</value>
   </data>
   <data name="Records.Publishers.Detail" xml:space="preserve">
-    <value>collections éditeur : {0}</value>
+    <value>collections : {0}</value>
   </data>
   <data name="Records.New.Publishers" xml:space="preserve">
     <value>Nouvel éditeur</value>
@@ -190,10 +190,10 @@
     <value>Éditeur modifié</value>
   </data>
   <data name="Latest.PublisherCollection.Creation" xml:space="preserve">
-    <value>Collection éditeur créée</value>
+    <value>Collection créée</value>
   </data>
   <data name="Latest.PublisherCollection.Modification" xml:space="preserve">
-    <value>Collection éditeur modifiée</value>
+    <value>Collection modifiée</value>
   </data>
   <data name="Latest.Genre.Creation" xml:space="preserve">
     <value>Genre créé</value>

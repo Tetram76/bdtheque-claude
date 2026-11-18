@@ -40,7 +40,7 @@
     <value>Éditeur</value>
   </data>
   <data name="Filter.PublisherCollection" xml:space="preserve">
-    <value>Collection éditeur</value>
+    <value>Collection</value>
   </data>
   <data name="Filter.Any" xml:space="preserve">
     <value>Tous</value>

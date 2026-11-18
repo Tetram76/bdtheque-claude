@@ -83,6 +83,15 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Header_NamesTheColumns_ThePossessionOfTheAlbum()
+    {
+        // « Collection » names the collection of a publisher only (fonctionnel/regles-metier/appartenance-a-la-collection.md, #425).
+        Assert.Equal(
+            ["Couverture", "Album", "Parution", "Éditions", "Possession", "Modifié", "Actions"],
+            Open("").FindAll(".album-row-head [role='columnheader']").Select(Text));
+    }
+
+    [Fact]
     public void Rows_TheAlbumItsAuthorsItsPublicationItsEditionsAndWhereItStands()
     {
         var rows = Open("").FindAll(".album-row:not(.album-row-head)").Select(row => (
@@ -94,10 +103,10 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Hergé", "1963", "2 éditions · 1 intention", "Dans la collection"),
+                ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Hergé", "1963", "2 éditions · 1 intention", "Possédé"),
                 ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido", "octobre 2023", "1 intention", "Intention d'achat"),
                 // No edition nor intent: a zero is not shown, but the dash of a missing data, said to a screen reader.
-                ("Le Bleu est une couleur chaude", "", "—Non renseignée", "—Aucune édition", "Hors collection"),
+                ("Le Bleu est une couleur chaude", "", "—Non renseignée", "—Aucune édition", "Non possédé"),
             ],
             rows);
     }
@@ -177,14 +186,14 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
         Assert.Equal("true", form.QuerySelector("button[aria-controls]")!.GetAttribute("aria-expanded"));
         Assert.Equal(
-            ["Série", "Auteur", "Éditeur", "Collection éditeur", "Genre", "Univers", "Collection"],
+            ["Série", "Auteur", "Éditeur", "Collection", "Genre", "Univers", "Possession"],
             form.QuerySelectorAll(".list-filters label").Select(Text));
         Assert.Equal(
             ["seriesId", "authorId", "publisherId", "publisherCollectionId", "genreId", "universeId"],
             form.QuerySelectorAll(".list-filters input[type='hidden']").Select(input => input.GetAttribute("name")));
         Assert.Equal(Genre.ToString(), form.QuerySelector(".list-filters input[name='genreId']")!.GetAttribute("value"));
         Assert.Equal(
-            [("", "Tous les albums"), ("InCollection", "Dans la collection"), ("PurchaseIntent", "Intention d'achat"), ("OutsideCollection", "Hors collection")],
+            [("", "Tous les albums"), ("InCollection", "Possédé"), ("PurchaseIntent", "Intention d'achat"), ("OutsideCollection", "Non possédé")],
             form.QuerySelectorAll("select[name='state'] option").Select(option => (option.GetAttribute("value"), Text(option))));
         Assert.Equal("PurchaseIntent", form.QuerySelector("select[name='state'] option[selected]")!.GetAttribute("value"));
         Assert.Equal("Filtrer", Text(form.QuerySelector(".list-filters-foot button[type='submit']")!));
@@ -201,7 +210,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("Genre : Aventure", $"{AppPaths.AdminAlbums}?q=tintin&state=InCollection"),
-                ("Collection : Dans la collection", $"{AppPaths.AdminAlbums}?q=tintin&genreId={Genre}"),
+                ("Possession : Possédé", $"{AppPaths.AdminAlbums}?q=tintin&genreId={Genre}"),
             ],
             filters.QuerySelectorAll(".tag").Select(tag => (Text(tag.QuerySelector("span")!), tag.QuerySelector("a")!.GetAttribute("href"))));
         Assert.Equal(("Tout effacer", $"{AppPaths.AdminAlbums}?q=tintin"), (Text(filters.Children[^1]), filters.Children[^1].GetAttribute("href")));
