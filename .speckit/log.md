@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-18
+
+* **Décision de l'utilisateur** : les listes des éditeurs et des genres de l'administration proposent la navigation par initiale, sur le nom de l'éditeur et le libellé du genre, comme toute liste triée par nom ; celles des éditions et des intentions d'achat, rangées dans l'ordre des albums, la navigation par initiale de l'album ; son utilisation est suivie par la mesure d'audience ; seuls les univers, rangés selon leur hiérarchie, n'en ont pas (#421, #478).
+
 ## 2026-11-17
 
 * **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, l'utilisateur peut restreindre les chantiers candidats à un périmètre, qui s'ajoute aux autres critères ; toute session du lot prévient l'orchestrateur de chaque évènement majeur (fin, abandon, problème, découpage ou ticket créé, attente de l'utilisateur), et seulement alors, jamais de son avancement ; les sessions échangent entre elles l'information utile au regard de leur brief ; chaque session mène elle-même les surveillances de son chantier, bornées dans le temps, l'état réel étant relu à l'expiration de leur délai. Le skill `chantiers-paralleles` les met en œuvre (#528).
