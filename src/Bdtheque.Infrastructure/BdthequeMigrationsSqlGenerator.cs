@@ -46,7 +46,10 @@ public sealed class BdthequeMigrationsSqlGenerator(MigrationsSqlGeneratorDepende
         builder
             .Append("ALTER TABLE ").Append(sql.DelimitIdentifier(operation.Table, operation.Schema))
             .Append(" ADD CONSTRAINT ").Append(sql.DelimitIdentifier(operation.Name))
-            .Append(" UNIQUE (").Append(string.Join(", ", operation.Columns.Select(c => sql.DelimitIdentifier(c)))).Append(")")
+            .Append(" UNIQUE ")
+            // Nulls equal to one another (the universes without a parent, siblings), as the index declares them.
+            .Append(index.MappedIndexes.Any(i => i.GetAreNullsDistinct() == false) ? "NULLS NOT DISTINCT " : "")
+            .Append("(").Append(string.Join(", ", operation.Columns.Select(c => sql.DelimitIdentifier(c)))).Append(")")
             .Append(" DEFERRABLE INITIALLY DEFERRED");
 
         if (terminate)

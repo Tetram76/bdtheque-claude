@@ -1,8 +1,0 @@
-.record-creation-lead {
-    margin: 0;
-}
-
-.record-creation-fields {
-    display: grid;
-    gap: var(--space-m);
-}

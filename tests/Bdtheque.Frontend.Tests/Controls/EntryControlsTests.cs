@@ -259,20 +259,24 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public async Task UniverseCreationDialog_GivesTheUniverseInItsParent_WithoutCreatingIt()
+    public async Task UniverseCreationDialog_ItsNameAlone_Required_TheTextTyped_ForAUniverseAtTheTop()
     {
-        (NewUniverse Universe, RecordOption? Parent)? created = null;
+        // A universe created on the spot asks for its name only, never its parent: it is created at the top of the hierarchy,
+        // and attached to a parent from its own panel (choix-implementation/socle/frontend.md, création sur place, #414).
+        NewUniverse? created = null;
         var dialog = Render<UniverseCreationDialog>(parameters => parameters
             .Add(p => p.Id, "universe-creation")
             .Add(p => p.Name, " Le port ")
-            .Add(p => p.OnCreated, value => created = value));
+            .Add(p => p.OnCreated, (NewUniverse universe) => created = universe));
 
-        // Its name required, its parent optional, as in the panel of a universe (visuel/saisie-album/contenu.md, mentions).
-        Assert.Equal(["universe-creation-name"], dialog.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
-        Assert.Equal("(obligatoire)", dialog.Find("label[for=universe-creation-name] .field-note").TextContent);
+        Assert.Equal("Nouvel univers", dialog.Find("dialog h2").TextContent.Trim());
+        Assert.Equal(["Nom(obligatoire)"], dialog.FindAll("dialog label").Select(l => l.TextContent.Trim()));
+        Assert.Empty(dialog.FindAll("[role=combobox]"));
+        Assert.Equal("Le port", dialog.Find("#universe-creation-name").GetAttribute("value"));
         await dialog.ClickAsync(".dialog-actions .button[data-variant=primary]");
 
-        Assert.Equal(("Le port", (Guid?)null, (RecordOption?)null), (created!.Value.Universe.Name, created.Value.Universe.ParentId, created.Value.Parent));
+        Assert.Equal("Le port", created!.Name);
+        Assert.NotEqual(Guid.Empty, created.Key);
         Assert.Empty(_sent);
     }
 

@@ -544,7 +544,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         await tags.InvokeAsync(() => tags.Instance.OnCreate.InvokeAsync("Le port"));
         await page.ClickAsync(".dialog-actions .button[data-variant=primary]");
         _api.Write = (_, _, _) => FakeAdminApi.Problem(
-            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameAlreadyUsed", "/newRecords/universes/0/name");
+            ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.TopLevelNameAlreadyUsed", "/newRecords/universes/0/name");
 
         await page.SubmitAsync("form");
 
@@ -552,7 +552,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("true", tag.GetAttribute("data-invalid"));
         var removal = tag.QuerySelector(".tag-remove")!;
         Assert.Equal("true", removal.GetAttribute("data-error-focus"));
-        Assert.Equal("« Le port » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.",
+        Assert.Equal("« Le port » est déjà pris au premier niveau : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.",
             page.Find($"#{removal.GetAttribute("aria-describedby")}").TextContent.Trim());
     }
 

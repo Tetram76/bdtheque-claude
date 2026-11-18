@@ -158,17 +158,21 @@ internal static class UniverseEndpoints
     private static async Task<UniverseInHierarchy> GetHierarchyAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
         (await UniverseTree.LoadAsync(context, cancellationToken)).InHierarchy(id);
 
+    /// <summary>
+    /// Creates a universe, under its parent if given: an existing universe, or one its panel created on the spot
+    /// (choix-implementation/socle/frontend.md, création sur place), created with it, at the top of the hierarchy.
+    /// </summary>
     private static async Task<Created<UniverseForm>> CreateAsync(
         CreateUniverseRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        if (request.ParentId is not null)
+            await UniverseHierarchy.LockAsync(context, cancellationToken);
+        var added = await FormReferences.CreateAddedAsync(context, fields, request.NewRecords, cancellationToken);
         var universe = fields.Create("", () => new Universe(request.Name));
         universe.SetDescription(request.Description);
         if (request.ParentId is { } parentId)
-        {
-            await UniverseHierarchy.LockAsync(context, cancellationToken);
-            universe.SetParent(await LoadWithAncestorsAsync(context, parentId, cancellationToken));
-        }
+            universe.SetParent(await ParentAsync(context, parentId, added, cancellationToken));
 
         context.Universes.Add(universe);
         await context.SaveChangesAsync(cancellationToken);
@@ -187,12 +191,13 @@ internal static class UniverseEndpoints
             await UniverseHierarchy.LockAsync(context, cancellationToken);
         var universe = await context.LoadAggregateForWriteAsync<Universe>(id, request.Version, cancellationToken: cancellationToken);
         fields.Place(universe);
+        var added = await FormReferences.CreateAddedAsync(context, fields, request.NewRecords, cancellationToken);
         universe.SetName(request.Name);
         universe.SetDescription(request.Description);
         if (request.ParentId != universe.ParentId)
         {
             universe.SetParent(request.ParentId is { } parentId
-                ? await LoadWithAncestorsAsync(context, parentId, cancellationToken)
+                ? await ParentAsync(context, parentId, added, cancellationToken)
                 : null);
         }
 
@@ -201,13 +206,21 @@ internal static class UniverseEndpoints
         return await GetAsync(universe.Id, context, cancellationToken);
     }
 
+    // The parent of a universe: the one its panel created on the spot, under its key, at the top of the hierarchy; an
+    // existing one otherwise, with its ancestors.
+    private static async Task<Universe> ParentAsync(
+        BdthequeDbContext context, Guid parentId, AddedRecords added, CancellationToken cancellationToken) =>
+        added.Universes.TryGetValue(parentId, out var parent)
+            ? parent
+            : await LoadWithAncestorsAsync(context, parentId, cancellationToken);
+
     /// <summary>
     /// Loads a universe with its whole ancestor chain, which <see cref="Universe.SetParent"/> needs to
     /// rule out a cycle: the universes form a small referential, loaded whole rather than walked
     /// recursively (choix-implementation/api/organisation-de-l-api.md). The caller holds the hierarchy
     /// lock, so that the check sees every change of parent committed before it.
     /// </summary>
-    internal static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
+    private static async Task<Universe> LoadWithAncestorsAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
     {
         var universes = await context.Universes.ToListAsync(cancellationToken);
         return universes.SingleOrDefault(u => u.Id == id) ?? throw new EntityNotFoundException(typeof(Universe), id);

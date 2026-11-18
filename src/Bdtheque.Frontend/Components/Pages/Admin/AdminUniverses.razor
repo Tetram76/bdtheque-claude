@@ -144,8 +144,9 @@
                             <input id="@control.Id" type="text" name="@NameName" autofocus="@(Focused == NameField)" tabindex="0"
                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryName" />
                         </Field>
-                        <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" Parent="_parent"
-                                             Error="@Errors.For(ParentField)" Autofocus="@(Focused == ParentField)" />
+                        <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" NewKeyName="@NewParentKeyName"
+                                             NewName="@NewParentName" Parent="_parent" NewParent="@SentNewParent" Error="@ParentError"
+                                             Autofocus="@(Focused == ParentField)" />
                         <Field Id="universe-description" Label="@L["Description"]" Error="@Errors.For(DescriptionField)" Context="control">
                             <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
                                       autofocus="@(Focused == DescriptionField)" tabindex="0" aria-describedby="@control.DescribedBy"
@@ -187,6 +188,8 @@
     private const string NameName = "name";
     private const string DescriptionName = "description";
     private const string ParentName = "parentId";
+    private const string NewParentKeyName = "newParentKey";
+    private const string NewParentName = "newParent";
     private const string VersionName = "version";
 
     /// <summary>How many other universes the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
@@ -213,6 +216,17 @@
     [SupplyParameterFromForm(FormName = EntryFormName, Name = ParentName)]
     private Guid? EntryParentId { get; set; }
 
+    /// <summary>The key of the parent created on the spot, sent by the field of the parent; none for an existing parent, or for none.</summary>
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = NewParentKeyName)]
+    private Guid? EntryNewParentKey { get; set; }
+
+    /// <summary>The name of the parent created on the spot, empty if the user emptied it: the saving refuses it.</summary>
+    [SupplyParameterFromForm(FormName = EntryFormName, Name = NewParentName)]
+    private string? EntryNewParentName { get; set; }
+
+    // The parent created on the spot, told by its key: an empty name is still one, which the domain refuses, never no parent.
+    private NewUniverse? SentNewParent => EntryNewParentKey is { } key ? new NewUniverse(key, EntryNewParentName ?? "") : null;
+
     /// <summary>The version of the universe changed, as its panel read it.</summary>
     [SupplyParameterFromForm(FormName = EntryFormName, Name = VersionName)]
     private uint? EntryVersion { get; set; }
@@ -227,6 +241,9 @@
     private DeletionImpact? _impact;
     private ApiProblem? _deletionProblem;
     private ApiProblem? _entryProblem;
+    // The parent created on the spot that the last saving sent, under the key standing for its identifier: what lets its error
+    // designate it (choix-implementation/socle/frontend.md, erreur d'une fiche créée sur place).
+    private NewRecords? _sentNewRecords;
     private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
 
     // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
@@ -333,6 +350,11 @@
 
     private async Task SaveAsync()
     {
+        // A parent created on the spot is sent by its name alone, under the key the field gave it, which the universe cites in
+        // place of its identifier: it is created with the universe, in the same transaction, or not at all.
+        var newParent = SentNewParent;
+        _sentNewRecords = newParent is null ? null : NewRecords.None with { Universes = [newParent] };
+        var parentId = newParent?.Key ?? EntryParentId;
         UniverseForm saved;
         try
         {
@@ -340,9 +362,9 @@
             saved = _query.Edit is { } edited
                 ? await Api.PutAsync<UpdateUniverseRequest, UniverseForm>(
                     $"/admin/universes/{edited}",
-                    new UpdateUniverseRequest(EntryName ?? "", EntryDescription, EntryParentId, EntryVersion.GetValueOrDefault()))
+                    new UpdateUniverseRequest(EntryName ?? "", EntryDescription, parentId, EntryVersion.GetValueOrDefault(), _sentNewRecords))
                 : await Api.PostAsync<CreateUniverseRequest, UniverseForm>(
-                    "/admin/universes", new CreateUniverseRequest(EntryName ?? "", EntryDescription, EntryParentId));
+                    "/admin/universes", new CreateUniverseRequest(EntryName ?? "", EntryDescription, parentId, _sentNewRecords));
         }
         catch (ApiProblemException exception)
         {
@@ -350,9 +372,11 @@
             return;
         }
 
+        var aborted = HttpContext?.RequestAborted ?? default;
+        if (newParent is not null)
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminUniverseParentCreated, $"universe={saved.ParentId}", aborted);
         await Recorder.RecordActionAsync(
-            _query.Edit is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}",
-            HttpContext?.RequestAborted ?? default);
+            _query.Edit is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}", aborted);
         Navigation.NavigateTo(ListOnly.Href());
     }
 
@@ -367,8 +391,15 @@
     // naming the universe as typed.
     private FieldErrors Errors => new(_entryProblem, FieldTexts, Rules, EntryName?.Trim() ?? "");
 
+    // The parent refused (a cycle), or the parent created on the spot that the saving refused (its name already taken at the top
+    // of the hierarchy), designated on the field of the parent, which cites it by its name.
+    private string? ParentError => Errors.For(ParentField)
+                                   ?? (_sentNewRecords is { Universes: [var sent] } ? Errors.ForAdded(_sentNewRecords, sent.Key) : null);
+
     // The first field to correct gets the focus; the first field otherwise.
-    private string Focused => PanelFields.FirstOrDefault(entered => Errors.For(entered) is not null && !Errors.IsRelated(entered)) ?? NameField;
+    private string Focused => PanelFields.FirstOrDefault(entered => ErrorOf(entered) is not null && !Errors.IsRelated(entered)) ?? NameField;
+
+    private string? ErrorOf(string field) => field == ParentField ? ParentError : Errors.For(field);
 
     private async Task LoadImpactAsync(Guid universeId)
     {

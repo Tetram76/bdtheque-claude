@@ -1,34 +1,63 @@
+@using Bdtheque.Contracts.Admin
 @using Bdtheque.Contracts.Catalog
 @inject ApiClient Api
 @inject IStringLocalizer<ParentUniverseField> L
 
 @* The parent of a universe, in the side panel of the list of the universes (visuel/listes/saisie-selon-l-entite.md): chosen by
-   typing its name, presented with its ancestors (« Univers Hugo Pratt › Corto Maltese »), and sent by its identifier (Name) with
-   the static form of the panel. It needs interactivity for its choice: the caller renders it in the InteractiveServer mode, and
-   passes it only what serializes. A parent refused (a cycle) is presented in place, with its reason, until another one is
-   chosen. *@
+   typing its name, presented with its ancestors (« Univers Hugo Pratt › Corto Maltese »), or created on the spot by its name
+   alone (« Créer l'univers « … » », choix-implementation/socle/frontend.md, création sur place), at the top of the hierarchy;
+   sent with the static form of the panel, by its identifier (Name), or by its key and its name (NewKeyName, NewName) for a
+   parent created on the spot, which the saving of the panel creates: the key tells it created even with an empty name,
+   which the saving then refuses, rather than taking it for no parent. It needs interactivity for its choice and its dialog: the caller renders it in
+   the InteractiveServer mode, and passes it only what serializes. A parent refused (a cycle, a name already taken) is
+   presented in place, with its reason, until another one is chosen. *@
 <Field Id="@Id" Label="@L["Label"]" Error="@_error" Help="@(_error is null ? HelpText : null)" Context="control">
-    <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" Name="@Name" Value="_value" ValueChanged="ChooseAsync"
-                  Placeholder="@L["Placeholder"]" AutoFocus="@Autofocus" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
+    <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" Value="_value" ValueChanged="ChooseAsync" Placeholder="@L["Placeholder"]"
+                  OnCreate="text => _creation = text" CreateLabel="@(text => L["Create", text].Value)" Pending="Pending"
+                  AutoFocus="@Autofocus" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
 </Field>
+<input type="hidden" name="@Name" value="@(IsNewChosen ? "" : _value?.Id.ToString() ?? "")" />
+<input type="hidden" name="@NewKeyName" value="@(IsNewChosen ? _new!.Key.ToString() : "")" />
+<input type="hidden" name="@NewName" value="@(IsNewChosen ? _new!.Name : "")" />
+
+@if (_creation is { } typed)
+{
+    <UniverseCreationDialog Id="@($"{Id}-creation")" Name="@typed" OnCreated="Created" OnCancel="() => _creation = null" />
+}
 
 @code {
     private RecordOption? _value;
     private string? _error;
+    // The parent created on the spot, chosen or not since: suggested again when its name is typed, rather than created twice.
+    private NewUniverse? _new;
+    // The text typed, while the dialog of its creation is open.
+    private string? _creation;
 
     /// <summary>The identifier of the field, unique in the page.</summary>
     [Parameter, EditorRequired]
     public string Id { get; set; } = null!;
 
-    /// <summary>The name under which the form sends the identifier of the parent; empty for none.</summary>
+    /// <summary>The name under which the form sends the identifier of an existing parent; empty for none.</summary>
     [Parameter, EditorRequired]
     public string Name { get; set; } = null!;
 
-    /// <summary>The parent chosen, with its ancestors; <c>null</c> at the top of the hierarchy.</summary>
+    /// <summary>The name under which the form sends the key of a parent created on the spot; empty for none.</summary>
+    [Parameter, EditorRequired]
+    public string NewKeyName { get; set; } = null!;
+
+    /// <summary>The name under which the form sends the name of a parent created on the spot.</summary>
+    [Parameter, EditorRequired]
+    public string NewName { get; set; } = null!;
+
+    /// <summary>The parent chosen, with its ancestors; <c>null</c> at the top of the hierarchy, or for a parent created on the spot.</summary>
     [Parameter]
     public UniverseInHierarchy? Parent { get; set; }
 
-    /// <summary>Whether the field takes the focus once interactive: the parent sent was refused (a cycle).</summary>
+    /// <summary>The parent created on the spot that a refused form sent; <c>null</c> for none.</summary>
+    [Parameter]
+    public NewUniverse? NewParent { get; set; }
+
+    /// <summary>Whether the field takes the focus once interactive: the parent sent was refused (a cycle, a name taken).</summary>
     [Parameter]
     public bool Autofocus { get; set; }
 
@@ -37,16 +66,26 @@
     public string? Error { get; set; }
 
     private UniverseInHierarchy? _parentReceived;
+    private NewUniverse? _newParentReceived;
     private string? _errorReceived;
+
+    private bool IsNewChosen => _new is not null && _value?.Id == _new.Key;
+
+    private IReadOnlyList<RecordOption> Pending => _new is null ? [] : [Option(_new)];
 
     // What the page sends (the parent read, or sent back with a refused form, and its error) replaces the choice in place;
     // the same values sent again leave it as it is.
     protected override void OnParametersSet()
     {
-        if (!Equals(Parent?.Universe, _parentReceived?.Universe))
+        if (!Equals(Parent?.Universe, _parentReceived?.Universe) || NewParent != _newParentReceived)
         {
             _parentReceived = Parent;
-            _value = Parent is null ? null : Option(Parent);
+            _newParentReceived = NewParent;
+            _new = NewParent;
+            if (_new is not null)
+                _value = Option(_new);
+            else
+                _value = Parent is null ? null : Option(Parent);
         }
         if (Error != _errorReceived)
         {
@@ -57,12 +96,12 @@
 
     private string HelpText => _value is null ? L["Help.None"] : L["Help.Parent", _value.Label];
 
-    // The parent chosen by its name, then presented with its ancestors once read.
+    // The parent chosen by its name, then presented with its ancestors once read; one created on the spot has none.
     private async Task ChooseAsync(RecordOption? option)
     {
         _value = option;
         _error = null;
-        if (option is null)
+        if (option is null || option.Id == _new?.Key)
             return;
 
         try
@@ -79,6 +118,17 @@
         }
     }
 
+    // The parent created on the spot becomes the parent chosen; created only with the universe of the panel, when it is saved.
+    private void Created(NewUniverse parent)
+    {
+        _creation = null;
+        _new = parent;
+        _value = Option(parent);
+        _error = null;
+    }
+
     private static RecordOption Option(UniverseInHierarchy universe) =>
         new(universe.Universe.Id, string.Join(" › ", universe.Ancestors.Select(a => a.Name).Append(universe.Universe.Name)), null);
+
+    private static RecordOption Option(NewUniverse universe) => new(universe.Key, universe.Name, null);
 }

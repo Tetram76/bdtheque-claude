@@ -108,7 +108,8 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
 
         var label = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" }).GetByRole(AriaRole.Textbox, new() { Name = "Libellé" });
         await label.FillAsync($"EPOPEE {_marker}");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter le genre" }).ClickAsync();
+        // Enter sends the form of the dialog, which holds its submission (wwwroot/modal-dialog.js).
+        await label.PressAsync("Enter");
 
         await Assertions.Expect(page.Locator("form.genre-new")).ToContainTextAsync(
             $"« EPOPEE {_marker} » est déjà pris : deux libellés qui ne diffèrent que par la casse ou les accents désignent le même genre.");

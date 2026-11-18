@@ -165,7 +165,9 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal("(obligatoire)", Text(panel.QuerySelector("label[for='universe-name'] .field-note")!));
         Assert.Equal("Les voyages du marin.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='description']")!).Value);
         Assert.Equal("Univers Hugo Pratt", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("value"));
+        // An existing parent is sent by its identifier, a parent created on the spot by its name (ParentUniverseFieldTests).
         Assert.Equal(PrattItem.Id.ToString(), panel.QuerySelector("input[type='hidden'][name='parentId']")!.GetAttribute("value"));
+        Assert.Equal("", panel.QuerySelector("input[type='hidden'][name='newParent']")!.GetAttribute("value"));
         Assert.Equal("Ses séries et albums sont aussi ceux de Univers Hugo Pratt.", Text(panel.QuerySelector(".field-help")!));
         // The dates at the top of the panel, above its first field.
         Assert.Equal("Univers créé le 12/01/2026 10:30, modifié le 12/01/2026 10:30.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));
@@ -251,7 +253,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         var panel = page.Find("dialog.side-panel");
         Assert.Equal("true", panel.QuerySelector("input[name='name']")!.GetAttribute("aria-invalid"));
         Assert.Equal(
-            "« star wars » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers sous ce parent.",
+            "« star wars » est déjà pris sous ce parent : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.",
             Text(panel.QuerySelector("input[name='name']")!.ParentElement!.QuerySelector(".field-error")!));
         Assert.Equal("À corriger", Text(panel.QuerySelector("[data-error-category='business'] [data-error-label]")!));
     }

@@ -1013,8 +1013,7 @@ namespace Bdtheque.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Universes_ParentId_Name",
                 table: "Universes",
-                columns: new[] { "ParentId", "Name" },
-                unique: true)
+                columns: new[] { "ParentId", "Name" })
                 .Annotation("Npgsql:NullsDistinct", false);
         }
 

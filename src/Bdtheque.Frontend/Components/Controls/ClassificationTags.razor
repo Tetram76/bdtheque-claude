@@ -123,28 +123,13 @@
         await Recorder.RecordActionAsync(GenreCreated);
     }
 
-    // Presented with its ancestors, those of the universe that contains it.
-    private async Task UniverseCreatedAsync((NewUniverse Universe, RecordOption? Parent) created)
+    // At the top of the hierarchy, it has no ancestors to present it with.
+    private async Task UniverseCreatedAsync(NewUniverse universe)
     {
         _universeCreation = null;
-        var (universe, parent) = created;
         Records.NewUniverses.Add(universe);
-        Records.Universes.Add(new RecordOption(universe.Key, parent is null ? universe.Name : $"{parent.Label} › {universe.Name}", null));
+        Records.Universes.Add(new RecordOption(universe.Key, universe.Name, null));
         await OnChange.InvokeAsync();
-        if (parent is not null)
-            Records.Rename(new RecordOption(universe.Key, $"{await AncestryAsync(parent)} › {universe.Name}", null));
         await Recorder.RecordActionAsync(UniverseCreated);
-    }
-
-    private async Task<string> AncestryAsync(RecordOption universe)
-    {
-        try
-        {
-            return CitedRecords.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")).Label;
-        }
-        catch (ApiProblemException)
-        {
-            return universe.Label;
-        }
     }
 }

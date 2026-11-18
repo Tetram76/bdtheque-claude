@@ -120,6 +120,25 @@ public sealed class NameUniquenessTests : IAsyncLifetime
         await AssertViolatesAsync("IX_Universes_ParentId_Name");
     }
 
+    [Fact]
+    public async Task UniverseName_ReleasedAndTakenAgainInOneSave_IsCheckedAtCommit()
+    {
+        // The panel of a universe renames it and creates on the spot its parent under its former name, in one save: unique at
+        // commit, the final state alone counts (choix-implementation/persistance/unicite-verifiee-a-la-validation.md).
+        var universe = new Universe("Corto Maltese");
+        _fixture.Context.Universes.Add(universe);
+        await _fixture.Context.SaveChangesAsync();
+
+        universe.SetName("Corto Maltese : la série");
+        var parent = new Universe("Corto Maltese");
+        _fixture.Context.Universes.Add(parent);
+        universe.SetParent(parent);
+        await _fixture.Context.SaveChangesAsync();
+
+        _fixture.Context.ChangeTracker.Clear();
+        Assert.Equal(parent.Id, (await _fixture.Context.Universes.SingleAsync(u => u.Id == universe.Id)).ParentId);
+    }
+
     private async Task AssertViolatesAsync(string constraint)
     {
         var exception = await Assert.ThrowsAnyAsync<Exception>(() => _fixture.Context.SaveChangesAsync());

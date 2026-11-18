@@ -12024,7 +12024,19 @@
               "null",
               "string"
             ],
+            "description": "Its parent: an existing universe, or the key of the parent the panel created on the spot.",
             "format": "uuid"
+          },
+          "newRecords": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The parent created on the spot, if any, created with the universe (NewRecords).",
+                "$ref": "#/components/schemas/NewRecords"
+              }
+            ]
           }
         }
       },
@@ -13782,8 +13794,7 @@
       "NewUniverse": {
         "required": [
           "key",
-          "name",
-          "parentId"
+          "name"
         ],
         "type": "object",
         "properties": {
@@ -13793,16 +13804,9 @@
           },
           "name": {
             "type": "string"
-          },
-          "parentId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "An existing universe, if the new one belongs to it.",
-            "format": "uuid"
           }
-        }
+        },
+        "description": "A universe created by its name alone, at the top of the hierarchy: it is attached to a parent from its own panel\n(choix-implementation/socle/frontend.md, création sur place)."
       },
       "OpenedVisit": {
         "required": [
@@ -17789,6 +17793,7 @@
               "null",
               "string"
             ],
+            "description": "Its parent: an existing universe, or the key of the parent the panel created on the spot.",
             "format": "uuid"
           },
           "version": {
@@ -17799,6 +17804,17 @@
             ],
             "description": "Version of the universe the form was read at.",
             "format": "uint32"
+          },
+          "newRecords": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The parent created on the spot, if any, created with the universe (NewRecords).",
+                "$ref": "#/components/schemas/NewRecords"
+              }
+            ]
           }
         }
       },

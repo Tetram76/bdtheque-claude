@@ -46,7 +46,7 @@ Le tableau suivant indique comment chaque échec est classé. Le classement des 
 
 | Échec | Catégorie et statut HTTP |
 | --- | --- |
-| Une règle du domaine est enfreinte, un index unique est violé (son code de règle vient de [`UniqueIndexRules`](../../../src/Bdtheque.Api/Errors/UniqueIndexRules.cs)), un texte dépasse sa longueur, une suppression est refusée, ou la requête retire une fiche qu'une recherche enregistrée désigne. | Métier, `422`, avec le membre `ruleCode`. |
+| Une règle du domaine est enfreinte, un index unique est violé (son code de règle vient de [`UniqueIndexRules`](../../../src/Bdtheque.Api/Errors/UniqueIndexRules.cs), puis [`ApiExceptionHandler`](../../../src/Bdtheque.Api/Errors/ApiExceptionHandler.cs) le précise d'après la fiche refusée : le nom d'un univers sans parent reçoit `Universe.TopLevelNameAlreadyUsed`), un texte dépasse sa longueur, une suppression est refusée, ou la requête retire une fiche qu'une recherche enregistrée désigne. | Métier, `422`, avec le membre `ruleCode`. |
 | La fiche visée n'existe pas, ou une clé étrangère désigne une fiche supprimée entre-temps. | Fonctionnelle, `404`. |
 | La version envoyée par le formulaire est périmée, ou l'impact d'une suppression a changé depuis sa confirmation. | Fonctionnelle, `409`. |
 | Toute autre exception, et toute réponse d'erreur émise sans corps. | Technique, `500` ou le statut qu'a choisi le framework. |

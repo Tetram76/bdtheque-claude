@@ -315,8 +315,8 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
     [Fact]
     public async Task Create_WithRecordsAddedOnTheSpot_CreatesThemWithTheAlbum()
     {
-        // The authors, genres and universes the form added are created when the album is saved, not before.
-        var parent = await CreateUniverseAsync();
+        // The authors, genres and universes the form added are created when the album is saved, not before; a universe at the
+        // top of the hierarchy, attached to a parent from its own panel.
         var (author, genre, universe) = (Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         var marker = Guid.NewGuid().ToString("N");
         var content = Content(UniqueTitle()) with
@@ -327,7 +327,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
             NewRecords = new NewRecords(
                 [new NewAuthor(author, $"Nouveau{marker}", "Jean", null)],
                 [new NewGenre(genre, $"Genre{marker}")],
-                [new NewUniverse(universe, $"Univers{marker}", parent.Id)], [], [], []),
+                [new NewUniverse(universe, $"Univers{marker}")], [], [], []),
         };
 
         var created = await CreateAsync(content);
@@ -337,7 +337,8 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         Assert.Equal(2, created.Content.Contributions.Count(c => c.AuthorId == references.Authors[0].Id));
         Assert.Equal($"Genre{marker}", Assert.Single(references.Genres).Label);
         var inHierarchy = Assert.Single(references.Universes);
-        Assert.Equal(($"Univers{marker}", parent.Id), (inHierarchy.Universe.Name, Assert.Single(inHierarchy.Ancestors).Id));
+        Assert.Equal(($"Univers{marker}", null), (inHierarchy.Universe.Name, inHierarchy.Universe.ParentId));
+        Assert.Empty(inHierarchy.Ancestors);
         Assert.Null(created.Content.NewRecords);
     }
 
@@ -426,7 +427,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         var content = Content(UniqueTitle()) with
         {
             UniverseIds = [universe],
-            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000), null)], [], [], []),
+            NewRecords = new NewRecords([], [], [new NewUniverse(universe, new string('u', 1_000))], [], [], []),
         };
 
         var response = await _client.PostAsJsonAsync("/admin/albums", content);

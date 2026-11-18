@@ -87,7 +87,6 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     [Theory, InEachTheme]
     public async Task UniverseAndGenre_AddedOnTheSpot_AreCreatedWithTheAlbum(string theme)
     {
-        var parent = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Monde{_marker}", null, null));
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
         var page = await OpenAsync(theme, AppPaths.AdminEditAlbum(album.Id));
         await ControlsPage.WaitUntilInteractiveAsync(page);
@@ -95,19 +94,20 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un genre" }).ClickAsync();
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Ajouter un genre" }).PressSequentiallyAsync($"Genre{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Créer le genre « Genre{_marker} »" }).ClickAsync();
+        // Enter adds the genre, rather than sending the form of the album behind the dialog.
         var genreDialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouveau genre" });
-        await genreDialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter le genre" }).ClickAsync();
+        await genreDialog.GetByRole(AriaRole.Textbox, new() { Name = "Libellé" }).PressAsync("Enter");
         await Assertions.Expect(genreDialog).ToHaveCountAsync(0);
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Ajouter un univers" }).ClickAsync();
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Ajouter un univers" }).PressSequentiallyAsync($"Quartier{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Créer l'univers « Quartier{_marker} »" }).ClickAsync();
+        // Its name alone, never its parent (choix-implementation/socle/frontend.md, création sur place, #414).
         var universeDialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
-        await universeDialog.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Monde{_marker}");
-        await universeDialog.GetByRole(AriaRole.Option, new() { Name = $"Monde{_marker}" }).ClickAsync();
+        await Assertions.Expect(universeDialog.GetByRole(AriaRole.Combobox)).ToHaveCountAsync(0);
         await universeDialog.GetByRole(AriaRole.Button, new() { Name = "Ajouter l'univers" }).ClickAsync();
         await Assertions.Expect(universeDialog).ToHaveCountAsync(0);
-        await Assertions.Expect(page.Locator(".classification-tags").Nth(1)).ToContainTextAsync($"Monde{_marker} › Quartier{_marker}");
+        await Assertions.Expect(page.Locator(".classification-tags").Nth(1)).ToContainTextAsync($"Quartier{_marker}");
         // Created only with the album, when it is saved.
         Assert.Empty((await GetAsync(album.Id)).References.Genres);
         using (var api = Application.CreateApiClient())
@@ -118,7 +118,9 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
         var saved = (await GetAsync(album.Id)).References;
         Assert.Equal($"Genre{_marker}", Assert.Single(saved.Genres).Label);
-        Assert.Equal(parent.Id, Assert.Single(Assert.Single(saved.Universes).Ancestors).Id);
+        // At the top of the hierarchy, attached to a parent from its own panel.
+        var universe = Assert.Single(saved.Universes);
+        Assert.Equal(($"Quartier{_marker}", null), (universe.Universe.Name, universe.Universe.ParentId));
     }
 
     [Theory, InEachTheme]

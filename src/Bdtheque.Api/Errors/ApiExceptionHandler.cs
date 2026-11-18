@@ -2,6 +2,7 @@ using Bdtheque.Api.Deletion;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Domain.Common;
+using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -32,8 +33,6 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
             logger.LogInformation("Request refused ({ProblemType}, rule {RuleCode}): {Reason}", type, ruleCode, exception.Message);
 
         var problem = new ProblemDetails { Status = status, Type = type };
-        if (ruleCode is not null)
-            problem.Extensions[ProblemTypes.RuleCodeExtension] = ruleCode;
         // What the user is to correct, where they entered it.
         if (type == ProblemTypes.Business)
         {
@@ -42,7 +41,10 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
                 problem.Extensions[ProblemTypes.FieldsExtension] = designation.Fields;
             if (designation.Related.Count > 0)
                 problem.Extensions[ProblemTypes.RelatedFieldsExtension] = designation.Related;
+            ruleCode = InSituation(ruleCode, designation.Records);
         }
+        if (ruleCode is not null)
+            problem.Extensions[ProblemTypes.RuleCodeExtension] = ruleCode;
         // What the message has to announce beyond the category: the records concerned by the deletion.
         if (ImpactOf(exception) is { } impact)
             problem.Extensions[ProblemTypes.ImpactExtension] = impact;
@@ -59,6 +61,14 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
             httpContext.RequestServices.GetRequiredService<ContentFields>(),
             httpContext.RequestServices.GetRequiredService<BdthequeDbContext>(),
             cancellationToken);
+
+    // The rule as the situation of the record refused states it: the name of a universe at the top of the hierarchy is
+    // taken among the universes without parent, not under a parent (decision of the user, #485), which the database, with
+    // a single index for both, cannot tell.
+    private static string? InSituation(string? ruleCode, IReadOnlyList<object> records) =>
+        ruleCode == DomainRules.UniverseNameAlreadyUsed && records.OfType<Universe>().Any(universe => universe is { Parent: null, ParentId: null })
+            ? DomainRules.UniverseTopLevelNameAlreadyUsed
+            : ruleCode;
 
     private static DeletionImpact? ImpactOf(Exception exception) => exception switch
     {

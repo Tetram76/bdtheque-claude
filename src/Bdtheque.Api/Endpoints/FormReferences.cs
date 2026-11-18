@@ -85,9 +85,10 @@ internal static class FormReferences
     /// Creates, through the domain, the records the form added on the spot, in the transaction of the record it saves: they are
     /// saved with it, or not at all (choix-implementation/api/organisation-de-l-api.md). Each is placed where the content enters
     /// it, so that an error it raises designates it, as any record the request writes
-    /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md). A new universe whose parent is given
-    /// takes the hierarchy lock, as any change of parent; a new collection of an existing publisher writes a child of the
-    /// aggregate of that publisher, whose root it locks and marks (choix-implementation/persistance/concurrence-d-acces.md).
+    /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md). A new universe is at the top of the
+    /// hierarchy, which it changes in nothing that could form a cycle: it takes no hierarchy lock. A new collection of an
+    /// existing publisher writes a child of the aggregate of that publisher, whose root it locks and marks
+    /// (choix-implementation/persistance/concurrence-d-acces.md).
     /// </summary>
     public static async Task<AddedRecords> CreateAddedAsync(
         BdthequeDbContext context, ContentFields fields, NewRecords? records, CancellationToken cancellationToken)
@@ -98,16 +99,9 @@ internal static class FormReferences
             .ToDictionary(a => a.Key, a => a.Author);
         var genres = records.Genres.Select((g, index) => (g.Key, Genre: fields.Create($"{AddedPath}/genres/{index}", () => new Genre(g.Label))))
             .ToDictionary(g => g.Key, g => g.Genre);
-        var universes = new Dictionary<Guid, Universe>();
-        if (records.Universes.Any(u => u.ParentId is not null))
-            await UniverseHierarchy.LockAsync(context, cancellationToken);
-        foreach (var (added, index) in records.Universes.Select((u, index) => (u, index)))
-        {
-            var universe = fields.Create($"{AddedPath}/universes/{index}", () => new Universe(added.Name));
-            if (added.ParentId is { } parentId)
-                universe.SetParent(await UniverseEndpoints.LoadWithAncestorsAsync(context, parentId, cancellationToken));
-            universes[added.Key] = universe;
-        }
+        var universes = records.Universes.Select((u, index) => (u.Key, Universe: fields.Create(
+                $"{AddedPath}/universes/{index}", () => new Universe(u.Name))))
+            .ToDictionary(u => u.Key, u => u.Universe);
 
         var series = records.Series.Select((s, index) => (s.Key, Series: fields.Create(
                 $"{AddedPath}/series/{index}", () => Series.WithProposedEditionTemplate(s.Title))))

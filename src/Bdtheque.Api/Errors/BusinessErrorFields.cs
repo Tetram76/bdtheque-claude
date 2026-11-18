@@ -23,7 +23,8 @@ internal static class BusinessErrorFields
     /// The fields of the values those to correct clash with, entered in the same content and left as they were (the other
     /// collection already named so): presented with the error, not to correct.
     /// </param>
-    public sealed record Designation(IReadOnlyList<string> Fields, IReadOnlyList<string> Related);
+    /// <param name="Records">The records of the values to correct, whose situation a rule may depend on.</param>
+    public sealed record Designation(IReadOnlyList<string> Fields, IReadOnlyList<string> Related, IReadOnlyList<object> Records);
 
     private sealed record Value(object Record, string Attribute, bool Related = false);
 
@@ -37,7 +38,9 @@ internal static class BusinessErrorFields
             PostgresException error => await RefusedAsync(error, fields, context, cancellationToken),
             _ => [],
         }).ToList();
-        return new(FieldsOf(designated.Where(value => !value.Related), fields), FieldsOf(designated.Where(value => value.Related), fields));
+        return new(
+            FieldsOf(designated.Where(value => !value.Related), fields), FieldsOf(designated.Where(value => value.Related), fields),
+            [.. designated.Where(value => !value.Related).Select(value => value.Record).Distinct(ReferenceEqualityComparer.Instance)]);
     }
 
     private static string[] FieldsOf(IEnumerable<Value> values, ContentFields fields) =>

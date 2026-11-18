@@ -156,6 +156,9 @@
   <data name="Universe.NameAlreadyUsed" xml:space="preserve">
     <value>Deux univers de même parent ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
   </data>
+  <data name="Universe.TopLevelNameAlreadyUsed" xml:space="preserve">
+    <value>Deux univers de premier niveau ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
+  </data>
   <data name="Contribution.AlreadyCredited" xml:space="preserve">
     <value>Cet auteur est déjà crédité dans ce rôle.</value>
   </data>
