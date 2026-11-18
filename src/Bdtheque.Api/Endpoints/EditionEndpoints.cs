@@ -137,7 +137,7 @@ internal static class EditionEndpoints
     /// <summary>
     /// The list of the editions of the administration (visuel/listes/liste-par-liste.md): the search and cross filters of the
     /// list of the consultation, in the same order, but the editions of the collection only, an edition targeted by a
-    /// purchase intent being one of the intents (fonctionnel/regles-metier/intention-d-achat.md). Each row carries the
+    /// purchase intent being one of the intents (fonctionnel/regles-metier/intention-d-acquisition.md). Each row carries the
     /// edition and its album, its cover, its category, its acquisition, its modification and the version of its album,
     /// which its deletion sends back.
     /// </summary>
@@ -259,7 +259,7 @@ internal static class EditionEndpoints
 
     /// <summary>
     /// Confirms the purchase of an edition targeted by an intent
-    /// (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention): the whole form is applied,
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the whole form is applied,
     /// with the acquisition, which realizes the intent.
     /// </summary>
     private static async Task<EditionForm> AcquireAsync(

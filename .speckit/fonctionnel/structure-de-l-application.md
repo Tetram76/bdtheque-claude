@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Structure de l''application'
 description: 'Consultation publique (fiches, navigation, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Structure de l'application
@@ -11,7 +11,7 @@ L'application se compose de trois parties distinctes :
 
 1. **Consultation** — accessible **publiquement** (sans authentification) :
    - Affichage d'une **fiche détaillée** pour les seuls **albums**, **séries** et **auteurs** : toutes les informations publiques disponibles y sont présentées. Les notes personnelles, la numérotation personnelle, les données d'acquisition (mode, date, prix, occasion, gratuité) et l'appréciation sont des informations **publiques**.
-     - Les **éditions**, leurs **visuels** et les **intentions d'achat** sont présentés par la fiche de leur album : chaque édition avec toutes ses informations et ses visuels (avec accès à l'image originale), chaque intention avec l'album ou l'édition qu'elle vise. La liste publique des intentions mène à la fiche de l'album visé.
+     - Les **éditions**, leurs **visuels** et les **intentions d'acquisition** sont présentés par la fiche de leur album : chaque édition avec toutes ses informations et ses visuels (avec accès à l'image originale), chaque intention avec l'album ou l'édition qu'elle vise. La liste publique des intentions mène à la fiche de l'album visé.
      - Les **éditeurs**, **collections éditeur**, **genres** et **univers** n'ont pas de fiche, ni d'entrée dans le menu de la consultation.
        - Un **éditeur** dont le **site web** est renseigné mène à ce site ; sinon, son nom n'est pas un lien. Une **collection éditeur**, sans site web, n'est pas un lien.
        - Un **genre** ou un **univers** mène à la liste de ses séries et de ses albums, présentée **comme la bibliographie d'un auteur** : séries et albums sans série au premier niveau, triés ensemble par ordre alphabétique, chaque série regroupant ses albums qui s'y rattachent, dans l'ordre de la série. Pour un univers, la liste comprend ses sous-univers (cf. [Hiérarchie des univers](regles-metier/hierarchie-des-univers.md)).

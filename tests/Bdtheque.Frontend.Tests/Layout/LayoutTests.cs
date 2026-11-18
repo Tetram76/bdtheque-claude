@@ -47,7 +47,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         var layout = Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body));
 
         var menu = layout.Find("app-scroll-row nav[aria-label='Menu de la consultation']");
-        Assert.Equal(["Accueil", "Albums", "Séries", "Auteurs", "Intentions d'achat"],
+        Assert.Equal(["Accueil", "Albums", "Séries", "Auteurs", "Intentions d'acquisition"],
             menu.QuerySelectorAll("a").Select(link => link.TextContent.Trim()));
         Assert.Equal(AppPaths.Home, menu.QuerySelector("a")?.GetAttribute("href"));
         Assert.All(menu.QuerySelectorAll("a").Skip(1), link => Assert.Equal(AppPaths.NotYetImplemented, link.GetAttribute("href")));
@@ -156,7 +156,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal(["Accueil", "Collection", "Auteurs et éditeurs", "Référentiels", "Réglages"],
             plan.QuerySelectorAll(".admin-menu-group-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(
-            ["Tableau de bord", "Albums", "Séries", "Éditions", "Intentions d'achat", "Auteurs", "Éditeurs",
+            ["Tableau de bord", "Albums", "Séries", "Éditions", "Intentions d'acquisition", "Auteurs", "Éditeurs",
                 "Genres", "Univers", "Paramétrage", "Statistiques privées"],
             plan.QuerySelectorAll("a > span:first-child").Select(entry => entry.TextContent.Trim()));
         Assert.Equal(AppPaths.AdminHome, plan.QuerySelector("a")?.GetAttribute("href"));
@@ -175,7 +175,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         var counts = layout.FindAll("nav a").Where(link => link.QuerySelector(".admin-menu-count") is not null)
             .Select(link => (link.QuerySelector("span")!.TextContent.Trim(), string.Join(" ", link.QuerySelector(".admin-menu-count")!.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))));
         Assert.Equal(
-            [("Albums", "2 847"), ("Séries", "412"), ("Éditions", "2 913"), ("Intentions d'achat", "18"), ("Auteurs", "1 106"),
+            [("Albums", "2 847"), ("Séries", "412"), ("Éditions", "2 913"), ("Intentions d'acquisition", "18"), ("Auteurs", "1 106"),
                 ("Éditeurs", "96"), ("Genres", "24"), ("Univers", "37")],
             counts.ToList());
     }

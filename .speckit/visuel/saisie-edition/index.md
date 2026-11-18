@@ -1,6 +1,6 @@
 # Saisie d'une édition
 
-* [Saisie d'une édition](saisie-d-une-edition.md) - Fiche de saisie d'une édition, de ses visuels et d'une intention d'achat.
+* [Saisie d'une édition](saisie-d-une-edition.md) - Fiche de saisie d'une édition, de ses visuels et d'une intention d'acquisition.
 * [Maquettes](maquettes.md) - Maquettes de la saisie d'une édition.
 * [Contenu](contenu.md) - Contenu de la saisie d'une édition : pré-remplissage, blocs, exemplaire et valeur, visuels, intention.
 * [Contrôles](controles.md) - Contrôles de la saisie d'une édition.

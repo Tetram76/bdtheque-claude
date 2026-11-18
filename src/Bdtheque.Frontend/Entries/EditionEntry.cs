@@ -9,7 +9,7 @@ namespace Bdtheque.Frontend.Entries;
 /// <summary>
 /// An edition as its entry form holds it while it is entered (visuel/saisie-edition/contenu.md): an owned edition, or an edition
 /// targeted by a purchase intent, entered with the minimum of fields
-/// (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention). Persisted from the prerendering into the
+/// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention). Persisted from the prerendering into the
 /// interactive circuit, which does not read it again. It applies no rule of the edition: the domain is their only source
 /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md), and reports what to correct when the
 /// edition is saved.

@@ -108,7 +108,7 @@ public sealed class EditionValueTests
     public void SetPublicationYearAndAcquisition_ClearingTheModeOfAnOwnedEdition_ThrowsAndKeepsIt()
     {
         // An owned edition stays owned until deleted: a bought edition never becomes an intent again
-        // (fonctionnel/regles-metier/intention-d-achat.md), and a form can leave the mode empty.
+        // (fonctionnel/regles-metier/intention-d-acquisition.md), and a form can leave the mode empty.
         var edition = CreateOwnedEdition(AcquisitionMode.Gift);
 
         DomainAssert.Violates<Edition>(
@@ -481,7 +481,7 @@ public sealed class EditionValueTests
     public void RecordAcquisition_PurchaseOfFreeEdition_ThrowsWithoutRealizingTheIntent()
     {
         // Freeness is a trait of the copy, left free of rules while the edition is not owned
-        // (fonctionnel/regles-metier/intention-d-achat.md): it only conflicts with the purchase that acquires it.
+        // (fonctionnel/regles-metier/intention-d-acquisition.md): it only conflicts with the purchase that acquires it.
         var edition = CreateEdition();
         var album = edition.Album;
         album.AddPurchaseIntent(edition);

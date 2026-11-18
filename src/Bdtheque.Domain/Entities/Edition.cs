@@ -114,7 +114,7 @@ public sealed class Edition : EntityBase
     /// <remarks>
     /// An edition is acquired through <see cref="Album.RecordAcquisition(Edition, EditionAcquisition)"/>
     /// only, and an owned edition stays owned until deleted: a bought edition never becomes an
-    /// intent again (fonctionnel/regles-metier/intention-d-achat.md).
+    /// intent again (fonctionnel/regles-metier/intention-d-acquisition.md).
     /// </remarks>
     public void SetPublicationYearAndAcquisition(int? publicationYear, EditionAcquisition acquisition)
     {
@@ -249,7 +249,7 @@ public sealed class Edition : EntityBase
                 this, acquisition.InitialValueCurrency is null ? nameof(InitialValueCurrency) : nameof(InitialValueAmount));
 
         // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
-        // until the edition is acquired (fonctionnel/regles-metier/intention-d-achat.md).
+        // until the edition is acquired (fonctionnel/regles-metier/intention-d-acquisition.md).
         if (acquisition.Mode is null
             && (acquisition.Date is not null || acquisition.PriceAmount is not null || acquisition.InitialValueAmount is not null))
             throw new DomainRuleViolationException(

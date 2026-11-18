@@ -162,7 +162,7 @@
     font-weight: var(--font-weight-strong);
 }
 
-/* Intentions d'achat: the block is their card, on a line: the chip, in the color the card had among the records, the
+/* Intentions d'acquisition: the block is their card, on a line: the chip, in the color the card had among the records, the
    number, the sentence, and the link at its end; on a narrow screen, the link goes under them. */
 .admin-intents {
     display: flex;

@@ -12,7 +12,7 @@
 @* The record of an album in the consultation (visuel/fiche-album/contenu.md): the cover and the identity of the album, its
    contributions, genres and universes; its summary; its editions in the collection, each with its visuals and its detail,
    an edition targeted by a purchase intent being never presented as an edition, but under them with the other intents
-   (fonctionnel/regles-metier/intention-d-achat.md); the rest of its series; its dates; and the viewer of a visual, a dialog
+   (fonctionnel/regles-metier/intention-d-acquisition.md); the rest of its series; its dates; and the viewer of a visual, a dialog
    above the record that its address opens (Navigation/AlbumRecordQuery.cs). Its styles read the contracts of the base theme only
    (visuel/fiche-album/declinaison-par-theme.md). The title of the page, read apart from it (a tab, the history), names its
    series: only the record makes it plain (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte). *@
@@ -160,7 +160,7 @@ else if (_album is { } album)
         }
 
         // Only the editions of the collection are editions; an edition targeted by an intent is one of the intents
-        // (fonctionnel/regles-metier/intention-d-achat.md). A visual the collection does not have, which only an address
+        // (fonctionnel/regles-metier/intention-d-acquisition.md). A visual the collection does not have, which only an address
         // written by hand names, opens no viewer.
         _owned = [.. _album.Editions.Where(e => e.IsInCollection)];
         if (_owned.Find(e => e.Edition.Id == query.Edition) is { } edition && query.Visual is { } visual && visual <= edition.Visuals.Count)

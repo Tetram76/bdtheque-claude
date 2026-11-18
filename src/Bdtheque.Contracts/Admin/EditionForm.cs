@@ -108,7 +108,7 @@ public sealed record UpdateEditionRequest(EditionContent Content, uint AlbumVers
 
 /// <summary>
 /// Confirms the purchase of an edition targeted by an intent
-/// (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention): the edition, with its
+/// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the edition, with its
 /// acquisition, which realizes the intent.
 /// </summary>
 /// <param name="Content">The whole edition, whose acquisition mode is required.</param>

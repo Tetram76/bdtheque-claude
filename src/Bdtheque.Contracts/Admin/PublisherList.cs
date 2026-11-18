@@ -5,7 +5,7 @@ namespace Bdtheque.Contracts.Admin;
 /// <param name="Collections">The names of its collections, in their order: their number is the column of the list.</param>
 /// <param name="EditionCount">
 /// Its editions in the collection, an edition targeted by a purchase intent being none
-/// (fonctionnel/regles-metier/intention-d-achat.md).
+/// (fonctionnel/regles-metier/intention-d-acquisition.md).
 /// </param>
 /// <param name="Version">Version of the publisher, sent back with its deletion.</param>
 public sealed record PublisherAdminListItem(

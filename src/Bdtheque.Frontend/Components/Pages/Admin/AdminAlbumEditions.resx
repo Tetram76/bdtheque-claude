@@ -13,13 +13,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Éditions et intentions d&apos;achat</value>
+    <value>Éditions et intentions d&apos;acquisition</value>
   </data>
   <data name="Administration" xml:space="preserve">
     <value>Administration</value>
   </data>
   <data name="PurchaseIntents" xml:space="preserve">
-    <value>Intentions d&apos;achat</value>
+    <value>Intentions d&apos;acquisition</value>
   </data>
   <data name="EditAlbum" xml:space="preserve">
     <value>Modifier</value>
@@ -40,7 +40,7 @@
     <value>Première publication :</value>
   </data>
   <data name="Album.Help" xml:space="preserve">
-    <value>L&apos;album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d&apos;achat.</value>
+    <value>L&apos;album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d&apos;acquisition.</value>
   </data>
   <data name="Block.Editions" xml:space="preserve">
     <value>Les éditions</value>
@@ -70,7 +70,7 @@
     <value>Chaque édition, avec ses visuels, se saisit sur sa propre fiche.</value>
   </data>
   <data name="Editions.Help.Intended" xml:space="preserve">
-    <value>L&apos;album est visé par une intention d&apos;achat : sa première édition s&apos;ajoute en confirmant l&apos;achat.</value>
+    <value>L&apos;album est visé par une intention d&apos;acquisition : sa première édition s&apos;ajoute en confirmant l&apos;acquisition.</value>
   </data>
   <data name="Pages" xml:space="preserve">
     <value>{0} pages</value>
@@ -100,22 +100,22 @@
     <value>Supprimer l&apos;édition…</value>
   </data>
   <data name="Block.Intents" xml:space="preserve">
-    <value>Les intentions d&apos;achat</value>
+    <value>Les intentions d&apos;acquisition</value>
   </data>
   <data name="Kicker.Intents" xml:space="preserve">
-    <value>Achats prévus</value>
+    <value>Acquisitions prévues</value>
   </data>
   <data name="Intents.Count.None" xml:space="preserve">
-    <value>Aucune intention d&apos;achat</value>
+    <value>Aucune intention d&apos;acquisition</value>
   </data>
   <data name="Intents.Count.One" xml:space="preserve">
-    <value>1 intention d&apos;achat</value>
+    <value>1 intention d&apos;acquisition</value>
   </data>
   <data name="Intents.Count.Other" xml:space="preserve">
-    <value>{0} intentions d&apos;achat</value>
+    <value>{0} intentions d&apos;acquisition</value>
   </data>
   <data name="NewIntent" xml:space="preserve">
-    <value>Nouvelle intention d&apos;achat</value>
+    <value>Nouvelle intention d&apos;acquisition</value>
   </data>
   <data name="NewIntent.Album" xml:space="preserve">
     <value>Sur l&apos;album…</value>
@@ -133,10 +133,10 @@
     <value>Nouvelle intention sur une édition…</value>
   </data>
   <data name="Intents.None" xml:space="preserve">
-    <value>Aucune intention d&apos;achat.</value>
+    <value>Aucune intention d&apos;acquisition.</value>
   </data>
   <data name="Intents.Table" xml:space="preserve">
-    <value>Intentions d&apos;achat sur l&apos;album</value>
+    <value>Intentions d&apos;acquisition sur l&apos;album</value>
   </data>
   <data name="Intents.Help" xml:space="preserve">
     <value>Une intention ne vise l&apos;album entier que tant qu&apos;il n&apos;a aucune édition, possédée ou visée ; ensuite, elle vise une édition précise, saisie sans exemplaire ni valeur.</value>
@@ -154,10 +154,10 @@
     <value>Posée le</value>
   </data>
   <data name="Confirm" xml:space="preserve">
-    <value>Confirmer l&apos;achat</value>
+    <value>Confirmer</value>
   </data>
   <data name="Confirm.Label" xml:space="preserve">
-    <value>Confirmer l&apos;achat : {0}</value>
+    <value>Confirmer l&apos;acquisition : {0}</value>
   </data>
   <data name="More.Intent" xml:space="preserve">
     <value>Autres actions sur l&apos;intention : {0}</value>
@@ -190,7 +190,7 @@
     <value>L'édition est encore désignée par :</value>
   </data>
   <data name="Removal.Title" xml:space="preserve">
-    <value>Retirer cette intention d&apos;achat ?</value>
+    <value>Retirer cette intention d&apos;acquisition ?</value>
   </data>
   <data name="Removal.Lead" xml:space="preserve">
     <value>Le retrait est définitif et emporte avec l&apos;intention :</value>

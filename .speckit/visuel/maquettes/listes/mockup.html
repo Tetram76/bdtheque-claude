@@ -469,7 +469,7 @@ const ENTITIES = {
     menu: 'Éditions', title: 'Éditions', total: '2 913', create: 'Nouvelle édition', kind: 'Fiches',
     searchPh: 'ISBN, avec ou sans tirets…', initials: 'B',
     filters: ['Album', 'Éditeur', 'Collection éditeur'],
-    filtersHelp: 'Seules les éditions de la collection : une édition visée figure parmi les intentions d\'achat. Une édition appartient à un album : « Nouvelle édition » commence par le choix de l\'album, ou par un ISBN.',
+    filtersHelp: 'Seules les éditions de la collection : une édition visée figure parmi les intentions d\'acquisition. Une édition appartient à un album : « Nouvelle édition » commence par le choix de l\'album, ou par un ISBN.',
     count: '5 éditions', countDetail: 'sous la lettre B', order: 'Dans l\'ordre des albums, puis par année d\'édition',
     page: 'Éditions 1 à 5 sur 5', pages: [],
     thumb: 'cover', mainHead: 'Édition',
@@ -485,15 +485,15 @@ const ENTITIES = {
     ]
   },
   intentions: {
-    menu: "Intentions d'achat", title: "Intentions d'achat", total: '18', create: null, kind: 'Fiches',
-    noCreate: 'Une intention se pose depuis la page des éditions et intentions d\'achat de son album.',
+    menu: "Intentions d'acquisition", title: "Intentions d'acquisition", total: '18', create: null, kind: 'Fiches',
+    noCreate: 'Une intention se pose depuis la page des éditions et intentions d\'acquisition de son album.',
     searchPh: 'Titre de l\'album ou de sa série…', initials: 'B', filters: [],
     count: '3 intentions', countDetail: 'sous la lettre B', order: 'Dans l\'ordre des albums',
     page: 'Intentions 1 à 3 sur 3', pages: [],
     thumb: 'cover', mainHead: 'Album visé',
     cols: [col('Porte sur', '330px'), col('Collection', '170px', { hideMd: true }), col('Posée le', '104px')],
     primary: ['Confirmer l\'achat', ICON.check],
-    rowMenu: menuOf({ label: 'Éditions et intentions d\'achat', icon: ICON.album }, { label: 'Viser plutôt une édition…', icon: ICON.swap }, { label: 'Retirer l\'intention…', icon: ICON.trash, del: true, sep: true }),
+    rowMenu: menuOf({ label: 'Éditions et intentions d\'acquisition', icon: ICON.album }, { label: 'Viser plutôt une édition…', icon: ICON.swap }, { label: 'Retirer l\'intention…', icon: ICON.trash, del: true, sep: true }),
     rows: [
       ['Blacksad - Intégrale [1 à 5]', '', [{ album: true }, { badge: 'Hors collection', dashed: true }, '8 oct. 2026'], { cover: false }],
       ['Les Bijoux de la Castafiore (Tintin - T. 21)', '', [{ edition: 'Casterman (Fac-similé) [2013]' }, { badge: 'Dans la collection', full: true }, '8 oct. 2026'], { cover: true, noSwap: true }],
@@ -643,7 +643,7 @@ class View extends Mockup {
       })();
       const editing = editRow === i;
       // An intent on an edition turns into one on the album only when that edition is the album's
-      // only one (fonctionnel/regles-metier.md § Intention d'achat): otherwise the conversion is not offered.
+      // only one (fonctionnel/regles-metier.md § Intention d'acquisition): otherwise the conversion is not offered.
       const menu = e.rowMenu.filter((m) => !(m.icon === ICON.swap && opts.noSwap))
         .map((m) => ({ ...m, label: m.icon === ICON.swap && opts.other ? opts.other : m.label, fg: m.del ? t.del : t.text, sep: Boolean(m.sep) }));
       return {
@@ -725,7 +725,7 @@ class View extends Mockup {
       closePanel: () => this.setState({ panel: null }),
       menu: [
         { label: 'Accueil', items: [menuItem('Tableau de bord', ''), menuItem('Nouvelle édition', '')] },
-        { label: 'Collection', items: [menuItem('Albums', '2 847'), menuItem('Séries', '412'), menuItem('Éditions', '2 913'), menuItem("Intentions d'achat", '18')] },
+        { label: 'Collection', items: [menuItem('Albums', '2 847'), menuItem('Séries', '412'), menuItem('Éditions', '2 913'), menuItem("Intentions d'acquisition", '18')] },
         { label: 'Auteurs et éditeurs', items: [menuItem('Auteurs', '1 106'), menuItem('Éditeurs', '96')] },
         { label: 'Référentiels', items: [menuItem('Genres', '24'), menuItem('Univers', '37')] },
         { label: 'Réglages', items: [menuItem('Paramétrage', ''), menuItem('Statistiques privées', '')] }

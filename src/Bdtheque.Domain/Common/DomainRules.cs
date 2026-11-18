@@ -23,7 +23,7 @@ public static class DomainRules
 
     /// <summary>
     /// An intent on the whole album while it has an edition, owned or targeted
-    /// (fonctionnel/regles-metier/intention-d-achat.md): the user then targets a specific edition.
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md): the user then targets a specific edition.
     /// </summary>
     public const string PurchaseIntentAlbumHasEditions = "PurchaseIntent.AlbumHasEditions";
     public const string PurchaseIntentEditionAlreadyTargeted = "PurchaseIntent.EditionAlreadyTargeted";

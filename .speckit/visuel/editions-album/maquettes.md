@@ -1,8 +1,8 @@
 ---
 type: Référence visuelle
 title: 'Maquettes'
-description: 'Maquettes de la page des éditions et intentions d''achat.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+description: 'Maquettes de la page des éditions et intentions d''acquisition.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Maquettes
@@ -13,8 +13,8 @@ Réglages de la source commune :
 
 | Réglage | Valeurs |
 | --- | --- |
-| `exemple` | `sansEdition` (par défaut) : un album sans édition ni intention d'achat ; `editions` : un album, ses deux éditions et une intention d'achat sur une troisième ; `integrale` : une intégrale sans édition, visée par une intention d'achat sur l'album |
-| `choixIntention` | choix de l'intention d'achat ouvert (exemple `sansEdition`) |
+| `exemple` | `sansEdition` (par défaut) : un album sans édition ni intention d'acquisition ; `editions` : un album, ses deux éditions et une intention d'acquisition sur une troisième ; `integrale` : une intégrale sans édition, visée par une intention d'acquisition sur l'album |
+| `choixIntention` | choix de l'intention d'acquisition ouvert (exemple `sansEdition`) |
 | `actions` | menu des autres actions de la première édition ouvert |
 | `menuOpen` | menu de l'administration ouvert |
 

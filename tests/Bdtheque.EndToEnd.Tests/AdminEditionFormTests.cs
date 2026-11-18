@@ -141,16 +141,16 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         var album = await CreateAlbumAsync();
         var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
-        await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'achat" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Nouvelle intention d'acquisition" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Sur une nouvelle édition…" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminNewPurchaseIntent(album.Id)));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
-        // The minimum of fields: neither copy nor value (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
+        // The minimum of fields: neither copy nor value (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention).
         await Assertions.Expect(page.GetByLabel("Mode d'acquisition")).ToHaveCountAsync(0);
         await page.GetByRole(AriaRole.Combobox, new() { Name = "Éditeur(obligatoire)", Exact = true }).PressSequentiallyAsync($"Éditeur{_marker}");
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         await page.GetByLabel("Année d'édition").FillAsync("2013");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'intention d'achat" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'intention d'acquisition" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".intent-row")).ToContainTextAsync($"Éditeur{_marker} [2013]");
@@ -158,7 +158,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention : Éditeur{_marker} [2013]" }).ClickAsync();
         await page.GetByRole(AriaRole.Link, new() { Name = "Modifier l'intention" }).ClickAsync();
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
-        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier l'intention d'achat");
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier l'intention d'acquisition");
         await page.GetByLabel("Année d'édition").FillAsync("2014");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 

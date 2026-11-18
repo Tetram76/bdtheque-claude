@@ -16,7 +16,7 @@
     <value>Éditions</value>
   </data>
   <data name="NoCreation" xml:space="preserve">
-    <value>Une édition se saisit depuis la page des éditions et intentions d&apos;achat de son album.</value>
+    <value>Une édition se saisit depuis la page des éditions et intentions d&apos;acquisition de son album.</value>
   </data>
   <data name="Kicker" xml:space="preserve">
     <value>Fiches</value>
@@ -46,7 +46,7 @@
     <value>Tous</value>
   </data>
   <data name="Filters.Note" xml:space="preserve">
-    <value>Série, album, éditeur et collection se choisissent en tapant leur nom. Seules les éditions de la collection figurent ici : une édition visée figure parmi les intentions d&apos;achat.</value>
+    <value>Série, album, éditeur et collection se choisissent en tapant leur nom. Seules les éditions de la collection figurent ici : une édition visée figure parmi les intentions d&apos;acquisition.</value>
   </data>
   <data name="Count.None" xml:space="preserve">
     <value>Aucune édition</value>
@@ -91,16 +91,16 @@
     <value>Modifier {0}</value>
   </data>
   <data name="AlbumEditions" xml:space="preserve">
-    <value>Éditions et intentions d&apos;achat</value>
+    <value>Éditions et intentions d&apos;acquisition</value>
   </data>
   <data name="AlbumEditions.Label" xml:space="preserve">
-    <value>Éditions et intentions d&apos;achat de {0}</value>
+    <value>Éditions et intentions d&apos;acquisition de {0}</value>
   </data>
   <data name="More" xml:space="preserve">
     <value>Autres actions sur {0}</value>
   </data>
   <data name="Menu.AlbumEditions" xml:space="preserve">
-    <value>Éditions et intentions d&apos;achat de l&apos;album</value>
+    <value>Éditions et intentions d&apos;acquisition de l&apos;album</value>
   </data>
   <data name="Menu.View" xml:space="preserve">
     <value>Voir l&apos;album dans la consultation</value>

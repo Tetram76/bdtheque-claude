@@ -543,7 +543,7 @@ const EDITIONS = [
     ],
     // A wished-for edition has no copy yet: its acquisition and the copy's characteristics do not exist.
     exemplaire: [
-      ['Possession', "Intention d'achat", '']
+      ['Possession', 'Intention', '']
     ],
     meta: 'Édition créée le 9 octobre 2026, modifiée le 9 octobre 2026.'
   }
@@ -648,13 +648,13 @@ class View extends Mockup {
       hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       art: ed.art,
       k: { recit: kick(1, 'Le récit'), editions: kick(2, 'Les éditions'), serie: kick(3, 'La série') },
-      nav: [navItem('Accueil', false), navItem('Albums', true), navItem('Séries', false), navItem('Auteurs', false), navItem("Intentions d'achat", false)],
+      nav: [navItem('Accueil', false), navItem('Albums', true), navItem('Séries', false), navItem('Auteurs', false), navItem("Intentions d'acquisition", false)],
       facts: [
         { label: 'T. 5', ...pick(true) },
         { label: 'Paru en novembre 1970', ...pick(false) },
         hasEdition
           ? { label: 'Dans la collection, en 3 éditions', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
-          : { label: 'Intention d\'achat', bg: 'transparent', fg: t.text, bd: '2px dashed ' + t.line }
+          : { label: 'Intention d\'acquisition', bg: 'transparent', fg: t.text, bd: '2px dashed ' + t.line }
       ],
       creditsTotal: distinct > 1 ? distinct + ' auteurs crédités' : 'Auteur',
       credits: ROLES.map(([role, label], r) => {
@@ -696,7 +696,7 @@ class View extends Mockup {
       nextVis: () => this.setState({ visual: (vi + 1) % visCount }),
       hasEdition, noEdition: !hasEdition,
       hasIntents: intents.length > 0,
-      intentsTitle: intents.length > 1 ? 'Intentions d\'achat' : 'Intention d\'achat',
+      intentsTitle: intents.length > 1 ? 'Intentions d\'acquisition' : 'Intention d\'acquisition',
       intents: intents.map((v, i) => ({ ...v, sep: i > 0 ? t.rowB : '0' })),
       editions: OWNED.map((e, i) => ({
         label: e.label, pressed: i === edIndex ? 'true' : 'false', ...pick(i === edIndex),
@@ -719,7 +719,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'achat", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'acquisition", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
 </script>
 </body>
 </html>

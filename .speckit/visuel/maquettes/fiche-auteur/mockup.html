@@ -358,7 +358,7 @@ class View extends Mockup {
       return { label: ROLE_LABELS[r], bg, fg };
     });
     const badge = (state) => ({
-      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? "Intention d'achat" : 'Hors collection'),
+      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? 'Intention' : 'Hors collection'),
       badgeBg: state === 'own' ? t.colBg : 'transparent',
       badgeFg: state === 'own' ? t.colFg : t.text,
       badgeB: state === 'own' ? '0' : '2px dashed ' + t.line
@@ -438,7 +438,7 @@ class View extends Mockup {
         r: t.tR === '0' ? '0' : '12px'
       },
       k: { bio: kick(1, 'Portrait'), biblio: kick(2, 'Bibliographie') },
-      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', false), navItem('Auteurs', true), navItem("Intentions d'achat", false)],
+      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', false), navItem('Auteurs', true), navItem("Intentions d'acquisition", false)],
       facts: [
         { label: credits, bg: t.acc, fg: t.onAcc, bd: '2px solid ' + t.acc },
         ...byRole.map(([r, n]) => ({ label: ROLE_LABELS[r] + ' · ' + n, ...chip }))

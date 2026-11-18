@@ -536,12 +536,12 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     {
         var page = OpenWished();
 
-        Assert.Equal("Modifier l'intention d'achat", page.Find("h1").TextContent.Trim());
+        Assert.Equal("Modifier l'intention d'acquisition", page.Find("h1").TextContent.Trim());
         Assert.Equal(["L'édition", "Fabrication", "Les visuels"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(["En couleur"], page.FindAll(".choice").Select(choice => choice.TextContent.Trim()));
         // The publisher alone is required (visuel/saisie-edition/contenu.md).
         Assert.Equal(["edition-publisher"], page.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
-        Assert.Equal("Intention d'achat posée le 08/10/2026 12:00, modifiée le 12/10/2026 12:00.", page.Find(".entry-form-dates").TextContent.Trim());
+        Assert.Equal("Intention d'acquisition posée le 08/10/2026 12:00, modifiée le 12/10/2026 12:00.", page.Find(".entry-form-dates").TextContent.Trim());
         Assert.Equal("Fac-similé", page.Find("#edition-collection").TextContent.Trim());
     }
 
@@ -566,10 +566,10 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     {
         var page = OpenNewIntent();
 
-        Assert.Equal("Nouvelle intention d'achat", page.Find("h1").TextContent.Trim());
-        Assert.Equal("Nouvelle intention d'achat", page.FindAll(".breadcrumb li")[^1].TextContent.Trim());
+        Assert.Equal("Nouvelle intention d'acquisition", page.Find("h1").TextContent.Trim());
+        Assert.Equal("Nouvelle intention d'acquisition", page.FindAll(".breadcrumb li")[^1].TextContent.Trim());
         Assert.Equal(["L'édition", "Fabrication", "Les visuels"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
-        Assert.Equal("Créer l'intention d'achat", page.Find(".save-bar button[type=submit]").TextContent.Trim());
+        Assert.Equal("Créer l'intention d'acquisition", page.Find(".save-bar button[type=submit]").TextContent.Trim());
         Assert.Contains("Pré-remplie d'après la série Tintin", page.Find(".edition-preset").TextContent);
         _api.Write = (_, _, _) => FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [new PurchaseIntentForm(IntentId, WishedId)], 13),
             HttpStatusCode.Created);

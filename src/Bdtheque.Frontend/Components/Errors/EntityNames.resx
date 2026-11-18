@@ -55,10 +55,10 @@
     <value>{0} contributions</value>
   </data>
   <data name="PurchaseIntent.One" xml:space="preserve">
-    <value>{0} intention d&apos;achat</value>
+    <value>{0} intention d&apos;acquisition</value>
   </data>
   <data name="PurchaseIntent.Other" xml:space="preserve">
-    <value>{0} intentions d&apos;achat</value>
+    <value>{0} intentions d&apos;acquisition</value>
   </data>
   <data name="Author.One" xml:space="preserve">
     <value>{0} auteur</value>

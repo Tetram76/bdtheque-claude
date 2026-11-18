@@ -157,7 +157,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
     [Fact]
     public async Task Create_OnTheWholeAlbumWithAnOwnedEdition_IsABusinessError()
     {
-        // fonctionnel/regles-metier/intention-d-achat.md: an album with an edition is no longer wished for in any edition.
+        // fonctionnel/regles-metier/intention-d-acquisition.md: an album with an edition is no longer wished for in any edition.
         var album = await CreateAlbumAsync();
         var owned = await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions",
             new CreateEditionRequest(OwnedContent((await CreatePublisherAsync()).Id), album.Version));

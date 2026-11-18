@@ -10,7 +10,7 @@ namespace Bdtheque.Api.Tests;
 /// <summary>
 /// The page of the editions and purchase intents of an album (<c>GET /admin/albums/{id}/editions-and-purchase-intents</c>,
 /// visuel/editions-album/contenu.md): the album in brief, its editions of the collection, and its intents, an edition targeted
-/// by an intent being one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md).
+/// by an intent being one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md).
 /// </summary>
 public sealed class AlbumEditionsPageTests : IClassFixture<ApiWebApplicationFactory>
 {

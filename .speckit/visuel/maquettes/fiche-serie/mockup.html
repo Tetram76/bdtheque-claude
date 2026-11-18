@@ -473,7 +473,7 @@ class View extends Mockup {
       rated: rating > 0,
       stars: '★'.repeat(rating) + '☆'.repeat(5 - rating),
       ratingLabel: 'Appréciation : ' + rating + ' sur 5',
-      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? "Intention d'achat" : 'Hors collection'),
+      badge: state === 'own' ? 'Dans la collection' : (state === 'intent' ? 'Intention' : 'Hors collection'),
       badgeBg: state === 'own' ? t.colBg : 'transparent',
       badgeFg: state === 'own' ? t.colFg : t.text,
       badgeB: state === 'own' ? '0' : '2px dashed ' + t.line
@@ -513,7 +513,7 @@ class View extends Mockup {
         notesGap: s.summary ? '10px' : '0', notesRule: s.summary ? t.rowB : '0'
       },
       k: { recit: kick(1, 'Le récit'), albums: kick(2, 'Les albums') },
-      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', true), navItem('Auteurs', false), navItem("Intentions d'achat", false)],
+      nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', true), navItem('Auteurs', false), navItem("Intentions d'acquisition", false)],
       stack: [
         { left: '26px', top: '0', rot: '6deg', ...pileCard(2) },
         { left: '13px', top: '8px', rot: '2deg', ...pileCard(1) },

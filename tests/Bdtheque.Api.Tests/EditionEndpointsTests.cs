@@ -455,7 +455,7 @@ public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFacto
     public async Task Update_ClearingTheAcquisitionMode_IsABusinessErrorAndKeepsTheEditionUntouched()
     {
         // An owned edition stays owned until deleted
-        // (choix-implementation/domaine/intention-d-achat-agregat-porte-par-l-album.md).
+        // (choix-implementation/domaine/intention-d-acquisition-agregat-porte-par-l-album.md).
         var created = await CreateAsync(await CreateAlbumAsync(), Content((await CreatePublisherAsync()).Id));
 
         var response = await _client.PutAsJsonAsync(

@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 1 — Modèle de domaine'
 description: 'Phase 1, modèle de domaine (v0.0.2), consolidation et ajustement de la reprise.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Phase 1 — Modèle de domaine
@@ -19,7 +19,7 @@ Implémentation des entités du modèle métier ([`modele-metier/`](../modele-me
 | ~~#63~~ | Ajout de l'entité Contribution |
 | ~~#64~~ | Ajout de l'entité Édition |
 | ~~#65~~ | Ajout de l'entité Visuel d'édition |
-| ~~#66~~ | Ajout de l'entité Intention d'achat |
+| ~~#66~~ | Ajout de l'entité Intention d'acquisition |
 
 ## Consolidation avant la Phase 2
 

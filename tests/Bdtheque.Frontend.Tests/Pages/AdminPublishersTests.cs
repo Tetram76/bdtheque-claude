@@ -238,7 +238,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 "1 édition : rattachez-la à un autre éditeur, ou supprimez-la ;",
-                "1 intention d'achat : rattachez son édition à un autre éditeur, ou retirez-la ;",
+                "1 intention d'acquisition : rattachez son édition à un autre éditeur, ou retirez-la ;",
                 "1 recherche enregistrée : retirez de ses critères l'éditeur et ses collections.",
             ],
             dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));

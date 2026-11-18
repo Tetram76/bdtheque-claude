@@ -33,7 +33,7 @@ public sealed record NewPurchaseIntentForm(
 /// The edition an intent targets, entered with the minimum of fields: those of the published edition,
 /// without the traits of the copy once owned (condition, second hand, dedication, freeness,
 /// acquisition, personal reference and notes —
-/// fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention).
+/// fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention).
 /// </summary>
 /// <param name="PublisherId">Required.</param>
 /// <param name="PublisherCollectionId">Must belong to the publisher.</param>

@@ -238,7 +238,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// <summary>
     /// Records an intent to acquire this album in any edition. Refused if the album is already
     /// targeted as a whole, or has any edition, owned or targeted: an album targeted as a whole has
-    /// no edition (modele-metier/intention-d-achat.md).
+    /// no edition (modele-metier/intention-d-acquisition.md).
     /// </summary>
     public PurchaseIntent AddPurchaseIntent()
     {
@@ -251,7 +251,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// <summary>
     /// Records an intent to acquire one specific edition of this album. Several editions of the
     /// same album may each be targeted, but never while the album itself is
-    /// (modele-metier/intention-d-achat.md).
+    /// (modele-metier/intention-d-acquisition.md).
     /// </summary>
     public PurchaseIntent AddPurchaseIntent(Edition edition)
     {
@@ -263,7 +263,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Removes an intent of this album. An intent on an edition takes the edition along: an edition
-    /// not owned and its intent are inseparable (fonctionnel/regles-metier/intention-d-achat.md).
+    /// not owned and its intent are inseparable (fonctionnel/regles-metier/intention-d-acquisition.md).
     /// </summary>
     public void RemovePurchaseIntent(PurchaseIntent intent)
     {
@@ -275,7 +275,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts the intent on the whole album into an intent on <paramref name="edition"/>, an edition
-    /// of the album neither owned nor targeted yet (fonctionnel/regles-metier/intention-d-achat.md).
+    /// of the album neither owned nor targeted yet (fonctionnel/regles-metier/intention-d-acquisition.md).
     /// </summary>
     /// <exception cref="ArgumentException">The intent does not target the whole album.</exception>
     public PurchaseIntent ConvertPurchaseIntentToEdition(PurchaseIntent intent, Edition edition)
@@ -292,7 +292,7 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     /// <summary>
     /// Converts an intent on an edition into an intent on the whole album, which removes the edition
-    /// targeted, not owned (fonctionnel/regles-metier/intention-d-achat.md). Refused unless this edition is the
+    /// targeted, not owned (fonctionnel/regles-metier/intention-d-acquisition.md). Refused unless this edition is the
     /// only one of the album: an album targeted as a whole has no edition.
     /// </summary>
     /// <exception cref="ArgumentException">The intent already targets the whole album.</exception>
@@ -311,7 +311,7 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// <summary>
     /// Records the acquisition of one of this album's editions — the only way for an edition to
     /// become owned, since only this aggregate sees every intent it may realize
-    /// (fonctionnel/regles-metier/intention-d-achat.md › Réalisation d'une intention): the intent on this
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md › Réalisation d'une intention): the intent on this
     /// edition, or else the
     /// one on the whole album, is removed; other editions' intents are kept.
     /// </summary>
@@ -364,7 +364,7 @@ public sealed class Album : EntityBase, IAggregateRoot
         EnsureOwnEdition(edition);
         // An edition already bought cannot become an intent again: a second copy is recorded as
         // a new edition of the album, which then carries the intent
-        // (fonctionnel/regles-metier/intention-d-achat.md).
+        // (fonctionnel/regles-metier/intention-d-acquisition.md).
         if (edition.AcquisitionMode is not null)
             throw new DomainRuleViolationException(
                 DomainRules.PurchaseIntentEditionAlreadyOwned, "An edition already owned cannot be targeted by a purchase intent.");
@@ -383,7 +383,7 @@ public sealed class Album : EntityBase, IAggregateRoot
                 DomainRules.PurchaseIntentAlbumAlreadyTargeted, "This album is already targeted as a whole by a purchase intent.");
     }
 
-    // An album targeted as a whole has no edition (modele-metier/intention-d-achat.md): once it has
+    // An album targeted as a whole has no edition (modele-metier/intention-d-acquisition.md): once it has
     // one, owned or targeted, a specific edition is wished for, not any. The edition excepted is the one
     // a conversion to the whole album removes.
     private void EnsureWithoutEditionBut(Guid? removedEditionId)

@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 2 — Contracts et API'
 description: 'Phase 2, contrats et API (v0.0.3), consolidation et ajustements issus des maquettes et des contraintes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Phase 2 — Contracts et API
@@ -26,7 +26,7 @@ Hors périmètre (phases dédiées ci-dessous) : statistiques, conversion de dev
 | ~~#80~~ | Administration des albums |
 | ~~#81~~ | Administration des éditions |
 | ~~#82~~ | Téléversement et gestion des visuels d'édition |
-| ~~#83~~ | Intentions d'achat |
+| ~~#83~~ | Intentions d'acquisition |
 | ~~#84~~ | Listes et recherche de la consultation |
 | ~~#85~~ | Fiches détaillées de la consultation |
 
@@ -63,7 +63,7 @@ Répercussion dans le modèle de domaine et dans l'API du journal des modificati
 
 ## Ajustement issu des maquettes des fiches de série et d'auteur
 
-Répercussion dans l'API des données que les cartes d'album des fiches de série et d'auteur affichent (couverture, appréciation, intention d'achat, nombre d'albums d'une série), après que l'utilisateur a statué quelle édition fournit la couverture d'un album. La phase 2 étant validée, un seul ticket la couvre.
+Répercussion dans l'API des données que les cartes d'album des fiches de série et d'auteur affichent (couverture, appréciation, intention d'acquisition, nombre d'albums d'une série), après que l'utilisateur a statué quelle édition fournit la couverture d'un album. La phase 2 étant validée, un seul ticket la couvre.
 
 | Ticket | Titre |
 | --- | --- |
@@ -90,11 +90,11 @@ Répercussion dans le modèle de domaine et dans l'API de la recherche avancée 
 
 ## Ajustement issu des maquettes des listes et saisies de l'administration
 
-Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'achat sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'achat d'un album ([Intention d'achat](../fonctionnel/regles-metier/intention-d-achat.md)). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
+Répercussion dans le modèle de domaine et dans l'API de la règle qui réserve une intention d'acquisition sur l'album à un album sans édition, ajoutée au `.speckit/` avec la page des éditions et intentions d'acquisition d'un album ([Intention d'acquisition](../fonctionnel/regles-metier/intention-d-acquisition.md)). Les phases 1 et 2 étant validées, un seul ticket couvre les deux.
 
 | Ticket | Titre |
 | --- | --- |
-| ~~#185~~ | Intention d'achat sur un album réservée à un album sans édition |
+| ~~#185~~ | Intention d'acquisition sur un album réservée à un album sans édition |
 
 ## Ajustement issu de la mesure d'audience de l'interface web
 

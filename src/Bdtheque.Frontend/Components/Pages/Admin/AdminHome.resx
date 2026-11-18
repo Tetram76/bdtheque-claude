@@ -124,16 +124,16 @@
     <value>Nouvel univers</value>
   </data>
   <data name="Intents.Title" xml:space="preserve">
-    <value>Intentions d&apos;achat</value>
+    <value>Intentions d&apos;acquisition</value>
   </data>
   <data name="Intents.Kicker" xml:space="preserve">
-    <value>Achats</value>
+    <value>Acquisitions</value>
   </data>
   <data name="Intents.Detail" xml:space="preserve">
-    <value>achats à confirmer, posés depuis leur album</value>
+    <value>acquisitions à confirmer, posées depuis leur album</value>
   </data>
   <data name="Intents.Confirm" xml:space="preserve">
-    <value>Confirmer les achats</value>
+    <value>Confirmer les acquisitions</value>
   </data>
   <data name="Checks.Title" xml:space="preserve">
     <value>À vérifier</value>
@@ -172,10 +172,10 @@
     <value>Série modifiée</value>
   </data>
   <data name="Latest.PurchaseIntent.Creation" xml:space="preserve">
-    <value>Intention d&apos;achat créée</value>
+    <value>Intention d&apos;acquisition créée</value>
   </data>
   <data name="Latest.PurchaseIntent.Modification" xml:space="preserve">
-    <value>Intention d&apos;achat modifiée</value>
+    <value>Intention d&apos;acquisition modifiée</value>
   </data>
   <data name="Latest.Author.Creation" xml:space="preserve">
     <value>Auteur créé</value>

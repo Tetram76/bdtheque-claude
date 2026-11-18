@@ -16,7 +16,7 @@
     <value>Possédé</value>
   </data>
   <data name="PurchaseIntent" xml:space="preserve">
-    <value>Intention d'achat</value>
+    <value>Intention</value>
   </data>
   <data name="OutsideCollection" xml:space="preserve">
     <value>Non possédé</value>

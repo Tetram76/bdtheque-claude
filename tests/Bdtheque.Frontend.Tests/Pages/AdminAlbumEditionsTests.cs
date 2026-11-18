@@ -17,7 +17,7 @@ namespace Bdtheque.Frontend.Tests.Pages;
 /// <summary>
 /// The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): its heading, the album in brief,
 /// its editions and its intents with their actions, the button that adds an intent according to the state of the album
-/// (fonctionnel/regles-metier/intention-d-achat.md), its dialogs and its errors, told apart by role, link and text, never by
+/// (fonctionnel/regles-metier/intention-d-acquisition.md), its dialogs and its errors, told apart by role, link and text, never by
 /// appearance.
 /// </summary>
 public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
@@ -81,11 +81,11 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Administration", AppPaths.AdminHome), ("Intentions d'achat", AppPaths.AdminPurchaseIntents),
+                ("Administration", AppPaths.AdminHome), ("Intentions d'acquisition", AppPaths.AdminPurchaseIntents),
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", null),
             ],
             page.FindAll(".breadcrumb li").Select(item => (Text(item), item.QuerySelector("a")?.GetAttribute("href"))));
-        Assert.Equal("Éditions et intentions d'achat", Text(page.Find("h1")));
+        Assert.Equal("Éditions et intentions d'acquisition", Text(page.Find("h1")));
         Assert.Equal("Les Bijoux de la Castafiore (Tintin - T. 21)", Text(page.Find(".album-editions-subject")));
         Assert.Empty(page.Find(".album-editions-heading").QuerySelectorAll("a.button"));
     }
@@ -112,7 +112,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         Assert.Equal("Première publication : avril 1963", Text(album.QuerySelector(".album-brief-date")!));
         Assert.Equal("Possédé", Text(album.QuerySelector(".tag")!));
         Assert.Equal(
-            "L'album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d'achat.",
+            "L'album lui-même se modifie sur sa fiche de saisie ; cette page ne réunit que ses éditions et ses intentions d'acquisition.",
             Text(Block(Open(""), "L'album").QuerySelector(".album-editions-help")!));
     }
 
@@ -176,16 +176,16 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         Assert.Empty(editions.QuerySelectorAll("a.button"));
         Assert.Equal(
-            "L'album est visé par une intention d'achat : sa première édition s'ajoute en confirmant l'achat.",
+            "L'album est visé par une intention d'acquisition : sa première édition s'ajoute en confirmant l'acquisition.",
             Text(editions.QuerySelector(".album-editions-help")!));
     }
 
     [Fact]
     public void Intents_OnAnEdition_TheEditionItsDetailAndItsDate_AndTheirActions()
     {
-        var intents = Block(Open(""), "Les intentions d'achat");
+        var intents = Block(Open(""), "Les intentions d'acquisition");
 
-        Assert.Equal("1 intention d'achat", Text(intents.QuerySelector(".album-editions-count")!));
+        Assert.Equal("1 intention d'acquisition", Text(intents.QuerySelector(".album-editions-count")!));
         var row = Assert.Single(intents.QuerySelectorAll(".intent-row"));
         Assert.Equal(
             ("Édition", "Casterman (Fac-similé) [2013]", "Édition spéciale · Cartonnée", "Posée le 08/10/2026"),
@@ -193,8 +193,10 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
                 Text(row.QuerySelector(".intent-created")!)));
         var confirm = row.QuerySelector(".intent-actions a.button")!;
         Assert.Equal(
-            ("Confirmer l'achat", "Confirmer l'achat : Casterman (Fac-similé) [2013]", AppPaths.AdminConfirmPurchase(AlbumId, OnEdition.Id)),
+            ("Confirmer", "Confirmer l'acquisition : Casterman (Fac-similé) [2013]", AppPaths.AdminConfirmPurchase(AlbumId, OnEdition.Id)),
             (Text(confirm), Normalized(confirm.GetAttribute("aria-label")!), confirm.GetAttribute("href")));
+        // The text alone would read as confirming the intent: its full name is told on hover too (#534).
+        Assert.Equal(confirm.GetAttribute("aria-label"), confirm.GetAttribute("title"));
         // The album has other editions: the intent does not turn into one on the whole album.
         Assert.Equal(
             [
@@ -212,7 +214,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     {
         Answer(AlbumState.Intended, [], [OnAlbum]);
 
-        var row = Assert.Single(Block(Open(""), "Les intentions d'achat").QuerySelectorAll(".intent-row"));
+        var row = Assert.Single(Block(Open(""), "Les intentions d'acquisition").QuerySelectorAll(".intent-row"));
 
         Assert.Equal(("Album", "toute édition"), (Text(row.QuerySelector(".tag")!), Text(row.QuerySelector(".intent-target-detail")!)));
         Assert.Null(row.QuerySelector(".intent-sub"));
@@ -229,7 +231,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     {
         Answer(AlbumState.Intended, [], [OnEdition with { IsConvertible = true }]);
 
-        var row = Assert.Single(Block(Open(""), "Les intentions d'achat").QuerySelectorAll(".intent-row"));
+        var row = Assert.Single(Block(Open(""), "Les intentions d'acquisition").QuerySelectorAll(".intent-row"));
 
         Assert.Contains(("Viser plutôt l'album…", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnEdition.Id)), Items(row));
     }
@@ -240,11 +242,11 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     {
         Answer(AlbumState.Outside, [], []);
 
-        var intents = Block(Open(""), "Les intentions d'achat");
+        var intents = Block(Open(""), "Les intentions d'acquisition");
 
-        Assert.Equal("Aucune intention d'achat", Text(intents.QuerySelector(".album-editions-count")!));
-        Assert.Equal("Aucune intention d'achat.", Text(intents.QuerySelector(".album-editions-none")!));
-        Assert.Equal("Nouvelle intention d'achat", Text(intents.QuerySelector(".actions-menu button.button")!));
+        Assert.Equal("Aucune intention d'acquisition", Text(intents.QuerySelector(".album-editions-count")!));
+        Assert.Equal("Aucune intention d'acquisition.", Text(intents.QuerySelector(".album-editions-none")!));
+        Assert.Equal("Nouvelle intention d'acquisition", Text(intents.QuerySelector(".actions-menu button.button")!));
         Assert.Equal(
             [
                 ("Sur l'album… Toute édition de l'album fera l'affaire.", null),
@@ -260,7 +262,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     // Once an edition is known, owned or targeted, only a precise edition may be targeted: a plain button.
     public void NewIntent_OfAnAlbumWithAnEdition_TargetsAnEdition()
     {
-        var intents = Block(Open(""), "Les intentions d'achat");
+        var intents = Block(Open(""), "Les intentions d'acquisition");
 
         var create = intents.QuerySelector(".album-editions-toolbar a.button")!;
         Assert.Equal(("Nouvelle intention sur une édition…", AppPaths.AdminNewPurchaseIntent(AlbumId)), (Text(create), create.GetAttribute("href")));
@@ -271,7 +273,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     {
         Answer(AlbumState.Intended, [], [OnAlbum]);
 
-        var intents = Block(Open(""), "Les intentions d'achat");
+        var intents = Block(Open(""), "Les intentions d'acquisition");
 
         Assert.Empty(intents.QuerySelectorAll(".album-editions-toolbar .button"));
     }
@@ -315,7 +317,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         var dialog = Open($"remove-intent={OnEdition.Id}").Find("dialog");
 
-        Assert.Equal(("Retirer cette intention d'achat ?", "Les Bijoux de la Castafiore (Tintin - T. 21) · Casterman (Fac-similé) [2013]"),
+        Assert.Equal(("Retirer cette intention d'acquisition ?", "Les Bijoux de la Castafiore (Tintin - T. 21) · Casterman (Fac-similé) [2013]"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
         Assert.Equal(["Suppression aussi de 1 édition"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
     }

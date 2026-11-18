@@ -2,7 +2,7 @@
 
 * [Domaine](domaine.md) - Le domaine : une collection de bandes dessinées.
 * [Glossaire des entités](glossaire-des-entites.md) - Définition de chaque entité du domaine ; point d'entrée du modèle.
-* [Relations et cardinalités](relations-et-cardinalites.md) - Relations et cardinalités de chaque entité, contraintes des intentions d'achat, du suivi de l'outil et des visites.
+* [Relations et cardinalités](relations-et-cardinalites.md) - Relations et cardinalités de chaque entité, contraintes des intentions d'acquisition, du suivi de l'outil et des visites.
 * [Schéma des relations](schema-des-relations.md) - Diagramme des relations, collection utilisateur, contrainte des contributions.
 
 ## Attributs des entités
@@ -18,7 +18,7 @@
 * [Genre](genre.md) - Libellé d'un genre, unique sans casse ni accents.
 * [Univers](univers.md) - Nom et description d'un univers, nom unique sous son parent sans casse ni accents.
 * [Visuel d'édition](visuel-d-edition.md) - Type, fichier, ordre et couleurs d'un visuel d'édition.
-* [Intention d'achat](intention-d-achat.md) - Cible album ou édition d'une intention d'achat et ses contraintes.
+* [Intention d'acquisition](intention-d-acquisition.md) - Cible album ou édition d'une intention d'acquisition et ses contraintes.
 * [Recherche enregistrée](recherche-enregistree.md) - Nom, entité, critères et variables d'une recherche enregistrée.
 * [Paramétrage de l'application](parametrage-de-l-application.md) - Format du libellé des albums, culture d'affichage ; fiche unique.
 * [Jeton d'accès](jeton-d-acces.md) - Attributs d'un jeton d'accès de l'outil pour agents IA (Phase 6).

@@ -281,7 +281,7 @@
     private static string AuthorsText(AlbumAdminListItem row) =>
         string.Join(" · ", row.Authors.Select(a => RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym)));
 
-    // « 2 éditions · 1 intention »: an intent is never one of the editions (fonctionnel/regles-metier/intention-d-achat.md); a
+    // « 2 éditions · 1 intention »: an intent is never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md); a
     // zero says nothing, and is left out beside the other number (« 1 intention »).
     private string EditionsText(AlbumAdminListItem row)
     {

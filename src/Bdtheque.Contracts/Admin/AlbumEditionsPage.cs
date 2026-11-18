@@ -6,7 +6,7 @@ namespace Bdtheque.Contracts.Admin;
 /// <summary>
 /// The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md): the album in brief, as a row
 /// of the list of the albums presents it, its editions of the collection and its purchase intents. An edition targeted by an
-/// intent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-achat.md).
+/// intent is one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md).
 /// </summary>
 /// <param name="Album">The album in brief, with the version that any deletion of its editions or intents sends back.</param>
 /// <param name="CreatedAt">When the album was created; its last modification is the one of <paramref name="Album"/>.</param>
@@ -36,7 +36,7 @@ public sealed record AlbumEditionItem(
 /// <param name="Category">The category of the edition targeted.</param>
 /// <param name="Binding">The binding of the edition targeted.</param>
 /// <param name="IsConvertible">
-/// Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-achat.md): always for an intent
+/// Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-acquisition.md): always for an intent
 /// on the album; for an intent on an edition, only when that edition is the only one of its album.
 /// </param>
 /// <param name="CreatedAt">When the intent was set.</param>

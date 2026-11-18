@@ -111,14 +111,14 @@ public static class AppPaths
     public static string AdminNewAlbumEdition(Guid albumId) => $"{AdminAlbums}/{albumId}/editions/new";
 
     /// <summary>The route of the entry form of a new purchase intent of an album, on the new edition it targets.</summary>
-    public const string AdminNewPurchaseIntentRoute = AdminAlbums + "/{AlbumId:guid}/purchase-intents/new";
+    public const string AdminNewPurchaseIntentRoute = AdminAlbums + "/{AlbumId:guid}/acquisition-intents/new";
 
     /// <summary>The entry form of a new purchase intent of an album, on the new edition it targets (visuel/saisie-edition/).</summary>
-    public static string AdminNewPurchaseIntent(Guid albumId) => $"{AdminAlbums}/{albumId}/purchase-intents/new";
+    public static string AdminNewPurchaseIntent(Guid albumId) => $"{AdminAlbums}/{albumId}/acquisition-intents/new";
 
     /// <summary>Whether a path is that of the entry form of a new purchase intent, which shares its page with the editions.</summary>
     public static bool IsNewPurchaseIntent(string path) =>
-        path.TrimEnd('/').EndsWith("/purchase-intents/new", StringComparison.OrdinalIgnoreCase);
+        path.TrimEnd('/').EndsWith("/acquisition-intents/new", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The next step of the merge of two albums, whose presentation awaits the terms of the merge
@@ -157,17 +157,17 @@ public static class AppPaths
     public const string AdminMergeEditions = NotYetImplemented;
 
     /// <summary>The list of the purchase intents of the administration (visuel/listes/).</summary>
-    public const string AdminPurchaseIntents = "/admin/purchase-intents";
+    public const string AdminPurchaseIntents = "/admin/acquisition-intents";
 
     /// <summary>
     /// The confirmation of the purchase that realizes an intent, addressed by its album
-    /// (fonctionnel/regles-metier/intention-d-achat.md#réalisation-dune-intention), which no mockup presents yet.
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention), which no mockup presents yet.
     /// </summary>
     public static string AdminConfirmPurchase(Guid albumId, Guid id) => NotYetImplemented;
 
     /// <summary>
     /// The conversion of an intent into one on the other target, an edition or the whole album, addressed by its album
-    /// (fonctionnel/regles-metier/intention-d-achat.md), which no mockup presents yet.
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md), which no mockup presents yet.
     /// </summary>
     public static string AdminConvertPurchaseIntent(Guid albumId, Guid id) => NotYetImplemented;
 

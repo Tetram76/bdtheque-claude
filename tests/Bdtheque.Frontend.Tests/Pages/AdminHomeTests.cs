@@ -102,14 +102,14 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         var page = Render<AdminHome>();
 
         var blocks = page.FindAll("section.block").Select(block => block.QuerySelector(".block-title")!.TextContent.Trim()).ToList();
-        Assert.Equal(blocks.IndexOf("Les fiches") + 1, blocks.IndexOf("Intentions d'achat"));
-        var intents = BlockOf(page, "Intentions d'achat");
-        Assert.Equal("Achats", intents.QuerySelector(".block-kicker")!.TextContent.Trim());
+        Assert.Equal(blocks.IndexOf("Les fiches") + 1, blocks.IndexOf("Intentions d'acquisition"));
+        var intents = BlockOf(page, "Intentions d'acquisition");
+        Assert.Equal("Acquisitions", intents.QuerySelector(".block-kicker")!.TextContent.Trim());
         // The block is the card itself, no card in it: its number, its sentence and its single link; no creation, an intent
         // is set from its album.
         Assert.Empty(intents.QuerySelectorAll("li, .admin-record"));
-        Assert.Equal(("18", "achats à confirmer, posés depuis leur album"), (Text(intents.QuerySelector(".admin-intents-count")!), Text(intents.QuerySelector(".admin-intents-detail")!)));
-        Assert.Equal([("Confirmer les achats", AppPaths.AdminPurchaseIntents)], intents.QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))));
+        Assert.Equal(("18", "acquisitions à confirmer, posées depuis leur album"), (Text(intents.QuerySelector(".admin-intents-count")!), Text(intents.QuerySelector(".admin-intents-detail")!)));
+        Assert.Equal([("Confirmer les acquisitions", AppPaths.AdminPurchaseIntents)], intents.QuerySelectorAll("a").Select(link => (link.TextContent.Trim(), link.GetAttribute("href"))));
     }
     [Theory]
     [InlineData(7, true)]

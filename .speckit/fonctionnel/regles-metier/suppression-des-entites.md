@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Suppression des entités'
-description: 'Confirmation, impact par type d''entité (édition visée comptée comme intention d''achat), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:00:00Z }
+description: 'Confirmation, impact par type d''entité (édition visée comptée comme intention d''acquisition), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ---
 
 # Suppression des entités
@@ -17,7 +17,7 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 
 **Impact de la suppression** : le message de confirmation — comme l'erreur d'une suppression refusée — indique l'impact de la suppression, c'est-à-dire le **nombre de fiches impactées, distingué par type d'entité** (ex. « utilisé par 3 séries et 12 albums », « supprime 2 éditions et 5 visuels »), dans l'ordre des types de fiche ([Ordre des types de fiche](../presentation/ordre-des-types-de-fiche.md)) : fiches qui perdent leur association avec l'entité supprimée, fiches supprimées avec elle, ou fiches qui bloquent la suppression.
 
-- **Une édition visée est comptée comme une intention d'achat**, jamais parmi les éditions, comme partout ailleurs ([Intention d'achat](intention-d-achat.md)) : supprimer un album qui a 2 éditions possédées et 1 édition visée « supprime 2 éditions et 1 intention d'achat » ; un éditeur dont relèvent ces trois éditions est « utilisé par 2 éditions et 1 intention d'achat ». L'intention que l'on retire n'est pas comptée dans ce qu'elle emporte : retirer une intention sur une édition « supprime 1 visuel », celui de l'édition visée (décision de l'utilisateur, #418).
+- **Une édition visée est comptée comme une intention d'acquisition**, jamais parmi les éditions, comme partout ailleurs ([Intention d'acquisition](intention-d-acquisition.md)) : supprimer un album qui a 2 éditions possédées et 1 édition visée « supprime 2 éditions et 1 intention d'acquisition » ; un éditeur dont relèvent ces trois éditions est « utilisé par 2 éditions et 1 intention d'acquisition ». L'intention que l'on retire n'est pas comptée dans ce qu'elle emporte : retirer une intention sur une édition « supprime 1 visuel », celui de l'édition visée (décision de l'utilisateur, #418).
 - **Une suppression refusée** présente une ligne par type de fiche qui la bloque, avec son nombre et ce qu'il faut faire (« 2 éditions : rattachez-les à un autre éditeur, ou supprimez-les ») ; rien d'autre ne la redit (décision de l'utilisateur, #418 : « trop long, trop de choses à lire »).
 
 | Entité supprimée | Lien | Type | Effet |
@@ -33,9 +33,9 @@ La suppression n'aboutit que si aucun lien de type **Référence** ne la bloque.
 | Collection éditeur | Collection template d'une série | Référence | Refusée. |
 | Série | Albums rattachés | Référence | Refusée tant que la série contient des albums. |
 | Série | Ses contributions template | Composition | Supprimées avec elle. |
-| Album | Ses éditions (avec leurs visuels et intentions d'achat), ses contributions, son intention d'achat | Composition | Supprimés avec lui. |
-| Édition | Ses visuels, son intention d'achat | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
-| Intention d'achat portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. [Intention d'achat](intention-d-achat.md)). |
+| Album | Ses éditions (avec leurs visuels et intentions d'acquisition), ses contributions, son intention d'acquisition | Composition | Supprimés avec lui. |
+| Édition | Ses visuels, son intention d'acquisition | Composition | Supprimés avec elle. Si c'était la dernière édition possédée de l'album, la confirmation signale que l'album sort de la collection. |
+| Intention d'acquisition portant sur une édition | L'édition visée (non possédée), avec ses visuels | Composition | Supprimée avec elle : une édition non possédée n'existe que par son intention (cf. [Intention d'acquisition](intention-d-acquisition.md)). |
 | Toute fiche | Désignée par un critère ou par la valeur par défaut d'une variable d'une recherche enregistrée (cf. [Recherche avancée](../recherche-avancee/recherche-avancee.md)) | Référence | Refusée tant qu'une recherche enregistrée la désigne, elle ou une fiche supprimée avec elle. |
 | Jeton d'accès | Son historique d'utilisation et ses retours écrits (cf. [Suivi de l'utilisation](../agents-ia/suivi-de-l-utilisation.md)) | Composition | Supprimés avec lui. Pour conserver cet historique, le jeton est archivé plutôt que supprimé (cf. [Accès par jeton](../agents-ia/acces-par-jeton.md)). |
-| Visuel d'édition, Contribution, Intention d'achat portant sur l'album, Recherche enregistrée | — | — | Hors la ligne « Toute fiche », suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
+| Visuel d'édition, Contribution, Intention d'acquisition portant sur l'album, Recherche enregistrée | — | — | Hors la ligne « Toute fiche », suppression sans autre effet (le média d'un visuel est supprimé avec lui). |
