@@ -369,6 +369,9 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.StartsWith("author-last-name-error", panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-describedby"));
         Assert.Equal(("business", "À corriger"), ErrorOf(panel));
         Assert.Equal(["lastName"], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
+        // Declared: without it, Blazor, which focuses the field after an enhanced navigation, would take it out of the
+        // keyboard path (#443).
+        Assert.Equal("0", panel.QuerySelector("[autofocus]")!.GetAttribute("tabindex"));
     }
 
     [Theory]
