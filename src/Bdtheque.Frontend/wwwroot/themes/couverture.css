@@ -77,7 +77,7 @@
     --color-text-on-header: #FFFFFF;
     --color-header-field: var(--day-header-field);
     --color-header-field-border: var(--day-header-field-border);
-    --color-header-placeholder: var(--day-light-on-deep);
+    --color-header-placeholder: var(--day-header-placeholder);
     --color-header-icon: var(--day-light-on-deep);
     --color-header-tag: var(--day-header-field);
     --color-text-on-header-tag: #FFFFFF;

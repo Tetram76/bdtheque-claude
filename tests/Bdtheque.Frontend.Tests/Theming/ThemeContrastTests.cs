@@ -87,6 +87,18 @@ public sealed partial class ThemeContrastTests
         }),
     ];
 
+    // The placeholder of a field, and the one of the search field of the header, against the text typed into that field,
+    // from which it stands apart whatever the color of that text (visuel/liste-albums/controles.md).
+    private static readonly (string Placeholder, string Text)[] PlaceholderPairs =
+    [
+        ("placeholder", "text"),
+        ("header-placeholder", "text-on-header"),
+    ];
+
+    // No standard measures how far a placeholder stands apart from the text: the smallest gap the themes already validated
+    // keep between them (1.59:1, white text on the header of « La couverture du jour »), rounded down.
+    private const double PlaceholderApart = 1.5;
+
     // A theme painted by the day: the stage of the home page, of the deep colour (surface-inverse), white texts and their
     // light version, on the deep colour, on the reflection of the accent in a corner of the stage, and on a field of the header.
     private static readonly (string Foreground, string Background, double Minimum)[] DayPairs =
@@ -135,6 +147,21 @@ public sealed partial class ThemeContrastTests
             .Select(pair => (pair, ratio: ContrastRatio(colors[pair.Foreground], colors[pair.Background])))
             .Where(result => result.ratio < result.pair.Minimum)
             .Select(result => $"{result.pair.Foreground} on {result.pair.Background}: {result.ratio:0.00}:1 < {result.pair.Minimum}:1");
+
+        Assert.Empty(failures);
+    }
+
+    [Theory]
+    [MemberData(nameof(OfferedThemes))]
+    public void Placeholder_StandsApartFromTheText(string themeKey, string cover)
+    {
+        var theme = ThemeCatalog.Offered.Single(theme => theme.Key == themeKey);
+        var colors = ColorsOf(theme, theme.PaintedByTheDay ? DayPalette.Of(Covers[cover]) : null);
+
+        var failures = PlaceholderPairs
+            .Select(pair => (pair, ratio: ContrastRatio(colors[pair.Placeholder], colors[pair.Text])))
+            .Where(result => result.ratio < PlaceholderApart)
+            .Select(result => $"{result.pair.Placeholder} against {result.pair.Text}: {result.ratio:0.00}:1 < {PlaceholderApart}:1");
 
         Assert.Empty(failures);
     }
