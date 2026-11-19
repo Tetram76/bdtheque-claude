@@ -107,7 +107,7 @@ Ce job soumet le code à SonarQube Cloud, le service d'analyse statique du proje
 
 - La version déclarée de l'analyse est le dernier tag du dépôt (`git describe --tags --abbrev=0`). SonarQube Cloud tient ainsi pour « nouveau code » tout ce qui a changé depuis la dernière version publiée.
 - Quand une source a changé, le job réunit dans un même dossier les rapports de couverture de tous les jobs de tests, c'est-à-dire les artefacts `coverage*`, et les transmet à l'analyse. Sinon, aucun rapport n'est importé, puisque aucun code mesuré n'a changé.
-- L'analyse ignore `.speckit/**`, `poc/**`, les migrations, que génère EF Core, et le dossier des rapports. Les scripts PowerShell, ceux de `wwwroot` du frontend et celui du modèle du site de la documentation technique sont analysés, mais exclus de la seule couverture, que seuls les tests .NET mesurent.
+- L'analyse ignore `.speckit/**`, `poc/**`, les migrations, que génère EF Core, et le dossier des rapports. Les scripts et modules PowerShell (`.ps1`, `.psm1`), les scripts de `wwwroot` du frontend et celui du modèle du site de la documentation technique sont analysés, mais exclus de la seule couverture, que seuls les tests .NET mesurent.
 - Le job s'authentifie par le secret de dépôt `SONAR_TOKEN`.
 
 Une analyse qui n'aboutit pas fait échouer ce seul job. La suite à donner à son résultat sur une Pull Request est fixée par [Analyse SonarQube Cloud](../../../.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md).
