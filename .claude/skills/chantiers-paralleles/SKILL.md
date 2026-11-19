@@ -83,10 +83,14 @@ never taking one of the places of the chantiers run at once.
   part of that harness: its session carries it to the merge; it is not a
   chantier of the batch. It counts for the **independence** of the chantiers
   (step 2.2): a chantier touching the same files waits for its merge.
-- **Follow-up tickets** a harness opens (consistency gap, major version bump
-  of the stack and its review, improvement found by a review, deferred
-  quality entry) are tickets like any other: candidates when they are in the
-  current milestone.
+- **Follow-up tickets**: the harness session follows the rule on creating
+  tickets (`.speckit/gestion-projet/revue-tickets/issues.md`, « Décision de
+  créer un ticket »): what a harness treatment can fix is fixed in its pull
+  request. What it does open as a ticket (consistency gap, the check having
+  no pull request; major version bump of the stack, its review of the
+  existing code included; improvement too big for a bump's pull request;
+  deferred quality entry) is a ticket like any other: a candidate when it is
+  in the current milestone.
 - Its heavy runs count in the resources (step 2.3) like any session's.
 
 ## 2. Before each launch — every time, never reused
@@ -232,8 +236,16 @@ brief (`prompt`) says:
   and locked, branches and worktree cleaned), with the pull request, the
   squashed commit and what is left to do; its abandonment; a problem that
   blocks it or goes beyond its chantier; a split of its ticket or a ticket
-  created; a wait on the user (decision, functional validation). It never
-  reports its progress at regular intervals;
+  it cannot avoid creating (below); a wait on the user (decision, functional
+  validation). It never reports its progress at regular intervals;
+- that a problem it finds follows the rule on creating tickets
+  (`.speckit/gestion-projet/revue-tickets/issues.md`, « Décision de créer un
+  ticket »): it fixes it in its own pull request whenever that is within
+  reach and reasonable, even a little outside its objective; only when it
+  really cannot (fix too big for its pull request, decision of the user,
+  unmet dependency) does it submit the ticket to the orchestrator **before**
+  creating it, then create it itself once the orchestrator agrees; a finding
+  with no real effect is only said in its pull request;
 - that it may exchange directly with the sessions of the other chantiers of
   the batch, only for information **useful** in the light of the context its
   brief gives (coordinating a heavy run or a shared environment, a file both
@@ -298,6 +310,13 @@ chosen before the others; the whole selection was presented at step 2.4.
   (`git rev-list --count origin/main..<branch>` is 0, or its pull request is
   squash-merged) is deleted with `git branch -D`.
   Report to the user in one line what was cleaned.
+- A ticket a session submits before creating it, or a problem it reports:
+  never turn it into a ticket yourself. Check that no chantier of the batch
+  in progress already handles it (if one does, tell that chantier's session,
+  with `SendMessage`, and no ticket is created); otherwise, if the session
+  really cannot fix it in its pull request (`issues.md`, « Décision de créer
+  un ticket »), agree, and the session creates it. A problem the **user**
+  reports stays a ticket.
 - A note that reports a split or a new ticket: tell the user which tickets
   join the candidates (within the user's scope, if any); they are planned at the next pass of step 2 (now, if a
   place is free), after checking them on GitHub (step 2.1).

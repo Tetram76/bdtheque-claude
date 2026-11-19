@@ -106,9 +106,10 @@ signature-false-positive exit applies, see "Exit"):
       the PR's objective — then confront the finding as a whole (what it
       raises, its cause and its fix) with the PR's objective (see "Scope"
       below).
-   b. If the whole finding is within the PR's objective: fix it at the root (never a
-      band-aid), in one dedicated commit. If not: the fix may be deferred
-      (ticket, or note in the implementation plan — see "Scope") — never
+   b. If the whole finding is within the PR's objective, or outside it but
+      within reach and reasonable: fix it at the root (never a band-aid), in
+      one dedicated commit. Only if this PR really cannot carry the fix: defer
+      it (ticket, or note in the implementation plan — see "Scope") — never
       patched over in this PR.
 4. If any fix commits were made, push them — do not reply to or resolve any
    thread until the push has succeeded.
@@ -426,9 +427,14 @@ for a fix, outside the PR's scope.
 
 - **Whole finding within the PR's objective**: fix it here (step b).
 - **Outside it** — by what it raises, its cause or its fix — even when the
-  symptom is in the diff: the fix may be
-  deferred, never lost, and never replaced by a local patch in this PR that
-  leaves the cause in place. Where it is traced depends on the phase of the
+  symptom is in the diff: still **fix it here** whenever the fix is within
+  reach and stays reasonable, even a little outside the PR's objective, and
+  say so in the PR description (policy:
+  `.speckit/gestion-projet/revue-tickets/issues.md#décision-de-créer-un-ticket`).
+  Defer it only when this PR really cannot carry it: a fix too big for it, a
+  decision that belongs to the user, or an unmet dependency. A deferred fix is
+  never lost, and never replaced by a local patch in this PR that leaves the
+  cause in place. Where it is traced depends on the phase of the
   implementation plan (`.speckit/suivi-implementation/`) it belongs to:
   - **already finished phase**: a ticket;
   - **phase already broken down into work items**: the open ticket of the
@@ -459,8 +465,8 @@ the underlying weakness directly (e.g. factor the repeated check into one
 place referenced everywhere, or restructure the flawed step), even if that
 means a larger change than the finding alone would suggest.
 
-**b. If the finding is valid and, as a whole, within the PR's objective**
-(see "Scope"), fix it — and every other instance of the same
+**b. If the finding is valid and, as a whole, within the PR's objective — or
+outside it but within reach and reasonable** (see "Scope"), fix it — and every other instance of the same
 underlying issue found by the scan above, and the deeper weakness if one was
 identified — in one dedicated commit per underlying finding (do not batch
 multiple *unrelated* findings into one commit, but do not split one finding's
