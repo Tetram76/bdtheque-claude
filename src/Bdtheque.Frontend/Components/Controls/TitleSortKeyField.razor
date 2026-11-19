@@ -67,7 +67,12 @@
 
     private bool HasTitle => !string.IsNullOrWhiteSpace(Title);
 
-    private string? Shown => IsManual ? ManualKey : HasTitle ? _computed : UntitledKey;
+    private string? Shown => (IsManual, HasTitle) switch
+    {
+        (true, _) => ManualKey,
+        (false, true) => _computed,
+        _ => UntitledKey,
+    };
 
     private string Help => (IsManual, HasTitle) switch
     {
