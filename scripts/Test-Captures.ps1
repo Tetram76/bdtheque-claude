@@ -12,7 +12,8 @@
 
     A failed comparison leaves the capture taken and its difference image in
     tests/Bdtheque.EndToEnd.Tests/TestResults/captures. With -Update, the captures replace the references, to be
-    reviewed before they are committed: the pull request then shows each changed capture before and after.
+    reviewed before they are committed: the pull request then shows each changed capture before and after. A failed
+    run (build or test) replaces none of them, and says so.
 
     Requires a running Docker service (Docker Desktop, Rancher Desktop), whose socket the container uses to start the
     PostgreSQL database of the tests. When the machine names in SSL_CERT_FILE the bundle of the certificate authorities
@@ -74,7 +75,8 @@ $results = Join-Path $root "$project/TestResults/captures"
 if (Test-Path $results) { Remove-Item $results -Recurse -Force }
 
 # Copied rather than built in place: the build outputs of the machine stay out of the container, and the container's
-# out of the working tree. Only the references (with -Update) and the results of a failed comparison come back.
+# out of the working tree. Only the references (with -Update) and the results of a failed comparison come back; the
+# references only from a run that succeeded, a failed one leaving them all as they were rather than half taken again.
 $inside = @"
 set -e
 mkdir -p /work
@@ -84,7 +86,7 @@ dotnet build $project --configuration Release
 status=0
 dotnet test $project --configuration Release --no-build --filter '$testFilter' --blame-hang-timeout $hangTimeout || status=`$?
 if [ -d $project/TestResults/captures ]; then mkdir -p /repo/$project/TestResults && cp -r $project/TestResults/captures /repo/$project/TestResults/; fi
-if [ "$($Update.IsPresent)" = "True" ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/; fi
+if [ "$($Update.IsPresent)" = "True" ] && [ `$status -eq 0 ]; then rm -rf /repo/$project/Captures/References && cp -r $project/Captures/References /repo/$project/Captures/; fi
 exit `$status
 "@ -replace "`r", ''
 
@@ -136,8 +138,11 @@ finally {
     $run.Dispose()
 }
 
-if ($Update) {
+if ($Update -and $status -eq 0) {
     Write-Host 'References updated: review the changes of' (Join-Path $project 'Captures/References') 'before committing them.'
+}
+elseif ($Update) {
+    Write-Host "References not updated: the captures failed (exit code $status), and the references were left as they were."
 }
 elseif ($status -ne 0 -and (Test-Path $results)) {
     Write-Host "Captures that differ from their reference, with their difference image: $results"

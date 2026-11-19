@@ -108,7 +108,7 @@ Chaque écran est capturé dans chacun des thèmes et comparé, pixel par pixel,
 ./scripts/Test-Captures.ps1
 ```
 
-Un changement de rendu voulu met à jour les références, à relire avant de les committer :
+Un changement de rendu voulu met à jour les références, à relire avant de les committer ; si la construction ou un test échoue, aucune n'est remplacée, et le script le dit :
 
 ```bash
 ./scripts/Test-Captures.ps1 -Update
