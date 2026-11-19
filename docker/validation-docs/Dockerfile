@@ -17,7 +17,7 @@ RUN pwsh -NoLogo -NoProfile -File scripts/Build-TechnicalDocumentation.ps1 -Outp
 
 # The runtime image of `api`, already on the machine: no other base image to pull nor to keep up to date. DocFX serves
 # the static site.
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-noble-chiseled-extra AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-resolute-chiseled-extra AS final
 COPY --from=build /docfx /docfx
 COPY --from=build /site /site
 EXPOSE 8080
