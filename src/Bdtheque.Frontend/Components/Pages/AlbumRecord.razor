@@ -1,4 +1,5 @@
 @attribute [Route(AppPaths.AlbumRoute)]
+@using Bdtheque.Contracts.Admin
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Components.Records
@@ -40,7 +41,7 @@ else if (_album is { } album)
 
             <div class="album-identity">
                 @* Not in the collection, at first glance: wished for, or catalogued only (visuel/fiche-album/contenu.md). *@
-                <CollectionStatus State="CollectionState" />
+                <CollectionStatus State="album.State" />
                 <div class="album-title">
                     @if (album.Album.SeriesId is { } seriesId)
                     {
@@ -59,8 +60,8 @@ else if (_album is { } album)
                         <li class="album-fact">@L["Published", Format.PartialDate(year, album.FirstPublicationMonth)]</li>
                     }
                     <li class="album-membership">
-                        <Tag Text="@Membership" Variant="@(album.Album.IsInCollection ? TagVariant.Filled : TagVariant.Dashed)"
-                             Icon="@(!album.Album.IsInCollection && IsIntended ? IconName.PurchaseIntent : null)" />
+                        <Tag Text="@Membership" Variant="@(album.State == AlbumCollectionState.InCollection ? TagVariant.Filled : TagVariant.Dashed)"
+                             Icon="@(album.State == AlbumCollectionState.PurchaseIntent ? IconName.PurchaseIntent : null)" />
                     </li>
                 </ul>
 
@@ -95,7 +96,7 @@ else if (_album is { } album)
 
         @* Without edition in the collection, nothing says so in their place: the banner and the membership of the album already
            do; and an album with neither edition nor intent has no block that would hold nothing (visuel/fiche-album/contenu.md). *@
-        @if (_owned.Count > 0 || IsIntended)
+        @if (_owned.Count > 0 || album.State == AlbumCollectionState.PurchaseIntent)
         {
             <Block Title="@L["Editions.Title"]" Kicker="@L["Editions.Kicker"]" data-part="editions">
                 @if (_owned.Count > 0)
@@ -182,22 +183,12 @@ else if (_album is { } album)
         new(Heading),
     ];
 
-    private int OwnedEditionCount => _owned.Count;
-
-    private Bdtheque.Contracts.Admin.AlbumCollectionState CollectionState => (_album!.Album.IsInCollection, IsIntended) switch
+    // The state of the album, computed by the API as on its cards and in the lists: the record only presents it.
+    private string Membership => _album!.State switch
     {
-        (true, _) => Bdtheque.Contracts.Admin.AlbumCollectionState.InCollection,
-        (false, true) => Bdtheque.Contracts.Admin.AlbumCollectionState.PurchaseIntent,
-        _ => Bdtheque.Contracts.Admin.AlbumCollectionState.OutsideCollection,
-    };
-
-    private bool IsIntended => _album!.PurchaseIntent is not null || _album.Editions.Any(e => e.PurchaseIntent is not null);
-
-    private string Membership => (_album!.Album.IsInCollection, OwnedEditionCount, IsIntended) switch
-    {
-        (true, 1, _) => L["Membership.InCollection.One", 1],
-        (true, var count, _) => L["Membership.InCollection.Other", count],
-        (false, _, true) => L["Membership.PurchaseIntent"],
+        AlbumCollectionState.InCollection when _owned.Count == 1 => L["Membership.InCollection.One", 1],
+        AlbumCollectionState.InCollection => L["Membership.InCollection.Other", _owned.Count],
+        AlbumCollectionState.PurchaseIntent => L["Membership.PurchaseIntent"],
         _ => L["Membership.OutOfCollection"],
     };
 }

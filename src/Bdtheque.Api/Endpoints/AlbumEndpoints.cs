@@ -68,6 +68,7 @@ internal static class AlbumEndpoints
                         .Select(CatalogExpressions.Expand((Album a) => new
                         {
                             Album = a.ToSummary(),
+                            State = a.CollectionState(),
                             a.FirstPublicationYear,
                             a.FirstPublicationMonth,
                             a.Summary,
@@ -98,7 +99,7 @@ internal static class AlbumEndpoints
             : [];
 
         return new AlbumDetail(
-            album.Album, album.FirstPublicationYear, album.FirstPublicationMonth, album.Summary, album.PersonalNotes,
+            album.Album, album.State, album.FirstPublicationYear, album.FirstPublicationMonth, album.Summary, album.PersonalNotes,
             EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating), CatalogExpressions.ToCover(album.CoverVisual), album.Genres, universes, album.Contributions, editions,
             album.PurchaseIntent, seriesAlbums, album.CreatedAt, album.ModifiedAt);
     }

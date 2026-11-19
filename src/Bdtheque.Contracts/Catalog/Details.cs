@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Catalog;
@@ -10,6 +11,9 @@ namespace Bdtheque.Contracts.Catalog;
 // (modele-metier/attributs-communs-a-toutes-les-entites.md), and so does each entity it presents
 // without a record of its own (edition, contribution, visual, purchase intent).
 
+/// <param name="State">
+/// Where the album stands with regard to the collection (fonctionnel/regles-metier/appartenance-a-la-collection.md), as on its cards.
+/// </param>
 /// <param name="Cover">
 /// That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not, as on its cards:
 /// the record is of the documentary base. <c>null</c> without any, the generic visual standing in for it
@@ -26,6 +30,7 @@ namespace Bdtheque.Contracts.Catalog;
 /// </param>
 public sealed record AlbumDetail(
     AlbumSummary Album,
+    AlbumCollectionState State,
     int? FirstPublicationYear,
     int? FirstPublicationMonth,
     string? Summary,

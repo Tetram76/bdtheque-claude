@@ -9849,7 +9849,7 @@
           "album",
           "rating",
           "cover",
-          "hasPurchaseIntent"
+          "state"
         ],
         "type": "object",
         "properties": {
@@ -9877,9 +9877,9 @@
               }
             ]
           },
-          "hasPurchaseIntent": {
-            "type": "boolean",
-            "description": "Whether a purchase intent targets the album, or one of its editions."
+          "state": {
+            "description": "Where the album stands with regard to the collection (fonctionnel/regles-metier/appartenance-a-la-collection.md), computed\nas in every list and record: the card presents it, without computing it.",
+            "$ref": "#/components/schemas/AlbumCollectionState"
           }
         },
         "description": "An album as a card, illustrated by its cover: in the record of a series, the bibliography of an author\nand the works of a genre or of a universe."
@@ -10068,6 +10068,7 @@
       "AlbumDetail": {
         "required": [
           "album",
+          "state",
           "firstPublicationYear",
           "firstPublicationMonth",
           "summary",
@@ -10087,6 +10088,10 @@
         "properties": {
           "album": {
             "$ref": "#/components/schemas/AlbumSummary"
+          },
+          "state": {
+            "description": "Where the album stands with regard to the collection (fonctionnel/regles-metier/appartenance-a-la-collection.md), as on its cards.",
+            "$ref": "#/components/schemas/AlbumCollectionState"
           },
           "firstPublicationYear": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
