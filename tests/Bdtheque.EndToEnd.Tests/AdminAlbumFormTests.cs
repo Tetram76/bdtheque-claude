@@ -63,6 +63,26 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Theory, InEachTheme]
+    public async Task SortKey_ReadOnlyUntilATitleIsEntered_ThenEnteredByHand(string theme)
+    {
+        // Without a title, an album is sorted by the key of its series, never by one entered by hand
+        // (visuel/saisie-album/contenu.md, #465).
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);
+        await ControlsPage.WaitUntilInteractiveAsync(page);
+        var sortKey = page.GetByLabel("Clé de tri");
+        await Assertions.Expect(sortKey).Not.ToBeEditableAsync();
+
+        await page.GetByLabel("Titre").FillAsync($"Le Lotus bleu {_marker}");
+        await Assertions.Expect(sortKey).ToHaveValueAsync($"Lotus bleu {_marker} [Le]");
+        await Assertions.Expect(sortKey).ToBeEditableAsync();
+        await sortKey.FillAsync($"Lotus {_marker}");
+        await Assertions.Expect(page.GetByText("Manuelle", new() { Exact = true })).ToBeVisibleAsync();
+
+        await page.GetByLabel("Titre").FillAsync("");
+        await Assertions.Expect(sortKey).Not.ToBeEditableAsync();
+    }
+
+    [Theory, InEachTheme]
     public async Task Author_AddedOnTheSpot_IsCreatedAndCreditedWithTheAlbum(string theme)
     {
         var album = await CreateAlbumAsync(Content($"Album {_marker}"));
