@@ -1,17 +1,18 @@
 ---
 type: Choix d'implémentation
 title: 'Environnement de validation fonctionnelle'
-description: 'Version d''une PR lancée sur le poste en une commande, images construites localement, données de validation fictives, édition à la une laissée au tirage ou, sur demande, couverture pâle.'
+description: 'Version d''une PR lancée sur le poste en une commande, images construites localement, un seul environnement sur le poste (lancement ou arrêt en cours, autre version : refusés), données de validation fictives, édition à la une laissée au tirage ou, sur demande, couverture pâle.'
 applies_to:
   - 'scripts/Start-Validation.ps1'
   - 'scripts/Stop-Validation.ps1'
+  - 'scripts/ValidationEnvironment.psm1'
   - 'docker/validation/**'
   - 'docker/validation-data/**'
   - 'src/Bdtheque.ValidationData/**'
   - 'tests/Bdtheque.ValidationData.Tests/**'
   - 'src/Bdtheque.Frontend/Theming/ChosenThemeSelector.cs'
   - 'src/Bdtheque.Frontend/Hosting/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T12:00:00Z }
 ---
 
 # Environnement de validation fonctionnelle
@@ -20,6 +21,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 - **Images construites sur le poste**, avec les Dockerfiles de production, depuis les sources du commit de tête de la PR extraites hors de la copie de travail : ni les modifications locales ni la branche courante n'entrent dans ce qui est validé. Quelques minutes au premier lancement, les suivants reprenant le cache, et seules des images de base épinglées sont téléchargées.
   - **Alternative écartée (images de la PR publiées sur Docker Hub)** : chaque validation consommerait les quotas de Docker Hub et de l'API GitHub ([Intégration continue (CI)](../../gestion-projet/depot/integration-continue-ci.md)), les dépôts privés exigeraient un jeton sur le poste, et un workflow de plus devrait supprimer les tags de chaque PR à sa fermeture ([Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)). Un coût sans justification pour éviter quelques minutes de construction.
 - **Un projet Compose distinct**, surchargeant celui de production sans le modifier, avec des valeurs fixes et fictives : ses conteneurs, réseaux, volumes et images locales ne touchent ni un déploiement local ni les images publiées, et ses ports ne s'ouvrent qu'au poste lui-même.
+- **Un seul environnement sur le poste, de quelque clone ou worktree qu'il soit lancé** : son projet Compose, ses ports, les noms de ses images et le dossier de ses sources extraites sont fixes, si bien que deux lancements simultanés mêleraient leurs étapes, l'un construisant ses images depuis les sources que l'autre vient d'extraire à leur place (#529). Le lancement et l'arrêt tiennent donc un verrou du poste de leur première étape à la dernière ; une autre opération est refusée, en le disant, tant qu'il est tenu. Un lancement est refusé de même tant que l'environnement exécute une autre version, c'est-à-dire une autre Pull Request, ou un autre commit hors Pull Request, jusqu'à son arrêt ; relancer la même Pull Request, même après un push, le remet à zéro.
+  - **Alternative écartée (un environnement par worktree, avec son projet, ses ports et ses sources)** : l'utilisateur valide une version à la fois, aux adresses fixes que donne chaque demande de validation, et les sessions d'un lot se partagent déjà le poste ([Chantiers en parallèle](../../gestion-projet/gouvernance/chantiers-en-parallele.md#ressources)) : plusieurs environnements doubleraient mémoire et constructions sans rien apporter.
+  - **Alternative écartée (second lancement qui attend la fin du premier)** : au terme de l'attente, il remplacerait l'environnement que l'autre vient de lancer pour qu'il soit validé ; refusé, il le dit, et se relance une fois l'environnement libre.
+  - **Alternative écartée (vérification des conteneurs avant le lancement, `docker ps`)** : rien n'est démarré pendant l'extraction des sources et la construction des images, si bien que deux lancements proches voient chacun un poste libre.
 - **Documentation technique du commit validé**, servie à côté de l'application par un service du même projet, sur une adresse du seul poste que la commande affiche ; la documentation de l'API reste celle d'`api` (mise en œuvre : [Documentation technique : mise en œuvre](../documentation-technique.md)).
 - **Environnement ASP.NET Core `Validation`**, qui se comporte comme la production, avec deux ajouts : la documentation de l'API ([Documentation de l'API](../socle/transverse/documentation-de-l-api.md)), et le **thème choisi par l'adresse**, qui devient celui de la visite, pour juger chaque thème sans attendre qu'il soit tiré ([Design et charte graphique](../../fonctionnel/design-et-charte-graphique.md)).
   - **Alternative écartée (environnement `Development`)** : il change d'autres comportements (page d'exception du développeur, liaison des requêtes, validation des services), que l'utilisateur validerait à tort pour ceux de la production.

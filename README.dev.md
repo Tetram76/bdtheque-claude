@@ -177,13 +177,22 @@ Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'
 | `-PaleCoverSpotlight` | Met à la une la couverture pâle des données de validation, cas le plus exigeant du thème `couverture`, au lieu de l'édition que tire l'application au premier affichage de la journée parmi toutes les éditions possédées. Incompatible avec `-Empty` et `-KeepData`, qui ne chargent pas les données. |
 | `-Ref <commit>` | Au lieu d'une Pull Request, n'importe quel commit du dépôt : branche, tag, empreinte. Sans `-PullRequest` ni `-Ref`, le commit courant (`HEAD`), sans les modifications non commitées. |
 
+### Un seul environnement sur le poste
+
+Le poste n'a qu'un environnement de validation, quel que soit le clone ou le worktree du dépôt depuis lequel il est lancé : ses ports, ses images et ses sources extraites sont les mêmes pour tous. Pour que deux commandes ne se mélangent pas :
+
+- un lancement ou un arrêt est refusé tant qu'un autre lancement ou arrêt est en cours ; le message dit lequel, depuis quel dossier et depuis quand, et il suffit de relancer la commande une fois celui-ci terminé ;
+- un lancement est refusé tant que l'environnement exécute une autre version (une autre Pull Request, ou un autre commit avec `-Ref`) ; le message la nomme. Il faut d'abord l'arrêter, une fois sa validation terminée, puis relancer la commande.
+
 ### Remise à zéro et arrêt
 
-Chaque lancement repart d'une base vide (sauf `-KeepData`) : relancer la commande remet l'environnement à zéro. Pour l'arrêter et supprimer ses conteneurs, ses réseaux, ses données (base et visuels) et les sources extraites pour lui :
+Chaque lancement repart d'une base vide (sauf `-KeepData`) : relancer la commande pour la même Pull Request, même après de nouveaux commits, remet l'environnement à zéro. Pour l'arrêter et supprimer ses conteneurs, ses réseaux, ses données (base et visuels) et les sources extraites pour lui :
 
 ```bash
 pwsh ./scripts/Stop-Validation.ps1
 ```
+
+Le script affiche la version qu'il a arrêtée, qui peut avoir été lancée depuis un autre clone ou worktree.
 
 Les images construites restent sur le poste, pour accélérer la validation suivante ; `docker image rm bdtheque-validation-api bdtheque-validation-frontend bdtheque-validation-data bdtheque-validation-docs` les supprime.
 
