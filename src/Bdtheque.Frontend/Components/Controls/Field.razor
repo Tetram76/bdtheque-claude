@@ -6,13 +6,17 @@
    the whole width (visuel/saisie-album/contenu.md). *@
 @* A field whose value the one to correct clashes with is marked: the focus goes to the field to correct (entry-form.js). *@
 <div class="field" style="@WidthStyle" data-error-related="@(ErrorRelated && Error is not null ? "true" : null)">
-    <label class="@(LabelHidden ? "visually-hidden" : "field-label")" for="@Id">
-        @Label
-        @if (Required)
-        {
-            <span class="field-note">@L["Required"]</span>
-        }
-    </label>
+    @if (Beside is null)
+    {
+        @LabelElement
+    }
+    else
+    {
+        <div class="field-heading">
+            @LabelElement
+            @Beside
+        </div>
+    }
     @ChildContent?.Invoke(Context)
     @if (Error is not null)
     {
@@ -83,8 +87,23 @@
     [Parameter]
     public int? Characters { get; set; }
 
+    /// <summary>
+    /// What follows the label on its line, outside it so as not to be read with it (e.g. the mode of a sort key and the
+    /// button that resets it).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Beside { get; set; }
+
     [Parameter]
     public RenderFragment<FieldContext>? ChildContent { get; set; }
+
+    private RenderFragment LabelElement => @<label class="@(LabelHidden ? "visually-hidden" : "field-label")" for="@Id">
+        @Label
+        @if (Required)
+        {
+            <span class="field-note">@L["Required"]</span>
+        }
+    </label>;
 
     private string ErrorId => $"{Id}-error";
 

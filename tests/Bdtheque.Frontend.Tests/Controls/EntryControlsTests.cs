@@ -229,6 +229,61 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         Assert.Null(manual);
     }
 
+    [Theory]
+    [InlineData("Tintin", null)]
+    [InlineData("Tintin", "Castafiore")]
+    [InlineData(null, null)]
+    public void TitleSortKeyField_IsRequired_InEitherMode_WithOrWithoutTitle(string? title, string? manualKey)
+    {
+        // The field always shows a key, computed, entered or that of the series (visuel/saisie-album/contenu.md, #465): its
+        // mention is that of the shared field, never its own.
+        var field = Render<TitleSortKeyField>(parameters => parameters
+            .Add(p => p.Id, "sort-key")
+            .Add(p => p.Title, title)
+            .Add(p => p.StoredKey, title)
+            .Add(p => p.ManualKey, manualKey)
+            .Add(p => p.UntitledPlaceholder, "—")
+            .Add(p => p.UntitledHelp, "—"));
+
+        var label = field.Find("label[for=sort-key]");
+        Assert.Equal("(obligatoire)", label.QuerySelector(".field-note")?.TextContent);
+        Assert.Null(field.Find("#sort-key").GetAttribute("aria-required"));
+    }
+
+    [Theory]
+    [InlineData(null, true)]
+    [InlineData("  ", true)]
+    [InlineData("Tintin", false)]
+    public void TitleSortKeyField_ReadOnly_UntilATitleIsEntered(string? title, bool readOnly)
+    {
+        // An album without a title of its own stays sorted by the key of its series (visuel/saisie-album/contenu.md, #465).
+        var field = Render<TitleSortKeyField>(parameters => parameters
+            .Add(p => p.Id, "sort-key")
+            .Add(p => p.Title, title)
+            .Add(p => p.StoredKey, string.IsNullOrWhiteSpace(title) ? null : title)
+            .Add(p => p.UntitledPlaceholder, "—")
+            .Add(p => p.UntitledHelp, "—"));
+
+        Assert.Equal(readOnly, field.Find("#sort-key").HasAttribute("readonly"));
+    }
+
+    [Fact]
+    public void TitleSortKeyField_InError_PresentsItAsEveryField()
+    {
+        var field = Render<TitleSortKeyField>(parameters => parameters
+            .Add(p => p.Id, "sort-key")
+            .Add(p => p.Title, "Tintin")
+            .Add(p => p.ManualKey, "")
+            .Add(p => p.UntitledPlaceholder, "—")
+            .Add(p => p.UntitledHelp, "—")
+            .Add(p => p.Error, "La clé de tri ne peut pas être vide."));
+
+        var input = field.Find("#sort-key");
+        Assert.Equal("true", input.GetAttribute("aria-invalid"));
+        Assert.Equal("sort-key-error sort-key-help", input.GetAttribute("aria-describedby"));
+        Assert.Equal("La clé de tri ne peut pas être vide.", field.Find("p.field-error#sort-key-error").TextContent);
+    }
+
     [Fact]
     public async Task AuthorCreationDialog_SplitsTheNameTyped_AndGivesTheAuthorCorrected_WithoutCreatingIt()
     {

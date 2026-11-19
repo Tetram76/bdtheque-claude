@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la saisie d''un album : erreurs, blocs du formulaire, barre d''enregistrement.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T10:00:00Z }
 ---
 
 # Contenu
@@ -19,7 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
   - **L'album** :
     - la **série**, choisie en tapant son titre, ou créée sur place si elle n'existe pas encore (« Créer la série « … » », dialogue « Nouvelle série », son titre seul), que l'on retire pour faire de l'album un album isolé ; l'aide rappelle ce que change la série pour le titre ;
     - le **titre**, obligatoire sans série seulement : marqué « (obligatoire) » sans série, sans mention dans une série, l'aide de la série rappelant qu'un album isolé doit avoir un titre ;
-    - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle** ; en mode manuel, **Réinitialiser** la recalcule à partir du titre ([Calcul et stockage de la clé de tri](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série.
+    - la **clé de tri**, toujours visible, marquée **Auto** ou **Manuelle**, et toujours « (obligatoire) », dans les deux modes, avec ou sans titre : même en mode Auto, où rien n'est saisi, le champ montre une valeur, la clé calculée ou, sans titre propre, celle de la série (décision de l'utilisateur, #465) ; **en lecture seule tant que l'album n'a pas de titre** : il reste rangé à la clé de sa série, qu'on ne remplace pas par une clé saisie (décision de l'utilisateur, #465) ; en mode manuel, **Réinitialiser** la recalcule à partir du titre ([Calcul et stockage de la clé de tri](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri)) ; sans titre propre, l'aide indique que l'album est rangé à la clé de sa série.
   - **Tomaison** et **Parution**, deux petits blocs côte à côte sous « L'album » (empilés sur smartphone) : deux notions sans rapport, la place de l'album dans la numérotation et sa date, que rien ne doit faire confondre, sans que l'une ou l'autre alourdisse « L'album » face aux blocs suivants. « Parution » prend la largeur de son contenu, « Tomaison » le reste.
     - **Tomaison**, dont les champs tiennent sur une ligne, qui passe à la ligne au besoin :
       - dans cet ordre : le **tome** (son **numéro** pour une intégrale), la case **Intégrale**, puis, pour une intégrale, les **tomes couverts**, regroupés sous leur propre intitulé (« 1 à 5 »), la règle qui les lie (« Les deux, ou aucun ») placée juste sous eux, et enfin la case **Hors-série** : la case Intégrale reste à côté des tomes couverts qu'elle fait apparaître ;

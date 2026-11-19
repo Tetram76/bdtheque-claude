@@ -12,6 +12,13 @@
     font-weight: var(--font-weight-strong);
 }
 
+.field-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+}
+
 .field-note {
     margin-inline-start: 0.35em;
     font-weight: normal;
