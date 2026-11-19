@@ -10,7 +10,7 @@ applies_to:
   - 'docker-compose.yml'
   - '.github/workflows/**'
   - 'scripts/Get-DependencyUpdates.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T20:25:33Z }
 ---
 
 # Mises à jour des dépendances
@@ -20,6 +20,7 @@ Les montées de version relèvent de l'agent (point technique, [Prise de décisi
 - **Toutes les technologies surveillées** : chaque version que le dépôt utilise est **épinglée** à sa valeur exacte, pour qu'aucune ne change sans une modification du dépôt, donc sans montée de version visible :
   - packages NuGet (`Directory.Packages.props`), outils .NET locaux (`dotnet-tools.json` : `dotnet-ef`, `dotnet-sonarscanner`, `dotnet-stryker`, `docfx`) et SDK .NET (image `sdk` des Dockerfiles et workflows, à la même version, alignement vérifié par un test ; `global.json` n'en fixe que le minimum, pour les postes de développement) ;
   - images de base des Dockerfiles et image de `db` (`docker-compose.yml`, et l'image identique des tests, `PostgreSqlTestServer`) : version exacte du composant (ex. version corrective de .NET, de PostgreSQL et version d'Alpine), sans empreinte (*digest*) : l'éditeur reconstruit l'image sous le même tag pour les correctifs de son système, qui arrivent ainsi sans attendre ([Images de base des conteneurs](../../choix-implementation/deploiement/images-de-base-des-conteneurs.md)) ;
+  - exécuteurs GitHub des workflows (`runs-on`) : la version d'Ubuntu des images d'exécution, jamais `ubuntu-latest`, que GitHub fait changer de lui-même ; alignement vérifié par un test ([Outillage de développement](../../choix-implementation/outillage.md)) ;
   - actions GitHub des workflows : empreinte complète du commit (*commit SHA*) de leur version exacte, cette version en commentaire (`uses: <action>@<empreinte> # v1.2.3`). Un tag de version reste déplaçable, par l'éditeur de l'action ou par qui compromet son dépôt, sauf pour une release immuable (documentation GitHub, *Immutable releases*), que peu d'actions publient : le code exécuté par les workflows, avec les secrets du dépôt, changerait sans modification du dépôt. Une empreinte, elle, ne désigne jamais un autre commit, et le relevé (ci-dessous) vérifie qu'elle est bien celle de la version du commentaire. À la différence d'une image, aucun correctif ne parvient par le déplacement d'un tag d'action : l'empreinte ne retarde rien.
     - **Alternative écartée (tag de la version seul)** : un tag déplacé, comme l'ont été ceux d'actions compromises, fait exécuter un autre code sans rien dans le dépôt qui le montre ni en déclenche la revue.
 

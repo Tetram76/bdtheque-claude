@@ -27,7 +27,7 @@ jobs:
   # is pushed before both are built. A failed build then leaves the published pair untouched.
   publish:
     name: Publish Docker images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:

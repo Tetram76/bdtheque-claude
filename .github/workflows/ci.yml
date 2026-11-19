@@ -28,7 +28,7 @@ jobs:
   # steps accordingly, which leaves them, hence their required checks, in place.
   changes:
     name: Changed files
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     outputs:
       sources: ${{ steps.changes.outputs.sources }}
       rendering: ${{ steps.changes.outputs.rendering }}
@@ -82,7 +82,7 @@ jobs:
   build-and-test:
     name: Build & tests (.NET)
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -162,7 +162,7 @@ jobs:
   end-to-end:
     name: End-to-end tests (${{ matrix.theme }})
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       # Each theme reports its own failures.
       fail-fast: false
@@ -294,7 +294,7 @@ jobs:
   documentation:
     name: Technical documentation
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # The whole history of a pull request: one of its commits may carry the trailer that says why a page did not change.
       # The depths are strings: the number 0 is false in an expression, which would always give 1.
@@ -364,7 +364,7 @@ jobs:
   sonarcloud:
     name: SonarQube Cloud analysis
     needs: [changes, build-and-test, end-to-end]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # The full history lets the analysis tell the new code apart and blame each issue.
       - name: Checkout
@@ -438,7 +438,7 @@ jobs:
   docker-build:
     name: Build Docker image (${{ matrix.image }})
     needs: changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         image: [api, frontend]

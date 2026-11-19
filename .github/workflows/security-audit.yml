@@ -23,7 +23,7 @@ concurrency:
 jobs:
   nuget:
     name: NuGet packages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -54,7 +54,7 @@ jobs:
 
   images:
     name: Docker image (${{ matrix.image }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
@@ -107,7 +107,7 @@ jobs:
   # pinned by version, so the GitHub Advisory Database is asked about each version in use.
   actions:
     name: GitHub Actions
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -135,7 +135,7 @@ jobs:
   report:
     name: Report
     needs: [nuget, images, actions]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     permissions:
       issues: write
     env:
