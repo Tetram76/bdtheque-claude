@@ -120,7 +120,9 @@ L'une comme l'autre peut se limiter aux captures dont le nom du test contient l'
 ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
 ```
 
-Le script est borné : un test bloqué plus d'une minute arrête le passage, et le conteneur est arrêté s'il n'a pas fini en quatre minutes et demie (un passage complet en dure environ une et demie) ; un tel arrêt signale d'abord un moteur Docker à vérifier.
+Le script est borné : un test bloqué plus d'une minute arrête le passage, et le conteneur est arrêté s'il n'a pas fini en six minutes (un passage complet en dure près de quatre sur quatre processeurs) ; un tel arrêt signale d'abord un moteur Docker à vérifier.
+
+Derrière un proxy qui signe de nouveau le HTTPS (session cloud de Claude Code, proxy d'entreprise), le conteneur doit faire confiance à son certificat pour restaurer les packages NuGet. Il suffit que la variable `SSL_CERT_FILE` du poste désigne le fichier des autorités de certification auxquelles il fait confiance, celle du proxy comprise, ce qu'une session cloud fait déjà : le script le transmet au conteneur. Sans cette variable, rien ne change.
 
 ### Lancer la stack complète depuis les sources (Docker Compose)
 
