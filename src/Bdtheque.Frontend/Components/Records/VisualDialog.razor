@@ -14,9 +14,12 @@
         <header class="visual-dialog-header">
             <div>
                 <h2 id="visual-dialog-title" class="visual-dialog-title">@VisualLabels.TypeOf(Edition, Position - 1, Values, L)</h2>
-                <p class="visual-dialog-edition"><LabelText Text="@EditionLabel" /></p>
+                <p class="visual-dialog-edition"><EditionLabelText Edition="Edition.Edition" PublisherWebsite="@Edition.PublisherWebsite" /></p>
             </div>
-            <a class="visual-dialog-close" href="@AppPaths.Album(AlbumId)" data-dialog-close aria-label="@L["Close"]"><Icon Name="IconName.Close" /></a>
+            @* The closing, the safe choice, has the focus as the dialog opens, though the publisher of the label of the edition, a
+               link, comes before it: a modal dialog focuses the element it marks autofocus, else its first focusable one (HTML,
+               dialog focusing steps). Its tabindex keeps it in the keyboard path once focused after a navigation (Routes.razor). *@
+            <a class="visual-dialog-close" href="@AppPaths.Album(AlbumId)" data-dialog-close aria-label="@L["Close"]" autofocus tabindex="0"><Icon Name="IconName.Close" /></a>
         </header>
         <div class="visual-dialog-image">
             <img src="@VisualMediaRoutes.Display(Current.Id)" alt="@L["Alt", VisualLabels.TypeOf(Edition, Position - 1, Values, L), EditionLabel]" />
@@ -44,7 +47,7 @@
     [Parameter, EditorRequired]
     public EditionDetail Edition { get; set; } = null!;
 
-    /// <summary>The label of the edition, which the dialog and the alternative text of its visual name.</summary>
+    /// <summary>The label of the edition, which the alternative text of its visual names, read as no link.</summary>
     [Parameter, EditorRequired]
     public string EditionLabel { get; set; } = "";
 

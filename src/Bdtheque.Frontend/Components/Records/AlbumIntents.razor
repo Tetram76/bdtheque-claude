@@ -1,6 +1,5 @@
 @using Bdtheque.Contracts.Catalog
 @inject IStringLocalizer<AlbumIntents> L
-@inject RecordLabels Labels
 @inject ValueLabels Values
 @inject DisplayFormatter Format
 
@@ -18,7 +17,16 @@
             {
                 <li>
                     <span class="intent-target">
-                        <span class="intent-label"><LabelText Text="@intent.Label" /></span>
+                        <span class="intent-label">
+                            @if (intent.Edition is { } edition)
+                            {
+                                <EditionLabelText Edition="edition.Edition" PublisherWebsite="@edition.PublisherWebsite" />
+                            }
+                            else
+                            {
+                                @L["WholeAlbum"]
+                            }
+                        </span>
                         @if (intent.Facts is { } facts)
                         {
                             <span class="intent-facts">@facts</span>
@@ -40,11 +48,12 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<EditionDetail> Editions { get; set; } = [];
 
-    private List<(string Label, string? Facts, DateTimeOffset PosedAt)> _intents = [];
+    // The edition targeted, none for an intent on the whole album.
+    private List<(EditionDetail? Edition, string? Facts, DateTimeOffset PosedAt)> _intents = [];
 
     protected override void OnParametersSet() => _intents = AlbumIntent is { } whole
-        ? [(L["WholeAlbum"], null, whole.CreatedAt)]
-        : [.. Editions.Where(e => e.PurchaseIntent is not null).Select(e => (Labels.Edition(e.Edition), Facts(e), e.PurchaseIntent!.CreatedAt))];
+        ? [(null, null, whole.CreatedAt)]
+        : [.. Editions.Where(e => e.PurchaseIntent is not null).Select(e => ((EditionDetail?)e, Facts(e), e.PurchaseIntent!.CreatedAt))];
 
     // What tells an edition apart beyond its label, as far as it is known; nothing when none is.
     private string? Facts(EditionDetail edition)

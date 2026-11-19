@@ -145,8 +145,28 @@ public sealed class HomeTests : BunitContext, IDisposable
         var spotlight = BlockOf(page, "À la une aujourd'hui !");
         Assert.Equal(AppPaths.Album(AlbumId), spotlight.QuerySelector("a")!.GetAttribute("href"));
         Assert.Equal("Le Lotus bleu (Tintin - T. 5)", spotlight.QuerySelector("a")!.TextContent.Trim());
-        Assert.Contains("Casterman [1946]", spotlight.TextContent);
+        Assert.Contains("Casterman, site externe [1946]", spotlight.TextContent);
         Assert.Contains("Tintin en Chine.", spotlight.TextContent);
+    }
+
+    [Fact]
+    public void Spotlight_ThePublisherOfTheLabelOfTheEdition_LeadsToItsWebsite_WhenKnown_AndIsNoLinkOtherwise()
+    {
+        _catalog.Dashboard = Collection();
+
+        var page = Render<Home>();
+
+        // The label of the edition is no link itself: its publisher leads to its site, as in the latest entries
+        // (fonctionnel/presentation/libelle-d-une-edition.md, visuel/dashboard/contenu-commun.md).
+        var casterman = BlockOf(page, "À la une aujourd'hui !").QuerySelector("a.publisher")!;
+        Assert.Equal(("Casterman, site externe", "https://www.casterman.com", "_blank"),
+            (casterman.TextContent, casterman.GetAttribute("href"), casterman.GetAttribute("target")));
+
+        _catalog.Dashboard = Collection() with { Content = Collection().Content! with { Spotlight = Collection().Content!.Spotlight! with { PublisherWebsite = null } } };
+
+        var unknown = BlockOf(Render<Home>(), "À la une aujourd'hui !");
+        Assert.Null(unknown.QuerySelector("a.publisher"));
+        Assert.Equal("Casterman", unknown.QuerySelector("span.publisher")!.TextContent);
     }
 
     [Fact]
@@ -238,7 +258,7 @@ public sealed class HomeTests : BunitContext, IDisposable
         var dargaud = new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Dargaud", null, null, 1961, null);
         return new Dashboard(new DashboardContent(
             new DashboardCounters(1234, 56, 1300),
-            new SpotlightEdition(lotus, casterman, null, "Tintin en Chine."),
+            new SpotlightEdition(lotus, casterman, "https://www.casterman.com", null, "Tintin en Chine."),
             [
                 new LatestEntry(lotus, casterman, "https://www.casterman.com", null, new DateOnly(2026, 11, 1), new DateTimeOffset(2026, 11, 2, 10, 0, 0, TimeSpan.Zero)),
                 new LatestEntry(asterix, dargaud, null, null, null, new DateTimeOffset(2026, 10, 4, 23, 30, 0, TimeSpan.Zero)),

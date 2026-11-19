@@ -25,7 +25,8 @@ internal static class DashboardEndpoints
 
     private static readonly Expression<Func<EditionSpotlight, SpotlightEdition>> SpotlightOf = CatalogExpressions.Expand(
         (EditionSpotlight s) => new SpotlightEdition(
-            s.Edition.Album.ToSummary(), s.Edition.ToSummary(), CatalogExpressions.ToCover(s.Edition.CoverVisualOf()), s.Edition.Album.Summary));
+            s.Edition.Album.ToSummary(), s.Edition.ToSummary(), s.Edition.Publisher.Website, CatalogExpressions.ToCover(s.Edition.CoverVisualOf()),
+            s.Edition.Album.Summary));
 
     // Wrapped, so that a day with an edition but without cover is told apart from a day without edition.
     private static readonly Expression<Func<EditionSpotlight, SpotlightColors>> ColorsOf = CatalogExpressions.Expand(

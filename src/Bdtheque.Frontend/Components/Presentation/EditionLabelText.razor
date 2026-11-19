@@ -1,0 +1,16 @@
+@using Bdtheque.Contracts.Catalog
+@inject RecordLabels Labels
+
+@* The label of an edition in the consultation, wherever it is no link itself: the name of its publisher leads to its site, as
+   any publisher, and the rest of the label is text, its ISBN in a block (fonctionnel/presentation/libelle-d-une-edition.md).
+   Written once, so that no page presents the publisher of a label otherwise (#467); the text read stays that of the label. *@
+<PublisherName Name="@Edition.PublisherName" Website="@PublisherWebsite" /><LabelText Text="@Labels.EditionAfterItsPublisher(Edition)" />
+
+@code {
+    [Parameter, EditorRequired]
+    public EditionSummary Edition { get; set; } = null!;
+
+    /// <summary>Where the publisher leads; <c>null</c> when unknown, the publisher being then no link.</summary>
+    [Parameter, EditorRequired]
+    public string? PublisherWebsite { get; set; }
+}

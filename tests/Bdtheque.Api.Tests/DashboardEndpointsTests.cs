@@ -109,9 +109,9 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Spotlight_IsAnOwnedEdition_WithItsFirstCoverTheLabelsAndTheSummaryOfItsAlbum()
+    public async Task Spotlight_IsAnOwnedEdition_WithItsFirstCoverTheLabelsTheWebsiteOfItsPublisherAndTheSummaryOfItsAlbum()
     {
-        var publisher = await CreatePublisherAsync("Casterman");
+        var publisher = await CreatePublisherAsync("Casterman", "https://www.casterman.com");
         var tintin = await CreateSeriesAsync("Tintin");
         var album = await CreateAlbumAsync("Le Lotus bleu", tintin.Id, volume: 5, summary: "Tintin en Chine.");
         var owned = await CreateOwnedEditionAsync(album.Id, publisher.Id, publicationYear: 1946);
@@ -125,9 +125,10 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
         var spotlight = (await GetDashboardAsync(Day)).Content!.Spotlight!;
 
         Assert.Equal(
-            (album.Id, "Le Lotus bleu", "Tintin", 5, owned, publisher.Name, 1946, cover, "Tintin en Chine."),
+            (album.Id, "Le Lotus bleu", "Tintin", 5, owned, publisher.Name, 1946, "https://www.casterman.com", cover, "Tintin en Chine."),
             (spotlight.Album.Id, spotlight.Album.Title, spotlight.Album.SeriesTitle, spotlight.Album.VolumeNumber,
-                spotlight.Edition.Id, spotlight.Edition.PublisherName, spotlight.Edition.PublicationYear, spotlight.Cover, spotlight.Summary));
+                spotlight.Edition.Id, spotlight.Edition.PublisherName, spotlight.Edition.PublicationYear, spotlight.PublisherWebsite,
+                spotlight.Cover, spotlight.Summary));
     }
 
     [Fact]

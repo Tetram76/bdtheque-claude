@@ -347,6 +347,37 @@ public sealed class PresentationTests : BunitContext
     }
 
     [Fact]
+    public void EditionLabelText_ThePublisherLeadsToItsWebsite_TheRestOfTheLabelInText_ItsIsbnInABlock()
+    {
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+
+        var label = Render<EditionLabelText>(parameters => parameters
+            .Add(p => p.Edition, new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Casterman", Guid.NewGuid(), "Ligne rouge", 1990, "9782203337039"))
+            .Add(p => p.PublisherWebsite, "https://www.casterman.com"));
+
+        // The label not being a link itself, the name of its publisher leads to its site, as any publisher
+        // (fonctionnel/presentation/libelle-d-une-edition.md): by the one presentation of a publisher, the rest in text.
+        var publisher = label.Find("a.publisher");
+        Assert.Equal(("Casterman, site externe", "https://www.casterman.com"), (publisher.TextContent, publisher.GetAttribute("href")));
+        Assert.Single(label.FindAll("a"));
+        Assert.Equal("Casterman, site externe (Ligne rouge) [1990] - ISBN 9782203337039", label.TextContent());
+        Assert.Equal("ISBN 9782203337039", label.Find(".label-isbn").TextContent);
+    }
+
+    [Fact]
+    public void EditionLabelText_WithoutWebsite_IsTheLabelInText()
+    {
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+
+        var label = Render<EditionLabelText>(parameters => parameters
+            .Add(p => p.Edition, new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Bulles & Cie", null, null, null, null))
+            .Add(p => p.PublisherWebsite, null));
+
+        Assert.Empty(label.FindAll("a"));
+        Assert.Equal("Bulles & Cie", label.TextContent());
+    }
+
+    [Fact]
     public void PublisherName_WithAWebsite_LeadsToIt_InANewTab_AnnouncedAsLeavingTheApplication()
     {
         var publisher = Render<PublisherName>(parameters => parameters

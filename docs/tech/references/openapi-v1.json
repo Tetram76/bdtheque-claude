@@ -17283,6 +17283,7 @@
         "required": [
           "album",
           "edition",
+          "publisherWebsite",
           "cover",
           "summary"
         ],
@@ -17293,6 +17294,13 @@
           },
           "edition": {
             "$ref": "#/components/schemas/EditionSummary"
+          },
+          "publisherWebsite": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Where the publisher of the edition leads, from the label of the edition (fonctionnel/presentation/libelle-d-une-edition.md);\n`null` when unknown, the publisher being then no link."
           },
           "cover": {
             "oneOf": [
