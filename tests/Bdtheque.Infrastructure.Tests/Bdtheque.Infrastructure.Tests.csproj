@@ -11,6 +11,8 @@
   <ItemGroup>
     <!-- The runner of the scripts of the repository, bounded, shared with the tests of the technical documentation. -->
     <Compile Include="..\Bdtheque.Documentation.Tests\Processes.cs" Link="Processes.cs" />
+    <!-- The throwaway Git repository of the tests of a script, shared with them too. -->
+    <Compile Include="..\Bdtheque.Documentation.Tests\GitFixture.cs" Link="GitFixture.cs" />
   </ItemGroup>
 
   <ItemGroup>

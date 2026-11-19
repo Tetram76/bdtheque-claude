@@ -54,7 +54,7 @@ flowchart LR
     documentation --> tools
 ```
 
-Les tests du dépôt, bien qu'ils fassent partie d'`Infrastructure.Tests`, n'ont besoin d'aucune de ces ressources : ils ne lisent que des fichiers.
+Les tests du dépôt, bien qu'ils fassent partie d'`Infrastructure.Tests`, n'ont besoin d'aucune de ces ressources : ils lisent des fichiers, et ceux qui vérifient un script du dépôt l'exécutent avec PowerShell, au besoin dans un dépôt git jetable.
 
 Le conteneur PostgreSQL est démarré par Testcontainers, une bibliothèque qui lance un conteneur Docker le temps des tests et le supprime ensuite. Docker est donc requis par tout test qui touche à la base. Le conteneur utilise la même image que le service `db` de [`docker-compose.yml`](../../../docker-compose.yml), si bien que les tests s'exécutent sur le même moteur qu'en production.
 
@@ -67,6 +67,7 @@ Les tests du dépôt confrontent les fichiers du dépôt à leurs règles, sans 
 | Test | Ce qu'il vérifie |
 | --- | --- |
 | [`SpeckitStructureTests`](../../../tests/Bdtheque.Infrastructure.Tests/SpeckitStructureTests.cs) | Il vérifie la structure du `.speckit/` : en-têtes, cartes, liens, motifs `applies_to`, table des moments d'`AGENTS.md` et ordre de `log.md`. |
+| [`SpeckitConceptsScriptTests`](../../../tests/Bdtheque.Infrastructure.Tests/SpeckitConceptsScriptTests.cs) | Il exécute [`Get-SpeckitConcepts.ps1`](../../../scripts/Get-SpeckitConcepts.ps1) sortie redirigée, comme le lance un agent avant chaque push, et vérifie que le script écrit en texte chaque concept qui régit un fichier modifié, suivi de chacun de ces fichiers en entier, ou dit qu'aucun concept n'en régit. |
 | [`TechnicalDocumentationStructureTests`](../../../tests/Bdtheque.Infrastructure.Tests/TechnicalDocumentationStructureTests.cs) | Il vérifie la structure de cette documentation, comme l'explique [Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md#contrôles). |
 | [`SdkVersionTests`](../../../tests/Bdtheque.Infrastructure.Tests/SdkVersionTests.cs), [`RuntimeImageTests`](../../../tests/Bdtheque.Infrastructure.Tests/RuntimeImageTests.cs) | Ils vérifient que les Dockerfiles et les workflows utilisent le même SDK, que les Dockerfiles utilisent la même image d'exécution, et que les jobs des workflows s'exécutent sur la version d'Ubuntu de cette image, dont ils partagent ainsi la bibliothèque ICU. |
 | [`DockerHubPullsTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerHubPullsTests.cs) | Il vérifie qu'aucun Dockerfile ne télécharge d'image de Docker Hub, et que l'analyse des images ne lit aucune image publiée. |
