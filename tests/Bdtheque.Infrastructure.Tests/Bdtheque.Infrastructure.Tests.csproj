@@ -9,7 +9,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The runner of the scripts of the repository, bounded, shared with the tests of the technical documentation. -->
+    <Compile Include="..\Bdtheque.Documentation.Tests\Processes.cs" Link="Processes.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Using Include="Bdtheque.Testing" />
+    <Using Include="Bdtheque.Documentation.Tests" />
   </ItemGroup>
 
 </Project>

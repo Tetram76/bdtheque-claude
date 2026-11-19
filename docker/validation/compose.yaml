@@ -1,8 +1,18 @@
 # Validation environment (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md):
 # overrides docker-compose.yml, with the values of validation.env, under a project name of its own.
 # Run by scripts/Start-Validation.ps1, stopped by scripts/Stop-Validation.ps1.
+
+# The version that the environment runs, on each of its containers: a start of another version is refused while
+# they run (scripts/ValidationEnvironment.psm1).
+x-validation-version: &validation-version
+  bdtheque.validation.version: ${VALIDATION_VERSION:?set by scripts/Start-Validation.ps1}
+
 services:
+  db:
+    labels: *validation-version
+
   api:
+    labels: *validation-version
     # Built on this machine, under names of their own: never the published images, which they would
     # replace on this machine.
     image: bdtheque-validation-api
@@ -20,6 +30,7 @@ services:
       - "127.0.0.1:${API_PORT}:8080"
 
   frontend:
+    labels: *validation-version
     image: bdtheque-validation-frontend
     environment:
       # Production, plus the theme chosen by the address of a page (?theme=).
@@ -31,6 +42,7 @@ services:
   # The technical documentation of the commit validated (docs/tech), built from its sources like the other images
   # (choix-implementation/documentation-technique.md). Nothing to reach: no network but its own.
   docs:
+    labels: *validation-version
     image: bdtheque-validation-docs
     build:
       context: .
@@ -43,6 +55,7 @@ services:
 
   # Loads the validation data through the API, once, into an empty database: started only on demand.
   validation-data:
+    labels: *validation-version
     image: bdtheque-validation-data
     build:
       context: .
