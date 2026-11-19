@@ -44,6 +44,8 @@ flowchart LR
     e2e --> sonar
 ```
 
+Tous les jobs s'exécutent sur des exécuteurs `ubuntu-26.04`, la version d'Ubuntu des images d'exécution de l'application, comme ceux des autres workflows du dépôt. Les tests de l'ordre et du formatage français utilisent la bibliothèque ICU de la machine qui les exécute : sur la même version d'Ubuntu que les images, ils vérifient donc le comportement qu'aura l'application en production. Un test du dépôt, présenté dans [Stratégie de tests](strategie-de-tests.md#tests-du-dépôt), refuse un exécuteur d'une autre version.
+
 Le premier job, `Changed files`, classe les fichiers modifiés. Les quatre jobs suivants démarrent en parallèle dès qu'il a fini. L'analyse SonarQube Cloud attend en outre la fin de tous les jobs de tests, parce qu'elle importe la couverture qu'ils ont mesurée ; si l'un d'eux échoue, l'analyse ne s'exécute pas.
 
 Le verdict de la porte de qualité de SonarQube Cloud n'apparaît pas sur ce schéma, car ce n'est pas un job du workflow : c'est un check à part, `SonarCloud Code Analysis`, que l'application SonarQube Cloud publie elle-même sur le commit une fois l'analyse reçue. Quand l'analyse ne s'exécute pas, ce check ne se présente pas.

@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T20:25:33Z }
 ---
 
 # Outillage de développement
@@ -65,6 +65,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
 
 ## CI
 
+- **Exécuteurs sur la version d'Ubuntu des images d'exécution** (`ubuntu-26.04` pour la variante *resolute* de l'image `aspnet`, [Images de base des conteneurs](deploiement/images-de-base-des-conteneurs.md)), pour tous les jobs de tous les workflows, ce que vérifie un test du dépôt : les tests de l'ordre et du formatage français, du domaine comme du frontend, s'exécutent sur l'ICU de l'exécuteur, et non sur celui des images ([Internationalisation](socle/transverse/internationalisation.md)). Sur la même version d'Ubuntu, l'ICU est le même : les tests valent pour les images, et une montée de leur version d'Ubuntu entraîne celle des exécuteurs. Sur un poste, les tests s'exécutent sur l'ICU de son système ; le CI fait foi.
+  - **Alternative écartée (`ubuntu-latest`)** : GitHub fait passer ce label d'une version d'Ubuntu à la suivante de lui-même (documentation GitHub, *Ubuntu 26 generally available and latest migration*) : l'ICU des tests changerait sans modification du dépôt, et se séparerait de celui des images.
+  - **Alternative écartée (tests exécutés dans un conteneur de l'image du SDK de même version d'Ubuntu)** : le même ICU, pour une mécanique de plus autour de tests qui démarrent eux-mêmes des conteneurs et un navigateur.
+  - **Alternative écartée (ICU embarqué par l'application, *app-local ICU*, package `Microsoft.ICU.ICU4C.Runtime`)** : le même ICU partout, postes compris (documentation .NET, *Globalization and ICU*), mais sa version la plus récente (72.1, publiée en 2023) est plus ancienne que celui des images, et l'application suivrait une distribution d'ICU sans correctif depuis.
 - **Contrôle de cohérence modèle ↔ migrations** : le CI échoue sur une modification du modèle commitée sans sa migration.
 - **Tests selon la modification** ([Intégration continue (CI)](../gestion-projet/depot/integration-continue-ci.md)) : les fichiers modifiés sont ceux qui distinguent le commit de fusion que construit le CI de la tête de `main` qu'il fusionne, la PR telle qu'elle serait fusionnée ; un fichier déplacé compte à ses deux chemins. Sans source modifiée, seuls s'exécutent les tests du dépôt, désignés par leur trait, et l'analyse se fait sans couverture ; sans source du rendu modifiée, aucun test de bout en bout.
   - **Alternative écartée (action de filtrage par chemins)** : une dépendance de plus à épingler et à surveiller ([Suivi des versions et des vulnérabilités](../contraintes-techniques/suivi-des-versions-et-des-vulnerabilites.md)), pour une comparaison que `git` fait en une commande.
