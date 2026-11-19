@@ -117,7 +117,7 @@ Sur un poste de développement, [`Test-Captures.ps1`](../../../scripts/Test-Capt
 ./scripts/Test-Captures.ps1 -Update -Filter admin-logout, AdminHome
 ```
 
-L'option `-Update` fixe la variable `BDTHEQUE_UPDATE_CAPTURES=1` : les captures prises deviennent alors les nouvelles références, qu'il faut relire avant de les commiter.
+L'option `-Update` fixe la variable `BDTHEQUE_UPDATE_CAPTURES=1` : les captures prises deviennent alors les nouvelles références, qu'il faut relire avant de les commiter. Le conteneur ne rapporte les références dans la copie de travail que si toute l'exécution a réussi : un échec de la construction ou d'un test les laisse toutes telles qu'elles étaient, plutôt qu'à moitié reprises, et le script annonce alors qu'elles n'ont pas été mises à jour, en gardant le code de sortie de l'échec. [`CaptureScriptTests`](../../../tests/Bdtheque.Infrastructure.Tests/CaptureScriptTests.cs) vérifie ce message de fin dans les deux cas, avec un faux `docker` qui ne démarre aucun conteneur.
 
 ## Exécuter les tests
 
