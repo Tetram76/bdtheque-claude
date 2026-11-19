@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using AngleSharp.Dom;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
@@ -372,11 +373,11 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
     // without its own title, catalogued only; a special issue.
     private static List<AlbumCard> Albums() =>
     [
-        new(Album(0, "Premier", 1), AlbumRating.Good, new AlbumCover(FirstCover, new CoverPalette("#335577", "#112233", "#DDAA44")), false),
-        new(Album(1, "Le Premier Cycle", null) with { Type = AlbumType.Omnibus, StartVolumeNumber = 1, EndVolumeNumber = 3 }, null, null, false),
-        new(Album(2, "Cinquième", 5, owned: false), null, null, true),
-        new(Album(3, null, 6, owned: false), null, null, false),
-        new(Album(4, "Carnets", 1) with { IsSpecialIssue = true }, null, null, false),
+        new(Album(0, "Premier", 1), AlbumRating.Good, new AlbumCover(FirstCover, new CoverPalette("#335577", "#112233", "#DDAA44")), AlbumCollectionState.InCollection),
+        new(Album(1, "Le Premier Cycle", null) with { Type = AlbumType.Omnibus, StartVolumeNumber = 1, EndVolumeNumber = 3 }, null, null, AlbumCollectionState.InCollection),
+        new(Album(2, "Cinquième", 5, owned: false), null, null, AlbumCollectionState.PurchaseIntent),
+        new(Album(3, null, 6, owned: false), null, null, AlbumCollectionState.OutsideCollection),
+        new(Album(4, "Carnets", 1) with { IsSpecialIssue = true }, null, null, AlbumCollectionState.InCollection),
     ];
 
     private static SeriesDetail Series()

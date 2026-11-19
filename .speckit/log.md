@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-19
+
+* **Choix** : les cartes d'album et la fiche d'un album reçoivent de l'API l'état de l'album, calculé par l'expression unique de l'appartenance à la collection, que partagent les listes ; état recalculé par le frontend écarté (#448).
+
 ## 2026-11-18
 
 * **Décision de l'utilisateur** : l'état de possession d'un album visé s'intitule « Intention », plus court que le nom de la fiche, « Intention d'acquisition », qui ne change pas (#543).

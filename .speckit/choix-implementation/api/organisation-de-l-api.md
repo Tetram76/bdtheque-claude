@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T10:00:00Z }
 ---
 
 # Organisation de l'API
@@ -21,7 +21,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 ## Familles de routes
 
 - **`/admin` pour la saisie, `/catalog` pour la consultation**, chacune avec ses propres DTO : une vue de lecture d'un côté, les champs saisissables de l'autre. `api` ne connaît pas l'utilisateur ([Authentification : mise en œuvre](../socle/transverse/authentification-mise-en-oeuvre.md)) : chaque client réserve `/admin` à l'administrateur authentifié. `/audience` reçoit la mesure d'audience, écrite pour tout utilisateur ([Mesure d'audience : mise en œuvre](../mesure-audience/mesure-d-audience-mise-en-oeuvre.md)).
-- **Appartenance à la collection calculée par une expression unique**, réutilisée par toute requête, jamais recodée.
+- **Appartenance à la collection calculée par une expression unique**, réutilisée par toute requête, jamais recodée : les listes, leurs filtres et leurs décomptes, les cartes d'album et la fiche d'un album portent l'état de l'album qu'elle calcule ([Appartenance à la collection](../../fonctionnel/regles-metier/appartenance-a-la-collection.md), états d'un album), et le frontend n'en calcule aucun.
+  - **Alternative écartée (état des cartes et de la fiche calculé par le frontend, d'après l'appartenance de l'album et ses intentions)** : une seconde écriture de la règle des trois états, qui diverge de celle des listes dès que l'une change (#448).
 
 ## Écritures
 

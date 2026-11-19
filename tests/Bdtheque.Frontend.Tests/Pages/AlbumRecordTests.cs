@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using AngleSharp.Dom;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
@@ -241,6 +242,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         _catalog.Album = Album() with
         {
             Album = Summary() with { IsInCollection = false },
+            State = AlbumCollectionState.PurchaseIntent,
             Cover = null,
             Editions = [],
             PurchaseIntent = new PurchaseIntentItem(Guid.NewGuid(), Modified, Modified),
@@ -258,7 +260,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     [Fact]
     public void AlbumWhoseOnlyEditionIsTargetedByAnIntent_IsMarkedAsSuch()
     {
-        _catalog.Album = Album() with { Album = Summary() with { IsInCollection = false }, Editions = [Intended()] };
+        _catalog.Album = Album() with { Album = Summary() with { IsInCollection = false }, State = AlbumCollectionState.PurchaseIntent, Editions = [Intended()] };
 
         var page = Open();
 
@@ -272,7 +274,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     [Fact]
     public void AlbumNeitherOwnedNorTargeted_IsOutOfTheCollection()
     {
-        _catalog.Album = Album() with { Album = Summary() with { IsInCollection = false }, Editions = [] };
+        _catalog.Album = Album() with { Album = Summary() with { IsInCollection = false }, State = AlbumCollectionState.OutsideCollection, Editions = [] };
 
         var page = Open();
 
@@ -557,6 +559,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         _catalog.Album = Album() with
         {
             Album = Summary() with { IsInCollection = false },
+            State = AlbumCollectionState.PurchaseIntent,
             Editions = [],
             PurchaseIntent = new PurchaseIntentItem(Guid.NewGuid(), Created, Created),
         };
@@ -613,7 +616,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     public void RestOfTheSeries_ShowsTheRangeOfAnOmnibus_InTheColumnOfTheVolume_NotInItsName()
     {
         var omnibus = Summary() with { Id = Guid.NewGuid(), Title = null, Type = AlbumType.Omnibus, VolumeNumber = 1, StartVolumeNumber = 1, EndVolumeNumber = 4 };
-        _catalog.Album = Album() with { SeriesAlbums = [new(omnibus, null, null, false), new(Summary(), null, null, false)] };
+        _catalog.Album = Album() with { SeriesAlbums = [new(omnibus, null, null, AlbumCollectionState.InCollection), new(Summary(), null, null, AlbumCollectionState.InCollection)] };
 
         var page = Open();
 
@@ -682,10 +685,10 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
     private static List<AlbumCard> SeriesAlbums() =>
     [
-        new(Summary() with { Id = SeriesAlbumIds[0], Title = "La Jeunesse", VolumeNumber = 1 }, null, null, false),
-        new(Summary(), null, null, false),
-        new(Summary() with { Id = SeriesAlbumIds[2], Title = "Les Celtiques", VolumeNumber = 6, IsInCollection = false }, null, null, true),
-        new(Summary() with { Id = SeriesAlbumIds[3], Title = null, IsSpecialIssue = true, VolumeNumber = 1, IsInCollection = false }, null, null, false),
+        new(Summary() with { Id = SeriesAlbumIds[0], Title = "La Jeunesse", VolumeNumber = 1 }, null, null, AlbumCollectionState.InCollection),
+        new(Summary(), null, null, AlbumCollectionState.InCollection),
+        new(Summary() with { Id = SeriesAlbumIds[2], Title = "Les Celtiques", VolumeNumber = 6, IsInCollection = false }, null, null, AlbumCollectionState.PurchaseIntent),
+        new(Summary() with { Id = SeriesAlbumIds[3], Title = null, IsSpecialIssue = true, VolumeNumber = 1, IsInCollection = false }, null, null, AlbumCollectionState.OutsideCollection),
     ];
 
     private static EditionDetail Intended() => Owned(IntendedEditionId, 2023) with
@@ -727,7 +730,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
             AcquisitionCurrency = null,
         };
         return new AlbumDetail(
-            Summary(), 1970, 11, "Venezuela, vers 1913.", "Réunit les trois premiers récits.", null,
+            Summary(), AlbumCollectionState.InCollection, 1970, 11, "Venezuela, vers 1913.", "Réunit les trois premiers récits.", null,
             new AlbumCover(Visuals[0], CoverColors),
             [new GenreListItem(Guid.NewGuid(), "Aventure")],
             [new UniverseInHierarchy(new UniverseListItem(Guid.NewGuid(), "Les Antilles", corto.Id, corto.Name), [root, corto])],

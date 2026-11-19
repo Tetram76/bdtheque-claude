@@ -100,12 +100,11 @@ internal static class CatalogExpressions
         e.PublicationYear,
         e.Isbn);
 
-    // The intents of an album carry its identifier, those on its editions included.
     private static readonly Expression<Func<Album, AlbumCard>> AlbumCardOf = a => new AlbumCard(
         a.ToSummary(),
         EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating),
         ToCover(a.CoverVisualOf()),
-        a.PurchaseIntents.Any());
+        a.CollectionState());
 
     // fonctionnel/regles-metier/couverture-d-un-album.md, among all the editions: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
@@ -131,7 +130,8 @@ internal static class CatalogExpressions
         .Select(v => new CoverVisual(v.Id, v.Palette.Dominant, v.Palette.Deep, v.Palette.Accent))
         .FirstOrDefault();
 
-    // Owned first, whatever its intents; then aimed at by an intent, on the album or on one of its editions.
+    // Owned first, whatever its intents; then aimed at by an intent, on the album or on one of its editions, whose
+    // intents carry its identifier.
     private static readonly Expression<Func<Album, AlbumCollectionState>> CollectionStateOf = a =>
         a.Editions.Any(e => e.IsOwned())
             ? AlbumCollectionState.InCollection

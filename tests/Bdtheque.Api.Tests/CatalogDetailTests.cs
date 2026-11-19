@@ -45,6 +45,8 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal(
             new AlbumSummary(album.Id, "Le Nid des Marsupilamis", series.Id, "Spirou et Fantasio", AlbumType.Regular, false, 12, null, null, true),
             detail.Album);
+        // Owned, whatever its intents (fonctionnel/regles-metier/appartenance-a-la-collection.md).
+        Assert.Equal(AlbumCollectionState.InCollection, detail.State);
         Assert.Equal((1960, 3, "Résumé", "Notes", AlbumRating.VeryGood),
             (detail.FirstPublicationYear, detail.FirstPublicationMonth, detail.Summary, detail.PersonalNotes, detail.Rating));
         // Union of those of the album and of its series, without duplicates.
@@ -108,8 +110,10 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var album = await CreateAlbumAsync("Album visé", null);
         var (intended, intent) = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2020);
 
-        var detail = Assert.Single((await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}")).Editions);
+        var record = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
+        var detail = Assert.Single(record.Editions);
 
+        Assert.Equal(AlbumCollectionState.PurchaseIntent, record.State);
         Assert.Equal(
             (intended, null, null, false, intent, null, null),
             (detail.Edition.Id, detail.PublisherWebsite, (AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection,
@@ -153,7 +157,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
 
         var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
 
-        Assert.False(detail.Album.IsInCollection);
+        Assert.Equal((false, AlbumCollectionState.PurchaseIntent), (detail.Album.IsInCollection, detail.State));
         Assert.Equal(Assert.Single(intents.Intents).Id, detail.PurchaseIntent!.Id);
         AssertCreatedAfter(detail.CreatedAt, detail.PurchaseIntent);
         Assert.Empty(detail.Editions);
@@ -177,8 +181,13 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{shown.Id}");
 
         Assert.Equal(
-            [(first.Id, true, false), (shown.Id, false, false), (third.Id, false, true), (special.Id, false, false)],
-            detail.SeriesAlbums.Select(a => (a.Album.Id, a.Album.IsInCollection, a.HasPurchaseIntent)));
+            [
+                (first.Id, true, AlbumCollectionState.InCollection),
+                (shown.Id, false, AlbumCollectionState.OutsideCollection),
+                (third.Id, false, AlbumCollectionState.PurchaseIntent),
+                (special.Id, false, AlbumCollectionState.OutsideCollection),
+            ],
+            detail.SeriesAlbums.Select(a => (a.Album.Id, a.Album.IsInCollection, a.State)));
         Assert.Equal(new AlbumSummary(special.Id, "Les Helvétiques", series.Id, "Corto Maltese", AlbumType.Regular, true, 1, null, null, false),
             detail.SeriesAlbums[^1].Album);
     }
@@ -191,6 +200,8 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var detail = await GetAsync<AlbumDetail>($"/catalog/albums/{album.Id}");
 
         Assert.Empty(detail.SeriesAlbums);
+        // Neither owned edition nor intent.
+        Assert.Equal(AlbumCollectionState.OutsideCollection, detail.State);
     }
 
     [Fact]

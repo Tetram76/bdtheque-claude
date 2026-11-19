@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
 using AngleSharp.Dom;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
@@ -389,20 +390,20 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         new(seriesId == SangreId ? SangreAlbumId(volume) : Guid.NewGuid(), title, seriesId, seriesTitle, AlbumType.Regular, false, volume, null, null, true);
 
     private static AlbumCard Card(Guid seriesId, string seriesTitle, int volume, string? title = null) =>
-        new(Summary(seriesId, seriesTitle, volume, title), null, new AlbumCover(Guid.NewGuid(), new CoverPalette("#2F5BA8", "#14295A", "#D8342B")), false);
+        new(Summary(seriesId, seriesTitle, volume, title), null, new AlbumCover(Guid.NewGuid(), new CoverPalette("#2F5BA8", "#14295A", "#D8342B")), AlbumCollectionState.InCollection);
 
     // Volumes of « Sangre »: the second has its own title, the sixth is not in the collection.
     private static AlbumBibliographyItem SangreAlbum(int volume)
     {
         var card = Card(SangreId, "Sangre", volume, volume == 2 ? "Le Sang du dragon" : null);
         return new AlbumBibliographyItem(
-            card with { Album = card.Album with { IsInCollection = volume != 6 } },
+            volume == 6 ? card with { Album = card.Album with { IsInCollection = false }, State = AlbumCollectionState.OutsideCollection } : card,
             volume == 1 ? [ContributionRole.Illustrator, ContributionRole.Colorist] : [ContributionRole.Illustrator]);
     }
 
     private static AlbumBibliographyItem Sketchbook() => new(
         new AlbumCard(new AlbumSummary(SketchbookId, "Carnet de croquis", null, null, AlbumType.Regular, false, null, null, null, false),
-            AlbumRating.Good, null, false),
+            AlbumRating.Good, null, AlbumCollectionState.OutsideCollection),
         [ContributionRole.Scenarist, ContributionRole.Illustrator]);
 
     private static SeriesBibliographyItem Series(Guid id, string title, int albumCount, IReadOnlyList<ContributionRole> roles, IReadOnlyList<AlbumBibliographyItem> albums) =>
