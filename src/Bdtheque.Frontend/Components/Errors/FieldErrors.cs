@@ -29,6 +29,13 @@ public sealed class FieldErrors(
     public string? For(params string[] fields) => Text(field => fields.Contains(field), subject);
 
     /// <summary>
+    /// What to correct in the control that enters <paramref name="fields"/> of a line of a list entered with the form (a
+    /// collection of a publisher), the text citing that line by <paramref name="name"/>, as typed, rather than by the subject
+    /// of the form: when two lines are bordered, the name cited says which one to correct (decision of the user, #464).
+    /// </summary>
+    public string? ForNamed(string name, params string[] fields) => Text(field => fields.Contains(field), name);
+
+    /// <summary>
     /// What to correct in the record added on the spot under <paramref name="key"/> (an author, a genre, a universe, a series, a
     /// publisher, a publisher collection), which the last saving sent with its content (<paramref name="sent"/>), where the error designates it: any of its fields, the
     /// text citing that record, as its own list or panel does (visuel/saisie-album/contenu.md); none if the error designates

@@ -302,6 +302,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         _api.Write = (_, _, _) => FakeAdminApi.BusinessProblem(
             "PublisherCollection.NameAlreadyUsed", fields: ["/collections/1/name"], related: ["/collections/0/name"]);
 
+        await page.InputAsync($"#publisher-collection-{FacSimile}", " écritures ");
         await page.SubmitAsync("form");
 
         // Above the form, a text that needs no field to make sense.
@@ -310,7 +311,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
             page.Find("[role=alert]").QuerySelector("[data-error-text]")!.TextContent);
         var (clashing, renamed) = (page.FindAll("[aria-invalid=true]")[0], page.FindAll("[aria-invalid=true]")[1]);
         Assert.Equal(
-            "Ce nom est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.",
+            "« écritures » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.",
             page.Find($"#{renamed.Id}-error").TextContent);
         Assert.Equal("Une autre collection prend aussi ce nom, à la casse ou aux accents près.", page.Find($"#{clashing.Id}-error").TextContent);
         // The focus goes to the field to correct, not to the one it clashes with (wwwroot/entry-form.js).

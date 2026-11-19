@@ -79,7 +79,7 @@ else
                                 {
                                     <span class="publisher-collection-name">
                                         <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden Required
-                                               Error="@Errors.For(CollectionField(collection))" ErrorRelated="@Errors.IsRelated(CollectionField(collection))"
+                                               Error="@Errors.ForNamed(Label(collection), CollectionField(collection))" ErrorRelated="@Errors.IsRelated(CollectionField(collection))"
                                                Context="control">
                                             <input id="@control.Id" type="text" placeholder="@L["Collection.Name"]"
                                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"

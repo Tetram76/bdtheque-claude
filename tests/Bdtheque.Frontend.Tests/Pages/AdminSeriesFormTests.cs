@@ -358,7 +358,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         var field = page.Find("#series-collection");
         Assert.Equal("true", field.GetAttribute("aria-invalid"));
         Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
-            id => page.Find($"#{id}").TextContent.Trim().StartsWith("Ce nom est déjà pris", StringComparison.Ordinal));
+            id => page.Find($"#{id}").TextContent.Trim().StartsWith("« ligne NOIRE » est déjà pris", StringComparison.Ordinal));
     }
 
     [Fact]
