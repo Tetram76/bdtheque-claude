@@ -86,16 +86,16 @@ try {
     tar -xf $archive -C $sources
     Remove-Item $archive
 
-    # The commit validated, which the technical documentation names on each page, and the version that every container
-    # carries (docker/validation/compose.yaml): the extracted sources have no history to read them from.
+    # The commit validated, which the technical documentation names on each page (docker/validation/compose.yaml): the
+    # extracted sources have no history to read it from.
     $env:SOURCE_COMMIT = $commit
-    $env:VALIDATION_VERSION = $version
 
     $compose = @(
         'compose', '--project-name', $ProjectName, '--project-directory', $sources,
         '--file', (Join-Path $sources 'docker-compose.yml'), '--file', (Join-Path $sources 'docker/validation/compose.yaml'),
         '--env-file', (Join-Path $sources 'docker/validation/validation.env')
     )
+    $compose += '--file', (New-ValidationVersionOverride $compose $version (Join-Path $sources 'validation-version.yaml'))
 
     if (-not $KeepData) {
         docker @compose down --volumes --remove-orphans

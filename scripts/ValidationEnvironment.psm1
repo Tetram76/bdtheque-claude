@@ -18,7 +18,7 @@ $PSNativeCommandUseErrorActionPreference = $true
 # The Compose project of the environment, whose containers, networks and volumes carry its name.
 $ProjectName = 'bdtheque-validation'
 
-# The label that names, on each container, the version it runs (docker/validation/compose.yaml).
+# The label that names, on each container, the version it runs (New-ValidationVersionOverride).
 $VersionLabel = 'bdtheque.validation.version'
 
 # The lock and the description of its holder, beside the extracted sources: in the temporary folder of the user,
@@ -81,6 +81,32 @@ function Get-ValidationVersion {
             if ($label) { $label.Substring($VersionLabel.Length + 1) } else { '' }
         } |
         Sort-Object -Unique
+}
+
+function New-ValidationVersionOverride {
+    <#
+    .SYNOPSIS
+        Writes the Compose file that labels every service of the environment with the version it runs.
+    .DESCRIPTION
+        Written by the scripts rather than read from the sources of the commit validated: a commit older than the
+        lock, or a pull request that has not merged it, has no such label in its own Compose files, and its
+        environment would then never be recognised as its own. Only the services that those files declare are
+        labelled, the older ones lacking some (e.g. the technical documentation).
+    .OUTPUTS
+        The path of the file, to add to the Compose files of the environment.
+    #>
+    param(
+        # The arguments of docker that name the project and its Compose files.
+        [Parameter(Mandatory)] [string[]] $Compose,
+        [Parameter(Mandatory)] [string] $Version,
+        [Parameter(Mandatory)] [string] $Path
+    )
+
+    # The services of every profile, the data loader among them.
+    $services = docker @Compose --profile '*' config --services
+    $lines = @('services:') + @($services | ForEach-Object { "  ${_}:", '    labels:', "      ${VersionLabel}: '$Version'" })
+    Set-Content $Path $lines
+    $Path
 }
 
 function Format-ValidationVersion {
