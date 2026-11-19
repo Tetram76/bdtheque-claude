@@ -157,6 +157,10 @@ never taking one of the places of the chantiers run at once.
      pull request) and dependencies for **each** of its tickets, not only
      one: a ticket failing either check is not a candidate and joins no
      group;
+   - keep the **volume of changes** of the group « raisonnable »: comparable
+     to that of a single-ticket chantier, so that its pull request is
+     reviewed and validated in one go; a group that would exceed it is
+     reduced, the tickets taken out staying chantiers of their own;
    - its single pull request **fully handles each** of its tickets, as if
      each had its own pull request — a derogation to « un ticket, une PR »
      the user wants: no reference ticket, no associated ticket; the pull
