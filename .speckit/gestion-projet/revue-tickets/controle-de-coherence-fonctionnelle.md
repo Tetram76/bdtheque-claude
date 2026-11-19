@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Contrôle de cohérence fonctionnelle'
 description: 'Contrôle hebdomadaire de la cohérence de toute l''application, au sein des familles d''écrans et de points d''entrée de même nature et pour chaque règle transversale : sources confrontées, classement des écarts, suites, trace ; à lire quand le contrôle est dû ou demandé.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T21:00:00Z }
 ---
 
 # Contrôle de cohérence fonctionnelle
@@ -28,7 +28,7 @@ Pour chaque famille et chaque axe transversal, trois sources sont confrontées :
   - **Alternative écartée (questions posées par la session du contrôle, une à une ou réunies sur une page)** : toutes les questions d'un contrôle arrivent alors dans la même session, ce que l'utilisateur refuse, quelle que soit leur forme (exigence de l'utilisateur, #409).
 - **C — l'écart est justifié** : le `.speckit/` en donne la raison. Rien n'est fait.
 
-Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : chacune de ses suites est un ticket, réalisé par sa propre Pull Request. Il se termine quand la date de sa prise en compte est écrite dans la description de son ticket (§ Trace). Dans un lot de chantiers en parallèle, il n'est pas un chantier du lot et n'y occupe aucune place ; ses suites, elles, y sont candidates comme tout ticket du jalon en cours ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md#harnais)).
+Le contrôle lui-même ne modifie ni le `.speckit/` ni le code, et n'a pas de Pull Request : ne pouvant rien corriger lui-même, il fait de chacune de ses suites un ticket, réalisé par sa propre Pull Request ([Issues](issues.md#décision-de-créer-un-ticket)). Plusieurs écarts d'une même cause font un seul ticket, qui porte cette cause ([Qualité du code](../gouvernance/qualite-du-code.md), la cause de fond). Il se termine quand la date de sa prise en compte est écrite dans la description de son ticket (§ Trace). Dans un lot de chantiers en parallèle, il n'est pas un chantier du lot et n'y occupe aucune place ; ses suites, elles, y sont candidates comme tout ticket du jalon en cours ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md#harnais)).
 
 Une raison qui manque ou qui faillit fait d'un écart un B, jamais un C : une question de trop coûte une réponse à l'utilisateur, un écart réel classé C reste dans l'application sans que personne le voie.
 

@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), étiquette `agent` des tickets créés à l''initiative d''un agent, description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), étiquette `agent` des tickets créés à l''initiative d''un agent, description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; décision de créer un ticket à l''initiative d''un agent (seulement si la session ne peut pas corriger elle-même), puis recherche d''un ticket existant.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T21:00:00Z }
 ---
 
 # Issues
@@ -91,6 +91,20 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
 - **Ticket de suivi retrouvé par ses deux étiquettes** : un harnais, comme l'agent, le retrouve par l'étiquette du harnais **et** `harness`, jamais par la première seule, qui désigne aussi ses chantiers. Qui crée un ticket de suivi, harnais ou agent, lui pose les deux, ainsi que `agent` (§ Étiquette `agent`), un ticket de suivi n'étant jamais une demande de l'utilisateur.
 
 ## Avant de créer un ticket
+
+### Décision de créer un ticket
+
+Le projet doit produire une application, pas des tickets (« l'objectif du projet n'est pas de créer des tickets mais de produire une application !! », exigence de l'utilisateur). Avant toute création d'un ticket à l'initiative d'un agent sur un problème ou une amélioration qu'il relève (problème relevé en cours de chantier, retour de revue, suite d'un harnais, revue de l'existant…), l'agent décide d'abord s'il faut un ticket, et seulement ensuite cherche s'il en existe déjà un (§ Recherche d'un ticket existant) :
+
+- **La session qui relève un problème le corrige elle-même**, dans sa Pull Request, même un peu en dehors de son objectif, dès que la correction est à sa portée et reste raisonnable : cette Pull Request porte alors la correction, dite dans sa description.
+- **Un ticket seulement quand elle ne peut vraiment pas corriger** : correction trop grosse pour sa Pull Request, décision qui revient à l'utilisateur ([Prise de décision](../gouvernance/prise-de-decision.md)), ou dépendance non remplie (un autre chantier, une version, un déploiement à attendre). Un ticket alors nécessaire est créé sans hésiter, et porte l'analyse de la cause ([Qualité du code](../gouvernance/qualite-du-code.md), la cause de fond).
+- **Un constat sans effet réel**, sur l'application ou sur le travail, n'est ni corrigé ni mis en ticket : il est dit dans la Pull Request, ou consigné dans le concept qu'il concerne quand il éclaire un choix (ex. #569, devenu une remarque de [Navigation par initiale : mise en œuvre](../../choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md)).
+- **Revue de l'existant d'une montée de version** : elle se fait dans la Pull Request de la montée, jamais dans un ticket ouvert à sa fusion ([Mises à jour des dépendances](../depot/mises-a-jour-des-dependances.md)).
+- **Lot de chantiers en parallèle** : un problème qu'une session signale est soumis à cette règle ; l'orchestrateur ne le transforme pas d'office en ticket ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md#sessions-du-lot)). Un problème que l'**utilisateur** signale reste un ticket.
+
+Les tickets du plan (découpage d'une phase, sous-tickets d'un chantier découpé, chantiers d'une consolidation, [Suivi par tickets](suivi-par-tickets.md)) et le ticket de suivi d'un harnais ne relèvent pas de cette décision : leurs propres règles les prescrivent.
+
+### Recherche d'un ticket existant
 
 **Aucun ticket n'est créé sans avoir d'abord cherché s'il en existe déjà un** sur le même sujet, ouvert ou fermé : un doublon disperse le suivi d'un même problème entre plusieurs tickets, et oblige l'utilisateur à le relever.
 

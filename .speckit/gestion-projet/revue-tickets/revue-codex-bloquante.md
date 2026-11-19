@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Revue Codex (bloquante)'
 description: 'Revue Codex, condition du merge : ouverture de la PR, budget épuisé, statut et traitement des retours, cycle et surveillance.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T21:00:00Z }
 ---
 
 # Revue Codex (bloquante)
@@ -42,7 +42,7 @@ Codex ne connaît **ni le contexte du projet** (`.speckit/`, architecture, conve
 2. **Établir la cause racine** d'un retour jugé pertinent : le problème est analysé dans sa globalité, au-delà du passage relevé. La cause peut se trouver hors du diff, et hors de l'objectif de la PR. Elle est **nommée avant toute correction** : aucun commit de correction n'est fait tant qu'elle ne l'est pas.
 3. **Confronter à l'objectif de la PR**, impérativement, le **point dans son ensemble** — ce qu'il relève, sa cause et sa correction —, et non le seul passage relevé : Codex ne connaissant pas cet objectif ([Statut des retours de Codex](revue-codex-bloquante.md#statut-des-retours-de-codex)), un retour pertinent n'est pas pour autant à corriger dans la PR.
    - **Point qui relève, dans son ensemble, de l'objectif de la PR** : il est corrigé dans la PR (étape 4).
-   - **Point qui sort de l'objectif de la PR**, par ce qu'il relève, par sa cause ou par sa correction, y compris lorsque le symptôme se trouve dans le diff : sa correction peut être **différée**, sans qu'aucun correctif de surface ne compense dans la PR la cause laissée en place. Elle n'est jamais perdue pour autant, et sa trace dépend de la phase du plan d'implémentation dont relève le point :
+   - **Point qui sort de l'objectif de la PR**, par ce qu'il relève, par sa cause ou par sa correction, y compris lorsque le symptôme se trouve dans le diff : il est **corrigé dans la PR** dès que sa correction est à sa portée et reste raisonnable, même un peu en dehors de son objectif, la description de la PR le disant ([Issues](issues.md#décision-de-créer-un-ticket)). Sa correction n'est **différée** que si la PR ne peut vraiment pas la porter : correction trop grosse pour elle, décision qui revient à l'utilisateur, ou dépendance non remplie ; jamais alors un correctif de surface ne compense dans la PR la cause laissée en place. Une correction différée n'est jamais perdue pour autant, et sa trace dépend de la phase du plan d'implémentation dont relève le point :
      - **phase déjà terminée** : la correction prend la forme d'un **ticket** ([Issues](issues.md)) ;
      - **phase déjà découpée** : elle est reportée dans le ticket ouvert du chantier dont elle relève, ou, à défaut, prend la forme d'un **nouveau ticket** ;
      - **phase pas encore découpée** : aucun ticket ; une **note** est ajoutée sur cette phase dans [`suivi-implementation/`](../../suivi-implementation/index.md), pour que le point soit intégré au plan lors de son découpage.
