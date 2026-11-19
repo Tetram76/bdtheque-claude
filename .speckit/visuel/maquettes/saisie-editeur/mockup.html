@@ -447,9 +447,10 @@ class View extends Mockup {
     const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.modification;
     const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
     const errorKey = this.props.erreur;
-    // A publisher's name is unique as typed (modele-metier.md § Éditeur): here it was changed to another's.
-    const err = errorOf(errorKey, t, { title: 'Un autre éditeur porte déjà ce nom.', text: 'Deux éditeurs ne peuvent pas porter exactement le même nom ; une différence de casse suffit à les distinguer.' });
-    const nameError = errorKey === 'metier' ? '« Dargaud » est déjà le nom d\'un autre éditeur.' : null;
+    // A publisher's name is unique regardless of case and accents (modele-metier/editeur.md): here it was changed to
+    // another's. The text under the field is the one of any name already taken, citing the name as typed (#464).
+    const err = errorOf(errorKey, t, { title: 'Un autre éditeur porte déjà ce nom.', text: 'Deux éditeurs ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.' });
+    const nameError = errorKey === 'metier' ? '« Dargaud » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent le même éditeur.' : null;
     const name = nameError ? 'Dargaud' : x.name;
     const c = commonVals(this, t, kick);
     const imprints = x.imprints.map((p, i) => {

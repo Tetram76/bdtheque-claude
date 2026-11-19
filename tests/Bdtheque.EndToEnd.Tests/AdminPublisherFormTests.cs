@@ -97,20 +97,23 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
     [Theory, InEachTheme]
     public async Task Save_RenamingACollectionAsAnother_IsToCorrect_OnTheRenamedOne_WhichGetsTheFocus(string theme)
     {
-        // The collection renamed comes second: the focus goes to it, not to the first field in error.
+        // The collection renamed comes second: the focus goes to it, not to the first field in error. Renamed with another
+        // case, it is the same name: the message under it cites the name as typed (decision of the user, #464).
         var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(
             $"Dargaud {_marker}", null, [new(null, "Carnets"), new(null, "Escales")]));
         var page = await OpenAsync(theme, AppPaths.AdminEditPublisher(publisher.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
         var names = page.GetByLabel("Nom de la collection");
-        await names.Last.FillAsync("Carnets");
+        await names.Last.FillAsync("carnets");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
         await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
         await Assertions.Expect(names.First).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(names.Last).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(names.Last).ToBeFocusedAsync();
+        await Assertions.Expect(names.Last).ToHaveAccessibleDescriptionAsync(
+            "« carnets » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.");
     }
 
     /// <summary>

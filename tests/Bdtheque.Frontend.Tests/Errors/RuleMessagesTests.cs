@@ -31,7 +31,7 @@ public sealed class RuleMessagesTests
     }
 
     // One rule for every name unique regardless of case and accents (modele-metier/): presented alike, reminder included, above
-    // the form as under the field.
+    // the form as under the field, which cites the name as typed (decision of the user, #464).
     [Theory]
     [InlineData(DomainRules.GenreLabelAlreadyUsed)]
     [InlineData(DomainRules.AuthorDisplayNameAlreadyUsed)]
@@ -39,6 +39,7 @@ public sealed class RuleMessagesTests
     [InlineData(DomainRules.PublisherCollectionNameAlreadyUsed)]
     [InlineData(DomainRules.UniverseNameAlreadyUsed)]
     [InlineData(DomainRules.UniverseTopLevelNameAlreadyUsed)]
+    [InlineData(DomainRules.SavedSearchNameAlreadyUsed)]
     public void EveryNameUniqueRegardlessOfCaseAndAccents_RemindsItInBothItsTexts(string ruleCode)
     {
         var rule = Services.GetRequiredService<IStringLocalizer<RuleMessages>>()[ruleCode];
@@ -46,7 +47,7 @@ public sealed class RuleMessagesTests
 
         Assert.EndsWith("sans tenir compte de la casse ni des accents.", rule.Value);
         Assert.False(field.ResourceNotFound, $"No text under the field for the rule {ruleCode}.");
-        Assert.Matches("est déjà pris( sous ce parent| au premier niveau)? : deux ", field.Value);
+        Assert.Matches("^« Nom » est déjà pris( sous ce parent| au premier niveau)? : deux ", field.Value);
         Assert.Contains(" qui ne diffèrent que par la casse ou les accents désignent ", field.Value);
     }
 

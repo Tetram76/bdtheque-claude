@@ -431,7 +431,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var field = page.Find("#edition-collection");
         Assert.Equal("true", field.GetAttribute("aria-invalid"));
         Assert.Contains(field.GetAttribute("aria-describedby")!.Split(' '),
-            id => page.Find($"#{id}").TextContent.Trim().StartsWith("Ce nom est déjà pris", StringComparison.Ordinal));
+            id => page.Find($"#{id}").TextContent.Trim().StartsWith("« PASTICHES » est déjà pris", StringComparison.Ordinal));
     }
 
     // Under the field, in the compact form of the single component of the errors, which the field describes itself by; its

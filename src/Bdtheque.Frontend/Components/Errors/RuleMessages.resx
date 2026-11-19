@@ -190,7 +190,7 @@
     <value>Le nom de la recherche est obligatoire.</value>
   </data>
   <data name="SavedSearch.NameAlreadyUsed" xml:space="preserve">
-    <value>Ce nom est déjà celui d&apos;une autre recherche enregistrée.</value>
+    <value>Deux recherches enregistrées ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
   </data>
   <data name="SavedSearch.VariableNameRequired" xml:space="preserve">
     <value>Le nom de la variable est obligatoire.</value>

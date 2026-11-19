@@ -103,7 +103,7 @@
     <value>Une adresse web complète, commençant par https:// ou http://.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed" xml:space="preserve">
-    <value>Ce nom est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.</value>
+    <value>« {0} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.</value>
   </data>
   <data name="PublisherCollection.NameAlreadyUsed.Related" xml:space="preserve">
     <value>Une autre collection prend aussi ce nom, à la casse ou aux accents près.</value>
@@ -113,6 +113,9 @@
   </data>
   <data name="PublisherCollection.NotOfPublisher" xml:space="preserve">
     <value>Une collection de l&apos;éditeur choisi.</value>
+  </data>
+  <data name="SavedSearch.NameAlreadyUsed" xml:space="preserve">
+    <value>« {0} » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même recherche enregistrée.</value>
   </data>
   <data name="Series.SortKeyRequired" xml:space="preserve">
     <value>Saisissez une clé, ou réinitialisez-la.</value>
