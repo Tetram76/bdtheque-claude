@@ -52,8 +52,15 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     }
 
     /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
-    public string Edition(EditionSummary edition) =>
-        Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
+    public string Edition(EditionSummary edition) => edition.PublisherName + EditionAfterItsPublisher(edition);
+
+    /// <summary>
+    /// The label of an edition after the name of its publisher, which a page presents apart to make it a link
+    /// (fonctionnel/presentation/libelle-d-une-edition.md): its collection, year and ISBN when known, from their leading
+    /// separator; empty when none is.
+    /// </summary>
+    public string EditionAfterItsPublisher(EditionSummary edition) =>
+        AfterThePublisher(edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
 
     /// <summary>
     /// A label split before its ISBN, mention included, which always ends it: an ISBN is a single block, which the
@@ -127,9 +134,12 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
         };
     }
 
-    private string Edition(string publisher, string? collectionName, int? publicationYear, string? isbn)
+    private string Edition(string publisher, string? collectionName, int? publicationYear, string? isbn) =>
+        publisher + AfterThePublisher(collectionName, publicationYear, isbn);
+
+    private string AfterThePublisher(string? collectionName, int? publicationYear, string? isbn)
     {
-        var label = publisher;
+        var label = "";
         if (collectionName is { } collection)
             label += $" ({collection})";
         if (publicationYear is { } year)

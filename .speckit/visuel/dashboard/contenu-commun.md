@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu commun'
 description: 'Rubriques communes à toutes les alternatives du dashboard.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:47:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T15:30:00Z }
 ---
 
 # Contenu commun
@@ -17,7 +17,7 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
     - « Encore de la place sur les étagères ? Pas sûr… »
     - « Attention, ça déborde des étagères ! »
   - les **compteurs** : albums, séries, éditions.
-- **À la une** : l'édition mise à la une du jour ([Page d'accueil](../../fonctionnel/page-accueil.md)), avec sa couverture, le libellé de son album, le sien et le résumé de l'album. L'album mène à sa fiche.
+- **À la une** : l'édition mise à la une du jour ([Page d'accueil](../../fonctionnel/page-accueil.md)), avec sa couverture, le libellé de son album, le sien et le résumé de l'album. L'album mène à sa fiche, et l'éditeur du libellé de l'édition à son site, comme tout éditeur (ci-dessous, [Libellé d'une édition](../../fonctionnel/presentation/libelle-d-une-edition.md)).
 - **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : [Page d'accueil](../../fonctionnel/page-accueil.md)), et un lien vers la liste des albums.
 - **Ça vaut combien, tout ça ?** :
   - la valeur totale estimée et la valeur totale connue, puis les prix moyen, médian, minimum et maximum ;
@@ -27,4 +27,4 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
 - **Plutôt quel genre ?** : les genres et leur nombre d'albums ; un album peut relever de plusieurs genres.
 - **Chez quels éditeurs ?** : les éditeurs et leur nombre d'éditions possédées.
 
-Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu mène à ce site, signalé comme un lien qui fait sortir de l'application ([Liens qui font sortir de l'application](../charte-graphique/liens-qui-font-sortir-de-l-application.md)), et n'est sinon pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).
+Chaque album mène à sa fiche, et chaque genre à sa liste. Un éditeur dont le site web est connu, présenté seul ou dans le libellé d'une édition, mène à ce site, signalé comme un lien qui fait sortir de l'application ([Liens qui font sortir de l'application](../charte-graphique/liens-qui-font-sortir-de-l-application.md)), et n'est sinon pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)).

@@ -37,7 +37,10 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas(string theme)
     {
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1280, Height = 720 });
-        await page.GotoAsync(AppPaths.Album(Application.AlbumId));
+        // The page ready on its own state before its editions are measured: its fonts laid out and its rows of names folded,
+        // which would otherwise move them afterwards (observed: 45.6 px lower in one run out of 4 to 20 in « La couverture du
+        // jour », #467).
+        await PageReadiness.GotoAsync(page, AppPaths.Album(Application.AlbumId));
         // The editions some way down the screen, the page scrolled.
         await page.EvaluateAsync($"() => window.scrollBy(0, ({EditionsTop}) - 200)");
         var top = await page.EvaluateAsync<double>($"() => {EditionsTop}");
@@ -46,6 +49,9 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         await page.GetByRole(AriaRole.Link, new() { Name = "Planche 1" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(SecondVisualAddress());
         await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Planche 1");
+        // The closing, the safe choice, has the focus, though the publisher of the label of the edition leads to its site
+        // before it (choix-implementation/socle/frontend.md, dialogues modaux).
+        await Assertions.Expect(viewer.GetByRole(AriaRole.Link, new() { Name = "Fermer la visionneuse" })).ToBeFocusedAsync();
 
         await viewer.GetByRole(AriaRole.Link, new() { Name = "Visuel suivant" }).ClickAsync();
         await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Planche 2");

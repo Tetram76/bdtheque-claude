@@ -300,6 +300,35 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void LabelsOfTheEditions_ThePublisherLeadsToItsWebsite_InTheIntentsAndTheViewer_NotInTheTitleOfAnEdition()
+    {
+        _catalog.Album = Album();
+
+        var page = Open($"?edition={FirstEditionId}&visual=1");
+
+        // A label of an edition that is no link itself: its publisher leads to its site, as any publisher, the rest of the
+        // label in text (fonctionnel/presentation/libelle-d-une-edition.md). Not the title of an edition, whose publisher row,
+        // right below, already leads there.
+        string[] Publishers(string selector) => [.. page.FindAll($"{selector} a.publisher").Select(a => a.GetAttribute("href") ?? "")];
+        Assert.Equal(["https://www.casterman.com"], Publishers(".album-intents .intent-label"));
+        Assert.Equal(["https://www.casterman.com"], Publishers(".visual-dialog-edition"));
+        Assert.All(page.FindAll(".intent-label, .visual-dialog-edition"), label => Assert.Single(label.QuerySelectorAll("a")));
+        Assert.Empty(page.FindAll(".edition-label a"));
+        Assert.Equal(2, page.FindAll(".edition-detail a.publisher").Count);
+    }
+
+    [Fact]
+    public void LabelOfAnEdition_WithoutTheWebsiteOfItsPublisher_IsText()
+    {
+        _catalog.Album = Album() with { Editions = [.. Album().Editions.Select(e => e with { PublisherWebsite = null })] };
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".intent-label a"));
+        Assert.Equal("Casterman [2023]", page.Find(".intent-label").TextContent.Trim());
+    }
+
+    [Fact]
     public void Isbn_InTheLabelAndInTheDetailOfAnEdition_IsASingleBlock()
     {
         _catalog.Album = Album();
@@ -444,7 +473,9 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var dialog = page.Find("app-modal-dialog dialog.visual-dialog");
         Assert.Equal("Planche 2", dialog.QuerySelector(".visual-dialog-title")!.TextContent.Trim());
-        Assert.Equal("Casterman [2001] - ISBN\u00A02-203-34424-5", dialog.QuerySelector(".visual-dialog-edition")!.TextContent.Trim());
+        Assert.Equal("Casterman, site externe [2001] - ISBN\u00A02-203-34424-5", dialog.QuerySelector(".visual-dialog-edition")!.TextContent.Trim());
+        // Its alternative text names the edition by its label alone, read as no link.
+        Assert.Equal("Planche 2 de l'édition Casterman [2001] - ISBN\u00A02-203-34424-5", dialog.QuerySelector("img")!.GetAttribute("alt"));
         Assert.Equal(VisualMediaRoutes.Display(Visuals[2]), dialog.QuerySelector("img")!.GetAttribute("src"));
         Assert.Equal("3 sur 4", dialog.QuerySelector(".visual-position")!.TextContent.Trim());
         Assert.Equal(AlbumRecordQuery.ForVisual(FirstEditionId, 2).Href(AlbumId), dialog.QuerySelector("a[aria-label='Visuel précédent']")!.GetAttribute("href"));
@@ -524,7 +555,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var intents = BlockOf(page, "Dans quelles éditions ?").QuerySelector(".album-intents")!;
         Assert.Equal("Intention d'acquisition", intents.QuerySelector(".album-intents-title")!.TextContent.Trim());
         var intent = Assert.Single(intents.QuerySelectorAll("li"));
-        Assert.Equal("Casterman [2023]", intent.QuerySelector(".intent-label")!.TextContent.Trim());
+        Assert.Equal("Casterman, site externe [2023]", intent.QuerySelector(".intent-label")!.TextContent.Trim());
         Assert.Equal("Édition spéciale · Normal (A4) · Cartonnée · 112 pages", intent.QuerySelector(".intent-facts")!.TextContent.Trim());
         // Posed at 23:30 universal time on 9 October: the 10th in Paris, the time zone of the browser.
         Assert.Equal("Posée le 10/10/2026", intent.QuerySelector(".intent-date")!.TextContent.Trim());
@@ -548,7 +579,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var page = Open();
 
         Assert.Equal("Intentions d'acquisition", page.Find(".album-intents-title").TextContent.Trim());
-        Assert.Equal(["Casterman [2023]", "Casterman (Corto Maltese en couleur) [2016]"],
+        Assert.Equal(["Casterman, site externe [2023]", "Casterman, site externe (Corto Maltese en couleur) [2016]"],
             page.FindAll(".album-intents li .intent-label").Select(l => l.TextContent.Trim()));
         Assert.Empty(page.FindAll(".album-intents li")[1].QuerySelectorAll(".intent-facts"));
     }

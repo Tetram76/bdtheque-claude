@@ -34,9 +34,14 @@ public sealed record DashboardContent(
 public sealed record DashboardCounters(int AlbumCount, int SeriesCount, int EditionCount);
 
 /// <summary>The owned edition in the spotlight of the day, the same for every display of the day.</summary>
+/// <param name="PublisherWebsite">
+/// Where the publisher of the edition leads, from the label of the edition (fonctionnel/presentation/libelle-d-une-edition.md);
+/// <c>null</c> when unknown, the publisher being then no link.
+/// </param>
 /// <param name="Cover">The first cover of the edition; <c>null</c> without any, the generic visual standing in for it.</param>
 /// <param name="Summary">The summary of the album, which the theme may shorten.</param>
-public sealed record SpotlightEdition(AlbumSummary Album, EditionSummary Edition, AlbumCover? Cover, string? Summary);
+public sealed record SpotlightEdition(
+    AlbumSummary Album, EditionSummary Edition, string? PublisherWebsite, AlbumCover? Cover, string? Summary);
 
 /// <summary>An edition entered in the collection.</summary>
 /// <param name="PublisherWebsite">

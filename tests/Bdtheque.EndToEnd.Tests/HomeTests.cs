@@ -74,10 +74,18 @@ public sealed partial class DashboardHomeTests(CollectionApplication application
         await Assertions.Expect(page.Locator("[data-counter]")).ToHaveTextAsync(["2 albums", "1 série", "2 éditions"]);
 
         var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
-        await spotlight.GetByRole(AriaRole.Link).ClickAsync();
+        // Its publisher leads to its site, as in the latest entries (fonctionnel/presentation/libelle-d-une-edition.md); the
+        // album, to its record.
+        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link, new() { NameRegex = PublisherLeavingTheApplication() }))
+            .ToHaveAttributeAsync("href", "https://www.casterman.com");
+        await spotlight.GetByRole(AriaRole.Link, new() { Name = "Le Port des brumes (Nestor Burma - T. 3)" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AlbumsSection)}/[0-9a-f-]+$"));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Le Port des brumes");
     }
+
+    // The accessible name of a publisher leading to its site: its name, then the announcement of a site out of the application.
+    [GeneratedRegex("^Casterman.*site externe$")]
+    private static partial Regex PublisherLeavingTheApplication();
 
     // The day of the spotlight and the dates of the entries are those of the browser (fonctionnel/page-accueil.md): the
     // welcome screen gives its time zone before the dashboard of a first visit.
@@ -111,7 +119,7 @@ public sealed partial class DashboardHomeTests(CollectionApplication application
 
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", ApplicationHost.BrowserTimeZoneId);
         var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
-        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link)).ToContainTextAsync("Le Port des brumes");
+        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link, new() { Name = "Le Port des brumes (Nestor Burma - T. 3)" })).ToBeVisibleAsync();
         Assert.DoesNotContain(universalDay, await Application.SpotlightDaysAsync());
     }
 
