@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 7.4
 <#
 .SYNOPSIS
     Lists the pages of the technical documentation (docs/tech) that the changes of a branch may make wrong, and, with

@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 7.4
 <#
 .SYNOPSIS
     Starts the version of a pull request on this machine, for its functional validation.
@@ -81,10 +81,11 @@ try {
         Remove-Item $sources -Recurse -Force
     }
     New-Item -ItemType Directory $sources | Out-Null
-    $archive = Join-Path $sources 'sources.tar'
-    git -C $repository archive --format=tar --output $archive $commit
-    tar -xf $archive -C $sources
-    Remove-Item $archive
+    # Streamed from git to tar, with no archive in between to remove: on Windows, a process outside the script (such as
+    # the real-time scan of an antivirus) may open a file just written, and removing the archive at once failed now and
+    # then, the file "being used by another process" (#552). PowerShell 7.4 passes the bytes of a native command to the
+    # next one unchanged.
+    git -C $repository archive --format=tar $commit | tar -xf - -C $sources
 
     # The commit validated, which the technical documentation names on each page (docker/validation/compose.yaml): the
     # extracted sources have no history to read it from.

@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 7.4
 <#
 .SYNOPSIS
     Stops the validation environment started by Start-Validation.ps1, and removes its data.

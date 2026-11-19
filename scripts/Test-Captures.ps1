@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 7.4
 <#
 .SYNOPSIS
     Compares the captures of the screens with their references, or updates the references, in a Linux container.

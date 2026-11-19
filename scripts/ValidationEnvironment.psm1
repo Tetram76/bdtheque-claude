@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 7.4
 <#
 .SYNOPSIS
     The validation environment of this machine, as Start-Validation.ps1 and Stop-Validation.ps1 share it.
