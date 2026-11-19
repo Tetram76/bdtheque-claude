@@ -22,6 +22,11 @@ public sealed class DayPalette
 
     // The border of a control (WCAG 2.2, 1.4.11).
     private const double NonText = 3;
+
+    // How far a placeholder stands apart from the text typed in its field (visuel/liste-albums/controles.md), as a contrast
+    // ratio: the smallest gap the themes already validated keep between them, rounded down.
+    private const double PlaceholderApart = 1.5;
+
     private static readonly Rgb White = new(255, 255, 255);
     private static readonly Rgb InkColor = Rgb.Parse(Ink);
 
@@ -54,7 +59,10 @@ public sealed class DayPalette
 
         // The header and the stage are of the deep colour: a field is lighter, a reflection of the accent lights a corner,
         // and the secondary texts are a light version of the deep colour, all read with a white text.
-        var headerField = White.Over(deep, 0.14).DarkenedUntil(color => color.ContrastWith(White) >= Legible);
+        // Its placeholder, legible on it, stands apart from the white text: the field is darkened until both hold, which a
+        // dark enough field always allows.
+        var headerField = White.Over(deep, 0.14)
+            .DarkenedUntil(color => color.ContrastWith(White) >= Legible && HeaderPlaceholder(color).ContrastWith(White) >= PlaceholderApart);
         var reflection = accent.Over(deep, 0.35).DarkenedUntil(color => color.ContrastWith(White) >= Legible);
         var lightOnDeep = White.Over(deep, 0.75)
             .LightenedUntil(color => new[] { deep, headerField, reflection }.All(paper => color.ContrastWith(paper) >= Legible));
@@ -76,11 +84,20 @@ public sealed class DayPalette
             ["day-header-field"] = headerField.Hex,
             ["day-header-field-border"] = White.Over(deep, 0.5).LightenedUntil(color => color.ContrastWith(deep) >= NonText).Hex,
             ["day-light-on-deep"] = lightOnDeep.Hex,
+            ["day-header-placeholder"] = HeaderPlaceholder(headerField).Hex,
             // The halo behind the album in the spotlight keeps a part of the deep colour, even when the cover is pale.
             ["day-halo"] = dominant.Over(deep, 0.7).Hex,
             ["day-reflection"] = reflection.Hex,
         });
     }
+
+    /// <summary>
+    /// The placeholder of the search field of the header: its white text attenuated towards the field, by the share of the
+    /// light texts on the deep colour, lightened until legible on the field. Unlike those texts, it is read on the field
+    /// only: lightened for the reflection of a pale accent too, it would reach the white of the text.
+    /// </summary>
+    private static Rgb HeaderPlaceholder(Rgb field) =>
+        White.Over(field, 0.75).LightenedUntil(color => color.ContrastWith(field) >= Legible);
 
     /// <summary>
     /// A text white or nearly black on the accent, whichever reaches 4.5:1; an accent of middle tone, which neither reaches,

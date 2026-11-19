@@ -153,20 +153,17 @@
   <data name="Intent.Created" xml:space="preserve">
     <value>Posée le</value>
   </data>
-  <data name="Confirm" xml:space="preserve">
-    <value>Confirmer</value>
+  <data name="EditIntent.Label" xml:space="preserve">
+    <value>Modifier l&apos;intention : {0}</value>
   </data>
-  <data name="Confirm.Label" xml:space="preserve">
-    <value>Confirmer l&apos;acquisition : {0}</value>
+  <data name="ToEdition" xml:space="preserve">
+    <value>Viser une édition…</value>
+  </data>
+  <data name="ToEdition.Label" xml:space="preserve">
+    <value>Viser une édition plutôt que l&apos;album</value>
   </data>
   <data name="More.Intent" xml:space="preserve">
     <value>Autres actions sur l&apos;intention : {0}</value>
-  </data>
-  <data name="Menu.EditIntent" xml:space="preserve">
-    <value>Modifier l&apos;intention</value>
-  </data>
-  <data name="Menu.ToEdition" xml:space="preserve">
-    <value>Viser plutôt une édition…</value>
   </data>
   <data name="Menu.ToAlbum" xml:space="preserve">
     <value>Viser plutôt l&apos;album…</value>

@@ -191,19 +191,16 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
             ("Édition", "Casterman (Fac-similé) [2013]", "Édition spéciale · Cartonnée", "Posée le 08/10/2026"),
             (Text(row.QuerySelector(".tag")!), Text(row.QuerySelector(".intent-target-detail")!), Text(row.QuerySelector(".intent-sub")!),
                 Text(row.QuerySelector(".intent-created")!)));
-        var confirm = row.QuerySelector(".intent-actions a.button")!;
+        // Its main action is « Modifier », presented as that of an edition, which opens its form; the purchase is confirmed from
+        // the list of the intents, not here, and the menu does not repeat « Modifier » (#444).
+        var edit = Assert.Single(row.QuerySelectorAll(".intent-actions a.button"));
         Assert.Equal(
-            ("Confirmer", "Confirmer l'acquisition : Casterman (Fac-similé) [2013]", AppPaths.AdminConfirmPurchase(AlbumId, OnEdition.Id)),
-            (Text(confirm), Normalized(confirm.GetAttribute("aria-label")!), confirm.GetAttribute("href")));
-        // The text alone would read as confirming the intent: its full name is told on hover too (#534).
-        Assert.Equal(confirm.GetAttribute("aria-label"), confirm.GetAttribute("title"));
-        // The album has other editions: the intent does not turn into one on the whole album.
-        Assert.Equal(
-            [
-                ("Modifier l'intention", AppPaths.AdminEditEdition(AlbumId, OnEdition.Edition!.Id)),
-                ("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnEdition.Id}"),
-            ],
-            Items(row));
+            ("Modifier", "Modifier l'intention : Casterman (Fac-similé) [2013]", AppPaths.AdminEditEdition(AlbumId, OnEdition.Edition!.Id)),
+            (Text(edit), Normalized(edit.GetAttribute("aria-label")!), edit.GetAttribute("href")));
+        Assert.True(edit.HasAttribute("data-icon-only-on-smartphone"));
+        // The album has other editions: the intent does not turn into one on the whole album, and its removal is alone in its menu.
+        Assert.Equal([("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnEdition.Id}")], Items(row));
+        Assert.Empty(row.QuerySelectorAll(".menu-separator"));
         Assert.Equal(
             "Une intention ne vise l'album entier que tant qu'il n'a aucune édition, possédée ou visée ; ensuite, elle vise une édition précise, saisie sans exemplaire ni valeur.",
             Text(intents.QuerySelector(".album-editions-help")!));
@@ -218,12 +215,14 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(("Album", "toute édition"), (Text(row.QuerySelector(".tag")!), Text(row.QuerySelector(".intent-target-detail")!)));
         Assert.Null(row.QuerySelector(".intent-sub"));
+        // Nothing to modify: its main action turns it into an intent on an edition, which its menu no longer repeats (#444).
+        var convert = Assert.Single(row.QuerySelectorAll(".intent-actions a.button"));
         Assert.Equal(
-            [
-                ("Viser plutôt une édition…", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnAlbum.Id)),
-                ("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnAlbum.Id}"),
-            ],
-            Items(row));
+            ("Viser une édition…", "Viser une édition plutôt que l'album", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnAlbum.Id)),
+            (Text(convert), Normalized(convert.GetAttribute("aria-label")!), convert.GetAttribute("href")));
+        Assert.True(convert.HasAttribute("data-icon-only-on-smartphone"));
+        Assert.Equal([("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnAlbum.Id}")], Items(row));
+        Assert.Empty(row.QuerySelectorAll(".menu-separator"));
     }
 
     [Fact]
@@ -233,7 +232,13 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         var row = Assert.Single(Block(Open(""), "Les intentions d'acquisition").QuerySelectorAll(".intent-row"));
 
-        Assert.Contains(("Viser plutôt l'album…", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnEdition.Id)), Items(row));
+        Assert.Equal(
+            [
+                ("Viser plutôt l'album…", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnEdition.Id)),
+                ("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnEdition.Id}"),
+            ],
+            Items(row));
+        Assert.Single(row.QuerySelectorAll(".menu-separator"));
     }
 
     [Fact]
