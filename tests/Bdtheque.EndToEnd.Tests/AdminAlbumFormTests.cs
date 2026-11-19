@@ -63,13 +63,20 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
     }
 
     [Theory, InEachTheme]
-    public async Task SortKey_ReadOnlyUntilATitleIsEntered_ThenEnteredByHand(string theme)
+    public async Task SortKey_ThatOfTheSeriesUntilATitleIsEntered_ThenEnteredByHand(string theme)
     {
-        // Without a title, an album is sorted by the key of its series, never by one entered by hand
-        // (visuel/saisie-album/contenu.md, #465).
+        // Without a title, an album is sorted by the key of its series, which the field shows read-only, never by one entered
+        // by hand (visuel/saisie-album/contenu.md, #465).
+        await PostAsync<SeriesForm>("/admin/series", Series($"Les Marsupilamis {_marker}", []));
         var page = await OpenAsync(theme, AppPaths.AdminNewAlbum);
         await ControlsPage.WaitUntilInteractiveAsync(page);
         var sortKey = page.GetByLabel("Clé de tri");
+        await Assertions.Expect(sortKey).Not.ToBeEditableAsync();
+        await Assertions.Expect(sortKey).ToHaveValueAsync("");
+
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Série" }).PressSequentiallyAsync($"Les Marsupilamis {_marker}");
+        await page.GetByRole(AriaRole.Option, new() { Name = $"Les Marsupilamis {_marker}", Exact = true }).ClickAsync();
+        await Assertions.Expect(sortKey).ToHaveValueAsync($"Marsupilamis {_marker} [Les]");
         await Assertions.Expect(sortKey).Not.ToBeEditableAsync();
 
         await page.GetByLabel("Titre").FillAsync($"Le Lotus bleu {_marker}");

@@ -183,12 +183,25 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
     {
         var field = Render<TitleSortKeyField>(parameters => parameters
             .Add(p => p.Id, "sort-key")
-            .Add(p => p.UntitledPlaceholder, "Sans titre, l'album est rangé à la clé de la série")
+            .Add(p => p.UntitledKey, "Tintin")
             .Add(p => p.UntitledHelp, "Sans titre propre, l'album est rangé à la clé de sa série."));
 
-        Assert.Equal("Sans titre, l'album est rangé à la clé de la série", field.Find("#sort-key").GetAttribute("placeholder"));
+        // The key retained, shown as an automatic key, the help alone saying where it comes from (#465).
+        Assert.Equal(("Tintin", "Auto"), (field.Find("#sort-key").GetAttribute("value"), field.Find(".sort-key-mode").TextContent));
+        Assert.Null(field.Find("#sort-key").GetAttribute("placeholder"));
         Assert.Equal("Sans titre propre, l'album est rangé à la clé de sa série.", field.Find("#sort-key-help").TextContent);
         Assert.Empty(_sent);
+    }
+
+    [Fact]
+    public void TitleSortKeyField_WithoutTitleNorKeyRetained_IsEmpty_WithoutRepeatingItsHelp()
+    {
+        var field = Render<TitleSortKeyField>(parameters => parameters
+            .Add(p => p.Id, "sort-key")
+            .Add(p => p.UntitledHelp, "Calculée à partir du titre."));
+
+        var input = field.Find("#sort-key");
+        Assert.Equal((null, null), (input.GetAttribute("value"), input.GetAttribute("placeholder")));
     }
 
     [Fact]
@@ -199,7 +212,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Id, "sort-key")
             .Add(p => p.Title, "Tintin")
             .Add(p => p.StoredKey, "Tintin")
-            .Add(p => p.UntitledPlaceholder, "—")
             .Add(p => p.UntitledHelp, "—"));
         Assert.Equal("Tintin", field.Find("#sort-key").GetAttribute("value"));
 
@@ -218,7 +230,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Title, "Les Bijoux de la Castafiore")
             .Add(p => p.ManualKey, "Castafiore")
             .Add(p => p.ManualKeyChanged, value => manual = value)
-            .Add(p => p.UntitledPlaceholder, "—")
             .Add(p => p.UntitledHelp, "—"));
 
         Assert.Equal(("Castafiore", "Manuelle"), (field.Find("#sort-key").GetAttribute("value"), field.Find(".sort-key-mode").TextContent));
@@ -242,7 +253,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Title, title)
             .Add(p => p.StoredKey, title)
             .Add(p => p.ManualKey, manualKey)
-            .Add(p => p.UntitledPlaceholder, "—")
             .Add(p => p.UntitledHelp, "—"));
 
         var label = field.Find("label[for=sort-key]");
@@ -261,7 +271,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Id, "sort-key")
             .Add(p => p.Title, title)
             .Add(p => p.StoredKey, string.IsNullOrWhiteSpace(title) ? null : title)
-            .Add(p => p.UntitledPlaceholder, "—")
             .Add(p => p.UntitledHelp, "—"));
 
         Assert.Equal(readOnly, field.Find("#sort-key").HasAttribute("readonly"));
@@ -274,7 +283,6 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
             .Add(p => p.Id, "sort-key")
             .Add(p => p.Title, "Tintin")
             .Add(p => p.ManualKey, "")
-            .Add(p => p.UntitledPlaceholder, "—")
             .Add(p => p.UntitledHelp, "—")
             .Add(p => p.Error, "La clé de tri ne peut pas être vide."));
 

@@ -52,7 +52,7 @@ else
                            aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />
                 </Field>
                 <TitleSortKeyField Id="album-sort-key" Title="@Entry.Title" StoredKey="@Entry.StoredSortKey" @bind-ManualKey="Entry.ManualSortKey"
-                                   UntitledPlaceholder="@(Entry.Series is null ? L["SortKey.Placeholder"] : L["SortKey.Placeholder.Series"])"
+                                   UntitledKey="@Entry.SeriesSortKey"
                                    UntitledHelp="@(Entry.Series is null ? L["SortKey.Help.None"] : L["SortKey.Help.Series"])" Error="@Errors.For("/manualSortKey")" />
             </div>
         </Block>
@@ -219,12 +219,13 @@ else
         return AlbumEntry.Of(form, await SeriesAsync(form.Content.SeriesId));
     }
 
-    private async Task<SeriesDetail?> SeriesAsync(Guid? seriesId) =>
-        seriesId is { } id ? await Api.GetAsync<SeriesDetail>($"/catalog/series/{id}") : null;
+    // Read as its own form reads it: what the album displays through it, and its sort key in force, computed or entered by hand.
+    private async Task<SeriesForm?> SeriesAsync(Guid? seriesId) =>
+        seriesId is { } id ? await Api.GetAsync<SeriesForm>($"/admin/series/{id}") : null;
 
     // What the album displays through its series, once chosen or saved: a series that can no longer be read shows nothing
     // through it, and fails neither the choice nor the saving, which tells what became of it.
-    private async Task<SeriesDetail?> SeriesOrNoneAsync(Guid? seriesId)
+    private async Task<SeriesForm?> SeriesOrNoneAsync(Guid? seriesId)
     {
         try
         {
@@ -259,6 +260,8 @@ else
         Entry.ShowSeries(shown);
         if (series is null)
             return;
+        if (added)
+            await ShowNewSeriesSortKeyAsync(series, choice);
         try
         {
             var credits = Entry.ToContent().Contributions;
@@ -276,6 +279,21 @@ else
         catch (ApiProblemException)
         {
             // Nothing taken from a series that cannot be read.
+        }
+    }
+
+    // A series added on the spot will have the key of its title, in the automatic mode, which the domain computes.
+    private async Task ShowNewSeriesSortKeyAsync(RecordOption series, int choice)
+    {
+        try
+        {
+            var key = await Api.GetAsync<TitleSortKey>($"/admin/sort-keys/title?title={Uri.EscapeDataString(series.Label)}");
+            if (choice == _seriesChoice)
+                Entry!.SeriesSortKey = key.SortKey;
+        }
+        catch (ApiProblemException)
+        {
+            // No key shown; the album is sorted by that of its series anyway, once both are saved.
         }
     }
 

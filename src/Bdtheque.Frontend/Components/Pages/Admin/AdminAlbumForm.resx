@@ -165,12 +165,6 @@
   <data name="SortKey.Help.Series" xml:space="preserve">
     <value>Sans titre propre, l&apos;album est rangé à la clé de sa série.</value>
   </data>
-  <data name="SortKey.Placeholder" xml:space="preserve">
-    <value>Calculée à partir du titre</value>
-  </data>
-  <data name="SortKey.Placeholder.Series" xml:space="preserve">
-    <value>Sans titre, l&apos;album est rangé à la clé de la série</value>
-  </data>
   <data name="Summary" xml:space="preserve">
     <value>Résumé</value>
   </data>

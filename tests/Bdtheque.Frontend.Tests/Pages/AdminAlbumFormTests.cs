@@ -69,8 +69,8 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
         Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         _api.Answers[$"/admin/albums/{AlbumId}"] = Bijoux;
-        _api.Answers[$"/catalog/series/{SeriesId}"] = Series(SeriesId, "Tintin", ["Aventure"], ["Univers Hergé"]);
-        _api.Answers[$"/catalog/series/{OtherSeriesId}"] = Series(OtherSeriesId, "Blacksad", ["Polar"], []);
+        _api.Answers[$"/admin/series/{SeriesId}"] = Series(SeriesId, "Tintin", ["Aventure"], ["Univers Hergé"]);
+        _api.Answers[$"/admin/series/{OtherSeriesId}"] = Series(OtherSeriesId, "Blacksad", ["Polar"], []);
         _api.Answers["/admin/sort-keys/title"] = new TitleSortKey("Lotus bleu [Le]");
     }
 
@@ -433,6 +433,34 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task SortKey_WithoutTitle_IsThatOfTheSeries_ShownAsAnAutomaticKey()
+    {
+        // The key retained, that of the series, rather than a placeholder repeating the help (visuel/saisie-album/contenu.md, #465).
+        var page = OpenNew();
+        var key = page.Find("#album-sort-key");
+        Assert.Equal((null, null, true), (key.GetAttribute("value"), key.GetAttribute("placeholder"), key.HasAttribute("readonly")));
+
+        await ChooseSeriesAsync(page, new RecordOption(OtherSeriesId, "Blacksad", null));
+
+        key = page.Find("#album-sort-key");
+        Assert.Equal(("Blacksad", "Auto", true), (key.GetAttribute("value"), page.Find(".sort-key-mode").TextContent, key.HasAttribute("readonly")));
+        Assert.Equal("Sans titre propre, l'album est rangé à la clé de sa série.", page.Find("#album-sort-key-help").TextContent);
+    }
+
+    [Fact]
+    public async Task SortKey_WithoutTitle_InASeriesCreatedOnTheSpot_IsTheKeyOfItsTitle()
+    {
+        _api.Answers["/admin/sort-keys/title"] = new TitleSortKey("Vieux Fourneaux [Les]");
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new SeriesAlbumContributions(false, []));
+        var page = OpenNew();
+
+        await CreateSeriesOnTheSpotAsync(page, "Les Vieux Fourneaux");
+
+        Assert.Equal("Vieux Fourneaux [Les]", page.Find("#album-sort-key").GetAttribute("value"));
+        Assert.Contains("/admin/sort-keys/title?title=Les%20Vieux%20Fourneaux", _api.Requested);
+    }
+
+    [Fact]
     public async Task Series_Chosen_GivesWhatTheAlbumDisplaysThroughIt()
     {
         var page = OpenAlbum();
@@ -638,7 +666,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         // A series that does not exist yet is not read: its authors are asked of the domain as those of a series not created yet.
         var asked = _api.Written.Single();
         Assert.Equal((HttpMethod.Post, "/admin/series/new/album-contributions"), (asked.Method, asked.Path));
-        Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/catalog/series/", StringComparison.Ordinal));
+        Assert.DoesNotContain(_api.Requested, path => path.StartsWith("/admin/series/", StringComparison.Ordinal));
         Assert.Empty(page.FindAll(".inherited-tags"));
 
         _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
@@ -773,9 +801,15 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         return picker.InvokeAsync(() => picker.Instance.ValueChanged.InvokeAsync(series));
     }
 
-    private static SeriesDetail Series(Guid id, string title, string[] genres, string[] universes) => new(
-        id, title, null, null, false, null, null, null, null,
-        [.. genres.Select(g => new GenreListItem(Guid.NewGuid(), g))],
-        [.. universes.Select(u => new UniverseInHierarchy(new UniverseListItem(Guid.NewGuid(), u, null, null), []))],
-        [], new SeriesOverview(0, []), [], DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch);
+    // Its sort key is its title, which none of these has an article to put at its end.
+    private static SeriesForm Series(Guid id, string title, string[] genres, string[] universes) => new(
+        id, title,
+        new SeriesContent(title, null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []),
+        1,
+        new SeriesFormReferences(null, null,
+            [.. genres.Select(g => new GenreListItem(Guid.NewGuid(), g))],
+            [.. universes.Select(u => new UniverseInHierarchy(new UniverseListItem(Guid.NewGuid(), u, null, null), []))],
+            []),
+        DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch);
 }

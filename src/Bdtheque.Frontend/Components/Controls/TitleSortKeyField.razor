@@ -18,8 +18,7 @@
         }
     </Beside>
     <ChildContent>
-        <input id="@control.Id" type="text" class="sort-key-input" value="@Shown" placeholder="@(HasTitle ? null : UntitledPlaceholder)"
-               readonly="@(!HasTitle)" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @oninput="EnterAsync" />
+        <input id="@control.Id" type="text" class="sort-key-input" value="@Shown" readonly="@(!HasTitle)" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @oninput="EnterAsync" />
     </ChildContent>
 </Field>
 
@@ -49,9 +48,12 @@
     [Parameter]
     public string? StoredKey { get; set; }
 
-    /// <summary>What stands in the field for a record without title (e.g. an album sorted by its series).</summary>
-    [Parameter, EditorRequired]
-    public string UntitledPlaceholder { get; set; } = null!;
+    /// <summary>
+    /// The key a record without title is sorted by, shown as an automatic key (e.g. that of the series of an album);
+    /// <c>null</c> when none is retained, the field then being empty, with no placeholder to repeat its help.
+    /// </summary>
+    [Parameter]
+    public string? UntitledKey { get; set; }
 
     /// <summary>The help of a record without title.</summary>
     [Parameter, EditorRequired]
@@ -65,7 +67,7 @@
 
     private bool HasTitle => !string.IsNullOrWhiteSpace(Title);
 
-    private string? Shown => IsManual ? ManualKey : _computed;
+    private string? Shown => IsManual ? ManualKey : HasTitle ? _computed : UntitledKey;
 
     private string Help => (IsManual, HasTitle) switch
     {
