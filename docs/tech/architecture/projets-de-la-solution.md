@@ -53,7 +53,7 @@ Les tests sont répartis en projets selon ce qu'ils vérifient et les ressources
 | Projet | Ce qu'il vérifie | Ressources nécessaires |
 | --- | --- | --- |
 | `Bdtheque.Domain.Tests` | Il vérifie les règles du domaine. | Aucune. |
-| `Bdtheque.Infrastructure.Tests` | Il vérifie la persistance (migrations, contraintes de la base). Il contient aussi les tests du dépôt, de catégorie `Repository`, qui confrontent les fichiers du dépôt à leurs règles, dont la structure du `.speckit/` et celle de cette documentation. | PostgreSQL, pour les tests de persistance seulement. |
+| `Bdtheque.Infrastructure.Tests` | Il vérifie la persistance (migrations, contraintes de la base). Il contient aussi les tests du dépôt, de catégorie `Repository`, qui confrontent les fichiers du dépôt à leurs règles, dont la structure du `.speckit/` et celle de cette documentation. Parmi eux, ceux du verrou de l'environnement de validation lancent ses scripts, qui doivent refuser de démarrer pendant qu'une autre opération le tient. | PostgreSQL, pour les tests de persistance seulement ; PowerShell (`pwsh`), pour ceux du verrou. |
 | `Bdtheque.Api.Tests` | Il vérifie les endpoints, sur une API hébergée en mémoire dans le processus du test. | PostgreSQL. |
 | `Bdtheque.Frontend.Tests` | Il vérifie les composants Blazor avec bUnit, qui les rend sans navigateur. | Aucune. |
 | `Bdtheque.EndToEnd.Tests` | Il pilote l'application complète dans Chromium avec Playwright, et compare les captures de référence des écrans. | PostgreSQL et Chromium. |

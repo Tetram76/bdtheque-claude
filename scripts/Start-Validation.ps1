@@ -59,7 +59,7 @@ $sources = Get-ValidationSources
 
 # Held from the first step to the last: the extraction of the sources, the build of the images and the load of the
 # data of a start are those of a single version.
-$lock = Lock-ValidationEnvironment "the start of $(if ($PullRequest) { "pull request #$PullRequest" } else { $Ref })"
+$lock = Lock-ValidationEnvironment "the start of $(if ($PullRequest) { "pull request #$PullRequest" } else { "'$Ref'" })"
 try {
     if ($PullRequest) {
         git -C $repository fetch --quiet origin "pull/$PullRequest/head"
