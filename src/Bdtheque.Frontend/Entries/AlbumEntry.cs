@@ -73,6 +73,12 @@ public sealed class AlbumEntry
     /// <summary>Its authors, genres and universes, those added on the spot included.</summary>
     public CitedRecords Cited { get; set; } = new();
 
+    /// <summary>
+    /// The sort key of the series, by which an album without a title of its own is sorted, and which its form then shows
+    /// (visuel/saisie-album/contenu.md); <c>null</c> without a series, or with one that cannot be read.
+    /// </summary>
+    public string? SeriesSortKey { get; set; }
+
     /// <summary>The genres the album displays through its series, which are modified on the form of the series.</summary>
     public List<string> SeriesGenres { get; set; } = [];
 
@@ -83,7 +89,7 @@ public sealed class AlbumEntry
     public static AlbumEntry New(string? title = null) => new() { Title = title };
 
     /// <summary>The album as the API gives it, with what its series gives it to display, if any.</summary>
-    public static AlbumEntry Of(AlbumForm form, SeriesDetail? series)
+    public static AlbumEntry Of(AlbumForm form, SeriesForm? series)
     {
         var content = form.Content;
         var references = form.References;
@@ -115,11 +121,12 @@ public sealed class AlbumEntry
         return entry;
     }
 
-    /// <summary>What the series gives the album to display; nothing without a series.</summary>
-    public void ShowSeries(SeriesDetail? series)
+    /// <summary>What the series gives the album to display, and the key it sorts it by without a title; nothing without a series.</summary>
+    public void ShowSeries(SeriesForm? series)
     {
-        SeriesGenres = series is null ? [] : [.. series.Genres.Select(g => g.Label)];
-        SeriesUniverses = series is null ? [] : [.. series.Universes.Select(u => CitedRecords.Universe(u).Label)];
+        SeriesGenres = series is null ? [] : [.. series.References.Genres.Select(g => g.Label)];
+        SeriesUniverses = series is null ? [] : [.. series.References.Universes.Select(u => CitedRecords.Universe(u).Label)];
+        SeriesSortKey = series?.SortKey;
     }
 
     /// <summary>

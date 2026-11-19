@@ -148,11 +148,11 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
 
             <div style="display: flex; flex-direction: column; gap: 4px">
               <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px">
-                <label for="f-key" style="{{lbl}}">Clé de tri</label>
+                <label for="f-key" style="{{lbl}}">Clé de tri <span style="font-weight: 400; color: {{t.muted}}">(obligatoire)</span></label>
                 <span style="padding: 0 8px; border: {{keyBadgeB}}; border-radius: {{t.btnR}}; background: {{keyBadgeBg}}; color: {{keyBadgeFg}}; font-weight: 700; font-size: 11px; letter-spacing: .04em; text-transform: uppercase">{{keyMode}}</span>
                 <sc-if value="{{keyManual}}"><button type="button" style="padding: 0; border: 0; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Réinitialiser</button></sc-if>
               </span>
-              <input id="f-key" type="text" value="{{x.key}}" placeholder="{{x.keyPh}}" style="{{inp}}">
+              <input id="f-key" type="text" readonly="{{keyReadonly}}" value="{{x.key}}" style="{{inp}}">
               <span style="{{help}}">{{keyHelp}}</span>
             </div>
           </section>
@@ -468,7 +468,7 @@ const EXAMPLES = {
     existing: true, heading: "Modifier l'album", crumb: 'Les Bijoux de la Castafiore', labelNote: '',
     series: 'Tintin', seriesHelp: 'Rattaché à une série, l\'album peut se passer de titre : la série et le tome l\'identifient.',
     title: 'Les Bijoux de la Castafiore', titleNote: '', titlePh: 'Sans titre, l\'album prend celui de la série',
-    key: 'Bijoux de la Castafiore [Les]', manualKey: 'Bijoux Castafiore [Les]', keyPh: '',
+    key: 'Bijoux de la Castafiore [Les]', manualKey: 'Bijoux Castafiore [Les]',
     type: 'regular', hs: false, tome: '21', from: '', to: '', month: 0, year: '1963',
     credits: { 'Scénario': ['Hergé'], 'Dessin': ['Hergé'], 'Couleurs': [] }, copied: false,
     genres: ['Humour'], genresSeries: ['Aventure'], universes: ['Univers Hergé › Moulinsart'], universesSeries: ['Univers Hergé'],
@@ -482,7 +482,7 @@ const EXAMPLES = {
     existing: false, creating: true, heading: 'Nouvel album', crumb: 'Nouvel album', labelNote: '',
     series: '', seriesHelp: 'Sans série, l\'album est isolé : son titre est alors obligatoire.',
     title: '', titleNote: '(obligatoire)', titlePh: 'Titre de l\'album',
-    key: '', manualKey: '', keyPh: 'Calculée à partir du titre',
+    key: '', manualKey: '',
     type: 'regular', hs: false, tome: '', from: '', to: '', month: 0, year: '',
     credits: { 'Scénario': [], 'Dessin': [], 'Couleurs': [] }, copied: false,
     genres: [], genresSeries: [], universes: [], universesSeries: [],
@@ -493,7 +493,8 @@ const EXAMPLES = {
     existing: true, heading: "Modifier l'album", crumb: 'Blacksad - Intégrale [1 à 5]', labelNote: '',
     series: 'Blacksad', seriesHelp: 'Rattaché à une série, l\'album peut se passer de titre : la série et le tome l\'identifient.',
     title: '', titleNote: '', titlePh: 'Sans titre, l\'album prend celui de la série',
-    key: '', manualKey: '', keyPh: 'Sans titre, l\'album est rangé à la clé de la série',
+    // Without a title of its own, the key retained is that of its series (#465).
+    key: 'Blacksad', manualKey: '',
     type: 'omnibus', hs: false, tome: '', from: '1', to: '5', month: 10, year: '2023',
     credits: { 'Scénario': ['Juan Díaz Canales'], 'Dessin': ['Juanjo Guarnido'], 'Couleurs': ['Juanjo Guarnido'] }, copied: true,
     genres: [], genresSeries: ['Polar', 'Animalier'], universes: [], universesSeries: [],
@@ -592,6 +593,8 @@ class View extends Mockup {
       titleInvalid: titleError ? 'true' : 'false',
       titleBorder: titleError ? '2px solid ' + t.del : t.inB,
       keyManual,
+      // Read-only without a title: an album without one stays sorted by the key of its series (#465).
+      keyReadonly: !x.title,
       keyMode: keyManual ? 'Manuelle' : 'Auto',
       keyBadgeBg: keyManual ? t.acc : 'transparent',
       keyBadgeFg: keyManual ? t.onAcc : t.muted,

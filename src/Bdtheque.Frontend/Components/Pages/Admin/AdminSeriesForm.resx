@@ -93,9 +93,6 @@
   <data name="Title.Placeholder" xml:space="preserve">
     <value>Titre de la série</value>
   </data>
-  <data name="SortKey.Placeholder" xml:space="preserve">
-    <value>Calculée à partir du titre</value>
-  </data>
   <data name="SortKey.Help" xml:space="preserve">
     <value>Calculée à partir du titre, article reporté à la fin ; la modifier la fige.</value>
   </data>

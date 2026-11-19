@@ -43,7 +43,7 @@ else
                            aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />
                 </Field>
                 <TitleSortKeyField Id="series-sort-key" Title="@Entry.Title" StoredKey="@Entry.StoredSortKey" @bind-ManualKey="Entry.ManualSortKey"
-                                   UntitledPlaceholder="@L["SortKey.Placeholder"]" UntitledHelp="@L["SortKey.Help"]" Error="@Errors.For("/manualSortKey")" />
+                                   UntitledHelp="@L["SortKey.Help"]" Error="@Errors.For("/manualSortKey")" />
                 <Field Id="series-status" Label="@L["Status"]" Help="@L["Status.Help"]" Context="control">
                     <select id="@control.Id" class="series-list" aria-describedby="@control.DescribedBy" @bind="Entry.Status">
                         <option value="">@L["Status.None"]</option>

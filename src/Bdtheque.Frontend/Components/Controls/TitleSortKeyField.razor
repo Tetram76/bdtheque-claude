@@ -6,24 +6,21 @@
 @* The sort key of a title, always visible in the entry form (fonctionnel/presentation/tri-et-navigation-par-initiale.md#calcul-et-stockage-de-la-clé-de-tri),
    marked Auto or Manuelle: in the automatic mode, the key the domain computes from the title, asked for to the API at each
    change of the title, never computed here; typing a key of one's own fixes it, and Réinitialiser computes it again from the
-   title. Interactive. *@
-<div class="sort-key">
-    <div class="sort-key-heading">
-        <label class="sort-key-label" for="@Id">@L["Label"]</label>
+   title. Interactive. Always required, the field showing a key in either mode, with or without a title; read-only until a
+   title is entered, a record without one being sorted by the key of its series, never by one entered by hand
+   (visuel/saisie-album/contenu.md, #465). *@
+<Field Id="@Id" Label="@L["Label"]" Required="true" Help="@Help" Error="@Error" Context="control">
+    <Beside>
         <span class="sort-key-mode" data-mode="@(IsManual ? "manual" : "auto")">@L[IsManual ? "Manual" : "Auto"]</span>
         @if (IsManual)
         {
             <button type="button" class="sort-key-reset" @onclick="ResetAsync">@L["Reset"]</button>
         }
-    </div>
-    <input id="@Id" type="text" value="@Shown" placeholder="@(HasTitle ? null : UntitledPlaceholder)" aria-describedby="@DescribedBy"
-           aria-invalid="@(Error is null ? null : "true")" @oninput="EnterAsync" />
-    @if (Error is not null)
-    {
-        <p class="sort-key-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
-    }
-    <p class="sort-key-help" id="@HelpId">@Help</p>
-</div>
+    </Beside>
+    <ChildContent>
+        <input id="@control.Id" type="text" class="sort-key-input" value="@Shown" readonly="@(!HasTitle)" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @oninput="EnterAsync" />
+    </ChildContent>
+</Field>
 
 @code {
     // The number of the title whose key is shown: each change of the title gets the next one, before anything is awaited,
@@ -51,9 +48,12 @@
     [Parameter]
     public string? StoredKey { get; set; }
 
-    /// <summary>What stands in the field for a record without title (e.g. an album sorted by its series).</summary>
-    [Parameter, EditorRequired]
-    public string UntitledPlaceholder { get; set; } = null!;
+    /// <summary>
+    /// The key a record without title is sorted by, shown as an automatic key (e.g. that of the series of an album);
+    /// <c>null</c> when none is retained, the field then being empty, with no placeholder to repeat its help.
+    /// </summary>
+    [Parameter]
+    public string? UntitledKey { get; set; }
 
     /// <summary>The help of a record without title.</summary>
     [Parameter, EditorRequired]
@@ -67,7 +67,12 @@
 
     private bool HasTitle => !string.IsNullOrWhiteSpace(Title);
 
-    private string? Shown => IsManual ? ManualKey : _computed;
+    private string? Shown => (IsManual, HasTitle) switch
+    {
+        (true, _) => ManualKey,
+        (false, true) => _computed,
+        _ => UntitledKey,
+    };
 
     private string Help => (IsManual, HasTitle) switch
     {
@@ -75,12 +80,6 @@
         (false, true) => L["Help.Auto"],
         _ => UntitledHelp,
     };
-
-    private string ErrorId => $"{Id}-error";
-
-    private string HelpId => $"{Id}-help";
-
-    private string DescribedBy => Error is null ? HelpId : $"{ErrorId} {HelpId}";
 
     protected override async Task OnParametersSetAsync()
     {
