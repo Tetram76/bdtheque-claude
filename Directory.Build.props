@@ -9,7 +9,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <!-- The French UI needs culture-aware date/currency formatting and linguistic sorting
          (fr-FR), which the globalization-invariant mode would silently disable. The base
-         images (aspnet, noble-chiseled-extra variant) ship ICU for that reason: the plain
+         images (aspnet, chiseled-extra variant) ship ICU for that reason: the plain
          chiseled variant does not. See choix-implementation/socle/transverse/internationalisation.md. -->
     <InvariantGlobalization>false</InvariantGlobalization>
     <Deterministic>true</Deterministic>

@@ -29,7 +29,7 @@ RUN dotnet publish src/Bdtheque.Api/Bdtheque.Api.csproj -c Release -a $TARGETARC
 
 # Chiseled: neither shell nor package manager, non-root user; "extra" for ICU, which the French
 # linguistic sorting and formatting require (choix-implementation/socle/transverse/internationalisation.md).
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-noble-chiseled-extra AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-resolute-chiseled-extra AS final
 WORKDIR /app
 
 COPY --from=build /app .
