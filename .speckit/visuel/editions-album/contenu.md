@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la page des éditions et intentions d''acquisition d''un album.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T15:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T10:00:00Z }
 ---
 
 # Contenu
@@ -22,8 +22,13 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T15:45:00Z }
     - pour un album qui a une édition, possédée ou visée, seule une édition précise peut l'être : un bouton direct, **Nouvelle intention sur une édition…**, sans choix à faire ; plusieurs éditions d'un même album peuvent être visées, une intention chacune ;
     - dans les deux cas, viser une édition ouvre la fiche de saisie d'une nouvelle intention d'acquisition ([`saisie-edition/`](../saisie-edition/index.md)), sans exemplaire ni valeur ;
     - aucun bouton pour un album lui-même visé ;
-  - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec sa catégorie et sa reliure en petit dessous ; la date où elle a été posée ; puis ses actions : **Confirmer**, que son infobulle et les lecteurs d'écran nomment « Confirmer l'acquisition » (décision de l'utilisateur, #534, [Réalisation d'une intention](../../fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention)) et un menu « ⋯ » : **Modifier l'intention**, pour une intention sur une édition ; **Viser plutôt une édition…** pour une intention sur l'album, ou **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée ; et, séparée par un filet, **Retirer l'intention…**, qui supprime avec elle l'édition visée ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)). Un clic en dehors d'un menu ouvert le referme ;
+  - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec sa catégorie et sa reliure en petit dessous ; la date où elle a été posée ; puis ses actions, une action principale présentée comme le **Modifier** d'une ligne d'édition, et un menu « ⋯ » (décisions de l'utilisateur, #444) :
+    - une intention sur une **édition** a pour action principale **Modifier**, qui ouvre sa fiche de saisie ([`saisie-edition/`](../saisie-edition/index.md)) ; son menu propose **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée, puis, séparée par un filet, **Retirer l'intention…** ;
+    - une intention sur l'**album**, qui n'a rien à modifier, n'a pas de **Modifier** : son action principale est **Viser une édition…**, qui la convertit en intention sur une édition, et son menu ne propose que **Retirer l'intention…** ;
+    - **Retirer l'intention…** supprime avec elle l'édition visée ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) ;
+    - la confirmation de l'acquisition ne se fait pas depuis cette page, mais depuis la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) et le lien « Confirmer les acquisitions » de l'accueil de l'administration ([Réalisation d'une intention](../../fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention)) ;
+    - un clic en dehors d'un menu ouvert le referme ;
   - sans intention, « Aucune intention d'acquisition » ;
   - l'aide rappelle qu'une intention ne vise l'album entier que tant qu'il n'a aucune édition, possédée ou visée.
 - Au bas du bloc de l'album, sous son aide, les dates de création et de modification de l'album, introduites par ce qu'elles concernent (« Album créé le …, modifié le … »), jamais par « Fiche ».
-- **Smartphone** : chaque édition tient sur deux lignes, la vignette à gauche : le libellé et les actions (Modifier réduit à son icône), puis le détail ; chaque intention de même, Confirmer réduit à son icône, la date passant sous ce qu'elle vise.
+- **Smartphone** : chaque édition tient sur deux lignes, la vignette à gauche : le libellé et les actions (Modifier réduit à son icône), puis le détail ; chaque intention de même, Modifier ou Viser une édition… réduit à son icône, la date passant sous ce qu'elle vise.

@@ -11,7 +11,8 @@ namespace Bdtheque.EndToEnd.Tests;
 /// <summary>
 /// The page of the editions and purchase intents of an album (visuel/editions-album/contenu.md), on the application shared by
 /// the tests: each test creates its own album, named with a marker of its own. The paths of the user: from the list of the
-/// albums to the page and back, an intent set on the whole album, an edition deleted, an intent removed.
+/// albums to the page and back, an intent set on the whole album, an intent on an edition modified, an edition deleted, an intent
+/// removed.
 /// </summary>
 [Collection(ApplicationCollection.Name)]
 public sealed class AdminAlbumEditionsTests(ApplicationHost application) : BrowserTest<ApplicationHost>(application)
@@ -88,6 +89,21 @@ public sealed class AdminAlbumEditionsTests(ApplicationHost application) : Brows
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         await Assertions.Expect(page.Locator(".album-editions-none").First).ToHaveTextAsync("Aucune édition dans la collection.");
         await Assertions.Expect(page.Locator(".album-brief .tag")).ToHaveTextAsync("Non possédé");
+    }
+
+    [Theory, InEachTheme]
+    // « Modifier », the main action of an intent on an edition, opens its form, as that of an edition does (#444).
+    public async Task IntentOnAnEdition_Modified_OpensItsForm(string theme)
+    {
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Lombard {_marker}", null, []));
+        var album = await CreateAlbumAsync($"Thorgal {_marker}");
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(publisher.Id, null, 1980, null, null, null, null, null, null, null, true), album.Version));
+        var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
+
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier l'intention : Lombard {_marker} [1980]" }).ClickAsync();
+
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Modifier l'intention d'acquisition");
     }
 
     [Theory, InEachTheme]
