@@ -4,6 +4,7 @@
 
 * **Décision de l'utilisateur** : tout nom déjà pris se présente au même gabarit, qui cite le nom saisi et rappelle l'unicité sans casse ni accents : la saisie d'un éditeur (concept et maquette) suit la règle déjà tranchée pour l'éditeur et la collection à corriger, qui cite désormais son nom (« « aire libre » est déjà pris : … ») ; la recherche enregistrée reçoit le même gabarit, en tête et sous le champ. **Choix** : le mécanisme partagé des champs en cause cite, pour une ligne d'une liste saisie avec la fiche, le nom de cette ligne (#464).
 * **Choix** : les cartes d'album et la fiche d'un album reçoivent de l'API l'état de l'album, calculé par l'expression unique de l'appartenance à la collection, que partagent les listes ; état recalculé par le frontend écarté (#448).
+* **Décision de l'utilisateur** : sur la page des éditions et intentions d'acquisition d'un album, l'action principale d'une intention sur une édition est « Modifier », présentée comme celle d'une ligne d'édition, qui ouvre sa fiche de saisie, « Modifier l'intention » quittant son menu ; une intention sur l'album entier, qui n'a rien à modifier, a pour action principale « Viser une édition… », que son menu ne répète plus ; la confirmation de l'acquisition n'est plus offerte sur cette page, mais depuis la liste des intentions d'acquisition et l'accueil de l'administration ; maquette mise à jour (#444).
 
 ## 2026-11-18
 

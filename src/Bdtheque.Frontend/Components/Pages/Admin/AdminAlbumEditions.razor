@@ -175,19 +175,25 @@ else if (_page is { } page)
                             </span>
                             <span class="intent-created" role="cell">@($"{L["Intent.Created"]} ")<LocalDateTime Value="row.CreatedAt" DateOnly="true" /></span>
                             <span class="intent-actions" role="cell">
-                                <Button Href="@AppPaths.AdminConfirmPurchase(Id, row.Id)" Icon="IconName.Check" Label="@L["Confirm"]"
-                                        IconOnlyOnSmartphone="true" aria-label="@L["Confirm.Label", target]" title="@L["Confirm.Label", target]" />
+                                @* The main action, presented as the « Modifier » of an edition: an intent on an edition opens its form; one
+                                   on the whole album, which has nothing to modify, turns into one on an edition. The purchase is confirmed
+                                   from the list of the intents, not here (visuel/editions-album/contenu.md, #444). *@
+                                @if (row.Edition is { } edition)
+                                {
+                                    <Button Href="@AppPaths.AdminEditEdition(Id, edition.Id)" Icon="IconName.Edit" Label="@L["Edit"]"
+                                            IconOnlyOnSmartphone="true" aria-label="@L["EditIntent.Label", target]" />
+                                }
+                                else
+                                {
+                                    <Button Href="@AppPaths.AdminConvertPurchaseIntent(Id, row.Id)" Icon="IconName.Swap" Label="@L["ToEdition"]"
+                                            IconOnlyOnSmartphone="true" aria-label="@L["ToEdition.Label"]" />
+                                }
                                 <ActionsMenu Id="@($"intent-actions-{row.Id:N}")" Label="@L["More.Intent", target]">
-                                    @if (row.Edition is { } edition)
+                                    @if (row.Edition is not null && row.IsConvertible)
                                     {
-                                        <MenuItem Href="@AppPaths.AdminEditEdition(Id, edition.Id)" Icon="IconName.Edit" Label="@L["Menu.EditIntent"]" />
+                                        <MenuItem Href="@AppPaths.AdminConvertPurchaseIntent(Id, row.Id)" Icon="IconName.Swap" Label="@L["Menu.ToAlbum"]" />
+                                        <MenuSeparator />
                                     }
-                                    @if (row.IsConvertible)
-                                    {
-                                        <MenuItem Href="@AppPaths.AdminConvertPurchaseIntent(Id, row.Id)" Icon="IconName.Swap"
-                                                  Label="@(row.Edition is null ? L["Menu.ToEdition"] : L["Menu.ToAlbum"])" />
-                                    }
-                                    <MenuSeparator />
                                     <MenuItem Href="@AlbumEditionsQuery.ForIntentRemoval(row.Id).Href(Id)" Icon="IconName.Delete"
                                               Label="@L["Menu.RemoveIntent"]" Variant="ButtonVariant.Delete" />
                                 </ActionsMenu>
