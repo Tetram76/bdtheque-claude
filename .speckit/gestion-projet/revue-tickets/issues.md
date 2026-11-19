@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), étiquette `agent` des tickets créés à l''initiative d''un agent, description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; recherche d''un ticket existant avant toute création.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:00:00Z }
 ---
 
 # Issues
@@ -42,6 +42,10 @@ Un ticket parent ([Suivi par tickets](suivi-par-tickets.md), découpage au déma
 
 Seul le sujet propre du ticket compte : un ticket qui change l'application et, au passage, met sa documentation à jour, ajoute ses tests ou adapte un workflow ne reçoit pas l'étiquette correspondante.
 
+## Étiquette `agent`
+
+Tout ticket créé **à l'initiative d'un agent** reçoit l'étiquette `agent` dès sa création (exigence de l'utilisateur) : problème relevé par une session, retour de revue reporté, ticket de suivi ou suite d'un harnais (§ Tickets de suivi des harnais), écart d'un contrôle de cohérence, découpage décidé par l'agent… Un ticket qui porte une **demande de l'utilisateur** ne la reçoit pas, même s'il est rédigé et créé par un agent : une demande de l'utilisateur n'a pas d'étiquette particulière. L'étiquette décrit l'origine du ticket, et se cumule avec ses étiquettes de sujet et de harnais.
+
 ## Description des étiquettes
 
 Chaque étiquette que pose le projet porte sur GitHub une description qui résume en une phrase sa règle de pose : qui parcourt la liste des étiquettes, ou en choisit une, sait sans lire ce concept à quels tickets elle va. Elle est en anglais, comme tout contenu technique ([Qualité du code](../gouvernance/qualite-du-code.md), langue des fichiers techniques), et c'est celle-ci :
@@ -52,6 +56,7 @@ Chaque étiquette que pose le projet porte sur GitHub une description qui résum
 | `ui` | `Directly about what the user sees on screen: texts, layout, controls, themes` |
 | `tests` | `Directly about the tests: writing, fixing, tooling, coverage, execution` |
 | `ci` | `Directly about CI: workflows and their scripts, required checks, quotas, failures` |
+| `agent` | `Ticket created on an agent's own initiative, not on a request of the user` |
 | `harness` | `Tracking issue of a harness, never any other ticket` |
 | `security-audit` | `Security and dependency-updates harness: tracking issue and tickets opened from it` |
 | `quality-audit` | `Code quality harness: tracking issue and tickets opened from it` |
@@ -83,7 +88,7 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
   - **Point traité, aussitôt retiré** : un point corrigé ou rejeté n'est plus à corriger. Dès que son traitement est acquis, c'est-à-dire dès que le contrôle ne le relèverait plus (marquage dans l'outil, fusion sur `main` de la Pull Request qui le corrige ou porte son rejet dans le code), l'agent le retire de la description, sans attendre le contrôle suivant ; ou, quand le contrôle seul sait ce qui reste (ex. vulnérabilités d'une image après une montée de version), il relance le contrôle, qui réécrit la description, puis remet la ligne de sa prise en compte. Retiré plus tôt, un point encore relevé reviendrait au contrôle suivant comme nouveau, et le ferait échouer pour lui.
   - **Harnais sans contrôle automatique** (fonctionnel) : ses points relevés sont les tickets ouverts de ses suites, listés par leur numéro et leur titre ; seule la date de la dernière prise en compte y figure, et l'agent retire un point à la fermeture de son ticket.
   - **Dans le concept de chaque harnais**, la trace renvoie à cette règle, sans la redire : il ne précise que ce qui est propre au harnais.
-- **Ticket de suivi retrouvé par ses deux étiquettes** : un harnais, comme l'agent, le retrouve par l'étiquette du harnais **et** `harness`, jamais par la première seule, qui désigne aussi ses chantiers. Qui crée un ticket de suivi, harnais ou agent, lui pose les deux.
+- **Ticket de suivi retrouvé par ses deux étiquettes** : un harnais, comme l'agent, le retrouve par l'étiquette du harnais **et** `harness`, jamais par la première seule, qui désigne aussi ses chantiers. Qui crée un ticket de suivi, harnais ou agent, lui pose les deux, ainsi que `agent` (§ Étiquette `agent`), un ticket de suivi n'étant jamais une demande de l'utilisateur.
 
 ## Avant de créer un ticket
 
