@@ -107,7 +107,9 @@ else if (_album is { } album)
                         {
                             var label = Labels.Edition(edition.Edition);
                             <li class="edition">
-                                <h3 class="edition-label"><EditionLabelText Edition="edition.Edition" PublisherWebsite="@edition.PublisherWebsite" /></h3>
+                                @* In text: the publisher row of its detail, right below, already leads to the site of its publisher
+                                   (fonctionnel/presentation/libelle-d-une-edition.md). *@
+                                <h3 class="edition-label"><LabelText Text="@label" /></h3>
                                 <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
                                 <EditionFacts Edition="edition" />
                             </li>

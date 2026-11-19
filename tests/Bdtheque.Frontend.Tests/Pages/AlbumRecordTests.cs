@@ -293,26 +293,28 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         // The edition targeted by an intent (2023) is not one of them.
         var editions = BlockOf(page, "Dans quelles éditions ?").QuerySelectorAll(".edition");
-        Assert.Equal(["Casterman, site externe [2001] - ISBN\u00A02-203-34424-5", "Casterman, site externe (Univers d'auteurs) [2010]"],
+        Assert.Equal(["Casterman [2001] - ISBN\u00A02-203-34424-5", "Casterman (Univers d'auteurs) [2010]"],
             editions.Select(e => e.QuerySelector(".edition-label")!.TextContent.Trim()));
         Assert.All(editions, e => Assert.NotNull(e.QuerySelector(".edition-detail")));
         Assert.Equal("Offerte", Row(page, "Mode d'acquisition", edition: 1));
     }
 
     [Fact]
-    public void LabelsOfTheEditions_ThePublisherLeadsToItsWebsite_InTheEditions_TheIntentsAndTheViewer()
+    public void LabelsOfTheEditions_ThePublisherLeadsToItsWebsite_InTheIntentsAndTheViewer_NotInTheTitleOfAnEdition()
     {
         _catalog.Album = Album();
 
         var page = Open($"?edition={FirstEditionId}&visual=1");
 
         // A label of an edition that is no link itself: its publisher leads to its site, as any publisher, the rest of the
-        // label in text (fonctionnel/presentation/libelle-d-une-edition.md).
+        // label in text (fonctionnel/presentation/libelle-d-une-edition.md). Not the title of an edition, whose publisher row,
+        // right below, already leads there.
         string[] Publishers(string selector) => [.. page.FindAll($"{selector} a.publisher").Select(a => a.GetAttribute("href") ?? "")];
-        Assert.Equal(["https://www.casterman.com", "https://www.casterman.com"], Publishers(".edition-label"));
         Assert.Equal(["https://www.casterman.com"], Publishers(".album-intents .intent-label"));
         Assert.Equal(["https://www.casterman.com"], Publishers(".visual-dialog-edition"));
-        Assert.All(page.FindAll(".edition-label, .intent-label, .visual-dialog-edition"), label => Assert.Single(label.QuerySelectorAll("a")));
+        Assert.All(page.FindAll(".intent-label, .visual-dialog-edition"), label => Assert.Single(label.QuerySelectorAll("a")));
+        Assert.Empty(page.FindAll(".edition-label a"));
+        Assert.Equal(2, page.FindAll(".edition-detail a.publisher").Count);
     }
 
     [Fact]
@@ -322,8 +324,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Empty(page.FindAll(".edition-label a, .intent-label a"));
-        Assert.Equal("Casterman [2001] - ISBN\u00A02-203-34424-5", page.FindAll(".edition-label")[0].TextContent.Trim());
+        Assert.Empty(page.FindAll(".intent-label a"));
+        Assert.Equal("Casterman [2023]", page.Find(".intent-label").TextContent.Trim());
     }
 
     [Fact]

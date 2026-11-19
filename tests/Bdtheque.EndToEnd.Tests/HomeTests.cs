@@ -74,7 +74,11 @@ public sealed partial class DashboardHomeTests(CollectionApplication application
         await Assertions.Expect(page.Locator("[data-counter]")).ToHaveTextAsync(["2 albums", "1 série", "2 éditions"]);
 
         var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
-        await spotlight.GetByRole(AriaRole.Link).ClickAsync();
+        // Its publisher leads to its site, as in the latest entries (fonctionnel/presentation/libelle-d-une-edition.md); the
+        // album, to its record.
+        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link, new() { NameRegex = new Regex("^Casterman.*site externe$") }))
+            .ToHaveAttributeAsync("href", "https://www.casterman.com");
+        await spotlight.GetByRole(AriaRole.Link, new() { Name = "Le Port des brumes (Nestor Burma - T. 3)" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($@"{Regex.Escape(AppPaths.AlbumsSection)}/[0-9a-f-]+$"));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Le Port des brumes");
     }
@@ -111,7 +115,7 @@ public sealed partial class DashboardHomeTests(CollectionApplication application
 
         await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-time-zone", ApplicationHost.BrowserTimeZoneId);
         var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
-        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link)).ToContainTextAsync("Le Port des brumes");
+        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link, new() { Name = "Le Port des brumes (Nestor Burma - T. 3)" })).ToBeVisibleAsync();
         Assert.DoesNotContain(universalDay, await Application.SpotlightDaysAsync());
     }
 
