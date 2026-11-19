@@ -47,6 +47,8 @@
     --color-rule: #111111;
     --color-control-border: #111111;
     --color-control-background: #FFFFFF;
+    /* The muted text is the black of the text: the placeholder is that black, lightened, to stand apart from a typed value
+       (visuel/liste-albums/controles.md). */
     --color-placeholder: #5C5C5C;
     --color-accent: #111111;
     --color-text-on-accent: #FFFFFF;
