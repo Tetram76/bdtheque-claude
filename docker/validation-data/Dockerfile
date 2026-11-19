@@ -17,7 +17,7 @@ RUN dotnet publish src/Bdtheque.ValidationData/Bdtheque.ValidationData.csproj \
         -c Release -a $TARGETARCH --self-contained false --no-restore -p:DebugType=none -o /app
 
 # The runtime image of `api`, already on the machine: no other base image to pull nor to keep up to date.
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-noble-chiseled-extra AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.15-resolute-chiseled-extra AS final
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "Bdtheque.ValidationData.dll"]
