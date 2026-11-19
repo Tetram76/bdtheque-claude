@@ -75,7 +75,9 @@ function Get-ValidationVersion {
     .OUTPUTS
         Each distinct version, empty for a container started before the environment named its version.
     #>
-    docker ps --all --filter "label=com.docker.compose.project=$ProjectName" --format '{{.Labels}}' |
+    # The containers that Compose created for the project: those carry com.docker.compose.oneoff, unlike a container
+    # created by hand from one of its images, which inherits only the project label that Compose gives the images it builds.
+    docker ps --all --filter "label=com.docker.compose.project=$ProjectName" --filter 'label=com.docker.compose.oneoff' --format '{{.Labels}}' |
         ForEach-Object {
             $label = $_ -split ',' | Where-Object { $_.StartsWith("$VersionLabel=") }
             if ($label) { $label.Substring($VersionLabel.Length + 1) } else { '' }
