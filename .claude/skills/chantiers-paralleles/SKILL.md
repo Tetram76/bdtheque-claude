@@ -157,10 +157,17 @@ never taking one of the places of the chantiers run at once.
      pull request) and dependencies for **each** of its tickets, not only
      one: a ticket failing either check is not a candidate and joins no
      group;
-   - name its **reference ticket**, the one its single pull request closes;
-     the others are associated with it through GitHub's relations, cited
-     without a closing keyword (`suivi-par-tickets.md`, correspondence;
-     `lien-entre-pull-requests-et-issues.md`);
+   - keep the **volume of changes** of the group « raisonnable »: its pull
+     request stays contained enough to be reviewed and validated in one go —
+     it may carry more changes than a single ticket, never so much that its
+     review or functional validation gets hard; a group that would exceed it
+     is reduced, the tickets taken out staying chantiers of their own;
+   - its single pull request **fully handles each** of its tickets, as if
+     each had its own pull request — a derogation to « un ticket, une PR »
+     the user wants: no reference ticket, no associated ticket; the pull
+     request cites every ticket with a closing keyword, and each is closed,
+     commented and locked at the merge (`suivi-par-tickets.md`, tickets
+     reliés; `lien-entre-pull-requests-et-issues.md`);
    - it is one chantier: one session, one place, one in the number of the
      batch, ranked as the best ranked of its tickets.
 3. **Resources, now** (PowerShell, every command bounded in time):
@@ -188,8 +195,7 @@ never taking one of the places of the chantiers run at once.
    - the scope the user set, if any;
    - the number of chantiers of the batch the user set, and how many the
      selection counts (sub-tickets included);
-   - each selected chantier: all its tickets (`#<n>` and title of each, the
-     reference ticket named for linked tickets), rank in the order of
+   - each selected chantier: all its tickets (`#<n>` and title of each), rank in the order of
      priority, state — done (PR merged), in progress (its PR), launched now,
      or to come, with what it waits for (a free place, a dependency: name
      it). The ones to come are the current choice, which the next pass may
@@ -214,9 +220,10 @@ brief (`prompt`) says:
   ones), the conversation renamed after the ticket;
 - what the ticket requires in particular (functional validation or not,
   associated or duplicate tickets, a split expected, decisions of the user to
-  ask one at a time); for linked tickets, every ticket of the group, the
-  reference one its pull request closes, and the others to associate with
-  it, each closed or commented at the merge as `suivi-par-tickets.md` says;
+  ask one at a time); for linked tickets, every ticket of the group, each
+  fully handled by its single pull request, cited there with a closing
+  keyword, then closed, commented and locked at the merge as
+  `suivi-par-tickets.md` says;
 - that, if it splits the ticket, it carries out the first sub-ticket only and
   reports the others, which are launched as chantiers of the batch;
 - that it **notifies the orchestrator** with `SendMessage` (`to`: the

@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Versions et releases'
 description: 'Numérotation semver, jalons, rattachement des tickets et PR, publication d''une version (tag, release, analyse, images).'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T11:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:00:00Z }
 ---
 
 # Versions et releases
@@ -20,7 +20,7 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
 
   La version que livre chaque phase, ou partie de phase, est indiquée dans [`suivi-implementation/`](../../suivi-implementation/index.md).
 - **Jalon** : chaque version à venir est un jalon de même nom (`v0.1.0`), dont la description désigne la phase ou la partie qu'elle livre. Il est créé au découpage de cette phase ou de cette partie, avec ses tickets, ou avec le ticket d'une version corrective. Il ne porte pas d'échéance : le projet ne planifie pas de dates.
-- **Rattachement** : chaque ticket est rattaché au jalon de la version qui le livre ([Suivi par tickets](../revue-tickets/suivi-par-tickets.md)) ; un ticket hors plan l'est dès que sa réalisation est prévue dans une version, et reste sans jalon tant qu'elle ne l'est pas (ex. une montée de version majeure encore lointaine, un ticket de suivi d'un harnais (étiquette `harness`), que ne réalise aucune PR). Chaque Pull Request fusionnée sur `main` est rattachée au jalon de son ticket de référence ; sans ticket, à celui de la version en cours, la première version non publiée. Un ticket fermé sans être réalisé (*not planned*) quitte son jalon.
+- **Rattachement** : chaque ticket est rattaché au jalon de la version qui le livre ([Suivi par tickets](../revue-tickets/suivi-par-tickets.md)) ; un ticket hors plan l'est dès que sa réalisation est prévue dans une version, et reste sans jalon tant qu'elle ne l'est pas (ex. une montée de version majeure encore lointaine, un ticket de suivi d'un harnais (étiquette `harness`), que ne réalise aucune PR). Chaque Pull Request fusionnée sur `main` est rattachée au jalon de son ticket de référence, ou, pour un chantier de tickets reliés ([Chantiers en parallèle](../gouvernance/chantiers-en-parallele.md#choix-des-chantiers)), à celui de la version en cours, que complète le lot ; sans ticket, à celui de la version en cours, la première version non publiée. Un ticket fermé sans être réalisé (*not planned*) quitte son jalon.
   - **Documentation technique hors jalon** : un ticket ou une Pull Request qui ne porte que sur la documentation technique ([Documentation technique](../gouvernance/documentation-technique.md), pages de `docs/tech/`) n'a pas de jalon. Elle ne livre rien de l'application ; elle suit chaque version par les Pull Requests qui changent le code et la mettent à jour en même temps que lui, et qui gardent, elles, le jalon de leur ticket (exigence de l'utilisateur).
 - **Publication** : une version est publiée quand tous les tickets de son jalon sont fermés :
   - **tag** annoté et signé (clé GPG de [Signature des commits](signature-des-commits.md)), posé sur le commit de `main` qui la complète ;
