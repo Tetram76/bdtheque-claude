@@ -6,4 +6,4 @@
 * [Publication des images Docker](publication-des-images-docker.md) - Images publiées, tags, nightly unique, paire cohérente, analyse des vulnérabilités, architecture, workflow de publication.
 * [Version de PostgreSQL](version-de-postgresql.md) - postgres 18 alpine, épinglé, identique en production et dans les tests.
 * [Application du schéma au démarrage](application-du-schema-au-demarrage.md) - Migrations appliquées au démarrage d'api.
-* [Environnement de validation fonctionnelle](environnement-de-validation-fonctionnelle.md) - Version d'une PR lancée sur le poste en une commande, images construites localement, données de validation fictives, édition à la une laissée au tirage ou, sur demande, couverture pâle.
+* [Environnement de validation fonctionnelle](environnement-de-validation-fonctionnelle.md) - Version d'une PR lancée sur le poste en une commande, images construites localement, un seul environnement sur le poste (lancement ou arrêt en cours, autre version : refusés), données de validation fictives, édition à la une laissée au tirage ou, sur demande, couverture pâle.

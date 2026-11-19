@@ -7,6 +7,7 @@ code:
   - 'docker/**'
   - 'scripts/Start-Validation.ps1'
   - 'scripts/Stop-Validation.ps1'
+  - 'scripts/ValidationEnvironment.psm1'
   - '.github/workflows/docker-publish.yml'
 ---
 
@@ -71,20 +72,26 @@ Le fichier [`.env.example`](../../../.env.example) sert de modèle à ce `.env`.
 
 Avant de fusionner une Pull Request qui change ce que voit l'utilisateur, celui-ci la valide en la faisant tourner sur son propre poste. Une seule commande, [`Start-Validation.ps1`](../../../scripts/Start-Validation.ps1), lance la version complète de la Pull Request (ou de n'importe quel commit), avec des données fictives et la documentation technique du même commit. Elle n'exige que `git` et un service Docker démarré ; ni le SDK .NET ni aucun fichier à modifier ne sont nécessaires. Les raisons de ce dispositif sont dans [Environnement de validation fonctionnelle](../../../.speckit/choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md), et la marche à suivre dans le [`README.dev.md`](../../../README.dev.md).
 
-Le script procède dans l'ordre suivant. Il récupère d'abord le commit de tête de la Pull Request, puis en extrait les sources par `git archive` dans un dossier temporaire : les modifications non commitées de la copie de travail ne jouent donc aucun rôle dans ce qui est validé. Il supprime ensuite l'environnement précédent avec ses données, sauf si l'option `-KeepData` demande de les garder, si bien que chaque validation repart d'une base vide. Il construit alors les images et démarre les services, en attendant qu'ils soient en bonne santé. Il charge enfin les données de validation, sauf avec les options `-Empty` ou `-KeepData`.
+Le script procède dans l'ordre suivant. Il prend d'abord le verrou de l'environnement, qu'il garde jusqu'à sa dernière étape ; si un autre lancement ou un arrêt le tient, il s'arrête aussitôt en le disant. Il récupère ensuite le commit de tête de la Pull Request, puis refuse de continuer si l'environnement exécute déjà une autre version. Il en extrait alors les sources par `git archive` dans un dossier temporaire : les modifications non commitées de la copie de travail ne jouent donc aucun rôle dans ce qui est validé. Il supprime ensuite l'environnement précédent avec ses données, sauf si l'option `-KeepData` demande de les garder, si bien que chaque validation repart d'une base vide. Il construit alors les images et démarre les services, en attendant qu'ils soient en bonne santé. Il charge enfin les données de validation, sauf avec les options `-Empty` ou `-KeepData`.
 
-Le schéma suivant, tracé à la main d'après le script, répond à la question : par quelles étapes passe la commande de validation, et lesquelles ses options sautent-elles ?
+Le schéma suivant, tracé à la main d'après le script, répond à la question : par quelles étapes passe la commande de validation, quand refuse-t-elle de démarrer, et quelles étapes ses options sautent-elles ?
 
 ```mermaid
 flowchart TB
+    lock["Prise du verrou<br/>de l'environnement"]
+    busy(["Refus : autre lancement<br/>ou arrêt en cours"])
     fetch["Récupération du commit<br/>de tête de la Pull Request"]
+    other(["Refus : autre version<br/>en cours d'exécution"])
     extract["Extraction des sources<br/>par git archive"]
     down["Suppression de l'environnement<br/>précédent et de ses données"]
     up["Construction des images<br/>et démarrage des services"]
     load["Chargement des<br/>données de validation"]
-    done(["Adresses affichées"])
+    done(["Adresses affichées,<br/>verrou rendu"])
 
-    fetch --> extract
+    lock -- "déjà tenu" --> busy
+    lock -- "obtenu" --> fetch
+    fetch -- "autre version démarrée" --> other
+    fetch -- "environnement arrêté<br/>ou même version" --> extract
     extract -- "sans -KeepData" --> down --> up
     extract -- "avec -KeepData" --> up
     up -- "sans -Empty ni -KeepData" --> load --> done
@@ -119,4 +126,12 @@ Tous les ports ne sont ouverts que sur l'adresse locale du poste, `127.0.0.1`, e
 
 Le service `docs` sert la documentation technique du commit validé. Son image, construite par [`docker/validation-docs/Dockerfile`](../../../docker/validation-docs/Dockerfile), part du dossier `docs/tech/` de ce commit, dont l'empreinte est inscrite au pied de chaque page. Son fonctionnement est détaillé dans [Consulter, construire, vérifier et maintenir](../documentation/consulter-et-maintenir.md).
 
-Pour arrêter l'environnement, [`Stop-Validation.ps1`](../../../scripts/Stop-Validation.ps1) supprime les conteneurs, les réseaux, les données (sauf avec `-KeepData`) et les sources extraites. Il garde les images construites, si bien que la validation suivante ne reconstruit que ce que sa Pull Request a changé.
+Pour arrêter l'environnement, [`Stop-Validation.ps1`](../../../scripts/Stop-Validation.ps1) supprime les conteneurs, les réseaux, les données (sauf avec `-KeepData`) et les sources extraites, puis affiche la version qu'il a arrêtée. Il garde les images construites, si bien que la validation suivante ne reconstruit que ce que sa Pull Request a changé.
+
+### Un seul environnement par poste
+
+Le nom du projet, les ports, les noms des images et le dossier des sources extraites sont fixes : tous les clones et worktrees du dépôt lancent donc le même environnement. Sans précaution, deux lancements proches se mélangeraient, car le second supprimerait et réécrirait les sources pendant que le premier construit ses images, et un arrêt supprimerait les conteneurs et les sources d'un lancement en cours. Les deux scripts partagent pour l'éviter le module [`ValidationEnvironment.psm1`](../../../scripts/ValidationEnvironment.psm1), qui leur donne deux protections.
+
+La première est un verrou du poste. Chaque lancement et chaque arrêt ouvre en exclusivité le fichier `bdtheque-validation.lock` du dossier temporaire de l'utilisateur, à côté des sources extraites, et le garde ouvert jusqu'à sa dernière étape. Une seconde opération échoue aussitôt à l'ouvrir et s'arrête sans rien toucher, en citant celle qui le tient, que décrit le fichier voisin `bdtheque-validation.holder` : son objet, son heure de début, le dossier du dépôt et le processus qui l'a lancée. Le système rend le verrou à la fin du processus, même interrompu ou tué, si bien qu'aucun lancement avorté ne laisse l'environnement bloqué.
+
+La seconde porte sur la version qui tourne. Chaque conteneur du projet porte le label `bdtheque.validation.version`, qui vaut `pull-request:<numéro>` pour une Pull Request, ou `commit:<empreinte>` pour un commit lancé avec `-Ref`. Ce label ne vient pas des fichiers Compose du commit validé, qui peut être antérieur à ce mécanisme : le script écrit lui-même, à côté des sources extraites, une surcharge `validation-version.yaml` qui le pose sur chacun des services que ces fichiers déclarent. Un lancement lit ce label sur les conteneurs que Compose a créés pour le projet, reconnaissables à leur label `com.docker.compose.oneoff`, et non sur un conteneur créé à la main depuis l'une de ses images, qui hérite seulement du nom du projet. Il refuse de continuer si l'environnement exécute une autre version, jusqu'à ce qu'il soit arrêté. Relancer la même Pull Request reste permis, même après un push : c'est ainsi qu'on remet l'environnement à zéro.

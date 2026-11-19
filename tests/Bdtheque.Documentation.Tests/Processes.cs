@@ -41,6 +41,8 @@ internal static class Processes
             start.ArgumentList.Add(argument);
         // Messages of git and of the scripts in English whatever the machine, for the assertions that read them.
         start.Environment["LC_ALL"] = "C";
+        // Plain text, whatever the terminal: PowerShell colours its errors otherwise, escape sequences cutting their text.
+        start.Environment["NO_COLOR"] = "1";
         foreach (var (name, value) in environment ?? new Dictionary<string, string>())
             start.Environment[name] = value;
 
