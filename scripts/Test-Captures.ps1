@@ -15,7 +15,8 @@
     reviewed before they are committed: the pull request then shows each changed capture before and after.
 
     Requires a running Docker service (Docker Desktop, Rancher Desktop), whose socket the container uses to start the
-    PostgreSQL database of the tests.
+    PostgreSQL database of the tests. When the machine names in SSL_CERT_FILE the bundle of the certificate authorities
+    it trusts (e.g. behind a proxy that re-signs HTTPS), the container trusts the same bundle.
 
 .EXAMPLE
     ./scripts/Test-Captures.ps1
@@ -62,12 +63,12 @@ if (-not $playwright) { throw 'The version of Microsoft.Playwright was not found
 
 # Bounds of a run (gestion-projet/gouvernance/regles-de-travail-de-l-agent.md, durée d'une commande). A test longer than a
 # minute is stuck: a capture takes about a second, the longest test a few seconds, and each action of the browser gives up
-# after 30 s; VSTest then stops the run. The whole run, from the start of the container to its end, lasts about a minute
-# and a half (copy and build, 40 s; the 78 captures, 30 s), three minutes when the packages of the NuGet volume are
-# restored again: past four minutes and a half, the container is stopped, whatever holds it (e.g. a Docker engine that no
-# longer answers), rather than left running without an end.
+# after 30 s; VSTest then stops the run. The whole run, from the start of the container to its end, lasts about three
+# minutes and three quarters on four processors (copy and build, 25 s; the 504 captures, 3 min 10 s), four minutes and a
+# quarter when the packages of the NuGet volume are restored again (measured, #555): past six minutes, the container is
+# stopped, whatever holds it (e.g. a Docker engine that no longer answers), rather than left running without an end.
 $hangTimeout = '1min'
-$runTimeout = [TimeSpan]::FromMinutes(4.5)
+$runTimeout = [TimeSpan]::FromMinutes(6)
 
 $results = Join-Path $root "$project/TestResults/captures"
 if (Test-Path $results) { Remove-Item $results -Recurse -Force }
@@ -103,10 +104,20 @@ $arguments = @(
     # The database of the tests is a sibling container, reached through the ports it publishes on the host.
     '--add-host', 'host.docker.internal:host-gateway',
     '--env', 'TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal',
-    '--env', "BDTHEQUE_UPDATE_CAPTURES=$(if ($Update) { '1' } else { '0' })",
-    $image,
-    'bash', '-c', $inside
+    '--env', "BDTHEQUE_UPDATE_CAPTURES=$(if ($Update) { '1' } else { '0' })"
 )
+
+# A machine whose HTTPS goes through a proxy that re-signs it (e.g. a cloud session of Claude Code) names, in the variable
+# of OpenSSL, the bundle of the authorities it trusts, the proxy's included. The container knows only those of its image,
+# and its restore of the NuGet packages fails on the proxy's certificate (UntrustedRoot). .NET on Linux takes its trusted
+# roots from OpenSSL, which reads the same variable: the bundle is given to the container read-only, under that variable.
+# Without the variable (Windows machine of the user), nothing changes.
+if ($env:SSL_CERT_FILE -and (Test-Path $env:SSL_CERT_FILE -PathType Leaf)) {
+    $bundle = '/etc/ssl/certs/host-ca-bundle.crt'
+    $arguments += '--volume', "$((Resolve-Path $env:SSL_CERT_FILE).ProviderPath):${bundle}:ro", '--env', "SSL_CERT_FILE=$bundle"
+}
+
+$arguments += $image, 'bash', '-c', $inside
 
 $PSNativeCommandUseErrorActionPreference = $false
 # Each argument passed as it is (the script of the container spans several lines), the output left on the console.

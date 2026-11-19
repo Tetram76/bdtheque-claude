@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T13:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:00:00Z }
 ---
 
 # Thèmes
@@ -74,6 +74,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T13:20:00Z }
 - **Références mises à jour seulement après la validation de l'utilisateur** : la validation fonctionnelle est le seul juge du rendu ([Validation fonctionnelle](../../gestion-projet/revue-tickets/validation-fonctionnelle.md)), et chaque correction lui est soumise sans attendre de captures. Jusque-là, les captures d'une PR en brouillon diffèrent de leurs références, sans que ce soit à corriger ; les références mises à jour fixent ensuite le rendu validé.
 - **Captures comparées sous Linux seulement**, dans le CI et, ailleurs, dans le conteneur officiel de Playwright pour .NET : le rendu des polices diffère d'un système à l'autre.
   - **Alternative écartée (références propres à chaque système)** : chaque changement de rendu les demanderait toutes, sans garantie qu'elles montrent le même rendu.
+  - **Autorités de certification du poste transmises au conteneur par la variable d'OpenSSL** (`SSL_CERT_FILE`), quand le poste en désigne un fichier : derrière un proxy qui signe de nouveau le HTTPS (session cloud de Claude Code), le conteneur ne connaît que les autorités de son image, et sa restauration des packages NuGet échoue (`UntrustedRoot`, #555). Le fichier, monté en lecture seule, est désigné dans le conteneur par la même variable, que .NET lit sous Linux pour ses certificats racines (documentation .NET, *Cross-platform cryptography*, racines de confiance sous Linux) : le conteneur fait confiance à ce à quoi le poste fait confiance, et rien ne change sur un poste sans cette variable.
+    - **Alternative écartée (certificat installé dans le magasin du système du conteneur, `update-ca-certificates`)** : une étape de plus au démarrage du conteneur, qui exige le seul certificat du proxy, quand la variable désigne déjà le fichier complet.
+    - **Alternative écartée (image dérivée qui embarque le certificat)** : une image à construire et à suivre pour un besoin propre à un environnement.
 - **Tuiles redessinées en entier** par le navigateur des captures (commutateur de Blink `--disable-partial-raster`) : une tuile redessinée en partie n'arrondit pas l'anticrénelage comme une tuile dessinée d'un coup, et la même page donnerait deux captures selon le moment de son premier rendu. La capture ne dépend ainsi que de l'état de la page.
   - **Alternative écartée (attendre une page stable)** : la course porte sur le premier rendu, pendant le chargement ; une capture prise trois secondes après différait encore une fois sur cinq.
 - **Une unité d'écart tolérée par composante de couleur**, et rien au-delà : les bords d'un élément composé en 3D (un album en volume, tourné avec une perspective, [La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)) varient d'une unité d'une exécution du CI à l'autre, sur l'exécuteur seulement, ce qu'aucun réglage du navigateur ne corrige (sans GPU, constaté #314). Un changement réel de rendu (une couleur, un pixel de décalage) dépasse cette unité.
