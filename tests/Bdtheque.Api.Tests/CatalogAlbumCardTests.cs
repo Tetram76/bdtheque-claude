@@ -112,12 +112,12 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
 
         Assert.Equal(
             [
-                ((AlbumRating?)AlbumRating.VeryGood, true, false),
-                ((AlbumRating?)null, false, true),
-                ((AlbumRating?)AlbumRating.Poor, false, true),
-                (null, false, false),
+                ((AlbumRating?)AlbumRating.VeryGood, true, AlbumCollectionState.InCollection),
+                ((AlbumRating?)null, false, AlbumCollectionState.PurchaseIntent),
+                ((AlbumRating?)AlbumRating.Poor, false, AlbumCollectionState.PurchaseIntent),
+                (null, false, AlbumCollectionState.OutsideCollection),
             ],
-            detail.Albums.Select(a => (a.Rating, a.Album.IsInCollection, a.HasPurchaseIntent)));
+            detail.Albums.Select(a => (a.Rating, a.Album.IsInCollection, a.State)));
     }
 
     [Fact]
@@ -175,8 +175,8 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         Assert.Equal(2, chatEntry.Overview.AlbumCount);
         Assert.Equal([chatCover, null], chatEntry.Overview.FirstVolumeCovers);
         var chatCard = Assert.Single(chatEntry.Albums).Album;
-        Assert.Equal((chat1.Id, (AlbumRating?)AlbumRating.Good, (AlbumCover?)chatCover, true, false),
-            (chatCard.Album.Id, chatCard.Rating, chatCard.Cover, chatCard.Album.IsInCollection, chatCard.HasPurchaseIntent));
+        Assert.Equal((chat1.Id, (AlbumRating?)AlbumRating.Good, (AlbumCover?)chatCover, true, AlbumCollectionState.InCollection),
+            (chatCard.Album.Id, chatCard.Rating, chatCard.Cover, chatCard.Album.IsInCollection, chatCard.State));
 
         var donjonEntry = bibliography[1].Series!;
         Assert.Empty(donjonEntry.Albums);

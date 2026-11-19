@@ -1,3 +1,4 @@
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Catalog;
@@ -10,8 +11,11 @@ namespace Bdtheque.Contracts.Catalog;
 /// That of the album (fonctionnel/regles-metier/couverture-d-un-album.md), among all its editions, owned or not;
 /// <c>null</c> without any, the generic visual standing in for it (fonctionnel/regles-metier/visuel-par-defaut.md).
 /// </param>
-/// <param name="HasPurchaseIntent">Whether a purchase intent targets the album, or one of its editions.</param>
-public sealed record AlbumCard(AlbumSummary Album, AlbumRating? Rating, AlbumCover? Cover, bool HasPurchaseIntent);
+/// <param name="State">
+/// Where the album stands with regard to the collection (fonctionnel/regles-metier/appartenance-a-la-collection.md), computed
+/// as in every list and record: the card presents it, without computing it.
+/// </param>
+public sealed record AlbumCard(AlbumSummary Album, AlbumRating? Rating, AlbumCover? Cover, AlbumCollectionState State);
 
 /// <summary>The cover of an album: a visual of one of its editions.</summary>
 /// <param name="VisualId">The visual, whose media <c>api</c> serves (<see cref="VisualMediaRoutes"/>).</param>
