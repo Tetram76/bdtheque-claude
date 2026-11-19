@@ -142,7 +142,7 @@ Les écrans d'une Pull Request sont validés sur le poste de l'utilisateur, avan
 
 ### Prérequis de la validation
 
-- [PowerShell 7.3](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) ou plus récent (`pwsh`) ;
+- [PowerShell 7.4](https://learn.microsoft.com/powershell/scripting/install/installing-powershell) ou plus récent (`pwsh`) ;
 - git, avec ce dépôt cloné (le dépôt étant public, aucune authentification) ;
 - un service Docker compatible démarré, avec `docker compose` : [Docker Desktop](https://www.docker.com/products/docker-desktop/), [Rancher Desktop](https://rancherdesktop.io/) (moteur `dockerd`), Docker Engine sous Linux ou toute autre implémentation compatible.
 

@@ -1,4 +1,4 @@
-#Requires -Version 7.3
+#Requires -Version 7.4
 <#
 .SYNOPSIS
     Builds the site of the technical documentation (docs/tech) with DocFX, and serves it on demand.
