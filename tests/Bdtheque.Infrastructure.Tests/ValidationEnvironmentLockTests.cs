@@ -9,7 +9,7 @@ namespace Bdtheque.Infrastructure.Tests;
 /// Neither git nor Docker is reached: the refusal comes first.
 /// </summary>
 [Trait("Category", RepositoryFiles.Category)]
-public sealed class ValidationEnvironmentLockTests : IDisposable
+public sealed partial class ValidationEnvironmentLockTests : IDisposable
 {
     private const string Holder = "the start of pull request #1, started at 18:59:02 from another worktree (process 1)";
 
@@ -32,7 +32,7 @@ public sealed class ValidationEnvironmentLockTests : IDisposable
 
         Assert.False(result.Succeeded, result.Output);
         // PowerShell wraps the message of an error at the width of its output.
-        Assert.Contains($"The validation environment is busy: {Holder} is in progress.", Regex.Replace(result.Output, @"\s+", " "));
+        Assert.Contains($"The validation environment is busy: {Holder} is in progress.", Whitespace().Replace(result.Output, " "));
         Assert.Equal("sources of the start in progress", await File.ReadAllTextAsync(sourcesOfTheOther));
     }
 
@@ -59,4 +59,7 @@ public sealed class ValidationEnvironmentLockTests : IDisposable
         Processes.PowerShellAsync(
             Path.Combine(RepositoryFiles.Root, "scripts", script), [], RepositoryFiles.Root, TimeSpan.FromMinutes(1),
             environment ?? TemporaryFolder);
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex Whitespace();
 }
