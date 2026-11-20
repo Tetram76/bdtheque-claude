@@ -96,7 +96,7 @@
                     @ondragstart="() => _dragged = visual" @ondragend="() => _dragged = null"
                     @ondragover:preventDefault="true" @ondrop="() => DropAsync(visual)">
                     <Cover VisualId="visual.Id" Source="@PendingDisplayOf(visual)" Alt="@label" />
-                    <span class="edition-visual-mark" aria-hidden="true">@label</span>
+                    <span class="edition-visual-mark" data-type="@visual.Type" aria-hidden="true"><span class="edition-visual-mark-full">@label</span><span class="edition-visual-mark-short">@ShortOf(visual)</span></span>
                     <span class="edition-visual-actions">
                         <ActionsMenu Id="@($"{Id}-visual-{visual.Key:N}")" Label="@L["Actions", label]">
                             <span class="edition-visual-menu-heading">@L["Menu.Type"]</span>
@@ -409,9 +409,13 @@
         visual.PendingId is { } pending ? PendingVisualMediaRoutes.Original(pending) : VisualMediaRoutes.Original(visual.Id!.Value);
 
     // What each visual is, in full, as the album record names it in its viewer (« Planche 3 », « 4e de couverture »): also the
-    // mark of its thumbnail, whose room holds the full name (visuel/saisie-edition/contenu.md, #469).
+    // mark of its thumbnail, where the theme finds that it holds (visuel/saisie-edition/contenu.md, #469).
     private string LabelOf(VisualItem visual) =>
         VisualLabels.TypeOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), Values, L);
+
+    // The short mark of the album record (« Couv. », « 4e »), where the full name does not hold in the theme.
+    private string ShortOf(VisualItem visual) =>
+        VisualLabels.ShortOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), L);
 
     // In mebibytes, as the operating systems give the size of a file (« 30 Mio »).
     private static string MaxSize(long bytes) => (bytes / (1024d * 1024)).ToString("0.#", CultureInfo.CurrentCulture);

@@ -69,6 +69,18 @@
   <data name="Count.Other" xml:space="preserve">
     <value>{0} visuels</value>
   </data>
+  <data name="Short.Cover" xml:space="preserve">
+    <value>Couv.</value>
+  </data>
+  <data name="Short.Dedication" xml:space="preserve">
+    <value>Déd.</value>
+  </data>
+  <data name="Short.Endpaper" xml:space="preserve">
+    <value>Garde</value>
+  </data>
+  <data name="Short.BackCover" xml:space="preserve">
+    <value>4e</value>
+  </data>
   <data name="Plate" xml:space="preserve">
     <value>Planche {0}</value>
   </data>

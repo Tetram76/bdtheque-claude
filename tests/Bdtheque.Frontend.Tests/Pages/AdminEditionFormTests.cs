@@ -750,7 +750,10 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("JPEG, PNG, WebP ou GIF, 30 Mio au plus.", block.QuerySelector(".edition-visuals-formats")!.TextContent);
         Assert.Equal("3 visuels", block.QuerySelector(".edition-visuals-count")!.TextContent);
         var visuals = block.QuerySelectorAll(".edition-visual");
-        Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark")!.TextContent));
+        // Its full name, and the short mark of the album record that the theme shows where the full name does not hold.
+        Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark-full")!.TextContent));
+        Assert.Equal(["Couv.", "1", "2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark-short")!.TextContent));
+        Assert.Equal(["Cover", "Plate", "Plate"], visuals.Select(v => v.QuerySelector(".edition-visual-mark")!.GetAttribute("data-type")));
         Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector("img")!.GetAttribute("alt")));
         Assert.Equal(VisualMediaRoutes.Display(CoverId), visuals[0].QuerySelector("img")!.GetAttribute("src"));
         // Its menu: the type, the current one pressed, the original beside the application, the deletion.
@@ -780,7 +783,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         // After the cover, before the plates; shown from the waiting area; an unsaved change of the form.
         var added = page.FindAll(".edition-visual")[1];
         Assert.Equal(("Dédicace", "/admin/visuals/pending/" + AddedId + "/display"),
-            (added.QuerySelector(".edition-visual-mark")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
+            (added.QuerySelector(".edition-visual-mark-full")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
         // Its original as uploaded, from the waiting area too, before the form is saved.
         // Opened beside the form, but in the application: without the mark of a site outside it.
         var original = added.QuerySelectorAll(".actions-menu-panel a").Single(link => link.TextContent.Trim() == "Ouvrir l'original");
@@ -946,7 +949,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         await page.ClickAsync(() => page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche"));
 
         Assert.Empty(_api.Written);
-        Assert.Equal(["Planche 1", "Planche 2", "Planche 3"], page.FindAll(".edition-visual-mark").Select(mark => mark.TextContent));
+        Assert.Equal(["Planche 1", "Planche 2", "Planche 3"], page.FindAll(".edition-visual-mark-full").Select(mark => mark.TextContent));
         Assert.Contains("admin.edition-form.visual-type-changed", _audience.Functions);
         await page.SubmitAsync("form");
         Assert.Single(_api.Written);

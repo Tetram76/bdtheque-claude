@@ -8,9 +8,10 @@ namespace Bdtheque.Frontend.Components.Records;
 
 /// <summary>
 /// The names of a visual of an edition, written once for every page that names one: its type, a plate alone being numbered, by
-/// its rank among the plates of the edition, in full (the viewer and the thumbnails of the entry form) or short (the thumbnails of
-/// the album record, too small for the full name; visuel/fiche-album/contenu.md, visuel/saisie-edition/contenu.md, #469). The
-/// texts are those of the component that asks (keys <c>Plate</c> and <c>Short.{type}</c>).
+/// its rank among the plates of the edition, in full (the viewer, the thumbnails of the entry form) or short (the thumbnails of the
+/// album record, too small for the full name, and those of the entry form where a theme finds that the full name does not hold;
+/// visuel/fiche-album/contenu.md, visuel/saisie-edition/contenu.md, #469). The texts are those of the component that asks (keys
+/// <c>Plate</c> and <c>Short.{type}</c>).
 /// </summary>
 internal static class VisualLabels
 {
@@ -23,14 +24,15 @@ internal static class VisualLabels
     public static string TypeOf(IReadOnlyList<VisualType> types, int index, ValueLabels values, IStringLocalizer texts) =>
         types[index] == VisualType.Plate ? texts["Plate", PlateNumber(types, index)] : values.Of(types[index]);
 
-    /// <summary>The type of the visual at <paramref name="index"/> in short, under its thumbnail (« Couv. », « 2 », « 4e »).</summary>
-    public static string ShortOf(EditionDetail edition, int index, IStringLocalizer texts)
-    {
-        var types = TypesOf(edition);
-        return types[index] == VisualType.Plate
+    /// <summary>The type of the visual at <paramref name="index"/> of the edition in short, under its thumbnail (« Couv. », « 2 »,
+    /// « 4e »).</summary>
+    public static string ShortOf(EditionDetail edition, int index, IStringLocalizer texts) => ShortOf(TypesOf(edition), index, texts);
+
+    /// <summary>The type of the visual at <paramref name="index"/> among <paramref name="types"/> in short.</summary>
+    public static string ShortOf(IReadOnlyList<VisualType> types, int index, IStringLocalizer texts) =>
+        types[index] == VisualType.Plate
             ? PlateNumber(types, index).ToString(CultureInfo.CurrentCulture)
             : texts[$"Short.{types[index]}"];
-    }
 
     private static VisualType[] TypesOf(EditionDetail edition) => [.. edition.Visuals.Select(v => v.Type)];
 

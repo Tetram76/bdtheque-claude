@@ -319,6 +319,21 @@
     --book-turn: none;
     --book-ground: none;
 
+    /* The mark of each type of visual on the thumbnails of the entry form of an edition (visuel/saisie-edition/contenu.md,
+       #469): its full name where it holds on one line in the narrowest thumbnail, in the font of the theme, its short mark
+       otherwise; type by type, each a pair of displays, the full name's and the short mark's. « 4e de couverture » holds in
+       none of the offered themes. */
+    --edition-visual-mark-cover-full: inline;
+    --edition-visual-mark-cover-short: none;
+    --edition-visual-mark-dedication-full: inline;
+    --edition-visual-mark-dedication-short: none;
+    --edition-visual-mark-endpaper-full: inline;
+    --edition-visual-mark-endpaper-short: none;
+    --edition-visual-mark-plate-full: inline;
+    --edition-visual-mark-plate-short: none;
+    --edition-visual-mark-back-cover-full: none;
+    --edition-visual-mark-back-cover-short: inline;
+
     /* The home page of the administration, which every theme lays out alike but frames its own way
        (visuel/administration/declinaison-par-theme.md): the gap between its blocks, which a title straddling the top
        edge of its block needs wider; the tile of a type of record, its frame and its fill (--color-tile, read with the
