@@ -37,10 +37,10 @@
     <value>Aucun univers</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 univers</value>
+    <value>1 univers</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} univers</value>
+    <value>{0} univers</value>
   </data>
   <data name="Column.Universe" xml:space="preserve">
     <value>Univers</value>
@@ -55,25 +55,25 @@
     <value>Actions</value>
   </data>
   <data name="Series.One" xml:space="preserve">
-    <value>1 série</value>
+    <value>1 série</value>
   </data>
   <data name="Series.Other" xml:space="preserve">
-    <value>{0} séries</value>
+    <value>{0} séries</value>
   </data>
   <data name="Albums.Zero" xml:space="preserve">
     <value>aucun album</value>
   </data>
   <data name="Albums.One" xml:space="preserve">
-    <value>1 album</value>
+    <value>1 album</value>
   </data>
   <data name="Albums.Other" xml:space="preserve">
-    <value>{0} albums</value>
+    <value>{0} albums</value>
   </data>
   <data name="SubUniverses.One" xml:space="preserve">
-    <value>1 sous-univers</value>
+    <value>1 sous-univers</value>
   </data>
   <data name="SubUniverses.Other" xml:space="preserve">
-    <value>{0} sous-univers</value>
+    <value>{0} sous-univers</value>
   </data>
   <data name="Content.None" xml:space="preserve">
     <value>Ni série, ni album, ni sous-univers</value>

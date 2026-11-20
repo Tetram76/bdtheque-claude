@@ -34,10 +34,10 @@
     <value>Aucun auteur</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 auteur</value>
+    <value>1 auteur</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} auteurs</value>
+    <value>{0} auteurs</value>
   </data>
   <data name="Order" xml:space="preserve">
     <value>Triés par nom, le pseudonyme tenant lieu de nom</value>
@@ -67,10 +67,10 @@
     <value>Aucun album</value>
   </data>
   <data name="Albums.One" xml:space="preserve">
-    <value>1 album</value>
+    <value>1 album</value>
   </data>
   <data name="Albums.Other" xml:space="preserve">
-    <value>{0} albums</value>
+    <value>{0} albums</value>
   </data>
   <data name="Role.Scenarist" xml:space="preserve">
     <value>Scénario</value>
