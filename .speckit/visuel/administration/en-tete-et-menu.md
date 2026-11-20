@@ -2,12 +2,12 @@
 type: Référence visuelle
 title: 'En-tête et menu'
 description: 'En-tête et menu flottant de l''administration ; communs à ses pages.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T17:48:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T15:00:00Z }
 ---
 
 # En-tête et menu
 
-- **En-tête**, de gauche à droite : le logo, une étiquette « Administration », la recherche d'une fiche à modifier, le bouton d'aide, le lien « Aller à la consultation », marqué d'une flèche de sortie, puis le bouton « Menu », à l'extrémité droite. Sur smartphone, l'en-tête tient sur deux lignes : le logo, l'étiquette, la flèche de la consultation et le bouton « Menu », réduits à leur icône, puis la recherche et le bouton d'aide sur toute la largeur.
+- **En-tête**, de gauche à droite : le logo, une étiquette « Administration », la recherche d'une fiche à modifier, dont la croix d'effacement vide le champ ([Contrôles](../liste-albums/controles.md)), le bouton d'aide, le lien « Aller à la consultation », marqué d'une flèche de sortie, puis le bouton « Menu », à l'extrémité droite. Sur smartphone, l'en-tête tient sur deux lignes : le logo, l'étiquette, la flèche de la consultation et le bouton « Menu », réduits à leur icône, puis la recherche et le bouton d'aide sur toute la largeur.
 - Le **menu** n'est pas permanent :
   - il est **fermé par défaut** et s'ouvre par le bouton « Menu » ;
   - il s'ouvre en **panneau flottant** sous le bouton, aligné à droite, **par-dessus** le contenu : il ne décale jamais le reste de la page ; il défile de façon indépendante, la page restant immobile tant qu'il est ouvert ;
