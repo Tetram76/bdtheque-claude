@@ -195,7 +195,8 @@
     pointer-events: none;
 }
 
-/* The type, on a dark band at the foot of the thumbnail, readable on any image. */
+/* The type, on a dark band at the foot of the thumbnail, readable on any image: on one line, its full name or its short mark,
+   type by type as the theme says, from what holds in its narrowest thumbnail (visuel/saisie-edition/contenu.md, #469). */
 .edition-visual-mark {
     position: absolute;
     inset-block-end: var(--space-xs);
@@ -206,6 +207,40 @@
     color: var(--color-text-on-inverse);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
+    white-space: nowrap;
+}
+
+.edition-visual-mark[data-type="Cover"] {
+    --mark-full: var(--edition-visual-mark-cover-full);
+    --mark-short: var(--edition-visual-mark-cover-short);
+}
+
+.edition-visual-mark[data-type="Dedication"] {
+    --mark-full: var(--edition-visual-mark-dedication-full);
+    --mark-short: var(--edition-visual-mark-dedication-short);
+}
+
+.edition-visual-mark[data-type="Endpaper"] {
+    --mark-full: var(--edition-visual-mark-endpaper-full);
+    --mark-short: var(--edition-visual-mark-endpaper-short);
+}
+
+.edition-visual-mark[data-type="Plate"] {
+    --mark-full: var(--edition-visual-mark-plate-full);
+    --mark-short: var(--edition-visual-mark-plate-short);
+}
+
+.edition-visual-mark[data-type="BackCover"] {
+    --mark-full: var(--edition-visual-mark-back-cover-full);
+    --mark-short: var(--edition-visual-mark-back-cover-short);
+}
+
+.edition-visual-mark-full {
+    display: var(--mark-full);
+}
+
+.edition-visual-mark-short {
+    display: var(--mark-short);
 }
 
 .edition-visual-actions {

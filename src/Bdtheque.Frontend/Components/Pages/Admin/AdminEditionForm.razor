@@ -264,7 +264,17 @@ else
     };
 
     // The label of the edition as entered (fonctionnel/presentation/libelle-d-une-edition.md), from a publisher to choose.
-    private string Subject => EditionLabel(withIsbn: true);
+    private string Subject
+    {
+        get
+        {
+            if (Entry!.Publisher is not { } publisher)
+                return L["NoPublisher"];
+            return Labels.Edition(new EditionSummary(
+                Entry.Id ?? Guid.Empty, publisher.Id, publisher.Label, Entry.PublisherCollection?.Id, Entry.PublisherCollection?.Label,
+                Entry.PublicationYear, Entry.Isbn));
+        }
+    }
 
     private string AlbumLabel => Labels.Album(Entry!.Album, AlbumFormat);
 
@@ -291,13 +301,14 @@ else
     };
 
     // The page of the editions of the album, to which the album of the breadcrumb leads, as every breadcrumb of the
-    // administration leads back to a list (visuel/saisie-edition/contenu.md).
+    // administration leads back to a list; then the edition by its full label, ISBN included (visuel/saisie-edition/contenu.md,
+    // #470).
     private IReadOnlyList<BreadcrumbItem> Breadcrumb =>
     [
         new(L["Administration"], AppPaths.AdminHome),
         new(L["Albums"], AppPaths.AdminAlbums),
         new(AlbumLabel, AppPaths.AdminAlbumEditions(Entry!.AlbumId)),
-        new(Entry.Id is null ? Title : EditionLabel(withIsbn: false)),
+        new(Entry.Id is null ? Title : Subject),
     ];
 
     private SaveBarState State => Entry!.Id switch
@@ -355,15 +366,6 @@ else
         }
 
         _savedFingerprint = ReadEntry!.Fingerprint();
-    }
-
-    private string EditionLabel(bool withIsbn)
-    {
-        if (Entry!.Publisher is not { } publisher)
-            return L["NoPublisher"];
-        return Labels.Edition(new EditionSummary(
-            Entry.Id ?? Guid.Empty, publisher.Id, publisher.Label, Entry.PublisherCollection?.Id, Entry.PublisherCollection?.Label,
-            Entry.PublicationYear, withIsbn ? Entry.Isbn : null));
     }
 
     // A list of the values of an enumeration, « — » leaving the data empty, sized to its longest choice.

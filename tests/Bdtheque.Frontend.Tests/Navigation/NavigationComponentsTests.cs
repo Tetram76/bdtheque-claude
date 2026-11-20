@@ -19,6 +19,7 @@ public sealed class NavigationComponentsTests : BunitContext
         Services.AddLocalization();
         Services.AddScoped<BrowserTimeZone>();
         Services.AddScoped<DisplayFormatter>();
+        Services.AddLogging().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
     }
 
     protected override void Dispose(bool disposing)
@@ -46,6 +47,20 @@ public sealed class NavigationComponentsTests : BunitContext
         Assert.Equal("Le Lotus bleu", items[^1].TextContent.Trim());
         Assert.Equal("page", items[^1].QuerySelector("[aria-current]")?.GetAttribute("aria-current"));
         Assert.Null(items[^1].QuerySelector("a"));
+    }
+
+    [Fact]
+    public void Breadcrumb_ALevelThatEndsWithAnIsbn_KeepsItInOneBlock()
+    {
+        // fonctionnel/presentation/libelle-d-une-edition.md: wherever it is shown, an ISBN is never broken at the end of a line.
+        var breadcrumb = Render<Breadcrumb>(parameters => parameters.Add(p => p.Items,
+        [
+            new BreadcrumbItem("Albums", "/admin/albums"),
+            new BreadcrumbItem("Casterman [2007] - ISBN\u00a0978-2-203-00120-8"),
+        ]));
+
+        Assert.Equal("ISBN\u00a0978-2-203-00120-8", breadcrumb.Find("[aria-current] .label-isbn").TextContent);
+        Assert.Empty(breadcrumb.FindAll("a .label-isbn"));
     }
 
     [Fact]

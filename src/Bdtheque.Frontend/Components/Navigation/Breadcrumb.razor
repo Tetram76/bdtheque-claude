@@ -1,7 +1,8 @@
 @inject IStringLocalizer<Breadcrumb> L
 
 @* The fil d'Ariane of a page, under the header (e.g. Administration › Albums › the album, visuel/saisie-album/contenu.md):
-   each level leads to its page, the last one is the current page. *@
+   each level leads to its page, the last one is the current page. A level is the label of a record, whose ISBN a line never
+   breaks (fonctionnel/presentation/libelle-d-une-edition.md). *@
 <nav class="breadcrumb" aria-label="@L["Label"]">
     <ol>
         @foreach (var (item, index) in Items.Select((item, index) => (item, index)))
@@ -9,15 +10,15 @@
             <li>
                 @if (index == Items.Count - 1)
                 {
-                    <span aria-current="page">@item.Label</span>
+                    <span aria-current="page"><LabelText Text="@item.Label" /></span>
                 }
                 else if (item.Href is not null)
                 {
-                    <a href="@item.Href">@item.Label</a>
+                    <a href="@item.Href"><LabelText Text="@item.Label" /></a>
                 }
                 else
                 {
-                    <span>@item.Label</span>
+                    <span><LabelText Text="@item.Label" /></span>
                 }
             </li>
         }

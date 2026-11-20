@@ -14,6 +14,7 @@ using Bdtheque.Frontend.Visits;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Time.Testing;
 
 namespace Bdtheque.Frontend.Tests.Pages;
 
@@ -115,13 +116,16 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         },
         authenticated: true);
 
+    // The clock of the form, the system's unless a test needs the time a visual added is kept to elapse.
+    private TimeProvider _clock = TimeProvider.System;
+
     public AdminEditionFormTests()
     {
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         _api = new FakeAdminApi(_audience);
         _api.AddServices(Services, _request);
         Services.AddScoped<RecordSearch>();
-        Services.AddSingleton(TimeProvider.System);
+        Services.AddSingleton(_ => _clock);
         // The choice of a record imports its script once rendered, which these tests do not exercise.
         JSInterop.Mode = JSRuntimeMode.Loose;
         // An entry form is rendered by its circuit (InteractiveServer), which its frame marks.
@@ -151,8 +155,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     {
         var page = OpenOwned();
 
-        Assert.Equal(["Administration", "Albums", "Les Bijoux de la Castafiore (Tintin - T. 21)", "Casterman [2007]"],
+        // The edition by its full label, ISBN included, as everywhere (visuel/saisie-edition/contenu.md, #470): its ISBN in a
+        // block that a line never breaks.
+        Assert.Equal(["Administration", "Albums", "Les Bijoux de la Castafiore (Tintin - T. 21)", "Casterman [2007] - ISBN\u00a0978-2-203-00120-8"],
             page.FindAll(".breadcrumb li").Select(item => item.TextContent.Trim()));
+        Assert.Equal("ISBN\u00a0978-2-203-00120-8", page.Find(".breadcrumb [aria-current] .label-isbn").TextContent);
         Assert.Equal("Modifier l'édition", page.Find("h1").TextContent.Trim());
         Assert.Equal("Casterman [2007] - ISBN 978-2-203-00120-8", page.Find(".entry-form-subject").TextContent.Trim());
         // The album leads to the page of its editions from the breadcrumb, and to its own form from the heading; neither link
@@ -734,10 +741,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_ABlockOfTheForm_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsType()
+    public void Visuals_ABlockOfTheForm_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsFullType()
     {
         // visuel/saisie-edition/contenu.md, Les visuels: the last block of the form, saved with it, which the block says, then the
-        // drop zone, the number of visuals and their grid, a plate counted among the plates.
+        // drop zone, the number of visuals and their grid, each marked with the full name of its type, a plate numbered among the
+        // plates (#469).
         var page = OpenOwned();
         var block = page.Find("form .edition-visuals");
 
@@ -746,7 +754,10 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("JPEG, PNG, WebP ou GIF, 30 Mio au plus.", block.QuerySelector(".edition-visuals-formats")!.TextContent);
         Assert.Equal("3 visuels", block.QuerySelector(".edition-visuals-count")!.TextContent);
         var visuals = block.QuerySelectorAll(".edition-visual");
-        Assert.Equal(["Couv.", "Pl. 1", "Pl. 2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark")!.TextContent));
+        // Its full name, and the short mark of the album record that the theme shows where the full name does not hold.
+        Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark-full")!.TextContent));
+        Assert.Equal(["Couv.", "1", "2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark-short")!.TextContent));
+        Assert.Equal(["Cover", "Plate", "Plate"], visuals.Select(v => v.QuerySelector(".edition-visual-mark")!.GetAttribute("data-type")));
         Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector("img")!.GetAttribute("alt")));
         Assert.Equal(VisualMediaRoutes.Display(CoverId), visuals[0].QuerySelector("img")!.GetAttribute("src"));
         // Its menu: the type, the current one pressed, the original beside the application, the deletion.
@@ -775,8 +786,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(2048, form.GetProperty(UploadVisualFields.File).GetProperty("length").GetInt64());
         // After the cover, before the plates; shown from the waiting area; an unsaved change of the form.
         var added = page.FindAll(".edition-visual")[1];
-        Assert.Equal(("Déd.", "/admin/visuals/pending/" + AddedId + "/display"),
-            (added.QuerySelector(".edition-visual-mark")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
+        Assert.Equal(("Dédicace", "/admin/visuals/pending/" + AddedId + "/display"),
+            (added.QuerySelector(".edition-visual-mark-full")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
         // Its original as uploaded, from the waiting area too, before the form is saved.
         // Opened beside the form, but in the application: without the mark of a site outside it.
         var original = added.QuerySelectorAll(".actions-menu-panel a").Single(link => link.TextContent.Trim() == "Ouvrir l'original");
@@ -942,7 +953,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         await page.ClickAsync(() => page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche"));
 
         Assert.Empty(_api.Written);
-        Assert.Equal(["Pl. 1", "Pl. 2", "Pl. 3"], page.FindAll(".edition-visual-mark").Select(mark => mark.TextContent));
+        Assert.Equal(["Planche 1", "Planche 2", "Planche 3"], page.FindAll(".edition-visual-mark-full").Select(mark => mark.TextContent));
         Assert.Contains("admin.edition-form.visual-type-changed", _audience.Functions);
         await page.SubmitAsync("form");
         Assert.Single(_api.Written);
@@ -1005,6 +1016,27 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
         await page.ClickAsync("dialog .dialog-actions .button");
         Assert.Empty(page.FindAll("dialog"));
+    }
+
+    [Fact]
+    public async Task Visuals_AddedLongAgo_WhoseRemovalIsAsked_CloseTheRemovalDialog_ForTheOneThatTellsTheyAreRemoved()
+    {
+        // The removal of a visual asked, then the time it is kept elapsed: it is no longer in the form, nothing is left to remove.
+        var clock = new FakeTimeProvider(new DateTimeOffset(2026, 11, 20, 12, 0, 0, TimeSpan.Zero));
+        _clock = clock;
+        var page = OpenNewOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, clock.GetUtcNow().AddHours(24)), HttpStatusCode.Created);
+        await SendAsync(page, new TestBrowserFile("planche-oubliee.png", new byte[16]));
+        await page.ClickAsync(() => page.Find(".edition-visual").QuerySelectorAll(".actions-menu-panel button")[^1]);
+        Assert.Equal("Supprimer ce visuel ?", page.Find("dialog .dialog-title").TextContent);
+
+        await page.InvokeAsync(() => clock.Advance(TimeSpan.FromHours(24)));
+
+        var dialog = page.WaitForElement("dialog");
+        Assert.Single(page.FindAll("dialog"));
+        Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
+        Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
+        Assert.Equal("Aucun visuel", page.Find(".edition-visuals-count").TextContent);
     }
 
     [Fact]

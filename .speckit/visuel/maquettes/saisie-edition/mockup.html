@@ -104,7 +104,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           <span aria-hidden="true" style="margin: 0 6px">›</span>
           <a href="#" style="color: {{t.link}}; font-weight: 700">{{x.album}}</a>
           <span aria-hidden="true" style="margin: 0 6px">›</span>
-          <span aria-current="page">{{x.crumb}}</span>
+          <span aria-current="page">{{crumb}}</span>
         </nav>
         <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 16px">
           <div style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
@@ -504,11 +504,11 @@ const LISTS = {
 const pick = (list, value) => LISTS[list].map((label) => ({ label, selected: label === value }));
 
 // The visuals of an edition, in their fixed order of types (fonctionnel/regles-metier.md § Ordre des visuels d'une édition).
-const VISUAL_TYPES = [['Couverture', 'Couv.'], ['Dédicace', 'Déd.'], ['Page de garde', 'Garde'], ['Planche', ''], ['4e de couverture', '4e']];
+const VISUAL_TYPES = ['Couverture', 'Dédicace', 'Page de garde', 'Planche', '4e de couverture'];
 
 const EXAMPLES = {
   modification: {
-    existing: true, owned: true, heading: "Modifier l'édition", crumb: 'Casterman [2007]',
+    existing: true, owned: true, heading: "Modifier l'édition",
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     publisher: 'Casterman', collection: '', year: '2007', isbn: '978-2-203-00120-8', category: '—',
     format: 'Normal (A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '62', color: true,
@@ -541,7 +541,7 @@ const EXAMPLES = {
     dirty: false, status: 'Nouvelle fiche', statusShort: 'Nouvelle fiche', save: 'Créer l\'intention d\'acquisition'
   },
   intention: {
-    existing: true, intent: true, heading: "Modifier l'intention d'acquisition", crumb: 'Casterman (Fac-similé) [2013]',
+    existing: true, intent: true, heading: "Modifier l'intention d'acquisition",
     album: 'Les Bijoux de la Castafiore (Tintin - T. 21)',
     publisher: 'Casterman', collection: 'Fac-similé', year: '2013', isbn: '978-2-203-03312-4', category: 'Édition spéciale',
     format: 'Grand (> A4)', binding: 'Cartonnée', orientation: 'Portrait', reading: 'Gauche à droite', pages: '62', color: true,
@@ -609,20 +609,21 @@ class View extends Mockup {
     // The edition label is rebuilt as the form changes (fonctionnel/presentation.md § Libellé d'une édition).
     const label = x.publisher + (x.collection ? ' (' + x.collection + ')' : '') + (x.year ? ' [' + x.year + ']' : '') + (isbn ? ' - ISBN ' + isbn : '');
     const field = 'box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
-    // One grid in the fixed order of types, each thumbnail marked with its type: a type with a
-    // single visual does not take a line of its own.
-    const visuals = VISUAL_TYPES.filter(([type]) => x.visuals[type]).flatMap(([type, abbr], g) => {
+    // One grid in the fixed order of types, each thumbnail marked with its full type where it holds in the narrowest
+    // thumbnail, its short mark otherwise (« 4e de couv. » in every offered theme), plates alone numbered (#469): a type with a single
+    // visual does not take a line of its own.
+    const visuals = VISUAL_TYPES.filter((type) => x.visuals[type]).flatMap((type, g) => {
       const n = x.visuals[type];
       return Array.from({ length: n }, (_, i) => {
           const key = type + '-' + i;
           return {
-            mark: abbr || 'Pl. ' + (i + 1),
+            mark: type === '4e de couverture' ? '4e de couv.' : type + (type === 'Planche' ? ' ' + (i + 1) : ''),
             alt: type + (type === 'Planche' ? ' ' + (i + 1) : ''),
             bg: 'hsl(' + ((g * 70 + i * 23 + 200) % 360) + ', 38%, 38%)',
             menuOpen: visualMenu === key,
             expanded: visualMenu === key ? 'true' : 'false',
             toggle: () => this.setState({ visualMenu: visualMenu === key ? null : key }),
-            types: VISUAL_TYPES.map(([other]) => ({ label: other, checked: other === type ? 'true' : 'false', mark: other === type ? '✓ ' : '', fw: other === type ? '700' : '500' }))
+            types: VISUAL_TYPES.map((other) => ({ label: other, checked: other === type ? 'true' : 'false', mark: other === type ? '✓ ' : '', fw: other === type ? '700' : '500' }))
           };
         });
     });
@@ -644,6 +645,8 @@ class View extends Mockup {
     const barBg = t.cBg === 'transparent' ? t.bg : t.cBg;
     return {
       t, label,
+      // The breadcrumb names an existing edition by its full label, ISBN included (#470); a new one by the title.
+      crumb: x.existing ? label : x.crumb,
       icons: ICONS,
       // The collection is one of the publisher's, chosen in the list of them all.
       collections: ['—', 'Fac-similé', 'Pastiches', 'Univers d\'auteurs'].map((o, i) => ({ label: o, selected: x.collection ? o === x.collection : i === 0 })),

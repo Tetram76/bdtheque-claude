@@ -78,13 +78,10 @@
   <data name="Short.Endpaper" xml:space="preserve">
     <value>Garde</value>
   </data>
-  <data name="Short.Plate" xml:space="preserve">
-    <value>Pl. {0}</value>
-  </data>
   <data name="Short.BackCover" xml:space="preserve">
-    <value>4e</value>
+    <value>4e de couv.</value>
   </data>
-  <data name="Full.Plate" xml:space="preserve">
+  <data name="Plate" xml:space="preserve">
     <value>Planche {0}</value>
   </data>
   <data name="Actions" xml:space="preserve">

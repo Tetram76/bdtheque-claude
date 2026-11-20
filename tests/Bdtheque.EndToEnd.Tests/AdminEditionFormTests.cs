@@ -243,7 +243,8 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         var page = await OpenAsync(theme, AppPaths.AdminEditEdition(album.Id, edition.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
         var visuals = page.Locator("form .edition-visuals");
-        var marks = visuals.Locator(".edition-visual-mark");
+        // The mark each thumbnail shows, its full name or its short mark as the theme says.
+        var marks = visuals.Locator(".edition-visual-mark > :visible");
 
         // Three plates, sent one at a time to the waiting area; a file that is no image, refused with its reason.
         await page.GetByLabel("Ajoutés comme").SelectOptionAsync(new SelectOptionValue { Label = "Planche" });
@@ -255,7 +256,8 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(visuals.Locator(".edition-visuals-count")).ToHaveTextAsync("3 visuels");
         await Assertions.Expect(visuals.Locator(".edition-visuals-upload[data-refused] .edition-visuals-upload-reason"))
             .ToContainTextAsync("n'est pas une image lisible");
-        await Assertions.Expect(marks).ToHaveTextAsync(["Pl. 1", "Pl. 2", "Pl. 3"]);
+        await Assertions.Expect(marks).ToHaveTextAsync(["Planche 1", "Planche 2", "Planche 3"]);
+        await AssertEachTypeShowsWhatHoldsAsync(visuals);
         // Nothing saved yet: the form says so.
         Assert.Empty((await GetVisualsAsync(album.Id, edition.Id)).Visuals);
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Modifications non enregistrées");
@@ -263,7 +265,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         // The first plate becomes the cover, which comes first; the last plate dragged onto the first takes its place.
         await visuals.GetByRole(AriaRole.Button, new() { Name = "Actions sur Planche 1" }).ClickAsync();
         await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Button, new() { Name = "Couverture", Exact = true }).ClickAsync();
-        await Assertions.Expect(marks).ToHaveTextAsync(["Couv.", "Pl. 1", "Pl. 2"]);
+        await Assertions.Expect(marks).ToHaveTextAsync(["Couverture", "Planche 1", "Planche 2"]);
         var third = await visuals.Locator(".edition-visual img").Nth(2).GetAttributeAsync("src");
         await visuals.Locator(".edition-visual").Nth(2).DragToAsync(visuals.Locator(".edition-visual").Nth(1));
         await Assertions.Expect(visuals.Locator(".edition-visual img").Nth(1)).ToHaveAttributeAsync("src", third!);
@@ -335,6 +337,49 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
     }
 
     // Playwright drops no file of the system; the protocol of Chromium does, as a user would (Input.dispatchDragEvent).
+    // Type by type, in the theme of the test, a thumbnail shows the full name of its type where it holds on one line in the
+    // narrowest thumbnail of the grid, 7rem, a plate's with a number of three digits, and its short mark otherwise, which holds
+    // (visuel/saisie-edition/contenu.md, #469): measured on a copy of a mark, which keeps its styles, so that a thumbnail wider
+    // than the narrowest one does not hide a name too long, nor a theme that shows a name which does not hold.
+    private static async Task AssertEachTypeShowsWhatHoldsAsync(ILocator visuals)
+    {
+        string[][] types =
+        [
+            ["Cover", "Couverture", "Couv."], ["Dedication", "Dédicace", "Déd."], ["Endpaper", "Page de garde", "Garde"],
+            ["Plate", "Planche 999", "999"], ["BackCover", "4e de couverture", "4e de couv."],
+        ];
+        var wrong = await visuals.Locator(".edition-visual").First.EvaluateAsync<string[]>("""
+            (thumbnail, types) => {
+                const narrowest = 7 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+                const copy = thumbnail.querySelector('.edition-visual-mark').cloneNode(true);
+                const [full, short] = [copy.querySelector('.edition-visual-mark-full'), copy.querySelector('.edition-visual-mark-short')];
+                thumbnail.append(copy);
+                const holds = () => copy.offsetWidth + 2 * copy.offsetLeft <= narrowest;
+                try {
+                    return types.flatMap(([type, fullName, shortMark]) => {
+                        copy.dataset.type = type;
+                        full.textContent = fullName;
+                        short.textContent = shortMark;
+                        const showsFull = getComputedStyle(full).display !== 'none';
+                        const showsShort = getComputedStyle(short).display !== 'none';
+                        short.style.display = 'none';
+                        full.style.display = 'inline';
+                        const fullHolds = holds();
+                        full.style.display = 'none';
+                        short.style.display = 'inline';
+                        const shortHolds = holds();
+                        full.style.display = short.style.display = '';
+                        const shown = showsFull === fullHolds && showsShort === !fullHolds && (fullHolds || shortHolds);
+                        return shown ? [] : [`${type}: ${showsFull ? fullName : shortMark}, full name ${fullHolds ? 'holds' : 'does not hold'}`];
+                    });
+                } finally {
+                    copy.remove();
+                }
+            }
+            """, types);
+        Assert.Empty(wrong);
+    }
+
     private static async Task DropFileAsync(IPage page, string file, float x, float y)
     {
         var session = await page.Context.NewCDPSessionAsync(page);

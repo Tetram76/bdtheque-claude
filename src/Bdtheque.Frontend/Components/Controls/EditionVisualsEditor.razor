@@ -3,6 +3,7 @@
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Components.Errors
+@using Bdtheque.Frontend.Components.Records
 @using Bdtheque.Frontend.Entries
 @implements IDisposable
 @inject IStringLocalizer<EditionVisualsEditor> L
@@ -95,7 +96,7 @@
                     @ondragstart="() => _dragged = visual" @ondragend="() => _dragged = null"
                     @ondragover:preventDefault="true" @ondrop="() => DropAsync(visual)">
                     <Cover VisualId="visual.Id" Source="@PendingDisplayOf(visual)" Alt="@label" />
-                    <span class="edition-visual-mark" aria-hidden="true">@ShortOf(visual)</span>
+                    <span class="edition-visual-mark" data-type="@visual.Type" aria-hidden="true"><span class="edition-visual-mark-full">@label</span><span class="edition-visual-mark-short">@ShortOf(visual)</span></span>
                     <span class="edition-visual-actions">
                         <ActionsMenu Id="@($"{Id}-visual-{visual.Key:N}")" Label="@L["Actions", label]">
                             <span class="edition-visual-menu-heading">@L["Menu.Type"]</span>
@@ -385,9 +386,13 @@
             return;
         }
 
+        // Named while still among the visuals, which give a plate its number; a removal asked of one of them has nothing left to
+        // remove, and its dialog would name a visual the form no longer has.
+        _expired = [.. _expired ?? [], .. expired.Select(v => v.Name ?? LabelOf(v))];
+        if (_removing is { } removing && expired.Contains(removing))
+            _removing = null;
         foreach (var visual in expired)
             Visuals.Remove(visual);
-        _expired = [.. _expired ?? [], .. expired.Select(v => v.Name ?? LabelOf(v))];
         await ChangedAsync();
         StateHasChanged();
     }
@@ -407,16 +412,15 @@
     private static string OriginalOf(VisualItem visual) =>
         visual.PendingId is { } pending ? PendingVisualMediaRoutes.Original(pending) : VisualMediaRoutes.Original(visual.Id!.Value);
 
-    // « Planche 3 », the rank of a plate counted among the plates: what each visual is, in full.
+    // What each visual is, in full, as the album record names it in its viewer (« Planche 3 », « 4e de couverture »): also the
+    // mark of its thumbnail, where the theme finds that it holds (visuel/saisie-edition/contenu.md, #469).
     private string LabelOf(VisualItem visual) =>
-        visual.Type == VisualType.Plate ? L["Full.Plate", PlateNumber(visual)] : Values.Of(visual.Type);
+        VisualLabels.TypeOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), Values, L);
 
-    // « Pl. 3 », « Couv. »: the type marked on the thumbnail.
+    // The short mark of the entry form (« Couv. », « 4e de couv. », less short than the « 4e » of the album record), where the full
+    // name does not hold in the theme.
     private string ShortOf(VisualItem visual) =>
-        visual.Type == VisualType.Plate ? L["Short.Plate", PlateNumber(visual)] : L[$"Short.{visual.Type}"];
-
-    private int PlateNumber(VisualItem visual) =>
-        Visuals.TakeWhile(v => v != visual).Count(v => v.Type == VisualType.Plate) + 1;
+        VisualLabels.ShortOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), L);
 
     // In mebibytes, as the operating systems give the size of a file (« 30 Mio »).
     private static string MaxSize(long bytes) => (bytes / (1024d * 1024)).ToString("0.#", CultureInfo.CurrentCulture);
