@@ -2,7 +2,7 @@
 
 ## 2026-11-20
 
-* **Exigence de l'utilisateur** : ce que l'agent consigne de ce que dit l'utilisateur, dans le `.speckit/`, une *rule*, un *skill* ou une mémoire, en est le sens (idées, concepts, règles), formulé dans les termes du document, jamais sa formulation recopiée ou citée ; ses mots gardent pour l'agent leur sens exact. Les deux citations littérales de l'utilisateur (Issues, Suivi par tickets) sont reformulées.
+* **Exigence de l'utilisateur** : ce que l'agent consigne de ce que dit l'utilisateur, dans le `.speckit/`, une *rule*, un *skill* ou une mémoire, en est le sens (idées, concepts, règles), formulé dans les termes du document, jamais sa formulation recopiée ou citée ; ses mots gardent pour l'agent leur sens exact. Les deux citations littérales de l'utilisateur (Issues, Suivi par tickets) sont reformulées (#574).
 
 ## 2026-11-19
 
