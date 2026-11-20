@@ -42,6 +42,9 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         Assert.Equal(("get", AppPaths.AdminIsbnLookup), (form.GetAttribute("method"), form.GetAttribute("action")));
         Assert.Equal("ISBN de l'édition", form.QuerySelector("label[for='admin-isbn']")?.TextContent.Trim());
         Assert.Equal("isbn", form.QuerySelector("#admin-isbn")?.GetAttribute("name"));
+        // A search without a list behind it: its cross, right after the field, empties it (visuel/liste-albums/controles.md).
+        var cross = form.QuerySelector("#admin-isbn[type='search'] + .search-clear")!;
+        Assert.Equal(("button", "reset", "Effacer la recherche"), (cross.LocalName, cross.GetAttribute("type"), cross.TextContent.Trim()));
         Assert.Equal("Chercher dans les sources", form.QuerySelector("button[type='submit']")?.TextContent.Trim());
         Assert.Equal(
             [("Album", AppPaths.AdminNewAlbum), ("Série", AppPaths.AdminNewSeries), ("Auteur", AppPaths.AdminNewAuthor), ("Éditeur", AppPaths.AdminNewPublisher)],

@@ -18,7 +18,8 @@
            @attributes="AdditionalAttributes" />
     @if (Value is { } value)
     {
-        <button type="button" class="record-picker-clear" aria-label="@L["Clear", value.Label]" @onclick="ClearAsync"><Icon Name="IconName.Close" /></button>
+        @* The look of the cross of the search fields, the action being the same: resetting the field (visuel/liste-albums/controles.md). *@
+        <button type="button" class="record-picker-clear search-clear" aria-label="@L["Clear", value.Label]" @onclick="ClearAsync"><Icon Name="IconName.Close" /></button>
     }
     else
     {

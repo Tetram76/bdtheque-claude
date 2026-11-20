@@ -108,6 +108,26 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"genreId={genre}"));
     }
 
+    // The cross that removes the record chosen has the look of the cross of the search fields, the action being the same:
+    // resetting the field (visuel/liste-albums/controles.md): in the muted text, a target of 24 px, its icon of 18 px.
+    [Theory, InEachTheme]
+    public async Task RecordPicker_ItsCrossHasTheLookOfTheCrossOfTheSearchFields(string theme)
+    {
+        var token = $"Lagaffe{Guid.NewGuid():N}"[..13];
+        await CreateGenreAsync(token);
+        var page = await OpenAsync(theme);
+        var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
+        await TypeAndAwaitSuggestionsAsync(page, input, token);
+        await input.PressAsync("ArrowDown");
+        await input.PressAsync("Enter");
+
+        var cross = page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « {token} »" });
+        await Assertions.Expect(cross).ToBeVisibleAsync();
+        Assert.True(await cross.EvaluateAsync<bool>(Headers.HeaderTests.SameColorAs("--color-text-muted")), "The cross is not in the muted text.");
+        var sizes = await cross.EvaluateAsync<double[]>("cross => { const b = cross.getBoundingClientRect(); const i = cross.querySelector('.icon').getBoundingClientRect(); return [b.width, b.height, i.width]; }");
+        Assert.Equal([24, 24, 18], sizes);
+    }
+
     [Theory, InEachTheme]
     public async Task RecordPicker_KeepsTheActiveSuggestionInView_WhenTheListOverflows(string theme)
     {

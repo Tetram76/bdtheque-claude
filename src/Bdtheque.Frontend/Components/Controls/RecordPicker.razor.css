@@ -1,5 +1,6 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md); the text field is
-   the base theme's, its list of suggestions the OptionList's, placed under it. */
+   the base theme's, its list of suggestions the OptionList's, placed under it. The cross that removes the record chosen
+   is the one of the search fields (themes/base.css, .search-clear), the action being the same: resetting the field. */
 .record-picker {
     position: relative;
 }
@@ -8,7 +9,6 @@
     padding-inline-end: calc(var(--control-height) + var(--space-xs));
 }
 
-.record-picker-clear,
 .record-picker-search {
     position: absolute;
     inset-block: 0;
@@ -17,23 +17,12 @@
     align-items: center;
     justify-content: center;
     inline-size: var(--control-height);
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-control);
-    background: transparent;
     color: var(--color-text-muted);
-}
-
-.record-picker-clear {
-    color: var(--color-text);
-    cursor: pointer;
-}
-
-.record-picker-search {
     pointer-events: none;
 }
 
-.record-picker ::deep .icon {
-    inline-size: 1rem;
-    block-size: 1rem;
+/* The magnifier, of the size of the one of the search fields. */
+.record-picker-search ::deep .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
 }
