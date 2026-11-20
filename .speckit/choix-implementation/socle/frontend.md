@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T15:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T11:00:00Z }
 ---
 
 # Frontend
@@ -149,6 +149,12 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T15:30:00Z }
 - **Séries d'une bibliographie dépliées par une divulgation du navigateur** (`<details>`, [`visuel/fiche-auteur/`](../../visuel/fiche-auteur/index.md)), ouverte à l'arrivée jusqu'à six albums crédités : comme le repli des auteurs d'un rôle, ni requête pour montrer des albums déjà reçus, ni action suivie, « Tout déplier » et « Tout replier » compris ([Mesure d'audience de l'interface web](../../fonctionnel/mesure-audience.md), Fonctions suivies). « Tout déplier » et « Tout replier » ouvrent ou ferment toutes les divulgations de la liste par un script (élément personnalisé), aucune fonction du HTML n'agissant sur plusieurs divulgations à la fois ; leurs boutons n'apparaissent qu'une fois l'élément défini (`:defined`), si bien que sans script, chaque série se déplie encore seule.
   - **Alternative écartée (séries dépliées portées par l'adresse, comme les critères d'une liste)** : une requête et un nouveau rendu de la fiche pour des albums déjà présents dans la page, et une adresse qui nommerait chaque série dépliée.
   - **Alternative écartée (chevron de chaque série tenu par un script)** : un script pour ce que la divulgation du navigateur offre, et une fiche qui ne se déplierait plus sans lui.
+
+- **Reste de la série replié sur smartphone par une divulgation du navigateur** (`<details>`, [Contenu](../../visuel/fiche-album/contenu.md), #554) : la page reçoit déjà tous les albums de la série, et le serveur marque ceux qui sont à plus de trois places de l'album affiché ; une divulgation placée après la liste, fermée à l'arrivée, cache ces albums tant qu'elle est fermée (`:has()`), son résumé disant « et N autres », puis « Réduire ». Une requête de conteneur sur la largeur de la liste décide à la fois de ses colonnes et du repli : assez large pour deux colonnes, la liste est en colonnes, entière, et la divulgation cachée ; plus étroite, sur une colonne, elle se replie. Comme le repli des auteurs d'un rôle, ni requête, ni action suivie, ni script : le serveur sait combien d'albums il replie.
+  - **Alternative écartée (largeur de l'écran, requête de média)** : les marges de chaque thème décident de la place de la liste, que seule une requête de conteneur mesure (§ Listes de l'administration).
+  - **Alternative écartée (albums repliés marqués par un script selon la place, comme les auteurs d'un rôle)** : les noms d'un rôle se replient selon ce que tient leur ligne, que seul le navigateur connaît ; ici, la règle ne dépend que de la place de chaque album dans la série, que le serveur connaît.
+- **Nombre d'albums d'une série dans la collection, rapporté à ses albums, écrit une fois** ([Convivialité et efficacité](../../visuel/charte-graphique/convivialite-et-efficacite.md), #468) : un composant commun à la fiche d'une série et au reste de la série d'un album en donne le texte (« 0 album sur 3 dans la collection »), si bien que leurs formulations ne peuvent plus diverger. La bibliographie d'un auteur, qui rapporte son nombre aux albums crédités qu'elle vient de donner et écrit « aucun » pour un nombre nul, garde son propre texte.
+  - **Alternative écartée (texte écrit par chaque composant)** : c'est ainsi que le reste de la série disait « 3 albums, dont 1 dans la collection » quand la fiche de la série disait « 1 album sur 3 dans la collection » (contrôle de cohérence, #468).
 
 ## Présentation
 
