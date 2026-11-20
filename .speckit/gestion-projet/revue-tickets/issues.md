@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Issues'
 description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), étiquette `agent` des tickets créés à l''initiative d''un agent, description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; décision de créer un ticket à l''initiative d''un agent (seulement si la session ne peut pas corriger elle-même), puis recherche d''un ticket existant.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T10:00:00Z }
 ---
 
 # Issues
@@ -94,7 +94,7 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
 
 ### Décision de créer un ticket
 
-Le projet doit produire une application, pas des tickets (« l'objectif du projet n'est pas de créer des tickets mais de produire une application !! », exigence de l'utilisateur). Avant toute création d'un ticket à l'initiative d'un agent sur un problème ou une amélioration qu'il relève (problème relevé en cours de chantier, retour de revue, suite d'un harnais, revue de l'existant…), l'agent décide d'abord s'il faut un ticket, et seulement ensuite cherche s'il en existe déjà un (§ Recherche d'un ticket existant) :
+Le projet a pour objet de produire une application, et non des tickets (exigence de l'utilisateur). Avant toute création d'un ticket à l'initiative d'un agent sur un problème ou une amélioration qu'il relève (problème relevé en cours de chantier, retour de revue, suite d'un harnais, revue de l'existant…), l'agent décide d'abord s'il faut un ticket, et seulement ensuite cherche s'il en existe déjà un (§ Recherche d'un ticket existant) :
 
 - **La session qui relève un problème le corrige elle-même**, dans sa Pull Request, même un peu en dehors de son objectif, dès que la correction est à sa portée et reste raisonnable : cette Pull Request porte alors la correction, dite dans sa description.
 - **Un ticket seulement quand elle ne peut vraiment pas corriger** : correction trop grosse pour sa Pull Request, décision qui revient à l'utilisateur ([Prise de décision](../gouvernance/prise-de-decision.md)), ou dépendance non remplie (un autre chantier, une version, un déploiement à attendre). Un ticket alors nécessaire est créé sans hésiter, et porte l'analyse de la cause ([Qualité du code](../gouvernance/qualite-du-code.md), la cause de fond).

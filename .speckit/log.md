@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-20
+
+* **Exigence de l'utilisateur** : ce que l'agent consigne de ce que dit l'utilisateur, dans le `.speckit/`, une *rule*, un *skill* ou une mémoire, en est le sens (idées, concepts, règles), formulé dans les termes du document, jamais sa formulation recopiée ou citée ; ses mots gardent pour l'agent leur sens exact. Les deux citations littérales de l'utilisateur (Issues, Suivi par tickets) sont reformulées.
+
 ## 2026-11-19
 
 * **Exigence de l'utilisateur** : un agent ne crée un ticket sur un problème qu'il relève que s'il ne peut vraiment pas le corriger dans sa Pull Request (correction trop grosse, décision de l'utilisateur, dépendance non remplie) ; sinon il le corrige, même un peu hors de l'objectif de la PR ; un constat sans effet réel est dit dans la PR ou consigné dans son concept ; la revue de l'existant d'une montée se fait dans la PR de la montée ; dans un lot, l'orchestrateur ne transforme pas d'office le constat d'une session en ticket, la session lui soumettant tout ticket avant de le créer. Cette décision précède la recherche d'un doublon ; revue Codex, cause de fond, harnais (contrôle qualité, cohérence, mises à jour) et skills `codex-review-loop` et `chantiers-paralleles` alignés (#571).
