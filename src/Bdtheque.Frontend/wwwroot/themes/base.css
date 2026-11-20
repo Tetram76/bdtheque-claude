@@ -475,7 +475,8 @@ input[type="search"]::-webkit-search-cancel-button {
     display: none;
 }
 
-input[type="search"]:has(+ .search-clear) {
+/* The room of the cross, only while it shows: an empty field keeps its placeholder whole. */
+input[type="search"]:not(:placeholder-shown):has(+ .search-clear) {
     padding-inline-end: calc(var(--control-height) / 2 + 1rem);
 }
 
