@@ -46,7 +46,7 @@ Le tableau suivant indique comment chaque échec est classé. Le classement des 
 
 | Échec | Catégorie et statut HTTP |
 | --- | --- |
-| Une règle du domaine est enfreinte, un index unique est violé (son code de règle vient de [`UniqueIndexRules`](../../../src/Bdtheque.Api/Errors/UniqueIndexRules.cs), puis [`ApiExceptionHandler`](../../../src/Bdtheque.Api/Errors/ApiExceptionHandler.cs) le précise d'après la fiche refusée : le nom d'un univers sans parent reçoit `Universe.TopLevelNameAlreadyUsed`), un texte dépasse sa longueur, une suppression est refusée, ou la requête retire une fiche qu'une recherche enregistrée désigne. | Métier, `422`, avec le membre `ruleCode`. |
+| Une règle du domaine est enfreinte, un index unique est violé (son code de règle vient de [`UniqueIndexRules`](../../../src/Bdtheque.Api/Errors/UniqueIndexRules.cs), puis [`ApiExceptionHandler`](../../../src/Bdtheque.Api/Errors/ApiExceptionHandler.cs) le précise d'après la fiche refusée : le nom d'un univers sans parent reçoit `Universe.TopLevelNameAlreadyUsed`), un texte dépasse sa longueur, une suppression est refusée, le retrait d'une collection par la saisie de son éditeur est refusé parce qu'une fiche la désigne encore, ou la requête retire une fiche qu'une recherche enregistrée désigne. | Métier, `422`, avec le membre `ruleCode`. |
 | La fiche visée n'existe pas, ou une clé étrangère désigne une fiche supprimée entre-temps. | Fonctionnelle, `404`. |
 | La version envoyée par le formulaire est périmée, ou l'impact d'une suppression a changé depuis sa confirmation. | Fonctionnelle, `409`. |
 | Toute autre exception, et toute réponse d'erreur émise sans corps. | Technique, `500` ou le statut qu'a choisi le framework. |
@@ -61,7 +61,8 @@ Les membres d'un ProblemDetails propres à l'application sont nommés par [`Prob
 | `ruleCode` | Le code de la règle enfreinte, présent pour une erreur métier. |
 | `fields` | Les champs à corriger, désignés par des pointeurs JSON dans le contenu que la requête a envoyé, le premier étant celui à corriger d'abord. |
 | `relatedFields` | Les champs dont la valeur entre en conflit avec celle à corriger mais que la requête n'a pas modifiés : ils sont montrés avec l'erreur sans être à corriger. |
-| `impact` | L'impact actuel d'une suppression refusée, ou d'une suppression dont l'impact a changé depuis sa confirmation. |
+| `impact` | L'impact actuel d'une suppression refusée, d'un retrait refusé (une collection retirée par la saisie de son éditeur), ou d'une suppression dont l'impact a changé depuis sa confirmation. |
+| `record` | L'identifiant de la fiche en cause quand le contenu envoyé ne la cite plus, ce qui empêche de la désigner par un champ : c'est le cas d'une collection retirée par la saisie de son éditeur, dont le retrait est refusé ([`RemovalRefusedException`](../../../src/Bdtheque.Api/Deletion/RemovalRefusedException.cs)). |
 
 Un *pointeur JSON* (RFC 6901) est un chemin qui désigne une valeur à l'intérieur d'un document JSON, par exemple `/title` pour le titre d'un album ou `/collections/1/name` pour le nom de la deuxième collection d'un éditeur. Comme le formulaire a lui-même construit ce document, il sait retrouver le champ qui correspond à chaque pointeur.
 
@@ -111,11 +112,13 @@ flowchart LR
 
 ### Lecture de la réponse
 
-Tout appel à l'API qui n'aboutit pas fait lever par [`ApiClient`](../../../src/Bdtheque.Frontend/Api/ApiClient.cs) une [`ApiProblemException`](../../../src/Bdtheque.Frontend/Api/ApiProblem.cs). Elle porte un [`ApiProblem`](../../../src/Bdtheque.Frontend/Api/ApiProblem.cs) qui réunit la catégorie, le statut, le code de règle, l'impact et les champs. [`ApiProblemReader`](../../../src/Bdtheque.Frontend/Api/ApiProblemReader.cs) ne croit une réponse que si elle est un `application/problem+json` de l'une des trois catégories. Tout autre échec est traité comme technique : un autre corps, la page d'erreur d'un proxy, une panne du réseau, un délai dépassé ou une réponse illisible.
+Tout appel à l'API qui n'aboutit pas fait lever par [`ApiClient`](../../../src/Bdtheque.Frontend/Api/ApiClient.cs) une [`ApiProblemException`](../../../src/Bdtheque.Frontend/Api/ApiProblem.cs). Elle porte un [`ApiProblem`](../../../src/Bdtheque.Frontend/Api/ApiProblem.cs) qui réunit la catégorie, le statut, le code de règle, l'impact, les champs et, s'il y en a une, la fiche en cause que le contenu ne cite plus. [`ApiProblemReader`](../../../src/Bdtheque.Frontend/Api/ApiProblemReader.cs) ne croit une réponse que si elle est un `application/problem+json` de l'une des trois catégories. Tout autre échec est traité comme technique : un autre corps, la page d'erreur d'un proxy, une panne du réseau, un délai dépassé ou une réponse illisible.
 
 ### Présentation commune
 
 Le composant [`ErrorMessage`](../../../src/Bdtheque.Frontend/Components/Errors/ErrorMessage.razor) affiche toutes les erreurs. Il se présente en entier en tête d'une page, ou sous une forme compacte à l'intérieur d'un contrôle, comme les suggestions d'un choix, l'envoi d'un visuel ou les collections d'un éditeur. Sa catégorie est portée par l'attribut `data-error-category`, auquel chaque thème associe un cadre, une icône et une couleur. Une erreur technique n'affiche jamais de détail : seulement un texte générique, ou celui de l'action du contrôle qui a échoué.
+
+Un refus de suppression ou de retrait présente ce qui le bloque en une ligne par type de fiche, avec son nombre et, quand la page la donne, la marche à suivre. Ces lignes sont écrites par un seul composant, [`RefusalLines`](../../../src/Bdtheque.Frontend/Components/Errors/RefusalLines.razor), que partagent le dialogue de suppression des listes et `ErrorMessage` : un refus se présente donc de la même façon dans un dialogue et dans l'erreur d'un enregistrement. La saisie d'un éditeur s'en sert pour le retrait refusé d'une collection, en nommant la collection que l'erreur désigne par `record`.
 
 Lorsqu'un enregistrement échoue, [`SaveError`](../../../src/Bdtheque.Frontend/Components/Controls/SaveError.razor) ajoute à ce message les actions qui conviennent à sa catégorie, aussi bien sur une fiche de saisie interactive que dans un formulaire statique d'une liste. Pour une fiche modifiée entre-temps, il propose « Recharger la fiche » et « Voir mes changements » ; pour un problème technique, il propose « Réessayer ».
 

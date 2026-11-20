@@ -192,7 +192,8 @@ else
     // The name of a collection, as typed, which its removal names; « <Sans nom> » while nothing is.
     private string Label(CollectionEntry collection) => string.IsNullOrWhiteSpace(collection.Name) ? L["Unnamed"] : collection.Name.Trim();
 
-    // What references a collection (« 3 séries · 58 éditions · 1 intention »), an edition targeted counted as its intent
+    // What references a collection (« 3 séries · 58 éditions · 1 intention · 1 recherche enregistrée »), what decides of its
+    // removal (visuel/saisie-editeur/contenu.md, #471), an edition targeted counted as its intent
     // (fonctionnel/regles-metier/suppression-des-entites.md), in the order of the entity types
     // (fonctionnel/presentation/ordre-des-types-de-fiche.md); what becomes of a collection removed at the saving.
     private string Use(CollectionEntry collection)
@@ -206,6 +207,7 @@ else
             Counted(collection.SeriesCount, "Collection.Series", "Collection.Series.Plural"),
             Counted(collection.EditionCount, "Collection.Edition", "Collection.Editions"),
             Counted(collection.PurchaseIntentCount, "Collection.PurchaseIntent", "Collection.PurchaseIntents"),
+            Counted(collection.SavedSearchCount, "Collection.SavedSearch", "Collection.SavedSearches"),
         ];
         return string.Join(" · ", parts.OfType<string>());
     }
@@ -285,7 +287,18 @@ else
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
                       Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
-                      OnRetry="SaveAsync" />;
+                      OnRetry="SaveAsync" Business="@RefusedRemoval(problem)" RefusalHint="RefusalHint" />;
+
+    // The removal of a collection refused, as any deletion is, naming the collection the error designates, which the content
+    // no longer cited (visuel/saisie-editeur/contenu.md, decision of the user, #471); its lines say what blocks it.
+    private string? RefusedRemoval(ApiProblem problem) =>
+        problem is { RuleCode: "PublisherCollection.InUse", Record: { } id } && Entry!.Collections.FirstOrDefault(c => c.Id == id) is { } collection
+            ? L["Collection.Refusal.Lead", Label(collection)].Value
+            : null;
+
+    // What to do about the records of a type blocking the removal of a collection (« rattachez-les à une autre collection, ou
+    // supprimez-les »).
+    private string RefusalHint(string kind) => L[$"Collection.Refusal.Hint.{kind}"];
 
     private RenderFragment? Dates => Entry is { CreatedAt: { } created, ModifiedAt: { } modified }
         ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>

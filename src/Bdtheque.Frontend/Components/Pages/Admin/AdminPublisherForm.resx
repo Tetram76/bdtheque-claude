@@ -67,7 +67,7 @@
     <value>Ouvrir le site web</value>
   </data>
   <data name="Collections.Help" xml:space="preserve">
-    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une série, une édition ou une intention d&apos;acquisition ne peut pas être retirée.</value>
+    <value>Elles s&apos;enregistrent avec l&apos;éditeur. Une collection que désigne une série, une édition, une intention d&apos;acquisition ou une recherche enregistrée ne peut pas être retirée.</value>
   </data>
   <data name="Collections.None" xml:space="preserve">
     <value>Aucune collection.</value>
@@ -82,7 +82,7 @@
     <value>Nouvelle</value>
   </data>
   <data name="Collection.Unused" xml:space="preserve">
-    <value>Aucune série, édition ni intention</value>
+    <value>Inutilisée</value>
   </data>
   <data name="Collection.Removed" xml:space="preserve">
     <value>Retirée à l&apos;enregistrement</value>
@@ -104,6 +104,39 @@
   </data>
   <data name="Collection.Series.Plural" xml:space="preserve">
     <value>{0:N0} séries</value>
+  </data>
+  <data name="Collection.SavedSearch" xml:space="preserve">
+    <value>{0:N0} recherche enregistrée</value>
+  </data>
+  <data name="Collection.SavedSearches" xml:space="preserve">
+    <value>{0:N0} recherches enregistrées</value>
+  </data>
+  <data name="Collection.Refusal.Lead" xml:space="preserve">
+    <value>La collection « {0} » ne peut pas être retirée : elle est encore utilisée par</value>
+  </data>
+  <data name="Collection.Refusal.Hint.Series.One" xml:space="preserve">
+    <value>retirez la collection des valeurs de ses nouvelles éditions</value>
+  </data>
+  <data name="Collection.Refusal.Hint.Series.Other" xml:space="preserve">
+    <value>retirez la collection des valeurs de leurs nouvelles éditions</value>
+  </data>
+  <data name="Collection.Refusal.Hint.Edition.One" xml:space="preserve">
+    <value>rattachez-la à une autre collection, ou supprimez-la</value>
+  </data>
+  <data name="Collection.Refusal.Hint.Edition.Other" xml:space="preserve">
+    <value>rattachez-les à une autre collection, ou supprimez-les</value>
+  </data>
+  <data name="Collection.Refusal.Hint.PurchaseIntent.One" xml:space="preserve">
+    <value>rattachez son édition à une autre collection, ou retirez-la</value>
+  </data>
+  <data name="Collection.Refusal.Hint.PurchaseIntent.Other" xml:space="preserve">
+    <value>rattachez leurs éditions à une autre collection, ou retirez-les</value>
+  </data>
+  <data name="Collection.Refusal.Hint.SavedSearch.One" xml:space="preserve">
+    <value>retirez la collection de ses critères</value>
+  </data>
+  <data name="Collection.Refusal.Hint.SavedSearch.Other" xml:space="preserve">
+    <value>retirez la collection de leurs critères</value>
   </data>
   <data name="Collection.Remove" xml:space="preserve">
     <value>Retirer {0}</value>

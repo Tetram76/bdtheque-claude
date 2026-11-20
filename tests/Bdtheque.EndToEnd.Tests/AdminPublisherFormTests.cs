@@ -3,6 +3,8 @@ extern alias frontend;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Search;
 using frontend::Bdtheque.Frontend.Navigation;
 
 namespace Bdtheque.EndToEnd.Tests;
@@ -114,6 +116,30 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await Assertions.Expect(names.Last).ToBeFocusedAsync();
         await Assertions.Expect(names.Last).ToHaveAccessibleDescriptionAsync(
             "« carnets » est déjà pris : deux noms qui ne diffèrent que par la casse ou les accents désignent la même collection de cet éditeur.");
+    }
+
+    [Theory, InEachTheme]
+    public async Task Save_RemovingACollectionDesignatedSinceTheFormWasRead_IsRefused_NamingItAndWhatBlocksIt(string theme)
+    {
+        // A saved search designating the collection once the form is read: the removal is refused as any deletion, one line
+        // per type of record blocking it (visuel/saisie-editeur/contenu.md, decision of the user, #471).
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent(
+            $"Futuropolis {_marker}", null, [new(null, "Carnets"), new(null, "Escales")]));
+        var page = await OpenAsync(theme, AppPaths.AdminEditPublisher(publisher.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = "Retirer Escales" }).ClickAsync();
+        await Assertions.Expect(page.GetByText("Retirée à l'enregistrement")).ToBeVisibleAsync();
+        await PostAsync<SavedSearchForm>("/admin/saved-searches", new SavedSearchContent(
+            $"Éditions Escales {_marker}", EntityKind.Edition,
+            new SearchLink("publisherCollection", new SearchCriterion(
+                "record", SearchComparison.Is, [publisher.Collections.Single(c => c.Name == "Escales").Id.ToString()])), []));
+        await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        var error = page.GetByRole(AriaRole.Alert);
+        await Assertions.Expect(error).ToContainTextAsync("La collection « Escales » ne peut pas être retirée : elle est encore utilisée par");
+        await Assertions.Expect(error.GetByRole(AriaRole.Listitem)).ToHaveTextAsync(["1 recherche enregistrée : retirez la collection de ses critères."]);
+        Assert.Equal(["Carnets", "Escales"], (await GetAsync(publisher.Id)).Collections.Select(c => c.Name));
     }
 
     /// <summary>

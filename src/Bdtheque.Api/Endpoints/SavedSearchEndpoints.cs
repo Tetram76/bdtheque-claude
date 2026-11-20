@@ -1,3 +1,4 @@
+using Bdtheque.Api.Errors;
 using Bdtheque.Api.Search;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
@@ -81,20 +82,22 @@ internal static class SavedSearchEndpoints
                         ?? throw new EntityNotFoundException(typeof(SavedSearch), id));
 
     private static async Task<Created<SavedSearchForm>> CreateAsync(
-        SavedSearchContent content, BdthequeDbContext context, CancellationToken cancellationToken)
+        SavedSearchContent content, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         var (entity, criteria, variables, designated) = Checked(content, context);
-        var search = new SavedSearch(content.Name, entity, criteria, variables, designated);
+        var search = fields.Create("", () => new SavedSearch(content.Name, entity, criteria, variables, designated));
         context.SavedSearches.Add(search);
         await context.SaveChangesAsync(cancellationToken);
         return TypedResults.Created($"/admin/saved-searches/{search.Id}", ToForm(context, search));
     }
 
+    // The search is entered under /content of the request, next to its version.
     private static async Task<SavedSearchForm> UpdateAsync(
-        Guid id, UpdateSavedSearchRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid id, UpdateSavedSearchRequest request, BdthequeDbContext context, ContentFields fields, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var search = await context.LoadAggregateForWriteAsync<SavedSearch>(id, request.Version, cancellationToken: cancellationToken);
+        fields.Place(search, "/content");
         var (entity, criteria, variables, designated) = Checked(request.Content, context);
         search.SetName(request.Content.Name);
         search.SetSearch(entity, criteria, variables, designated);

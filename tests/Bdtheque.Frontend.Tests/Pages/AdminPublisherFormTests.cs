@@ -1,8 +1,10 @@
 using System.Globalization;
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Audience;
+using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Components.Pages.Admin;
@@ -31,10 +33,10 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     private static readonly PublisherForm Casterman = new(
         PublisherId, "Casterman", "https://www.casterman.com",
         [
-            new PublisherCollectionUse(Ecritures, "Écritures", 58, 1, 3),
-            new PublisherCollectionUse(FacSimile, "Fac-similé", 34, 0, 0),
-            new PublisherCollectionUse(Romans, "Les Romans (À suivre)", 0, 0, 0),
-            new PublisherCollectionUse(Univers, "Univers d'auteurs", 0, 0, 1),
+            new PublisherCollectionUse(Ecritures, "Écritures", 58, 1, 3, 1),
+            new PublisherCollectionUse(FacSimile, "Fac-similé", 34, 0, 0, 0),
+            new PublisherCollectionUse(Romans, "Les Romans (À suivre)", 0, 0, 0, 0),
+            new PublisherCollectionUse(Univers, "Univers d'auteurs", 0, 0, 1, 0),
         ],
         new DateTimeOffset(2026, 1, 12, 10, 0, 0, TimeSpan.Zero),
         new DateTimeOffset(2026, 11, 9, 17, 40, 0, TimeSpan.Zero),
@@ -132,12 +134,31 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
             ["Écritures", "Fac-similé", "Les Romans (À suivre)", "Univers d'auteurs"],
             rows.Select(row => row.QuerySelector("input")!.GetAttribute("value")));
         Assert.Equal(
-            ["3 séries · 58 éditions · 1 intention", "34 éditions", "Aucune série, édition ni intention", "1 série"],
+            ["3 séries · 58 éditions · 1 intention · 1 recherche enregistrée", "34 éditions", "Inutilisée", "1 série"],
             rows.Select(row => row.QuerySelector(".publisher-collection-count")!.TextContent.Trim()));
         // A lock where the removal of a collection in use would be.
         Assert.Equal([false, false, true, false], rows.Select(row => row.QuerySelector("button[aria-label^='Retirer']") is not null));
         Assert.Equal([true, true, false, true], rows.Select(row => row.QuerySelector("[role=img]") is not null));
         Assert.Equal("Utilisée : ne peut pas être retirée", rows[0].QuerySelector("[role=img]")!.GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void Collection_DesignatedBySavedSearchesOnly_CountsThem_AndCannotBeRemoved()
+    {
+        // What the line shows is what decides of the removal of the collection (visuel/saisie-editeur/contenu.md, #471).
+        _api.Answers[$"/admin/publishers/{PublisherId}"] = Casterman with
+        {
+            Collections = [new PublisherCollectionUse(Romans, "Les Romans (À suivre)", 0, 0, 0, 2)],
+        };
+        var page = OpenPublisher();
+
+        var row = page.Find(".publisher-collection");
+        Assert.Equal("2 recherches enregistrées", row.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
+        Assert.Null(row.QuerySelector("button[aria-label^='Retirer']"));
+        Assert.NotNull(row.QuerySelector("[role=img]"));
+        Assert.Equal(
+            "Elles s'enregistrent avec l'éditeur. Une collection que désigne une série, une édition, une intention d'acquisition ou une recherche enregistrée ne peut pas être retirée.",
+            page.Find(".publisher-help").TextContent.Trim());
     }
 
     [Fact]
@@ -184,7 +205,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         var added = page.FindAll(".publisher-collection")[4];
         Assert.Equal("Nouvelle", added.QuerySelector(".tag")!.TextContent.Trim());
-        Assert.Equal("Aucune série, édition ni intention", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
+        Assert.Equal("Inutilisée", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
 
         await page.ClickAsync(() => page.FindAll(".publisher-collection")[4].QuerySelector("button[aria-label^='Retirer']")!);
 
@@ -333,18 +354,58 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public async Task BusinessError_CollectionInUse_IsPresentedAboveTheForm()
+    public async Task BusinessError_CollectionInUse_NamesTheCollection_AndPresentsWhatBlocksItLineByLine()
     {
+        // A removal refused as any deletion is (fonctionnel/regles-metier/suppression-des-entites.md), naming the collection
+        // (visuel/saisie-editeur/contenu.md, decision of the user, #471).
         var page = OpenPublisher();
-        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "PublisherCollection.InUse");
+        _api.Write = (_, _, _) => CollectionInUse(Romans, new ImpactCount(EntityKind.Edition, 2), new ImpactCount(EntityKind.SavedSearch, 1));
 
         await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
         await page.SubmitAsync("form");
 
         var error = page.Find("[role=alert]");
-        Assert.Contains("ne peut pas être retirée", error.TextContent);
+        Assert.Equal(
+            "La collection « Les Romans (À suivre) » ne peut pas être retirée : elle est encore utilisée par",
+            error.QuerySelector("[data-error-text]")!.TextContent);
+        Assert.Equal(
+            ["2 éditions : rattachez-les à une autre collection, ou supprimez-les ;", "1 recherche enregistrée : retirez la collection de ses critères."],
+            error.QuerySelectorAll("[data-error-impact] li").Select(item => item.TextContent.Trim()));
         Assert.Empty(page.FindAll("[aria-invalid=true]"));
     }
+
+    [Theory]
+    [InlineData(EntityKind.Series, 1, "1 série : retirez la collection des valeurs de ses nouvelles éditions.")]
+    [InlineData(EntityKind.Series, 2, "2 séries : retirez la collection des valeurs de leurs nouvelles éditions.")]
+    [InlineData(EntityKind.Edition, 1, "1 édition : rattachez-la à une autre collection, ou supprimez-la.")]
+    [InlineData(EntityKind.PurchaseIntent, 1, "1 intention d'acquisition : rattachez son édition à une autre collection, ou retirez-la.")]
+    [InlineData(EntityKind.PurchaseIntent, 2, "2 intentions d'acquisition : rattachez leurs éditions à une autre collection, ou retirez-les.")]
+    [InlineData(EntityKind.SavedSearch, 2, "2 recherches enregistrées : retirez la collection de leurs critères.")]
+    public async Task BusinessError_CollectionInUse_SaysWhatToDoOfEachTypeBlocking(EntityKind kind, int count, string line)
+    {
+        var page = OpenPublisher();
+        _api.Write = (_, _, _) => CollectionInUse(Romans, new ImpactCount(kind, count));
+
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+        await page.SubmitAsync("form");
+
+        Assert.Equal(line, page.Find("[data-error-impact] li").TextContent.Trim());
+    }
+
+    // The refusal of the removal of a collection, as the API answers it: the impact of its deletion, and the collection.
+    private static HttpResponseMessage CollectionInUse(Guid collection, params ImpactCount[] blockedBy) =>
+        new(HttpStatusCode.UnprocessableEntity)
+        {
+            Content = JsonContent.Create(
+                new Dictionary<string, object>
+                {
+                    ["type"] = ProblemTypes.Business, ["status"] = 422, [ProblemTypes.RuleCodeExtension] = "PublisherCollection.InUse",
+                    [ProblemTypes.ImpactExtension] = new DeletionImpact(blockedBy, [], [], [], "fingerprint"),
+                    [ProblemTypes.RecordExtension] = collection,
+                },
+                options: JsonSerializerOptions.Web,
+                mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
+        };
 
     [Fact]
     public async Task FunctionalError_ModifiedMeanwhile_OffersToReloadAndToSeeTheChanges()
