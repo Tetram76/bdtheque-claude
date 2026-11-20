@@ -465,6 +465,47 @@ textarea {
     opacity: 1;
 }
 
+/* The cross that clears a search field (visuel/liste-albums/controles.md), drawn by the application (SearchClear) at the
+   end of the field, in the color of its magnifier, the muted text unless the field says otherwise (the header): the one of
+   the browser, which Blink and WebKit only draw, and in their own color, never shows. Shown only while a text is typed,
+   that is while the placeholder of the field is not. Its box, wider than its icon, is a target of 24 px (WCAG 2.2, 2.5.8),
+   centered on the round end of a pill field, so that its keyboard focus stays within the border of the field, whatever
+   the radius of the controls of the theme. */
+input[type="search"]::-webkit-search-cancel-button {
+    display: none;
+}
+
+input[type="search"]:has(+ .search-clear) {
+    padding-inline-end: calc(var(--control-height) / 2 + 1rem);
+}
+
+.search-clear {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: calc(var(--control-height) / 2 - 0.75rem);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transform: translateY(-50%);
+}
+
+.search-clear .icon {
+    inline-size: 1.125rem;
+    block-size: 1.125rem;
+}
+
+input[type="search"]:placeholder-shown + .search-clear {
+    display: none;
+}
+
 /* A list draws its own arrow, in the color of its text: the arrow of the system differs from one device to another. */
 select,
 button[role="combobox"] {

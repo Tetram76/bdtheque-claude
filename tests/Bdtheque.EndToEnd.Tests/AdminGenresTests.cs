@@ -48,6 +48,47 @@ public sealed class AdminGenresTests(ApplicationHost application) : BrowserTest<
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, $"?q={_marker}&entry=A"));
     }
 
+    // The cross of the search field (visuel/liste-albums/controles.md), in the muted text, next to the field in the keyboard
+    // path: it leads to the list without its search, its entry kept, as « Effacer la recherche » does; the field emptied, the
+    // cross goes with its text, and comes back with a text typed.
+    [Theory, InEachTheme]
+    public async Task Search_ItsCross_LeadsToTheListWithoutTheSearch_KeepingItsEntry(string theme)
+    {
+        await CreateGenreAsync($"Polar {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}&entry=P");
+        var field = page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher un genre" });
+        var cross = page.Locator("form.list-search").GetByRole(AriaRole.Link, new() { Name = "Effacer la recherche" });
+        await Assertions.Expect(cross).ToBeVisibleAsync();
+        Assert.True(await cross.EvaluateAsync<bool>(Headers.HeaderTests.SameColorAs("--color-text-muted")), "The cross is not in the muted text.");
+
+        await field.FocusAsync();
+        await page.Keyboard.PressAsync("Tab");
+        await Assertions.Expect(cross).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Enter");
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, "?entry=P"));
+        await Assertions.Expect(field).ToHaveValueAsync("");
+        await Assertions.Expect(cross).ToBeHiddenAsync();
+
+        await field.FillAsync(_marker);
+        await Assertions.Expect(cross).ToBeVisibleAsync();
+    }
+
+    // In the merge dialog, the cross of the search of the other genre leads back to the dialog before any search.
+    [Theory, InEachTheme]
+    public async Task Merge_TheCrossOfItsSearch_LeadsBackToTheDialogBeforeAnySearch(string theme)
+    {
+        var genre = await CreateGenreAsync($"Polar {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}&merge={genre.Id}&mergeQ=zz{_marker}");
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux genres" });
+
+        await dialog.GetByRole(AriaRole.Link, new() { Name = "Effacer la recherche" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres, $"?q={_marker}&merge={genre.Id}"));
+        await Assertions.Expect(dialog.GetByRole(AriaRole.Searchbox)).ToHaveValueAsync("");
+        await Assertions.Expect(dialog.GetByRole(AriaRole.Link, new() { Name = "Effacer la recherche" })).ToBeHiddenAsync();
+    }
+
     [Theory, InEachTheme]
     public async Task Edit_InItsRow_SavesTheLabel_AndLeadsBackToTheList(string theme)
     {

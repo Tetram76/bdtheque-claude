@@ -130,6 +130,7 @@ Les scripts de l'application sont courts, écrits à la main et sans dépendance
 | `scroll-row.js` | Il gère les lignes qui défilent horizontalement, comme le menu ou la navigation par initiale : il affiche les chevrons et centre l'entrée courante. |
 | `fold-row.js` | Il replie les noms d'un rôle selon la largeur disponible sur leur ligne. |
 | `bibliography-folds.js` | Il fournit les boutons « Tout déplier » et « Tout replier » d'une bibliographie, sous la forme d'un élément HTML personnalisé. |
+| `search-clear.js` | Quand la croix de la recherche de l'en-tête vide le champ, il rend le focus au champ ; dans une liste, la croix est un simple lien vers la liste sans recherche, sans script. |
 | `combobox.js` | Ce module retient l'action des touches du clavier qu'emploient les listes d'options : celle d'un choix de fiche par son nom, tant qu'elle est ouverte, et celle d'un choix dans une liste, dont le bouton ne doit pas être cliqué par Entrée ou Espace. |
 | `entry-form.js` | Ce module met en vue le premier champ à corriger après un refus de l'API. |
 | `themes/planche.js` | Il réalise le dessin propre au thème « La planche encrée ». |

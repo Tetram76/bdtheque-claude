@@ -67,11 +67,17 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
     };
 
     /// <summary>The address of the list with these criteria.</summary>
-    public string Href()
-    {
-        var parameters = Parameters();
-        return parameters.Count == 0 ? Path : $"{Path}?{Join(parameters)}";
-    }
+    public string Href() => HrefOf(Path, Parameters());
+
+    /// <summary>
+    /// The address of the list without its search, at its first page, its entry and its filters kept: that of « Effacer la
+    /// recherche » of an empty list and of the cross of its search field (visuel/liste-albums/controles.md).
+    /// </summary>
+    public string WithoutSearchHref() => (this with { Text = null, Page = 1 }).Href();
+
+    /// <summary>The address of a list from its path and the parameters of its address (<see cref="Parameters"/>).</summary>
+    public static string HrefOf(string path, IReadOnlyList<(string Name, string Value)> parameters) =>
+        parameters.Count == 0 ? path : $"{path}?{Join(parameters)}";
 
     /// <summary>
     /// The parameters of the address of the list, in their fixed order: those of <see cref="Href"/>, which a form that leads

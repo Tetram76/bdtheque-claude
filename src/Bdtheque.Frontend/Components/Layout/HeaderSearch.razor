@@ -1,10 +1,11 @@
 @* The search field of a header, always visible (visuel/charte-graphique/apparence-propre-a-chaque-alternative.md): it only
    leads to the page of its results, whose content belongs to the chantier that implements it. A plain form sent by GET,
-   which needs no interactivity. *@
+   which needs no interactivity. Its cross empties it, no list being behind it (visuel/liste-albums/controles.md). *@
 <form class="header-search" role="search" method="get" action="@Action">
     <label for="@Id" class="visually-hidden">@Label</label>
     <Icon Name="IconName.Search" />
     <input id="@Id" type="search" name="q" placeholder="@Placeholder" autocomplete="off" />
+    <SearchClear />
 </form>
 
 @code {

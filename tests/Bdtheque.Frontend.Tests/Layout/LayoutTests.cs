@@ -87,6 +87,21 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal("Rechercher", layout.Find($"label[for='{input.Id}']").TextContent.Trim());
     }
 
+    // No list behind the field of the header: its cross empties it, by resetting its form, right after it in the keyboard
+    // path, named for assistive technologies (visuel/liste-albums/controles.md).
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void HeaderSearch_ItsCrossEmptiesTheField_RightAfterIt(bool administration)
+    {
+        var form = (administration
+            ? Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body)).Find("header form[role='search']")
+            : Render<PublicLayout>(parameters => parameters.Add(p => p.Body, Body)).Find("header form[role='search']"));
+
+        var cross = form.QuerySelector("input[type='search'] + .search-clear")!;
+        Assert.Equal(("button", "reset", "Effacer la recherche"), (cross.LocalName, cross.GetAttribute("type"), cross.TextContent.Trim()));
+    }
+
     [Fact]
     public void ConsultationHeader_LeavesTheSearchOut_ForAPageThatAsksIt_KeepingTheHelp()
     {

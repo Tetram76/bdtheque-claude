@@ -24,7 +24,7 @@
     </Heading>
     <ChildContent>
         <ListSearch Action="@AppPaths.AdminAlbums" FieldId="albums-search" TextName="@AlbumListQuery.TextName" Text="@_query.Text"
-                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" PanelId="albums-filters"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@ListOnly.WithoutSearchHref()" PanelId="albums-filters"
                     FiltersName="@AlbumListQuery.FiltersName" FiltersOpenValue="@AlbumListQuery.FiltersOpenValue"
                     FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel"
                     HiddenFilters="KeptFilters" />
@@ -43,7 +43,7 @@
                 case EmptyListReason.Search:
                     <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
                         <Actions>
-                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                             <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewAlbum, _query.Text!)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
                         </Actions>
                     </EmptyList>

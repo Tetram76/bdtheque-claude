@@ -53,6 +53,9 @@ public sealed partial class ThemeContrastTests
         ("text-on-header", "header", Text),
         ("text-on-header", "header-field", Text),
         ("header-placeholder", "header-field", Text),
+        // The cross that clears its search, a control drawn in the color of its magnifier (visuel/liste-albums/controles.md);
+        // that of the fields of the page, in the muted text, is read as a text on the control above.
+        ("header-icon", "header-field", NonText),
         ("header-field-border", "header", NonText),
         ("text-on-header-tag", "header-tag", Text),
         ("text-on-help", "help", Text),

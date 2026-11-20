@@ -29,7 +29,7 @@
     </Heading>
     <ChildContent>
         <ListSearch Action="@AppPaths.AdminEditions" FieldId="editions-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
-                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" PanelId="editions-filters"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@ListOnly.WithoutSearchHref()" PanelId="editions-filters"
                     FiltersName="@AdminListQuery.FiltersName" FiltersOpenValue="@AdminListQuery.FiltersOpenValue"
                     FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel" HiddenFilters="KeptFilters" />
 
@@ -47,7 +47,7 @@
                 case EmptyListReason.Search:
                     <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
                         <Actions>
-                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                         </Actions>
                     </EmptyList>
                     break;

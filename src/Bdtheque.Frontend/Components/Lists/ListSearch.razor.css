@@ -18,7 +18,7 @@
     min-inline-size: 0;
 }
 
-.list-search-field ::deep .icon {
+.list-search-field > ::deep .icon {
     position: absolute;
     inset-block-start: 50%;
     inset-inline-start: var(--control-padding-inline);

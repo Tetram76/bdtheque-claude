@@ -26,7 +26,7 @@
     </Heading>
     <ChildContent>
         <ListSearch Action="@AppPaths.AdminUniverses" FieldId="universe-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
-                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@ListOnly.WithoutSearchHref()" />
 
         <ListSummary Count="@CountText()" Narrowed="@(_query.Text is not null)" WholeCount="_counts?.Universes" Order="@L["Order"]" />
 
@@ -36,7 +36,7 @@
             {
                 <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
                     <Actions>
-                        <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                        <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                         <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
                     </Actions>
                 </EmptyList>

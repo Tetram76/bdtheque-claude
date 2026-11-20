@@ -2,16 +2,19 @@
 
 @* The search of a list of the administration and the button of its filters (visuel/liste-albums/contenu.md), a form that
    leads to the list with its criteria, the page being rendered statically. Pressing Enter in the field searches: the first
-   button of the form, which the browser submits then, is the search itself, read by assistive technologies only. The
-   button of the filters submits the form too, folding or unfolding their panel, so that a text typed is never lost. *@
+   button of the form, which the browser submits then, is the search itself, read by assistive technologies only and out
+   of the keyboard path, where it would hold an invisible focus. The cross of the field, right after it, leads to the list
+   without its search (visuel/liste-albums/controles.md). The button of the filters submits the form too, folding or
+   unfolding their panel, so that a text typed is never lost. *@
 <form class="list-search" method="get" action="@Action" role="search">
     <div class="list-search-bar">
         <label class="visually-hidden" for="@FieldId">@SearchLabel</label>
         <span class="list-search-field">
             <Icon Name="IconName.Search" />
             <input id="@FieldId" name="@TextName" type="search" value="@Text" placeholder="@Placeholder" autocomplete="off" />
+            <SearchClear Href="@ClearHref" />
         </span>
-        <button class="visually-hidden" type="submit">@L["Search"]</button>
+        <button class="visually-hidden" type="submit" tabindex="-1">@L["Search"]</button>
         @if (PanelId is not null)
         {
             <Button Type="submit" Variant="ButtonVariant.Secondary" Icon="IconName.Filter" Label="@L["Filters"]"
@@ -55,9 +58,16 @@
     [Parameter, EditorRequired]
     public string SearchLabel { get; set; } = null!;
 
-    /// <summary>What the search looks into (e.g. « Titre de l'album ou de sa série… »).</summary>
-    [Parameter]
-    public string? Placeholder { get; set; }
+    /// <summary>
+    /// What the search looks into (e.g. « Titre de l'album ou de sa série… »): shown while the field is empty, it is also
+    /// what hides the cross then (themes/base.css).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public string Placeholder { get; set; } = null!;
+
+    /// <summary>The list without its search, which the cross of the field leads to.</summary>
+    [Parameter, EditorRequired]
+    public string ClearHref { get; set; } = null!;
 
     /// <summary>The identifier of the panel of the filters; none for a list without filters.</summary>
     [Parameter]
