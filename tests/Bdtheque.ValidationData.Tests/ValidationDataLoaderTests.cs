@@ -123,7 +123,10 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         var unused = Assert.Single(list, publisher => publisher.Name == ValidationDataLoader.UnusedPublisherName);
         Assert.Equal((null, 0, 0), (unused.Website, unused.Collections.Count, unused.EditionCount));
         // A publisher only named by the editions to buy of a purchase intent has none in the collection.
-        Assert.Contains(list, publisher => publisher.Name == ValidationDataLoader.IntendedPublisherName && publisher.EditionCount == 0);
+        Assert.Contains(list, publisher => publisher.Name == ValidationDataLoader.IntendedPublisherName
+                                           && (publisher.EditionCount, publisher.PurchaseIntentCount) is (0, > 0));
+        // Intents counted apart from the editions of a publisher that has both (visuel/listes/liste-par-liste.md).
+        Assert.Contains(list, publisher => publisher is { EditionCount: > 0, PurchaseIntentCount: > 0 });
         foreach (var publisher in list.Where(publisher => publisher.EditionCount == 0 && publisher.Name != ValidationDataLoader.IntendedPublisherName))
         {
             var impact = await _client.GetFromJsonAsync<Bdtheque.Contracts.Deletion.DeletionImpact>($"/admin/publishers/{publisher.Id}/deletion-impact");

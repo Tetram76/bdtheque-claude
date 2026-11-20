@@ -77,7 +77,8 @@ internal static class PublisherEndpoints
     /// <summary>
     /// The list of the publishers of the administration (visuel/listes/liste-par-liste.md): the search, the navigation by
     /// initial and the order of the list of the consultation. Each row carries the website of the publisher, its collections,
-    /// its editions in the collection, its modification and its version, which its deletion sends back.
+    /// its editions in the collection and, apart, the purchase intents on its editions, its modification and its version,
+    /// which its deletion sends back.
     /// </summary>
     private static Task<Page<PublisherAdminListItem>> ListForAdministrationAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
@@ -89,6 +90,7 @@ internal static class PublisherEndpoints
                 p.Website,
                 p.Collections.OrderBy(c => c.Name).ThenBy(c => c.Id).Select(c => c.Name).ToList(),
                 context.Editions.Count(e => e.PublisherId == p.Id && e.IsOwned()),
+                context.PurchaseIntents.Count(i => i.Edition!.PublisherId == p.Id),
                 p.ModifiedAt,
                 EF.Property<uint>(p, BdthequeDbContext.VersionProperty))), cancellationToken);
 

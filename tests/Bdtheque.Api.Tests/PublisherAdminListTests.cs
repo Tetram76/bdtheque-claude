@@ -41,23 +41,27 @@ public sealed class PublisherAdminListTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
-    public async Task Rows_CountTheEditionsInTheCollection_AnEditionTargetedByAnIntentBeingNone()
+    public async Task Rows_CountTheEditionsInTheCollection_AndApartTheIntentsOnTheirEditions()
     {
+        // An edition targeted by a purchase intent is never one of the editions: it is counted as its intent
+        // (fonctionnel/regles-metier/intention-d-acquisition.md), and a publisher named by intents only counts them.
         var publisher = await CreatePublisherAsync($"Casterman {_marker}");
         var other = await CreatePublisherAsync($"Dupuis {_marker}");
+        var intendedOnly = await CreatePublisherAsync($"Dynamite {_marker}");
         var album = await CreateAlbumAsync($"Album {_marker}");
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
         await CreateOwnedEditionAsync(album.Id, publisher.Id);
         await CreateOwnedEditionAsync(album.Id, other.Id);
         var intended = await CreateAlbumAsync($"Album visé {_marker}");
         await CreateIntendedEditionAsync(intended.Id, publisher.Id);
+        await CreateIntendedEditionAsync(intended.Id, intendedOnly.Id);
         var empty = await CreatePublisherAsync($"Futuropolis {_marker}");
 
         var rows = await ListAsync($"q={_marker}");
 
         Assert.Equal(
-            [(publisher.Id, 2, 0), (other.Id, 1, 0), (empty.Id, 0, 0)],
-            rows.Select(r => (r.Id, r.EditionCount, r.Collections.Count)));
+            [(publisher.Id, 2, 1, 0), (other.Id, 1, 0, 0), (intendedOnly.Id, 0, 1, 0), (empty.Id, 0, 0, 0)],
+            rows.Select(r => (r.Id, r.EditionCount, r.PurchaseIntentCount, r.Collections.Count)));
     }
 
     [Fact]

@@ -37,19 +37,16 @@
     <value>Aucun genre</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 genre</value>
+    <value>1 genre</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} genres</value>
+    <value>{0} genres</value>
   </data>
   <data name="Column.Genre" xml:space="preserve">
     <value>Genre</value>
   </data>
-  <data name="Column.Albums" xml:space="preserve">
-    <value>Albums</value>
-  </data>
-  <data name="Column.Series" xml:space="preserve">
-    <value>Séries</value>
+  <data name="Column.Works" xml:space="preserve">
+    <value>Œuvres</value>
   </data>
   <data name="Column.Modified" xml:space="preserve">
     <value>Modifié</value>
@@ -57,29 +54,20 @@
   <data name="Column.Actions" xml:space="preserve">
     <value>Actions</value>
   </data>
-  <data name="Albums.Zero" xml:space="preserve">
-    <value>aucun album</value>
-  </data>
-  <data name="Albums.One" xml:space="preserve">
-    <value>1 album</value>
-  </data>
-  <data name="Albums.Other" xml:space="preserve">
-    <value>{0} albums</value>
-  </data>
-  <data name="Series.Zero" xml:space="preserve">
-    <value>aucune série</value>
-  </data>
   <data name="Series.One" xml:space="preserve">
-    <value>1 série</value>
+    <value>1 série</value>
   </data>
   <data name="Series.Other" xml:space="preserve">
-    <value>{0} séries</value>
+    <value>{0} séries</value>
   </data>
-  <data name="Albums.None" xml:space="preserve">
-    <value>Aucun album</value>
+  <data name="Albums.One" xml:space="preserve">
+    <value>1 album</value>
   </data>
-  <data name="Series.None" xml:space="preserve">
-    <value>Aucune série</value>
+  <data name="Albums.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Works.None" xml:space="preserve">
+    <value>Ni série ni album</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>

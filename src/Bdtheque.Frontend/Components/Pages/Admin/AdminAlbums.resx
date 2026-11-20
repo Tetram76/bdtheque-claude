@@ -73,10 +73,10 @@
     <value>Aucun album</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 album</value>
+    <value>1 album</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} albums</value>
+    <value>{0} albums</value>
   </data>
   <data name="Order" xml:space="preserve">
     <value>Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas</value>
@@ -106,16 +106,16 @@
     <value>Aucune édition</value>
   </data>
   <data name="Editions.One" xml:space="preserve">
-    <value>1 édition</value>
+    <value>1 édition</value>
   </data>
   <data name="Editions.Other" xml:space="preserve">
-    <value>{0} éditions</value>
+    <value>{0} éditions</value>
   </data>
   <data name="Intents.One" xml:space="preserve">
-    <value>1 intention</value>
+    <value>1 intention</value>
   </data>
   <data name="Intents.Other" xml:space="preserve">
-    <value>{0} intentions</value>
+    <value>{0} intentions</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>

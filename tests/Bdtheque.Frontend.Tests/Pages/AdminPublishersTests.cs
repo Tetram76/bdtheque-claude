@@ -24,15 +24,16 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
 {
     private static readonly PublisherAdminListItem Casterman = new(
         Guid.Parse("01900000-0000-7000-8000-000000000001"), "Casterman", "https://www.casterman.com/",
-        ["Écritures", "Fac-similé", "Univers d'auteurs"], 412, new DateTimeOffset(2026, 9, 3, 8, 0, 0, TimeSpan.Zero), 41);
+        ["Écritures", "Fac-similé", "Univers d'auteurs"], 412, 2, new DateTimeOffset(2026, 9, 3, 8, 0, 0, TimeSpan.Zero), 41);
 
+    // Named by a purchase intent only: no edition in the collection.
     private static readonly PublisherAdminListItem Dargaud = new(
         Guid.Parse("01900000-0000-7000-8000-000000000002"), "Dargaud", "https://dargaud.com/bd",
-        ["Long courrier"], 1, new DateTimeOffset(2026, 7, 21, 8, 0, 0, TimeSpan.Zero), 42);
+        ["Long courrier"], 0, 1, new DateTimeOffset(2026, 7, 21, 8, 0, 0, TimeSpan.Zero), 42);
 
     private static readonly PublisherAdminListItem Futuropolis = new(
         Guid.Parse("01900000-0000-7000-8000-000000000003"), "Futuropolis", null,
-        [], 0, new DateTimeOffset(2026, 2, 2, 8, 0, 0, TimeSpan.Zero), 43);
+        [], 0, 0, new DateTimeOffset(2026, 2, 2, 8, 0, 0, TimeSpan.Zero), 43);
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
@@ -81,24 +82,27 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_TheNameItsCollectionsItsWebsiteAndItsNumbers()
+    public void Rows_TheNameItsCollectionsItsWebsiteAndItsCatalogue()
     {
-        var rows = Open("").FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
+        var page = Open("");
+        var rows = page.FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
             Text(row.QuerySelector(".row-entry")!),
             Text(row.QuerySelector(".publisher-collection-names")!),
             Text(row.QuerySelector(".publisher-website")!),
-            Text(row.QuerySelector(".publisher-collections")!),
-            Text(row.QuerySelector(".publisher-editions")!)));
+            Text(row.QuerySelector(".publisher-catalogue")!)));
 
-        // The website without its scheme, « www. » nor final slash, announced as leaving the application. On two lines, each number is preceded by the name of its
-        // column, which the styles hide in a table.
+        // The website without its scheme, « www. » nor final slash, announced as leaving the application. Its numbers in a
+        // single column, each followed by what it counts, in the order of the entity types, an intent never one of the
+        // editions; a zero is left out beside the others, and takes the dash of a missing data alone
+        // (visuel/listes/liste-par-liste.md, visuel/charte-graphique/convivialite-et-efficacite.md).
         Assert.Equal(
             [
-                ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com, site externe", "Collections 3", "Éditions 412"),
-                ("Dargaud", "Long courrier", "dargaud.com/bd, site externe", "Collections 1", "Éditions 1"),
-                ("Futuropolis", "Aucune collection", "—Non renseigné", "—Aucune collection", "—Aucune édition"),
+                ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com, site externe", "3 collections · 412 éditions · 2 intentions"),
+                ("Dargaud", "Long courrier", "dargaud.com/bd, site externe", "1 collection · 1 intention"),
+                ("Futuropolis", "Aucune collection", "—Non renseigné", "—Ni collection, ni édition, ni intention"),
             ],
             rows);
+        Assert.Equal("Catalogue", Text(page.Find(".publisher-row-head .publisher-catalogue")));
     }
 
     [Fact]
@@ -107,10 +111,9 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
         var rows = Open("").FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
             row.QuerySelector(".publisher-collection-names")!.HasAttribute("data-empty"),
-            row.QuerySelector(".publisher-collections")!.HasAttribute("data-zero"),
-            row.QuerySelector(".publisher-editions")!.HasAttribute("data-zero")));
+            row.QuerySelector(".publisher-catalogue")!.HasAttribute("data-zero")));
 
-        Assert.Equal([(false, false, false), (false, false, false), (true, true, true)], rows);
+        Assert.Equal([(false, false), (false, false), (true, true)], rows);
     }
 
     [Fact]
@@ -251,7 +254,8 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
 
         Assert.Equal("Fusionner deux éditeurs", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal(
-            [("Dargaud", "1 collection · 1 édition"), ("Futuropolis", "Aucune collection · aucune édition")],
+            // Each candidate with its catalogue, as its row presents it, as the albums with their editions.
+            [("Dargaud", "1 collection · 1 intention"), ("Futuropolis", "Ni collection, ni édition, ni intention")],
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
         var next = dialog.QuerySelector("#publisher-merge-continue")!;
         Assert.Equal(AppPaths.AdminMergePublishers, next.GetAttribute("action"));
