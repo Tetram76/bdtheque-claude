@@ -151,23 +151,53 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     }
 
     [Theory, InEachTheme]
-    public async Task RestOfTheSeries_Folds_AndLeadsToAnotherAlbumOfTheSeries_PutForwardOnItsRecord(string theme)
+    public async Task RestOfTheSeries_IsAlwaysShown_AndLeadsToAnotherAlbumOfTheSeries_PutForwardOnItsRecord(string theme)
     {
         var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
         var series = page.Locator("[data-part='series']");
         var other = series.GetByRole(AriaRole.Link, new() { Name = "Les Celtiques" });
         await Assertions.Expect(other).ToBeVisibleAsync();
+        // No disclosure: the name of the series is a link, and three albums have nothing to fold (#554).
+        await Assertions.Expect(series.Locator("details")).ToHaveCountAsync(0);
 
-        await series.Locator("summary").ClickAsync();
-        await Assertions.Expect(other).ToBeHiddenAsync();
-        await series.Locator("summary").ClickAsync();
         await other.ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/albums/{Application.IntendedAlbumId}$"));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Les Celtiques");
         await Assertions.Expect(series.Locator("[aria-current='page']")).ToHaveTextAsync("Les Celtiques");
         await Assertions.Expect(series.GetByRole(AriaRole.Link, new() { Name = "Lointaines îles du vent" })).ToBeVisibleAsync();
+    }
+
+    // In columns, a long series is shown whole; on one column (a smartphone), the albums far from the one shown are folded
+    // behind « et N autres », which unfolds them, « Réduire » folding them back (visuel/fiche-album/contenu.md, #554).
+    [Theory, InEachTheme]
+    public async Task RestOfTheSeries_OnASmartphone_FoldsTheAlbumsFarFromTheOneShown(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync(AppPaths.Album(Application.KirkFirstAlbumId));
+        var series = page.Locator("[data-part='series']");
+        var near = series.GetByRole(AriaRole.Link, new() { Name = "Tome 4" });
+        var far = series.GetByRole(AriaRole.Link, new() { Name = "Tome 7" });
+        var toggle = series.Locator(".series-albums-toggle summary");
+        await Assertions.Expect(far).ToBeVisibleAsync();
+        await Assertions.Expect(toggle).ToBeHiddenAsync();
+
+        await page.SetViewportSizeAsync(414, 896);
+        await Assertions.Expect(far).ToBeHiddenAsync();
+        await Assertions.Expect(near).ToBeVisibleAsync();
+        var more = toggle.Locator(".series-albums-more");
+        var less = toggle.Locator(".series-albums-less");
+        await Assertions.Expect(more).ToHaveTextAsync("et 3 autres");
+        await Assertions.Expect(less).ToBeHiddenAsync();
+
+        await toggle.ClickAsync();
+        await Assertions.Expect(far).ToBeVisibleAsync();
+        await Assertions.Expect(less).ToHaveTextAsync("Réduire");
+        await Assertions.Expect(more).ToBeHiddenAsync();
+
+        await toggle.ClickAsync();
+        await Assertions.Expect(far).ToBeHiddenAsync();
     }
 
     [GeneratedRegex(@"^et \d+ autres?$")]
@@ -229,6 +259,9 @@ public sealed class RecordsApplication : ApplicationHost
 
     /// <summary>An author known under a pseudonym, credited on nothing yet.</summary>
     public Guid UncreditedAuthorId { get; private set; }
+
+    /// <summary>The first of the seven albums of « Sergent Kirk », whose last three are far from it in the rest of its series.</summary>
+    public Guid KirkFirstAlbumId { get; private set; }
 
     protected override async Task SeedAsync()
     {
@@ -305,9 +338,11 @@ public sealed class RecordsApplication : ApplicationHost
             List<ContributionContent> credits = [new(hugo.Id, ContributionRole.Illustrator)];
             if (volume == 1)
                 credits.Add(new(hugo.Id, ContributionRole.Colorist));
-            await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
+            var kirkAlbum = await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
                 volume == 2 ? "Le Fort de l'Ouest" : null, null, kirk.Id, AlbumType.Regular, false, volume, null, null, 1953 + volume, null, null,
                 null, volume == 2 ? AlbumRating.VeryGood : null, [], [], credits));
+            if (volume == 1)
+                KirkFirstAlbumId = kirkAlbum.Id;
         }
 
         // Known under a pseudonym, with a nationality and a biography, credited on nothing yet.

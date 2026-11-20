@@ -61,7 +61,8 @@ public sealed class SeriesRecordTests(RecordsApplication application) : BrowserT
         var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
 
-        await page.Locator("[data-part='series']").GetByRole(AriaRole.Link, new() { Name = "Voir la fiche de la série" }).ClickAsync();
+        // The name of the series opens its record, and folds nothing (#554).
+        await page.Locator("[data-part='series']").GetByRole(AriaRole.Link, new() { Name = "Corto Maltese" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/series/{Application.SeriesId}$"));
     }

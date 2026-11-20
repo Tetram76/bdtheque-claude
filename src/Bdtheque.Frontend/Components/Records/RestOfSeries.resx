@@ -18,19 +18,13 @@
   <data name="Kicker" xml:space="preserve">
     <value>La série</value>
   </data>
-  <data name="Record" xml:space="preserve">
-    <value>Voir la fiche de la série</value>
+  <data name="More.One" xml:space="preserve">
+    <value>et {0} autre</value>
   </data>
-  <data name="Count.One" xml:space="preserve">
-    <value>{0} album</value>
+  <data name="More.Other" xml:space="preserve">
+    <value>et {0} autres</value>
   </data>
-  <data name="Count.Other" xml:space="preserve">
-    <value>{0} albums</value>
-  </data>
-  <data name="Owned" xml:space="preserve">
-    <value>{0}, dont {1} dans la collection</value>
-  </data>
-  <data name="Owned.None" xml:space="preserve">
-    <value>{0}, aucun dans la collection</value>
+  <data name="Less" xml:space="preserve">
+    <value>Réduire</value>
   </data>
 </root>

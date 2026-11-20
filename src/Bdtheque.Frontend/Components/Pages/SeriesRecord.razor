@@ -54,7 +54,7 @@ else if (_series is { } series)
                 @if (series.Albums.Count > 0)
                 {
                     <div class="series-progress">
-                        <span class="series-progress-label">@ProgressLabel</span>
+                        <span class="series-progress-label"><SeriesInCollection Albums="series.Albums" /></span>
                         <span class="series-progress-track" aria-hidden="true">
                             <span class="series-progress-bar" style="--progress: @(OwnedCount * 100 / series.Albums.Count)%"></span>
                         </span>
@@ -134,7 +134,5 @@ else if (_series is { } series)
 
     private IReadOnlyList<BreadcrumbItem> BreadcrumbItems => [new(L["Breadcrumb.Series"], AppPaths.Series), new(_series!.Title)];
 
-    private int OwnedCount => _series!.Albums.Count(a => a.Album.IsInCollection);
-
-    private string ProgressLabel => L[OwnedCount > 1 ? "Progress.Other" : "Progress.One", Format.Number(OwnedCount), Format.Number(_series!.Albums.Count)];
+    private int OwnedCount => SeriesInCollection.Owned(_series!.Albums);
 }

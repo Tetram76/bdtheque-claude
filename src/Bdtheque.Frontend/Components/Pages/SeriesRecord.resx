@@ -33,12 +33,6 @@
   <data name="ToComplete" xml:space="preserve">
     <value>À compléter</value>
   </data>
-  <data name="Progress.One" xml:space="preserve">
-    <value>{0} album sur {1} dans la collection</value>
-  </data>
-  <data name="Progress.Other" xml:space="preserve">
-    <value>{0} albums sur {1} dans la collection</value>
-  </data>
   <data name="Publisher" xml:space="preserve">
     <value>Éditeur</value>
   </data>
