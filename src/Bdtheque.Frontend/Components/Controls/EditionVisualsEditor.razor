@@ -386,9 +386,13 @@
             return;
         }
 
+        // Named while still among the visuals, which give a plate its number; a removal asked of one of them has nothing left to
+        // remove, and its dialog would name a visual the form no longer has.
+        _expired = [.. _expired ?? [], .. expired.Select(v => v.Name ?? LabelOf(v))];
+        if (_removing is { } removing && expired.Contains(removing))
+            _removing = null;
         foreach (var visual in expired)
             Visuals.Remove(visual);
-        _expired = [.. _expired ?? [], .. expired.Select(v => v.Name ?? LabelOf(v))];
         await ChangedAsync();
         StateHasChanged();
     }
