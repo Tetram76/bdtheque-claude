@@ -465,7 +465,7 @@ class View extends Mockup {
       ].filter(Boolean);
       const used = counts.length > 0;
       const usage = p.state === 'removed' ? 'Retirée à l\'enregistrement'
-        : (used ? counts.join(' · ') : 'Aucune série, édition, intention ni recherche enregistrée');
+        : (used ? counts.join(' · ') : 'Inutilisée');
       return {
         ...p, id: 'f-imp-' + i, label: p.name, usage, used,
         removed: p.state === 'removed', kept: p.state !== 'removed', isNew: p.state === 'new',

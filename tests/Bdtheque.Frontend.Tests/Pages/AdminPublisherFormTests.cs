@@ -134,7 +134,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
             ["Écritures", "Fac-similé", "Les Romans (À suivre)", "Univers d'auteurs"],
             rows.Select(row => row.QuerySelector("input")!.GetAttribute("value")));
         Assert.Equal(
-            ["3 séries · 58 éditions · 1 intention · 1 recherche enregistrée", "34 éditions", "Aucune série, édition, intention ni recherche enregistrée", "1 série"],
+            ["3 séries · 58 éditions · 1 intention · 1 recherche enregistrée", "34 éditions", "Inutilisée", "1 série"],
             rows.Select(row => row.QuerySelector(".publisher-collection-count")!.TextContent.Trim()));
         // A lock where the removal of a collection in use would be.
         Assert.Equal([false, false, true, false], rows.Select(row => row.QuerySelector("button[aria-label^='Retirer']") is not null));
@@ -205,7 +205,7 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
 
         var added = page.FindAll(".publisher-collection")[4];
         Assert.Equal("Nouvelle", added.QuerySelector(".tag")!.TextContent.Trim());
-        Assert.Equal("Aucune série, édition, intention ni recherche enregistrée", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
+        Assert.Equal("Inutilisée", added.QuerySelector(".publisher-collection-count")!.TextContent.Trim());
 
         await page.ClickAsync(() => page.FindAll(".publisher-collection")[4].QuerySelector("button[aria-label^='Retirer']")!);
 

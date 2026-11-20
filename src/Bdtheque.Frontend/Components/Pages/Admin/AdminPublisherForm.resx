@@ -82,7 +82,7 @@
     <value>Nouvelle</value>
   </data>
   <data name="Collection.Unused" xml:space="preserve">
-    <value>Aucune série, édition, intention ni recherche enregistrée</value>
+    <value>Inutilisée</value>
   </data>
   <data name="Collection.Removed" xml:space="preserve">
     <value>Retirée à l&apos;enregistrement</value>
