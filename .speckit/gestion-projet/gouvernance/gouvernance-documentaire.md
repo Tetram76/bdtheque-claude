@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Gouvernance documentaire'
-description: 'Développement piloté par la spécification, format OKF en carte et concepts, primauté du .speckit, rôle de l''agent, qui décide du contenu, sens consigné sans perdre les subtilités des mots et des expressions de l''utilisateur, sans sa formulation, nature des documents (référence ou journal).'
+description: 'Développement piloté par la spécification, format OKF en carte et concepts, primauté du .speckit, rôle de l''agent, qui décide du contenu, sens consigné sans perdre les subtilités des mots et des expressions de l''utilisateur, sans sa formulation, précision demandée avant de reformuler en cas de doute, nature des documents (référence ou journal).'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T08:55:04Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T08:57:23Z }
 ---
 
 # Gouvernance documentaire
@@ -29,7 +29,8 @@ Mettre à jour le concept concerné **immédiatement et sans attendre** dès que
 **Le sens, pas la formulation** (exigence de l'utilisateur) : l'utilisateur emploie des mots, des termes et des expressions précis, au sens précis, que l'agent retient exactement, sans l'élargir à un sens voisin (un mot qui désigne une couleur ne désigne pas aussi la couleur d'à côté). Ses phrases s'adressent toutefois à l'agent, dans la conversation, et non au document qui en garde la trace. Ce que l'agent consigne, dans le `.speckit/` comme dans une *rule*, un *skill* ou une mémoire, est donc le sens de ce que l'utilisateur a exprimé, les idées, les concepts et les règles qu'il porte, **sans perdre aucune des subtilités des mots et des expressions employés** :
 
 - chaque mot, terme ou expression qui porte le sens garde son sens exact dans le document : celui que l'utilisateur a employé, ou un équivalent de sens strictement identique, jamais un équivalent approchant, plus large ou plus faible (un objectif n'est pas un objet) ;
-- chaque subtilité est conservée, quelle qu'elle soit (ex. le degré, la certitude ou la portée : « à peu près », « pas forcément », « tous ») : rien n'est retranché, généralisé, durci ni affaibli. En cas de doute sur la fidélité d'un équivalent, le mot ou l'expression de l'utilisateur est repris tel quel ;
+- chaque subtilité est conservée, quelle qu'elle soit (ex. le degré, la certitude ou la portée : « à peu près », « pas forcément », « tous ») : rien n'est retranché, généralisé, durci ni affaibli ;
+- **soumis pour précision avant de reformuler** : en cas de doute sur le sens de ce que l'utilisateur a dit, ou dès qu'une reformulation présente une possibilité d'élargissement ou d'affaiblissement de ce qu'il a dit, l'agent le lui soumet pour précision **avant** de reformuler ;
 - seule la formulation adressée à l'agent n'est pas reproduite : tournures de conversation, première personne, exclamations, citation entre guillemets. Ce qu'elle exprime n'est pas perdu pour autant : la force d'une exigence que marquent une exclamation ou une insistance est rendue par les mots du document (ex. « toujours », « jamais », « sans exception »). La mention « exigence de l'utilisateur », ou « décision de l'utilisateur », suffit à dire d'où vient une règle.
 
 La forme d'un document dépend de sa **nature** :
