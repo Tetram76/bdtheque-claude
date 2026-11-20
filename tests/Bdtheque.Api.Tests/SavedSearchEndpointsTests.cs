@@ -57,7 +57,16 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
     {
         var response = await _client.PostAsJsonAsync("/admin/saved-searches", new SavedSearchContent(" ", EntityKind.Album, AlbumsTitled("Tintin"), []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SavedSearchNameRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SavedSearchNameRequired, ["/name"]);
+    }
+
+    [Fact]
+    public async Task Create_WithANameLongerThanTheColumn_IsABusinessError()
+    {
+        var response = await _client.PostAsJsonAsync(
+            "/admin/saved-searches", new SavedSearchContent(new string('R', 201), EntityKind.Album, AlbumsTitled("Tintin"), []));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/name"]);
     }
 
     [Fact]
@@ -68,7 +77,7 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         var response = await _client.PostAsJsonAsync(
             "/admin/saved-searches", new SavedSearchContent($"EDITIONS {_marker}", EntityKind.Album, AlbumsTitled("Tintin"), []));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SavedSearchNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SavedSearchNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -122,6 +131,42 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         AssertSameJson(content, updated.Content);
         Assert.NotEqual(search.Version, updated.Version);
         AssertSameJson(updated, await _client.GetFromJsonAsync<SavedSearchForm>($"/admin/saved-searches/{search.Id}"));
+    }
+
+    [Fact]
+    public async Task Update_WithBlankName_DesignatesTheNameOfItsContent()
+    {
+        var search = await CreateAsync(Name(), AlbumsTitled("Tintin"));
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/saved-searches/{search.Id}", new UpdateSavedSearchRequest(search.Content with { Name = " " }, search.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SavedSearchNameRequired, ["/content/name"]);
+    }
+
+    [Fact]
+    public async Task Update_WithANameLongerThanTheColumn_DesignatesTheNameOfItsContent()
+    {
+        var search = await CreateAsync(Name(), AlbumsTitled("Tintin"));
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/saved-searches/{search.Id}",
+            new UpdateSavedSearchRequest(search.Content with { Name = new string('R', 201) }, search.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/content/name"]);
+    }
+
+    [Fact]
+    public async Task Update_ToTheNameOfAnotherSearch_DesignatesTheNameOfItsContent()
+    {
+        var other = await CreateAsync(Name(), AlbumsTitled("Tintin"));
+        var search = await CreateAsync(Name(), AlbumsTitled("Astérix"));
+
+        var response = await _client.PutAsJsonAsync(
+            $"/admin/saved-searches/{search.Id}",
+            new UpdateSavedSearchRequest(search.Content with { Name = other.Content.Name.ToUpperInvariant() }, search.Version));
+
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.SavedSearchNameAlreadyUsed, ["/content/name"]);
     }
 
     [Fact]

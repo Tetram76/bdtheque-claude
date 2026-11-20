@@ -52,7 +52,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
         var response = await _client.PostAsJsonAsync(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest(" ", publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameRequired, ["/name"]);
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
         var response = await _client.PostAsJsonAsync(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest(new string('C', 301), publisher.Version));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/name"]);
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
             $"/admin/publishers/{publisher.Id}/collections/{collection.Id}",
             new UpdatePublisherCollectionRequest(new string('D', 301), collection.PublisherVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.TextTooLong, ["/name"]);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
         var response = await _client.PostAsJsonAsync(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("Écritures", first.PublisherVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
         var response = await _client.PostAsJsonAsync(
             $"/admin/publishers/{publisher.Id}/collections", new CreatePublisherCollectionRequest("VECU", first.PublisherVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]
@@ -201,7 +201,7 @@ public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebAppl
             $"/admin/publishers/{publisher.Id}/collections/{second.Id}",
             new UpdatePublisherCollectionRequest("Marvel", second.PublisherVersion));
 
-        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed);
+        await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionNameAlreadyUsed, ["/name"]);
     }
 
     [Fact]

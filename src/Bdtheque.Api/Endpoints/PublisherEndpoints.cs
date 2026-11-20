@@ -253,26 +253,30 @@ internal static class PublisherEndpoints
             .SingleOrDefaultAsync(cancellationToken)
         ?? throw new EntityNotFoundException(typeof(PublisherCollection), id);
 
+    // The collection is the record the content describes, its name entered at /name.
     private static async Task<Created<PublisherCollectionForm>> CreateCollectionAsync(
-        Guid rootId, CreatePublisherCollectionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, CreatePublisherCollectionRequest request, BdthequeDbContext context, ContentFields fields,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var publisher = await context.LoadAggregateForWriteAsync<Publisher>(
             rootId, request.PublisherVersion, query => query.Include(p => p.Collections), cancellationToken);
-        var collection = publisher.AddCollection(request.Name);
+        var collection = fields.Create("", () => publisher.AddCollection(request.Name));
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return TypedResults.Created($"/admin/publishers/{rootId}/collections/{collection.Id}", ToForm(context, publisher, collection));
     }
 
     private static async Task<PublisherCollectionForm> UpdateCollectionAsync(
-        Guid rootId, Guid id, UpdatePublisherCollectionRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+        Guid rootId, Guid id, UpdatePublisherCollectionRequest request, BdthequeDbContext context, ContentFields fields,
+        CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var publisher = await context.LoadAggregateForWriteAsync<Publisher>(
             rootId, request.PublisherVersion, query => query.Include(p => p.Collections), cancellationToken);
         var collection = publisher.Collections.SingleOrDefault(c => c.Id == id)
                          ?? throw new EntityNotFoundException(typeof(PublisherCollection), id);
+        fields.Place(collection);
         collection.SetName(request.Name);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
