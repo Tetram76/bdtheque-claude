@@ -1,30 +1,39 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the albums in columns as wide as the
    block allows, one on a smartphone, each line its volume, its title, then its membership; the album shown filled with the
    accent. */
-.series-record {
-    justify-self: start;
-    font-weight: var(--font-weight-strong);
-}
 
+/* The list of the series, whose width alone decides its columns and its folding (a container query): the margins of each
+   theme decide its room, which the width of the screen would not tell. */
 .series-albums {
+    container: series-albums / inline-size;
     border: 1px solid var(--color-rule);
     border-radius: var(--radius-tile);
 }
 
-.series-albums summary {
+.series-albums-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.25rem var(--space-m);
     min-block-size: var(--control-height);
+    margin: 0;
     padding-inline: var(--space-m);
-    cursor: pointer;
 }
 
+/* The name of the series opens its record (#554), underlined at all times like a title of a bibliography: a touch screen has
+   no hover. */
 .series-albums-title {
+    color: var(--color-text);
     font-family: var(--font-heading);
     font-weight: var(--font-weight-heading);
     font-size: var(--font-size-large);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+}
+
+.series-albums-title:hover {
+    text-decoration-thickness: 2px;
 }
 
 .series-albums-count {
@@ -34,7 +43,6 @@
 
 .series-albums ol {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(17.5rem, 100%), 1fr));
     gap: 0 var(--space-xl);
     margin: 0;
     padding: 0 var(--space-m) var(--space-s);
@@ -48,6 +56,53 @@
     min-block-size: 2rem;
     padding-block: var(--space-xs);
     border-block-end: 1px solid var(--color-rule);
+}
+
+.series-albums-toggle {
+    display: none;
+}
+
+.series-albums-toggle summary {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.625rem;
+    padding: 0 var(--space-m) var(--space-s);
+    color: var(--color-accent-text);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    list-style: none;
+    cursor: pointer;
+}
+
+.series-albums-toggle summary::-webkit-details-marker {
+    display: none;
+}
+
+.series-albums-toggle[open] .series-albums-more,
+.series-albums-toggle:not([open]) .series-albums-less {
+    display: none;
+}
+
+/* Wide enough for two columns of 17.5rem, with the gap between them and the padding of the list at the widest spacing of the
+   themes: the whole list in columns, nothing folded, since even a long series makes no long list there (#554). */
+@container series-albums (width >= 39rem) {
+    .series-albums ol {
+        grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+    }
+}
+
+/* On one column (a smartphone), the albums far from the one shown are folded behind « et N autres » until unfolded; « Réduire »
+   folds them back (visuel/fiche-album/contenu.md). */
+@container series-albums (width < 39rem) {
+    .series-albums-toggle {
+        display: block;
+    }
+
+    .series-albums:has(> .series-albums-toggle:not([open])) li[data-far] {
+        display: none;
+    }
 }
 
 /* Exactly as wide as the longest volume of the list, no more: its text, invisible, is laid under each volume

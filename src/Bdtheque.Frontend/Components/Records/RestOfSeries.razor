@@ -1,27 +1,29 @@
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Components.Lists
+@using Bdtheque.Frontend.Components.Presentation
 @inject IStringLocalizer<RestOfSeries> L
 @inject RecordLabels Labels
 @inject DisplayFormatter Format
 
-@* The rest of the series of an album (visuel/fiche-album/contenu.md): the link to the record of the series, and the
-   disclosure of its albums, in the order of the series (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), each
-   with its volume and where it stands with regard to the collection, as the lists tell it; the album shown is put forward,
-   and leads nowhere. A disclosure of the browser, open at first: no request, nor action followed, to fold what is already
-   on the page (choix-implementation/socle/frontend.md). *@
+@* The rest of the series of an album (visuel/fiche-album/contenu.md): the name of the series, which opens its record, with
+   its albums in the collection out of all of them (SeriesInCollection); then its albums, in the order of the series
+   (fonctionnel/regles-metier/ordre-des-albums-dans-une-serie.md), each with its volume and where it stands with regard to
+   the collection, as the lists tell it; the album shown is put forward, and leads nowhere. The list is always shown, in
+   columns; on one column only (a smartphone), the albums far from the one shown are folded behind « et N autres », a
+   disclosure of the browser after the list: no request, nor action followed, to show what is already on the page
+   (choix-implementation/socle/frontend.md, #554). *@
 <Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="series">
-    <a class="series-record" href="@AppPaths.SeriesRecord(SeriesId)">@L["Record"]</a>
-    <details class="series-albums" open>
-        <summary>
-            <span class="series-albums-title">@SeriesTitle</span>
-            <span class="series-albums-count">@Count</span>
-        </summary>
+    <div class="series-albums">
+        <p class="series-albums-head">
+            <a class="series-albums-title" href="@AppPaths.SeriesRecord(SeriesId)">@SeriesTitle</a>
+            <span class="series-albums-count"><SeriesInCollection Albums="Albums" /></span>
+        </p>
         <ol>
-            @foreach (var (card, name) in Lines)
+            @foreach (var (card, name, far) in Lines)
             {
                 var album = card.Album;
-                <li data-current="@(album.Id == AlbumId ? "" : null)">
+                <li data-current="@(album.Id == AlbumId ? "" : null)" data-far="@(far ? "" : null)">
                     @* A special case: the column of the volume is always given, beside a name that says it too (« Tome 3 »),
                        and holds the range of an omnibus (visuel/fiche-album/contenu.md). Each line keeps room for the longest
                        volume of the list (data-room), which the browser measures in the font of the column, so that the
@@ -39,10 +41,22 @@
                 </li>
             }
         </ol>
-    </details>
+        @if (FarCount > 0)
+        {
+            <details class="series-albums-toggle">
+                <summary>
+                    <span class="series-albums-more">@L[FarCount > 1 ? "More.Other" : "More.One", Format.Number(FarCount)]</span>
+                    <span class="series-albums-less">@L["Less"]</span>
+                </summary>
+            </details>
+        }
+    </div>
 </Block>
 
 @code {
+    // The albums shown on either side of the album of the record when the list is folded (visuel/fiche-album/contenu.md).
+    private const int Neighbours = 3;
+
     [Parameter, EditorRequired]
     public Guid AlbumId { get; set; }
 
@@ -56,19 +70,18 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
 
-    private List<(AlbumCard Card, AlbumInSeries Name)> Lines => [.. Albums.Select(card => (card, Labels.InTheRestOfItsSeries(card.Album)))];
+    private List<(AlbumCard Card, AlbumInSeries Name, bool Far)> Lines { get; set; } = [];
+
+    private int FarCount { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        var shown = Albums.ToList().FindIndex(card => card.Album.Id == AlbumId);
+        Lines = [.. Albums.Select((card, index) => (card, Labels.InTheRestOfItsSeries(card.Album), shown >= 0 && Math.Abs(index - shown) > Neighbours))];
+        FarCount = Lines.Count(line => line.Far);
+    }
 
     // The volume with the most characters stands for the widest: volumes differ in their digits, of the same width
     // (tabular figures), and in « à », one per range.
     private string? LongestVolume => Lines.Select(line => line.Name.Volume).MaxBy(volume => volume?.Length ?? 0);
-
-    private string Count
-    {
-        get
-        {
-            var total = L[Albums.Count > 1 ? "Count.Other" : "Count.One", Format.Number(Albums.Count)];
-            var owned = Albums.Count(a => a.Album.IsInCollection);
-            return owned == 0 ? L["Owned.None", total] : L["Owned", total, Format.Number(owned)];
-        }
-    }
 }
