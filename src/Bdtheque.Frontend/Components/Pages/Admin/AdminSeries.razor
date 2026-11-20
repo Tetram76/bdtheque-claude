@@ -24,7 +24,7 @@
     </Heading>
     <ChildContent>
         <ListSearch Action="@AppPaths.AdminSeries" FieldId="series-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
-                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" PanelId="series-filters"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@ListOnly.WithoutSearchHref()" PanelId="series-filters"
                     FiltersName="@AdminListQuery.FiltersName" FiltersOpenValue="@AdminListQuery.FiltersOpenValue"
                     FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel" HiddenFilters="KeptFilters" />
 
@@ -42,7 +42,7 @@
                 case EmptyListReason.Search:
                     <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
                         <Actions>
-                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                             <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewSeries, _query.Text!)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
                         </Actions>
                     </EmptyList>

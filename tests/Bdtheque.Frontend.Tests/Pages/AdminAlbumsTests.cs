@@ -176,6 +176,21 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         Assert.Equal(("false", "open", "2"), (filters.GetAttribute("aria-expanded"), filters.GetAttribute("value"), Text(filters.QuerySelector(".list-search-count")!)));
     }
 
+    // The cross of the field does what « Effacer la recherche » does: the list without its search, at its first page, its
+    // entry and its filters kept; right after the field in the keyboard path, before the button of the filters, the search
+    // for assistive technologies, which Enter submits, being out of it (visuel/liste-albums/controles.md).
+    [Fact]
+    public void Search_ItsCrossLeadsToTheListWithoutTheSearch_KeepingItsEntryAndFilters_RightAfterTheField()
+    {
+        var form = Open($"q=tintin&entry=T&genreId={Genre}&page=2").Find("form.list-search");
+
+        var cross = form.QuerySelector(".list-search-field input[name='q'] + a.search-clear")!;
+        Assert.Equal(("Effacer la recherche", $"{AppPaths.AdminAlbums}?entry=T&genreId={Genre}"), (Text(cross), cross.GetAttribute("href")));
+        Assert.Equal(
+            [("a", null), ("button", "-1"), ("button", null)],
+            form.QuerySelectorAll(".list-search-bar a, .list-search-bar button").Select(control => (control.LocalName, control.GetAttribute("tabindex"))));
+    }
+
     [Fact]
     public void Filters_UnfoldedAPanelOfTheirFields_TheRecordsChosenByTypingAndTheStateInAList()
     {

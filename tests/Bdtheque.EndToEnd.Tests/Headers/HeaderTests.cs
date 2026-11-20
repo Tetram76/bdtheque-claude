@@ -258,6 +258,39 @@ public sealed partial class HeaderTests(ApplicationHost application) : BrowserTe
         Assert.True(search!.Y >= menu!.Y + menu.Height, "The search is not under the menu.");
     }
 
+    // No list behind the field of the header: its cross (visuel/liste-albums/controles.md), shown only while a text is
+    // typed, in the color of the magnifier, a target for a finger within the field, follows it in the keyboard path and
+    // empties it, the focus going back to the field.
+    [Theory, InEachTheme]
+    public async Task HeaderSearch_ItsCross_ShownWhileATextIsTyped_EmptiesTheField_AndGivesItBackTheFocus(string theme)
+    {
+        var page = await OpenAsync(theme, AdminFramePage.Path, Smartphone);
+        var field = page.GetByRole(AriaRole.Searchbox, new() { Name = "Retrouver une fiche" });
+        var cross = page.Locator("header").GetByRole(AriaRole.Button, new() { Name = "Effacer la recherche" });
+        await Assertions.Expect(cross).ToBeHiddenAsync();
+
+        await field.FillAsync("Blueberry");
+
+        await Assertions.Expect(cross).ToBeVisibleAsync();
+        Assert.True(await cross.EvaluateAsync<bool>(SameColorAs("--color-header-icon")), "The cross is not in the color of the magnifier.");
+        var (box, within) = (await cross.BoundingBoxAsync(), await field.BoundingBoxAsync());
+        Assert.True(box!.Width >= 24 && box.Height >= 24, $"The cross is a target of {box.Width}×{box.Height} px.");
+        Assert.True(box.X >= within!.X && box.X + box.Width <= within.X + within.Width, "The cross is not within the field.");
+
+        await field.PressAsync("Tab");
+        await Assertions.Expect(cross).ToBeFocusedAsync();
+        await page.Keyboard.PressAsync("Enter");
+
+        await Assertions.Expect(field).ToHaveValueAsync("");
+        await Assertions.Expect(field).ToBeFocusedAsync();
+        await Assertions.Expect(cross).ToBeHiddenAsync();
+    }
+
+    // Whether the color of the element is the one of a custom property of the theme, as the browser computes it.
+    internal static string SameColorAs(string property) =>
+        $"element => {{ const probe = document.createElement('span'); probe.style.color = 'var({property})'; document.body.append(probe); " +
+        "const expected = getComputedStyle(probe).color; probe.remove(); return getComputedStyle(element).color === expected; }";
+
     [GeneratedRegex(@"\?entry=%23$")]
     private static partial Regex EntryNumberUrl();
 

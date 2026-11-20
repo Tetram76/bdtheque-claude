@@ -26,7 +26,7 @@
     </Heading>
     <ChildContent>
         <ListSearch Action="@AppPaths.AdminGenres" FieldId="genre-search" TextName="@AdminListQuery.TextName" Text="@_query.Text"
-                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" />
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@ListOnly.WithoutSearchHref()" />
 
         <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (ListOnly with { Entry = entry, Page = 1 }).Href())" />
 
@@ -41,7 +41,7 @@
                 case { EmptyReason: EmptyListReason.Search, Text: { } searched }:
                     <EmptyList Message="@L["Empty.Text", searched]" Hint="@L["Empty.Hint"]">
                         <Actions>
-                            <Button Href="@((ListOnly with { Text = null, Page = 1 }).Href())" Label="@L["Empty.Clear"]" />
+                            <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                             <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", searched]" />
                         </Actions>
                     </EmptyList>

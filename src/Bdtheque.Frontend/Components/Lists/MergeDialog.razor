@@ -2,7 +2,8 @@
 
 @* The merge of a record of a list of the administration with another one of the same type (visuel/liste-albums/contenu.md,
    fonctionnel/structure-de-l-application.md): from the record chosen, the other one is found by a search, a form of the
-   dialog that leads to the list with it, and « Continuer » leads to the next step, whose presentation awaits the terms of
+   dialog that leads to the list with it, whose cross leads back to the dialog before any search
+   (visuel/liste-albums/controles.md), and « Continuer » leads to the next step, whose presentation awaits the terms of
    the merge. *@
 <Dialog Id="@Id" Title="@Title" Subject="@Subject" Tone="DialogTone.Choice" CloseHref="@CloseHref">
     <ChildContent>
@@ -10,8 +11,11 @@
         <form class="merge-search" method="get" action="@Action" role="search">
             <QueryFields Parameters="Criteria" />
             <label class="visually-hidden" for="@($"{Id}-text")">@SearchLabel</label>
-            <input id="@($"{Id}-text")" name="@AdminListQuery.MergeTextName" type="search" value="@Text" placeholder="@Placeholder"
-                   autocomplete="off" />
+            <span class="merge-search-field">
+                <input id="@($"{Id}-text")" name="@AdminListQuery.MergeTextName" type="search" value="@Text" placeholder="@Placeholder"
+                       autocomplete="off" />
+                <SearchClear Href="@ClearHref" />
+            </span>
             <Button Type="submit" Icon="IconName.Search" Label="@L["Search"]" />
         </form>
         @if (Candidates is null)
@@ -84,9 +88,9 @@
     [Parameter, EditorRequired]
     public string SearchLabel { get; set; } = null!;
 
-    /// <summary>What the search looks into.</summary>
-    [Parameter]
-    public string? Placeholder { get; set; }
+    /// <summary>What the search looks into: shown while the field is empty, it is also what hides the cross then (themes/base.css).</summary>
+    [Parameter, EditorRequired]
+    public string Placeholder { get; set; } = null!;
 
     /// <summary>The other records the search found; <c>null</c> before any search.</summary>
     [Parameter]
@@ -120,6 +124,9 @@
     public Guid SubjectId { get; set; }
 
     private string ContinueId => $"{Id}-continue";
+
+    // The list with the dialog open, without the search of the other record: the criteria the search keeps, alone.
+    private string ClearHref => AdminListQuery.HrefOf(Action, Criteria);
 
     /// <summary>Another record of the type, as the dialog proposes it: its label, and what tells it apart.</summary>
     public sealed record MergeCandidate(Guid Id, string Label, string Detail);

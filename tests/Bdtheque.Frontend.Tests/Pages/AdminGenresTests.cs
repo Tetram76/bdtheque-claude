@@ -317,6 +317,18 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         Assert.Equal(AppPaths.AdminMergeGenres, dialog.QuerySelector("#genre-merge-continue")!.GetAttribute("action"));
     }
 
+    // The cross of the search of the other genre leads back to the dialog before any search, the list under it kept; right
+    // after the field, before its button (visuel/liste-albums/controles.md).
+    [Fact]
+    public void Merge_TheCrossOfItsSearch_LeadsBackToTheDialogBeforeAnySearch()
+    {
+        var form = Open($"q=ave&merge={Adventure.Id}&mergeQ=e").Find("dialog form.merge-search");
+
+        var cross = form.QuerySelector("input[name='mergeQ'] + a.search-clear")!;
+        Assert.Equal(("Effacer la recherche", $"{AppPaths.AdminGenres}?q=ave&merge={Adventure.Id}"), (Text(cross), cross.GetAttribute("href")));
+        Assert.Equal(["a", "button"], form.QuerySelectorAll("a, button").Select(control => control.LocalName));
+    }
+
     [Fact]
     public void Empty_ASearchWithoutResult_OffersToAddTheGenreSearched()
     {

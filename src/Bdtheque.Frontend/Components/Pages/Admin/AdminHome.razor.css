@@ -48,6 +48,12 @@
     min-inline-size: 0;
 }
 
+/* The field and its cross, which sits at its end. */
+.admin-isbn-field {
+    position: relative;
+    display: flex;
+}
+
 .admin-create {
     display: flex;
     flex-wrap: wrap;

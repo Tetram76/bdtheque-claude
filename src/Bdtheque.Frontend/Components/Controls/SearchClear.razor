@@ -1,0 +1,21 @@
+@inject IStringLocalizer<SearchClear> L
+
+@* The cross that clears a search field (visuel/liste-albums/controles.md), placed right after its field, in the keyboard
+   path: drawn by the application, the one of the browser never showing, and shown only while a text is typed
+   (themes/base.css). A list, rendered statically, is led back to without its search, as « Effacer la recherche » does; a
+   field without a list behind it (the header) is emptied by resetting its form, the keyboard focus going back to it
+   (wwwroot/search-clear.js). *@
+@if (Href is null)
+{
+    <button class="search-clear" type="reset"><Icon Name="IconName.Close" /><span class="visually-hidden">@L["Clear"]</span></button>
+}
+else
+{
+    <a class="search-clear" href="@Href"><Icon Name="IconName.Close" /><span class="visually-hidden">@L["Clear"]</span></a>
+}
+
+@code {
+    /// <summary>The list without its search; none for a field without a list behind it, which the cross empties.</summary>
+    [Parameter]
+    public string? Href { get; set; }
+}

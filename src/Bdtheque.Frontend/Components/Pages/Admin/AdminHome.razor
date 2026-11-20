@@ -30,8 +30,12 @@
         <Block Title="@L["Entry.Title"]" Kicker="@L["Entry.Kicker"]" Raised="true">
             <form class="admin-isbn" method="get" action="@AppPaths.AdminIsbnLookup" role="search">
                 <Field Id="admin-isbn" Label="@L["Entry.Isbn"]" Context="field">
-                    <input id="@field.Id" name="isbn" type="text" inputmode="text" autocomplete="off" autocapitalize="characters"
-                           spellcheck="false" placeholder="@L["Entry.IsbnPlaceholder"]" />
+                    @* A search without a list behind it, whose cross empties the field (visuel/liste-albums/controles.md). *@
+                    <span class="admin-isbn-field">
+                        <input id="@field.Id" name="isbn" type="search" inputmode="text" autocomplete="off" autocapitalize="characters"
+                               spellcheck="false" placeholder="@L["Entry.IsbnPlaceholder"]" />
+                        <SearchClear />
+                    </span>
                 </Field>
                 <Button Type="submit" Variant="ButtonVariant.Primary" Icon="IconName.Search" Label="@L["Entry.Lookup"]" />
             </form>
