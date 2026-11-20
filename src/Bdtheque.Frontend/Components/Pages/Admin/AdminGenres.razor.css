@@ -1,8 +1,8 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list and the entry of a genre,
    the rest of the page being that of every list of the administration (Components/Lists). */
 /* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
-   row holds on two lines: the label and the actions, then its numbers of albums and of series, each preceded by the name of
-   its column. A list wide enough for its columns is a table; wider still, the table adds the last modification
+   row holds on two lines: the label and the actions, then its works, whose text names what it counts. A list wide enough for
+   its columns is a table; wider still, the table adds the last modification
    (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
 .genre-rows {
     container: genre-rows / inline-size;
@@ -59,16 +59,8 @@
     font-weight: var(--font-weight-strong);
 }
 
-.genre-albums {
-    grid-area: albums;
-}
-
-.genre-series {
-    grid-area: series;
-}
-
-.genre-caption {
-    color: var(--color-text-muted);
+.genre-works {
+    grid-area: works;
 }
 
 .genre-modified {
@@ -91,10 +83,11 @@
     gap: var(--space-xs);
 }
 
-@container genre-rows (min-width: 34rem) {
+/* The works hold « 118 séries · 1 612 albums » on a single line. */
+@container genre-rows (min-width: 36rem) {
     .genre-row {
-        grid-template-columns: minmax(0, 1fr) 6rem 6rem var(--genre-actions-width);
-        grid-template-areas: "main series albums actions";
+        grid-template-columns: minmax(0, 1fr) 12rem var(--genre-actions-width);
+        grid-template-areas: "main works actions";
         align-items: center;
     }
 
@@ -106,17 +99,12 @@
         display: contents;
         font-size: inherit;
     }
-
-    /* In a table, the head names the columns. */
-    .genre-caption {
-        display: none;
-    }
 }
 
 @container genre-rows (min-width: 48rem) {
     .genre-row {
-        grid-template-columns: minmax(0, 1fr) 6rem 6rem 6.75rem var(--genre-actions-width);
-        grid-template-areas: "main series albums modified actions";
+        grid-template-columns: minmax(0, 1fr) 12rem 6.75rem var(--genre-actions-width);
+        grid-template-areas: "main works modified actions";
     }
 
     .genre-modified {
@@ -129,9 +117,9 @@
     grid-column: 1 / -1;
 }
 
-/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn,
-   with the name of its column (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
-@container genre-rows (width < 34rem) {
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn
+   (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container genre-rows (width < 36rem) {
     .genre-meta [data-zero] {
         display: none;
     }

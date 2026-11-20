@@ -7,6 +7,7 @@ namespace Bdtheque.Contracts.Admin;
 /// Its editions in the collection, an edition targeted by a purchase intent being none
 /// (fonctionnel/regles-metier/intention-d-acquisition.md).
 /// </param>
+/// <param name="PurchaseIntentCount">The purchase intents targeting one of its editions, counted apart from them.</param>
 /// <param name="Version">Version of the publisher, sent back with its deletion.</param>
 public sealed record PublisherAdminListItem(
     Guid Id,
@@ -14,5 +15,6 @@ public sealed record PublisherAdminListItem(
     string? Website,
     IReadOnlyList<string> Collections,
     int EditionCount,
+    int PurchaseIntentCount,
     DateTimeOffset ModifiedAt,
     uint Version);

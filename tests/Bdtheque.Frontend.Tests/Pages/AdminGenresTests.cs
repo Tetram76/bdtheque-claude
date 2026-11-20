@@ -71,29 +71,19 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_TheLabelAndItsNumbers()
+    public void Rows_TheLabelAndItsWorks_InASingleColumn()
     {
-        var rows = Open("").FindAll(".genre-row:not(.genre-row-head)").Select(row => (
-            Text(row.QuerySelector(".row-entry")!),
-            Text(row.QuerySelector(".genre-albums")!),
-            Text(row.QuerySelector(".genre-series")!),
-            row.QuerySelector(".genre-series")!.HasAttribute("data-zero")));
-
-        // On two lines, each number is preceded by the name of its column, which the styles hide in a table; a zero is not shown,
-        // but the dash of a missing data, said to a screen reader, which the styles withdraw on two lines.
-        Assert.Equal([("Aventure", "Albums 612", "Séries 118", false), ("Biographie", "Albums 37", "—Aucune série", true), ("Western", "—Aucun album", "—Aucune série", true)], rows);
-    }
-
-    [Fact]
-    public void Columns_TheSeriesBeforeTheAlbums()
-    {
-        // fonctionnel/presentation/ordre-des-types-de-fiche.md: in the head as in each row.
         var page = Open("");
+        var rows = page.FindAll(".genre-row:not(.genre-row-head)").Select(row => (
+            Text(row.QuerySelector(".row-entry")!),
+            Text(row.QuerySelector(".genre-works")!),
+            row.QuerySelector(".genre-works")!.HasAttribute("data-zero")));
 
-        Assert.Equal(["Séries", "Albums"], page.FindAll(".genre-row-head [role=columnheader]").Select(Text).Where(name => name is "Séries" or "Albums"));
-        Assert.Equal(
-            ["genre-series", "genre-albums"],
-            page.Find(".genre-row:not(.genre-row-head)").QuerySelectorAll("[role=cell]").Select(cell => cell.ClassName).Where(name => name is "genre-series" or "genre-albums"));
+        // Each number followed by what it counts, the series before the albums (fonctionnel/presentation/ordre-des-types-de-fiche.md);
+        // a zero is left out beside the other, and takes alone the dash of a missing data, said to a screen reader, which the
+        // styles withdraw on two lines (visuel/listes/liste-par-liste.md).
+        Assert.Equal([("Aventure", "118 séries · 612 albums", false), ("Biographie", "37 albums", false), ("Western", "—Ni série ni album", true)], rows);
+        Assert.Equal("Œuvres", Text(page.Find(".genre-row-head .genre-works")));
     }
 
     [Fact]
@@ -321,7 +311,8 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
 
         Assert.Equal("Fusionner deux genres", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal(
-            [("Biographie", "aucune série · 37 albums"), ("Western", "aucune série · aucun album")],
+            // Each candidate with its works, as its row presents them.
+            [("Biographie", "37 albums"), ("Western", "Ni série ni album")],
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
         Assert.Equal(AppPaths.AdminMergeGenres, dialog.QuerySelector("#genre-merge-continue")!.GetAttribute("action"));
     }

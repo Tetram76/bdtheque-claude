@@ -55,10 +55,10 @@
     <value>Aucune série</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 série</value>
+    <value>1 série</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} séries</value>
+    <value>{0} séries</value>
   </data>
   <data name="Order" xml:space="preserve">
     <value>Triées par titre</value>
@@ -88,16 +88,16 @@
     <value>Aucun album</value>
   </data>
   <data name="Albums.One" xml:space="preserve">
-    <value>1 album</value>
+    <value>1 album</value>
   </data>
   <data name="Albums.Other" xml:space="preserve">
-    <value>{0} albums</value>
+    <value>{0} albums</value>
   </data>
   <data name="Albums.InCollection" xml:space="preserve">
-    <value>{0} dont {1} dans la collection</value>
+    <value>{0} dont {1} dans la collection</value>
   </data>
   <data name="Albums.AllInCollection" xml:space="preserve">
-    <value>{0} dans la collection</value>
+    <value>{0} dans la collection</value>
   </data>
   <data name="Complete" xml:space="preserve">
     <value>Complète</value>

@@ -283,25 +283,15 @@
 
     // « 2 éditions · 1 intention »: an intent is never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md); a
     // zero says nothing, and is left out beside the other number (« 1 intention »).
-    private string EditionsText(AlbumAdminListItem row)
+    private string EditionsText(AlbumAdminListItem row) =>
+        ListCounts.Join(Counted("Editions", row.EditionCount), Counted("Intents", row.PurchaseIntentCount)) ?? L["Editions.None"];
+
+    private string? Counted(string name, int count) => count switch
     {
-        string?[] parts =
-        [
-            row.EditionCount switch
-            {
-                0 => null,
-                1 => L["Editions.One"].Value,
-                var count => L["Editions.Other", Format.Number(count)].Value,
-            },
-            row.PurchaseIntentCount switch
-            {
-                0 => null,
-                1 => L["Intents.One"].Value,
-                var count => L["Intents.Other", Format.Number(count)].Value,
-            },
-        ];
-        return parts.Any(part => part is not null) ? string.Join(" · ", parts.OfType<string>()) : L["Editions.None"];
-    }
+        0 => null,
+        1 => L[$"{name}.One"].Value,
+        _ => L[$"{name}.Other", Format.Number(count)].Value,
+    };
 
     private string CandidateDetail(AlbumAdminListItem candidate) => string.Join(" · ", new[]
     {

@@ -37,22 +37,16 @@
     <value>Aucun univers</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 univers</value>
+    <value>1 univers</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} univers</value>
+    <value>{0} univers</value>
   </data>
   <data name="Column.Universe" xml:space="preserve">
     <value>Univers</value>
   </data>
-  <data name="Column.Albums" xml:space="preserve">
-    <value>Albums</value>
-  </data>
-  <data name="Column.Series" xml:space="preserve">
-    <value>Séries</value>
-  </data>
-  <data name="Column.SubUniverses" xml:space="preserve">
-    <value>Sous-univers</value>
+  <data name="Column.Content" xml:space="preserve">
+    <value>Contenu</value>
   </data>
   <data name="Column.Modified" xml:space="preserve">
     <value>Modifié</value>
@@ -60,23 +54,29 @@
   <data name="Column.Actions" xml:space="preserve">
     <value>Actions</value>
   </data>
+  <data name="Series.One" xml:space="preserve">
+    <value>1 série</value>
+  </data>
+  <data name="Series.Other" xml:space="preserve">
+    <value>{0} séries</value>
+  </data>
   <data name="Albums.Zero" xml:space="preserve">
     <value>aucun album</value>
   </data>
   <data name="Albums.One" xml:space="preserve">
-    <value>1 album</value>
+    <value>1 album</value>
   </data>
   <data name="Albums.Other" xml:space="preserve">
-    <value>{0} albums</value>
+    <value>{0} albums</value>
   </data>
-  <data name="Albums.None" xml:space="preserve">
-    <value>Aucun album</value>
+  <data name="SubUniverses.One" xml:space="preserve">
+    <value>1 sous-univers</value>
   </data>
-  <data name="Series.None" xml:space="preserve">
-    <value>Aucune série</value>
+  <data name="SubUniverses.Other" xml:space="preserve">
+    <value>{0} sous-univers</value>
   </data>
-  <data name="SubUniverses.None" xml:space="preserve">
-    <value>Aucun sous-univers</value>
+  <data name="Content.None" xml:space="preserve">
+    <value>Ni série, ni album, ni sous-univers</value>
   </data>
   <data name="Candidate.In" xml:space="preserve">
     <value>Dans {0}</value>
