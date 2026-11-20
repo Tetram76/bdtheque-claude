@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Gouvernance documentaire'
-description: 'Développement piloté par la spécification, format OKF en carte et concepts, primauté du .speckit, rôle de l''agent, qui décide du contenu, sens consigné plutôt que les mots de l''utilisateur, nature des documents (référence ou journal).'
+description: 'Développement piloté par la spécification, format OKF en carte et concepts, primauté du .speckit, rôle de l''agent, qui décide du contenu, sens consigné avec la précision des termes de l''utilisateur, sans sa formulation, nature des documents (référence ou journal).'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T08:53:52Z }
 ---
 
 # Gouvernance documentaire
@@ -26,7 +26,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T10:00:00Z }
 
 Mettre à jour le concept concerné **immédiatement et sans attendre** dès que l'utilisateur fournit une exigence, une contrainte, une règle ou toute information relevant du périmètre d'un des concepts. Ne jamais laisser une information pertinente uniquement dans le fil de conversation.
 
-**Le sens, pas les mots** (exigence de l'utilisateur) : l'utilisateur emploie des mots précis, dont l'agent retient le sens exact, sans l'élargir à un sens voisin (un mot qui désigne une couleur ne désigne pas aussi la couleur d'à côté). Ces mots s'adressent toutefois à l'agent, dans la conversation, et non au document qui en garde la trace. Ce que l'agent consigne, dans le `.speckit/` comme dans une *rule*, un *skill* ou une mémoire, est donc le sens de ce que l'utilisateur a exprimé : les idées, les concepts et les règles qu'il porte, formulés dans les termes du document et de son sujet. La formulation de l'utilisateur n'y est ni recopiée, ni citée entre guillemets ; la mention « exigence de l'utilisateur », ou « décision de l'utilisateur », suffit à dire d'où vient une règle.
+**Le sens, pas la formulation** (exigence de l'utilisateur) : l'utilisateur emploie des mots et des termes précis, au sens précis, que l'agent retient exactement, sans l'élargir à un sens voisin (un mot qui désigne une couleur ne désigne pas aussi la couleur d'à côté). Ses phrases s'adressent toutefois à l'agent, dans la conversation, et non au document qui en garde la trace. Ce que l'agent consigne, dans le `.speckit/` comme dans une *rule*, un *skill* ou une mémoire, est donc le sens de ce que l'utilisateur a exprimé, les idées, les concepts et les règles qu'il porte, **avec la même précision** :
+
+- chaque terme qui porte le sens garde son sens exact dans le document : le terme employé par l'utilisateur, ou un terme de sens strictement identique, jamais un terme approchant, plus large ou plus faible (un objectif n'est pas un objet) ;
+- chaque nuance est conservée, qu'elle porte sur le degré, la certitude ou la portée (« à peu près », « pas forcément », « tous ») : rien n'est retranché, généralisé ni durci ;
+- seule la formulation adressée à l'agent n'est pas reproduite : tournures de conversation, première personne, exclamations et emphase, citation entre guillemets. La mention « exigence de l'utilisateur », ou « décision de l'utilisateur », suffit à dire d'où vient une règle.
 
 La forme d'un document dépend de sa **nature** :
 
