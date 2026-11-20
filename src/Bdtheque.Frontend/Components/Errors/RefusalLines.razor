@@ -29,7 +29,12 @@
     [Parameter(CaptureUnmatchedValues = true)]
     public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string Line(ImpactCount count, bool last) => Hint is null
-        ? Entities.Of(count)
-        : L[last ? "LastLine" : "Line", Entities.Of(count), Hint($"{count.Kind}.{EntityCounts.Form(count.Count)}")];
+    private string Line(ImpactCount count, bool last)
+    {
+        if (Hint is null)
+            return Entities.Of(count);
+        // The last line ends the sentence, the others continue it.
+        var line = last ? "LastLine" : "Line";
+        return L[line, Entities.Of(count), Hint($"{count.Kind}.{EntityCounts.Form(count.Count)}")];
+    }
 }
