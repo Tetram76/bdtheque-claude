@@ -42,6 +42,7 @@ internal static class ApiProblemReader
                 ? new ApiProblem(category, status, ruleCode, impact)
                 {
                     Fields = FieldsOf(root, ProblemTypes.FieldsExtension), RelatedFields = FieldsOf(root, ProblemTypes.RelatedFieldsExtension),
+                    Record = Guid.TryParse(StringOf(root, ProblemTypes.RecordExtension), out var record) ? record : null,
                 }
                 : new ApiProblem(category, status, ruleCode, impact);
         }

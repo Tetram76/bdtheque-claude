@@ -48,6 +48,9 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
         // What the message has to announce beyond the category: the records concerned by the deletion.
         if (ImpactOf(exception) is { } impact)
             problem.Extensions[ProblemTypes.ImpactExtension] = impact;
+        // The record in cause, which no field of the content designates.
+        if (exception is RemovalRefusedException removal)
+            problem.Extensions[ProblemTypes.RecordExtension] = removal.RecordId;
 
         httpContext.Response.StatusCode = status;
         // The exception is deliberately not passed on: nothing internal reaches the response.
@@ -74,6 +77,7 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
     {
         DeletionRefusedException refused => refused.Impact,
         DeletionImpactChangedException changed => changed.Impact,
+        RemovalRefusedException removal => removal.Impact,
         _ => null,
     };
 
@@ -84,6 +88,8 @@ internal sealed class ApiExceptionHandler(IProblemDetailsService problemDetailsS
 
         DeletionRefusedException =>
             (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, DomainRules.DeletionBlockedByReferences),
+
+        RemovalRefusedException removal => (StatusCodes.Status422UnprocessableEntity, ProblemTypes.Business, removal.Rule),
 
         DeletionImpactChangedException => (StatusCodes.Status409Conflict, ProblemTypes.Functional, null),
 

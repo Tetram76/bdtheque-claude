@@ -32,10 +32,16 @@ public sealed record ApiProblem(ProblemCategory Category, int? Status, string? R
     /// </summary>
     public IReadOnlyList<string> RelatedFields { get; init; } = [];
 
+    /// <summary>
+    /// The record in cause of a business error, when the content the form sent does not enter it (e.g. a collection removed
+    /// from the form of its publisher, whose removal is refused); none otherwise.
+    /// </summary>
+    public Guid? Record { get; init; }
+
     // Two problems are the same error when they designate the same fields, not the same lists.
     public bool Equals(ApiProblem? other) =>
         other is not null
-        && (Category, Status, RuleCode, Impact) == (other.Category, other.Status, other.RuleCode, other.Impact)
+        && (Category, Status, RuleCode, Impact, Record) == (other.Category, other.Status, other.RuleCode, other.Impact, other.Record)
         && Fields.SequenceEqual(other.Fields) && RelatedFields.SequenceEqual(other.RelatedFields);
 
     public override int GetHashCode() => HashCode.Combine(Category, Status, RuleCode, Impact, Fields.Count);

@@ -8,6 +8,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using DomainEnums = Bdtheque.Domain.Enums;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Endpoints;
@@ -157,9 +158,9 @@ internal static class PublisherEndpoints
     /// </summary>
     /// <exception cref="EntityNotFoundException">A collection listed is not one of the publisher's.</exception>
     /// <exception cref="DomainRuleViolationException">
-    /// A collection removed is referenced (<see cref="DomainRules.PublisherCollectionInUse"/>), or a value breaks a rule of the
-    /// publisher or of its collections.
+    /// A value breaks a rule of the publisher or of its collections.
     /// </exception>
+    /// <exception cref="RemovalRefusedException">A collection removed is referenced (<see cref="DomainRules.PublisherCollectionInUse"/>).</exception>
     private static async Task ApplyAsync(
         BdthequeDbContext context, ContentFields fields, Publisher publisher, PublisherContent content,
         CancellationToken cancellationToken)
@@ -191,7 +192,8 @@ internal static class PublisherEndpoints
     private static string CollectionPath(int index) => $"/collections/{index}";
 
     // A collection is removed as it would be deleted (fonctionnel/regles-metier/suppression-des-entites.md): refused while
-    // editions, series templates or saved searches reference it, whose count is that of its deletion. Its row is locked
+    // editions, series templates or saved searches reference it, whose count is that of its deletion, which the refusal carries
+    // to be presented line by line (visuel/saisie-editeur/contenu.md), with the collection the content no longer cites. Its row is locked
     // first, after the publisher's (choix-implementation/persistance/concurrence-d-acces.md): an edition or a series that
     // would reference it meanwhile waits for the end of the save, which no reference can then slip into.
     private static async Task RemoveCollectionAsync(
@@ -201,14 +203,14 @@ internal static class PublisherEndpoints
         var impact = await AggregateDeletion.ComputeImpactAsync<PublisherCollection>(
             context, collection.Id, CollectionDeletionLinks, cancellationToken);
         if (impact.BlockedBy.Count > 0)
-            throw new DomainRuleViolationException(
-                DomainRules.PublisherCollectionInUse, $"Collection {collection.Id} is referenced and cannot be removed.");
+            throw new RemovalRefusedException(DomainRules.PublisherCollectionInUse, collection.Id, impact);
 
         publisher.RemoveCollection(collection);
     }
 
     // Its collections in the order of the base, by name, each with what references it, counted as the impact of its deletion
-    // (CollectionDeletionLinks, AggregateDeletion): an edition a purchase intent targets is counted as that intent.
+    // (CollectionDeletionLinks, AggregateDeletion): an edition a purchase intent targets is counted as that intent, and the
+    // saved searches designating the collection are counted (visuel/saisie-editeur/contenu.md).
     private static async Task<PublisherForm> ToFormAsync(BdthequeDbContext context, Publisher publisher, CancellationToken cancellationToken) =>
         new(
             publisher.Id,
@@ -223,7 +225,9 @@ internal static class PublisherEndpoints
                     c.Name,
                     context.Editions.Count(e => e.PublisherCollectionId == c.Id && !context.PurchaseIntents.Any(p => p.EditionId == e.Id)),
                     context.PurchaseIntents.Count(p => p.Edition!.PublisherCollectionId == c.Id),
-                    context.Series.Count(s => s.TemplatePublisherCollectionId == c.Id)))
+                    context.Series.Count(s => s.TemplatePublisherCollectionId == c.Id),
+                    context.SavedSearches.Count(s => s.Designations.Any(
+                        d => d.Kind == DomainEnums.EntityKind.PublisherCollection && d.RecordId == c.Id))))
                 .ToListAsync(cancellationToken),
             publisher.CreatedAt,
             publisher.ModifiedAt,

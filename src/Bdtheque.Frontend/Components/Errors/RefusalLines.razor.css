@@ -1,4 +1,4 @@
-/* The lines of a refused deletion, one per entity type blocking it. Built on the contracts of the theme only
+/* The lines of a refused deletion or removal, one per entity type blocking it. Built on the contracts of the theme only
    (choix-implementation/socle/themes.md). */
 .deletion-refusal {
     display: flex;

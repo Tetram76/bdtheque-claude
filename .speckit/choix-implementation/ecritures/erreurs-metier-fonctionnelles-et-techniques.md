@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Errors/**'
   - 'src/Bdtheque.Domain/Common/DomainRule*.cs'
   - 'src/Bdtheque.Contracts/Errors/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T12:00:00Z }
 ---
 
 # Erreurs métier, fonctionnelles et techniques
@@ -19,6 +19,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T12:10:00Z }
   - **Une violation de la base est rapportée aux fiches que la requête écrit** : PostgreSQL ne nomme ni la colonne ni la ligne d'un texte trop long, si bien que les valeurs écrites sont mesurées, en caractères, aux longueurs que le modèle déclare pour le schéma, sans copie de ces longueurs ; une unicité refusée désigne les fiches dont les valeurs se heurtent entre elles (deux collections d'un éditeur enregistrées ensemble sous le même nom, à la casse ou aux accents près), comparées comme leur colonne les compare ([Collation des colonnes texte](../persistance/collation-des-colonnes-texte.md)), par les attributs saisis de l'index, hors clés étrangères ; sinon, la fiche de ce type que la requête écrit, que heurte une ligne qu'elle n'a pas lue. La requête lit d'autres fiches du même type sans les écrire (les auteurs déjà crédités d'un album, à côté de celui créé sur place) : seules comptent celles qu'elle écrit. Parmi plusieurs (deux genres créés sur place), la base dit laquelle une autre ligne détient déjà, interrogée une fois la transaction de la requête annulée, sa colonne comparant les valeurs par sa collation.
     - **Alternative écartée (toutes les fiches écrites de ce type désignées)** : chacune serait présentée comme déjà prise, son message la citant, alors qu'une seule l'est.
   - **Champs à corriger et champs associés** : de fiches qui se heurtent, celles que la requête écrit (créées, ou dont une valeur change) sont à corriger ; celles qu'elle laisse telles quelles ne sont que **associées**, dans une liste à part de la réponse, que le client présente avec l'erreur sans la donner à corriger. Une contrainte différable n'étant vérifiée qu'au commit, quand l'enregistrement a déjà marqué ses fiches inchangées, les fiches écrites sont retenues à chaque enregistrement de la requête.
+  - **Fiche absente du contenu** : une fiche que la requête retire sans la citer (une collection retirée de la saisie de son éditeur) n'a pas de champ ; l'erreur la désigne par son identifiant ([Suppression des entités : mise en œuvre](suppression-des-entites-mise-en-oeuvre.md)).
   - **Alternative écartée (champ déduit du code de règle par le client)** : une règle commune à plusieurs champs (texte trop long) ou à plusieurs lignes d'une liste ne situe pas son champ, et chaque client tiendrait sa propre correspondance (#398).
   - **Alternative écartée (longueurs vérifiées avant l'enregistrement)** : une seconde vérification de la règle de la base, que celle-ci garde de toute façon ; mesurer les valeurs n'a lieu qu'une fois la violation constatée.
   - **Alternative écartée (champ lu dans le message d'erreur de PostgreSQL)** : le texte trop long n'y nomme pas la colonne, et le détail d'une unicité refusée n'est livré qu'avec les données de la ligne, à ne pas journaliser.

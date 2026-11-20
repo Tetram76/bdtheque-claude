@@ -34,6 +34,12 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     /// <summary>A publisher with nothing but its name, whose deletion is accepted.</summary>
     public const string UnusedPublisherName = "Éditions Sans Rivage";
 
+    /// <summary>A publisher with editions, one of whose collections only a saved search designates.</summary>
+    public const string DesignatedCollectionPublisherName = "Bulles & Cie";
+
+    /// <summary>The collection of <see cref="DesignatedCollectionPublisherName"/> that only a saved search designates.</summary>
+    public const string DesignatedCollectionName = "Planches d'Antan";
+
     /// <summary>A publisher only named by the edition to buy of a purchase intent.</summary>
     public const string IntendedPublisherName = "Éditions de l'Horizon";
 
@@ -95,7 +101,10 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.UniverseAsync(UnattachedUniverse, "À rattacher à un univers parent.", null);
 
         var lagoon = await data.PublisherAsync("Éditions du Lagon", "https://www.example.org/lagon", "Grand Large", "Escales");
-        var bubbles = await data.PublisherAsync("Bulles & Cie", null, "Petit Format");
+        var bubbles = await data.PublisherAsync(DesignatedCollectionPublisherName, null, "Petit Format", DesignatedCollectionName);
+        // A collection that only a saved search designates, next to one its editions designate: its form counts the search,
+        // and the collection cannot be removed (visuel/saisie-editeur/contenu.md).
+        await data.SavedSearchOfCollectionAsync($"Éditions de la collection {DesignatedCollectionName}", bubbles.Collections[1]);
         var blackPlate = await data.PublisherAsync("Planche Noire", "https://www.example.com/planche-noire");
         // The cases of the list of the publishers: many collections and no edition, whose deletion takes the collections with
         // it; nothing but a name, whose deletion is accepted; only named by an edition to buy, none in the collection.
@@ -525,6 +534,12 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             album.Version = edition.AlbumVersion;
             return edition.Id;
         }
+
+        /// <summary>A saved search of the editions of a collection of a publisher, which designates it.</summary>
+        public async Task SavedSearchOfCollectionAsync(string name, Guid collection) =>
+            await PostAsync<SavedSearchContent, SavedSearchForm>("/admin/saved-searches", new(
+                name, EntityKind.Edition,
+                new SearchLink("publisherCollection", new SearchCriterion("record", SearchComparison.Is, [collection.ToString()])), []));
 
         /// <summary>A saved search of the albums that designates one of them.</summary>
         public async Task SavedSearchAsync(string name, Guid album) =>

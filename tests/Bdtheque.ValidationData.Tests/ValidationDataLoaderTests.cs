@@ -42,6 +42,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task PublisherForm_HasACollectionThatOnlyASavedSearchDesignates()
+    {
+        var publishers = await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.PublisherAdminListItem>>(
+            $"/admin/publishers?q={Uri.EscapeDataString(ValidationDataLoader.DesignatedCollectionPublisherName)}");
+        var form = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.PublisherForm>(
+            $"/admin/publishers/{Assert.Single(publishers!.Items).Id}");
+
+        var designated = Assert.Single(form!.Collections, c => c.Name == ValidationDataLoader.DesignatedCollectionName);
+        Assert.Equal((0, 0, 0, 1), (designated.EditionCount, designated.PurchaseIntentCount, designated.SeriesCount, designated.SavedSearchCount));
+    }
+
+    [Fact]
     public async Task LongSeries_HasRegularVolumesOmnibusesAndSpecialIssues_WithAndWithoutCover()
     {
         var series = await SeriesAsync(ValidationDataLoader.LongSeriesTitle);

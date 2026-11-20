@@ -10,7 +10,7 @@
 @switch (Problem.Category)
 {
     case ProblemCategory.Business:
-        <ErrorMessage Problem="Problem" Label="@L["Business"]" />
+        <ErrorMessage Problem="Problem" Label="@L["Business"]" Message="@Business" RefusalHint="RefusalHint" />
         break;
     case ProblemCategory.Functional:
         <ErrorMessage Problem="Problem" Label="@L["Functional"]" Message="@(Problem.Status == StatusCodes.Status404NotFound ? NotFound : Conflict)">
@@ -61,6 +61,17 @@
     /// <summary>The record could not be saved: the changes are still in the form.</summary>
     [Parameter, EditorRequired]
     public string Technical { get; set; } = null!;
+
+    /// <summary>
+    /// The text of a business error the form words itself, in place of the text of its rule (e.g. a refused removal naming the
+    /// collection removed); by default, the text of the rule.
+    /// </summary>
+    [Parameter]
+    public string? Business { get; set; }
+
+    /// <summary>What to do about each type of records blocking a refused removal (<see cref="ErrorMessage.RefusalHint"/>).</summary>
+    [Parameter]
+    public Func<string, string>? RefusalHint { get; set; }
 
     /// <summary>Whether the record is already saved, which a reload reads anew: a new record has nothing to reload.</summary>
     [Parameter]

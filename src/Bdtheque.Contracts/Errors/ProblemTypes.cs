@@ -47,4 +47,11 @@ public static class ProblemTypes
     /// the deletion (<see cref="Deletion.DeletionImpact"/>).
     /// </summary>
     public const string ImpactExtension = "impact";
+
+    /// <summary>
+    /// Extension member of a <see cref="Business"/> problem holding the identifier of the record in cause, when the content the
+    /// request sent does not enter it, so that no field can designate it (e.g. a collection removed from the form of its
+    /// publisher, whose removal is refused). Absent otherwise.
+    /// </summary>
+    public const string RecordExtension = "record";
 }

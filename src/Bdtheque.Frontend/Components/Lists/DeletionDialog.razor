@@ -1,6 +1,5 @@
 @using Bdtheque.Contracts.Deletion
 @inject IStringLocalizer<DeletionDialog> L
-@inject IStringLocalizer<EntityNames> Entities
 
 @* The deletion of a record of a list of the administration (visuel/liste-albums/contenu.md): the dialog announces the impact of
    the deletion (fonctionnel/regles-metier/suppression-des-entites.md) and confirms it by a form protected against forgery,
@@ -12,13 +11,7 @@
 {
     <Dialog Id="@Id" Title="@L["Refusal.Title"]" Subject="@Subject" Tone="DialogTone.Refusal" CloseHref="@CloseHref" CloseLabel="@L["Close"]">
         <p>@RefusalLead</p>
-        <ul class="deletion-refusal">
-            @for (var i = 0; i < Impact.BlockedBy.Count; i++)
-            {
-                var count = Impact.BlockedBy[i];
-                <li data-kind="@count.Kind">@L[i == Impact.BlockedBy.Count - 1 ? "Refusal.LastLine" : "Refusal.Line", Entities.Of(count), RefusalHint($"{count.Kind}.{EntityCounts.Form(count.Count)}")]</li>
-            }
-        </ul>
+        <RefusalLines Impact="Impact" Hint="RefusalHint" />
     </Dialog>
 }
 else if (Impact is not null)

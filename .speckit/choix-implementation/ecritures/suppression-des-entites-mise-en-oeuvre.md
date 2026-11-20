@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Deletion/**'
   - 'src/Bdtheque.Api/Endpoints/DeletionEndpoints.cs'
   - 'src/Bdtheque.Contracts/Deletion/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T12:00:00Z }
 ---
 
 # Suppression des entités : mise en œuvre
@@ -22,7 +22,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:30:00Z }
 - **Édition visée comptée comme son intention par le mécanisme commun** ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) : une fois relevées les fiches de chaque lien et les recherches enregistrées qui les désignent, toute édition que vise une intention passe du compte des éditions à celui des intentions, sous la même nature de lien, l'intention supprimée elle-même exceptée. Chaque ressource déclare ses liens tels que le schéma les connaît (une intention emporte une édition) : aucune ne peut oublier la règle. L'empreinte porte sur les identités ainsi comptées, et le relevé des visuels comme celui des recherches enregistrées, faits avant, gardent l'édition visée.
   - **Alternative écartée (liens restreints aux éditions possédées dans chaque ressource, et liens d'intentions ajoutés)** : la règle serait écrite dans l'album, l'éditeur, la collection et l'intention, et une ressource qui l'oublierait recompterait l'édition visée.
   - **Alternative écartée (règle appliquée par le frontend à la présentation)** : l'impact ne porte que des nombres par type, d'où l'on ne sait pas quelles éditions sont visées ; et l'outil pour agents IA, autre client, devrait la redire.
-- **Ce qui désigne une collection, dans la saisie de son éditeur, compté comme l'impact de sa suppression** : une édition que vise une intention compte pour cette intention, comme dans le mécanisme commun, en une requête pour toutes les collections de l'éditeur.
+- **Ce qui désigne une collection, dans la saisie de son éditeur, compté comme l'impact de sa suppression** : une édition que vise une intention compte pour cette intention, et les recherches enregistrées qui désignent la collection sont comptées, comme dans le mécanisme commun, en une requête pour toutes les collections de l'éditeur.
+  - **Retrait d'une collection refusé comme une suppression** : l'erreur métier (`PublisherCollection.InUse`) porte l'impact recalculé, que le formulaire présente ligne par ligne comme le dialogue commun, et désigne la collection par son identifiant (`record`), seule désignation possible d'une fiche que le contenu, qui l'a retirée, ne cite plus.
+    - **Alternative écartée (refus par le code `DeletionBlockedByReferences` des suppressions)** : le formulaire ne saurait ni quelle collection nommer, ni que le refus vient d'un retrait, qui se résout aussi en la rétablissant.
   - **Alternative écartée (impact de suppression calculé pour chaque collection)** : plusieurs requêtes par collection à chaque lecture de la fiche, pour des nombres que la projection donne d'un coup.
 - **Refus présenté par le dialogue commun** ([Frontend](../socle/frontend.md)) : une ligne par type de fiche qui bloque, son nombre et la marche à suivre, que chaque page donne au singulier et au pluriel ; le résumé de l'impact ne présente plus que ce que fait une suppression confirmée.
 - **Ordre unique des types de fiche écrit une fois, dans les contrats** ([Ordre des types de fiche](../../fonctionnel/presentation/ordre-des-types-de-fiche.md)) : l'API rend chaque liste de l'impact dans cet ordre, que tout client présente tel quel ; un écran qui assemble lui-même un décompte (collection d'un éditeur, colonnes d'une liste, candidats d'une fusion) le suit, fixé par ses tests.
