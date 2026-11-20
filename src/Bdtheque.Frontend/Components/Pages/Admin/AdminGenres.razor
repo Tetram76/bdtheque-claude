@@ -67,8 +67,7 @@
             <div class="genre-rows" role="table" aria-label="@L["Title"]">
                 <div class="genre-row genre-row-head" role="row">
                     <span class="genre-main" role="columnheader">@L["Column.Genre"]</span>
-                    <span class="genre-series" role="columnheader">@L["Column.Series"]</span>
-                    <span class="genre-albums" role="columnheader">@L["Column.Albums"]</span>
+                    <span class="genre-works" role="columnheader">@L["Column.Works"]</span>
                     <span class="genre-modified" role="columnheader">@L["Column.Modified"]</span>
                     <span class="genre-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
                 </div>
@@ -209,16 +208,12 @@
     // « Nouveau genre » opens the dialog of a new genre over the list, which keeps its search.
     private string NewHref => (ListOnly with { Adding = true }).Href();
 
-    // The numbers and the modification of a genre, which its row keeps while it is changed. On two lines, a number loses its
-    // column header: it carries the name of its column, and a zero is withdrawn.
+    // The works and the modification of a genre, which its row keeps while it is changed.
     private RenderFragment Numbers(GenreAdminListItem row) =>
         @<text>
             <span class="genre-meta">
-                <span class="genre-series" role="cell" data-zero="@(row.SeriesCount == 0)">
-                    <ListCount Value="row.SeriesCount" None="@L["Series.None"]"><span class="genre-caption">@L["Column.Series"]</span> @Format.Number(row.SeriesCount)</ListCount>
-                </span>
-                <span class="genre-albums" role="cell" data-zero="@(row.AlbumCount == 0)">
-                    <ListCount Value="row.AlbumCount" None="@L["Albums.None"]"><span class="genre-caption">@L["Column.Albums"]</span> @Format.Number(row.AlbumCount)</ListCount>
+                <span class="genre-works" role="cell" data-zero="@(row.SeriesCount + row.AlbumCount == 0)">
+                    <ListCount Value="row.SeriesCount + row.AlbumCount" None="@L["Works.None"]">@WorksText(row)</ListCount>
                 </span>
             </span>
             <span class="genre-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
@@ -459,15 +454,18 @@
         var count => L["Count.Other", Format.Number(count)],
     };
 
-    // « aucune série · 37 albums »: what tells two genres of close labels apart, in the order of the entity types
-    // (fonctionnel/presentation/ordre-des-types-de-fiche.md).
-    private string CandidateDetail(GenreAdminListItem candidate) =>
-        $"{Plural("Series", candidate.SeriesCount)} · {Plural("Albums", candidate.AlbumCount)}";
+    // What tells two genres of close labels apart: their works, as their rows present them.
+    private string CandidateDetail(GenreAdminListItem candidate) => WorksText(candidate) ?? L["Works.None"];
 
-    private string Plural(string name, int count) => count switch
+    // « 31 séries · 142 albums », in the order of the entity types (fonctionnel/presentation/ordre-des-types-de-fiche.md); a
+    // zero says nothing and is left out, none at all if both are (visuel/listes/liste-par-liste.md).
+    private string? WorksText(GenreAdminListItem row) =>
+        ListCounts.Join(Counted("Series", row.SeriesCount), Counted("Albums", row.AlbumCount));
+
+    private string? Counted(string name, int count) => count switch
     {
-        0 => L[$"{name}.Zero"],
-        1 => L[$"{name}.One"],
-        _ => L[$"{name}.Other", Format.Number(count)],
+        0 => null,
+        1 => L[$"{name}.One"].Value,
+        _ => L[$"{name}.Other", Format.Number(count)].Value,
     };
 }

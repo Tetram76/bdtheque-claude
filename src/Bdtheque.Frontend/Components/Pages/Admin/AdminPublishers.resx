@@ -34,10 +34,10 @@
     <value>Aucun éditeur</value>
   </data>
   <data name="Count.One" xml:space="preserve">
-    <value>1 éditeur</value>
+    <value>1 éditeur</value>
   </data>
   <data name="Count.Other" xml:space="preserve">
-    <value>{0} éditeurs</value>
+    <value>{0} éditeurs</value>
   </data>
   <data name="Order" xml:space="preserve">
     <value>Triés par nom</value>
@@ -48,11 +48,8 @@
   <data name="Column.Website" xml:space="preserve">
     <value>Site web</value>
   </data>
-  <data name="Column.Collections" xml:space="preserve">
-    <value>Collections</value>
-  </data>
-  <data name="Column.Editions" xml:space="preserve">
-    <value>Éditions</value>
+  <data name="Column.Catalogue" xml:space="preserve">
+    <value>Catalogue</value>
   </data>
   <data name="Column.Modified" xml:space="preserve">
     <value>Modifié</value>
@@ -64,25 +61,25 @@
     <value>Aucune collection</value>
   </data>
   <data name="Collections.One" xml:space="preserve">
-    <value>1 collection</value>
+    <value>1 collection</value>
   </data>
   <data name="Collections.Other" xml:space="preserve">
-    <value>{0} collections</value>
-  </data>
-  <data name="Editions.Zero" xml:space="preserve">
-    <value>aucune édition</value>
+    <value>{0} collections</value>
   </data>
   <data name="Editions.One" xml:space="preserve">
-    <value>1 édition</value>
+    <value>1 édition</value>
   </data>
   <data name="Editions.Other" xml:space="preserve">
-    <value>{0} éditions</value>
+    <value>{0} éditions</value>
   </data>
-  <data name="Collections.None" xml:space="preserve">
-    <value>Aucune collection</value>
+  <data name="Intents.One" xml:space="preserve">
+    <value>1 intention</value>
   </data>
-  <data name="Editions.None" xml:space="preserve">
-    <value>Aucune édition</value>
+  <data name="Intents.Other" xml:space="preserve">
+    <value>{0} intentions</value>
+  </data>
+  <data name="Catalogue.None" xml:space="preserve">
+    <value>Ni collection, ni édition, ni intention</value>
   </data>
   <data name="Edit" xml:space="preserve">
     <value>Modifier</value>

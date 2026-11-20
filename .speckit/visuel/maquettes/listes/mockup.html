@@ -525,13 +525,13 @@ const ENTITIES = {
     count: '3 éditeurs', countDetail: 'sous la lettre D', order: 'Triés par nom',
     page: 'Éditeurs 1 à 3 sur 3', pages: [],
     thumb: null, mainHead: 'Éditeur',
-    cols: [col('Site web', '170px', { hideMd: true }), col('Collections', '96px'), col('Éditions', '96px'), col('Modifié', '104px', { hideMd: true })],
+    cols: [col('Site web', '170px', { hideMd: true }), col('Catalogue', '270px'), col('Modifié', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit],
     rowMenu: menuOf(VIEW('Ouvrir le site web'), MERGE('Fusionner avec un autre éditeur…'), DELETE),
     rows: [
-      ['Dargaud', 'Poisson Pilote, Long courrier', [{ link: 'dargaud.com' }, '2', '688', '3 sept. 2026']],
-      ['Delcourt', 'Encrages, Mirages, Neopolis…', [{ link: 'editions-delcourt.fr' }, '9', '377', '14 mai 2026']],
-      ['Dupuis', 'Repérages, Aire libre, Expresso…', [{ link: 'dupuis.com' }, '5', '596', '9 oct. 2026']]
+      ['Dargaud', 'Poisson Pilote, Long courrier', [{ link: 'dargaud.com' }, '2 collections · 688 éditions · 3 intentions', '3 sept. 2026']],
+      ['Delcourt', 'Encrages, Mirages, Neopolis…', [{ link: 'editions-delcourt.fr' }, '9 collections · 377 éditions', '14 mai 2026']],
+      ['Dupuis', 'Repérages, Aire libre, Expresso…', [{ link: 'dupuis.com' }, '5 collections · 596 éditions · 1 intention', '9 oct. 2026']]
     ]
   },
   genres: {
@@ -541,12 +541,12 @@ const ENTITIES = {
     count: '2 genres', countDetail: 'sous la lettre A', order: 'Triés par libellé',
     page: 'Genres 1 à 2 sur 2', pages: [],
     thumb: null, mainHead: 'Genre',
-    cols: [col('Albums', '96px'), col('Séries', '96px'), col('Modifié', '104px', { hideMd: true })],
+    cols: [col('Œuvres', '200px'), col('Modifié', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit], inline: true,
     rowMenu: menuOf(VIEW('Voir ses œuvres dans la consultation'), MERGE('Fusionner avec un autre genre…'), DELETE),
     rows: [
-      ['Animalier', '', ['142', '31', '8 oct. 2026']],
-      ['Aventure', '', ['612', '118', '12 janv. 2026']]
+      ['Animalier', '', ['31 séries · 142 albums', '8 oct. 2026']],
+      ['Aventure', '', ['118 séries · 612 albums', '12 janv. 2026']]
     ]
   },
   univers: {
@@ -555,18 +555,18 @@ const ENTITIES = {
     count: '37 univers', countDetail: '', order: 'Chaque univers suivi de ses sous-univers, dont il compte les albums et séries',
     page: 'Univers 1 à 37 sur 37', pages: [],
     thumb: null, mainHead: 'Univers',
-    cols: [col('Albums', '96px'), col('Séries', '96px'), col('Sous-univers', '104px', { hideMd: true }), col('Modifié', '104px', { hideMd: true })],
+    cols: [col('Contenu', '250px'), col('Modifié', '104px', { hideMd: true })],
     primary: ['Modifier', ICON.edit], panel: true,
     rowMenu: menuOf(VIEW('Voir ses œuvres dans la consultation'), MERGE('Fusionner avec un autre univers…'), DELETE),
     rows: [
-      ['Univers Hergé', '', ['24', '3', '2', '2 févr. 2026'], { depth: 0 }],
-      ['Tintin', '', ['24', '1', '1', '2 févr. 2026'], { depth: 1 }],
-      ['Moulinsart', '', ['3', { text: '—', muted: true }, { text: '—', muted: true }, 'hier'], { depth: 2 }],
-      ['Univers Hugo Pratt', '', ['31', '4', '3', '12 janv. 2026'], { depth: 0 }],
-      ['Corto Maltese', '', ['18', '1', '1', '12 janv. 2026'], { depth: 1 }],
-      ['Les Antilles', '', ['4', { text: '—', muted: true }, { text: '—', muted: true }, '12 janv. 2026'], { depth: 2 }],
-      ['Les Scorpions du désert', '', ['5', '1', { text: '—', muted: true }, '3 mars 2026'], { depth: 1 }],
-      ['Les Cités obscures', '', ['14', '1', { text: '—', muted: true }, '30 juin 2026'], { depth: 0 }]
+      ['Univers Hergé', '', ['3 séries · 24 albums · 2 sous-univers', '2 févr. 2026'], { depth: 0 }],
+      ['Tintin', '', ['1 série · 24 albums · 1 sous-univers', '2 févr. 2026'], { depth: 1 }],
+      ['Moulinsart', '', ['3 albums', 'hier'], { depth: 2 }],
+      ['Univers Hugo Pratt', '', ['4 séries · 31 albums · 3 sous-univers', '12 janv. 2026'], { depth: 0 }],
+      ['Corto Maltese', '', ['1 série · 18 albums · 1 sous-univers', '12 janv. 2026'], { depth: 1 }],
+      ['Les Antilles', '', ['4 albums', '12 janv. 2026'], { depth: 2 }],
+      ['Les Scorpions du désert', '', ['1 série · 5 albums', '3 mars 2026'], { depth: 1 }],
+      ['Les Cités obscures', '', ['1 série · 14 albums', '30 juin 2026'], { depth: 0 }]
     ]
   }
 };

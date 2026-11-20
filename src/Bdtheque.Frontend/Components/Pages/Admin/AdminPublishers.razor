@@ -65,8 +65,7 @@
                 <div class="publisher-row publisher-row-head" role="row">
                     <span class="publisher-main" role="columnheader">@L["Column.Publisher"]</span>
                     <span class="publisher-website" role="columnheader">@L["Column.Website"]</span>
-                    <span class="publisher-collections" role="columnheader">@L["Column.Collections"]</span>
-                    <span class="publisher-editions" role="columnheader">@L["Column.Editions"]</span>
+                    <span class="publisher-catalogue" role="columnheader">@L["Column.Catalogue"]</span>
                     <span class="publisher-modified" role="columnheader">@L["Column.Modified"]</span>
                     <span class="publisher-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
                 </div>
@@ -92,13 +91,9 @@
                                     <NotSet Brief="true" />
                                 }
                             </span>
-                            @* On two lines, a number loses its column header: it carries the name of its column, and a zero is
-                               withdrawn. *@
-                            <span class="publisher-collections" role="cell" data-zero="@(row.Collections.Count == 0)">
-                                <ListCount Value="row.Collections.Count" None="@L["Collections.None"]"><span class="publisher-caption">@L["Column.Collections"]</span> @Format.Number(row.Collections.Count)</ListCount>
-                            </span>
-                            <span class="publisher-editions" role="cell" data-zero="@(row.EditionCount == 0)">
-                                <ListCount Value="row.EditionCount" None="@L["Editions.None"]"><span class="publisher-caption">@L["Column.Editions"]</span> @Format.Number(row.EditionCount)</ListCount>
+                            @{ var counted = row.Collections.Count + row.EditionCount + row.PurchaseIntentCount; }
+                            <span class="publisher-catalogue" role="cell" data-zero="@(counted == 0)">
+                                <ListCount Value="counted" None="@L["Catalogue.None"]">@CatalogueText(row)</ListCount>
                             </span>
                         </span>
                         <span class="publisher-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>
@@ -268,15 +263,19 @@
         var count => L["Count.Other", Format.Number(count)],
     };
 
-    // « 2 collections · 688 éditions »: what tells two publishers of close names apart.
-    private string CandidateDetail(PublisherAdminListItem candidate) =>
-        $"{Plural("Collections", candidate.Collections.Count)} · {Plural("Editions", candidate.EditionCount)}";
+    // What tells two publishers of close names apart: their catalogue, as their rows present it.
+    private string CandidateDetail(PublisherAdminListItem candidate) => CatalogueText(candidate) ?? L["Catalogue.None"];
 
-    private string Plural(string name, int count) => count switch
+    // « 2 collections · 688 éditions · 3 intentions », in the order of the entity types, an intent never one of the editions
+    // (visuel/listes/liste-par-liste.md); a zero says nothing and is left out, none at all if every number is.
+    private string? CatalogueText(PublisherAdminListItem row) => ListCounts.Join(
+        Counted("Collections", row.Collections.Count), Counted("Editions", row.EditionCount), Counted("Intents", row.PurchaseIntentCount));
+
+    private string? Counted(string name, int count) => count switch
     {
-        0 => L[$"{name}.Zero"],
-        1 => L[$"{name}.One"],
-        _ => L[$"{name}.Other", Format.Number(count)],
+        0 => null,
+        1 => L[$"{name}.One"].Value,
+        _ => L[$"{name}.Other", Format.Number(count)].Value,
     };
 
     // The website as read at a glance: its host, without its scheme nor « www. », and its path if it has one
