@@ -76,51 +76,40 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_InRetreatUnderTheirParent_WithTheirNumbers()
+    public void Rows_InRetreatUnderTheirParent_WithTheirContent_InASingleColumn()
     {
-        var rows = Open("").FindAll(".universe-row:not(.universe-row-head)").Select(row => (
+        var page = Open("");
+        var rows = page.FindAll(".universe-row:not(.universe-row-head)").Select(row => (
             Text(row.QuerySelector(".row-entry")!),
             row.GetAttribute("data-depth"),
-            Text(row.QuerySelector(".universe-albums")!),
-            Text(row.QuerySelector(".universe-series")!),
-            Text(row.QuerySelector(".universe-subuniverses")!)));
+            Text(row.QuerySelector(".universe-content")!)));
 
+        // Each number followed by what it counts, the series before the albums, then the sub-universes
+        // (fonctionnel/presentation/ordre-des-types-de-fiche.md); a zero is left out beside the others
+        // (visuel/listes/liste-par-liste.md).
         Assert.Equal(
             [
-                ("Univers Hugo Pratt", "0", "Albums 31", "Séries 4", "Sous-univers 3"),
-                ("Corto Maltese", "1", "Albums 18", "Séries 1", "Sous-univers 1"),
-                // A zero is not shown, but the dash of a missing data, said to a screen reader.
-                ("Les Antilles", "2", "Albums 4", "—Aucune série", "—Aucun sous-univers"),
-                ("Les Cités obscures", "0", "Albums 14", "Séries 1", "—Aucun sous-univers"),
+                ("Univers Hugo Pratt", "0", "4 séries · 31 albums · 3 sous-univers"),
+                ("Corto Maltese", "1", "1 série · 18 albums · 1 sous-univers"),
+                ("Les Antilles", "2", "4 albums"),
+                ("Les Cités obscures", "0", "1 série · 14 albums"),
             ],
             rows);
+        Assert.Equal("Contenu", Text(page.Find(".universe-row-head .universe-content")));
     }
 
     [Fact]
-    public void Rows_MarkAZero_ByThePresenceOfTheAttribute()
+    public void Rows_OfAnEmptyUniverse_TheDashOfAMissingData_MarkedAsAZero()
     {
         // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on: on
         // two lines, a zero is withdrawn (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul).
-        var rows = Open("").FindAll(".universe-row:not(.universe-row-head)").Select(row => (
-            row.QuerySelector(".universe-series")!.HasAttribute("data-zero"),
-            row.QuerySelector(".universe-subuniverses")!.HasAttribute("data-zero")));
+        var empty = Row(new(Guid.Parse("01900000-0000-7000-8000-000000000005"), "Les Terres creuses", null, null), [], 0, 0, 0, 45);
+        Answer([Cities, empty], totalCount: 2);
 
-        Assert.Equal([(false, false), (false, false), (true, true), (false, true)], rows);
-    }
+        var rows = Open("").FindAll(".universe-row:not(.universe-row-head) .universe-content")
+            .Select(cell => (Text(cell), cell.HasAttribute("data-zero")));
 
-    [Fact]
-    public void Columns_TheSeriesBeforeTheAlbums_ThenTheSubUniverses()
-    {
-        // fonctionnel/presentation/ordre-des-types-de-fiche.md: in the head as in each row.
-        string[] counts = ["universe-series", "universe-albums", "universe-subuniverses"];
-        var page = Open("");
-
-        Assert.Equal(
-            ["Séries", "Albums", "Sous-univers"],
-            page.FindAll(".universe-row-head [role=columnheader]").Select(Text).Where(name => name is "Séries" or "Albums" or "Sous-univers"));
-        Assert.Equal(
-            counts,
-            page.Find(".universe-row:not(.universe-row-head)").QuerySelectorAll("[role=cell]").Select(cell => cell.ClassName).Where(counts.Contains));
+        Assert.Equal([("1 série · 14 albums", false), ("—Ni série, ni album, ni sous-univers", true)], rows);
     }
 
     [Fact]
