@@ -14971,6 +14971,7 @@
           "website",
           "collections",
           "editionCount",
+          "purchaseIntentCount",
           "modifiedAt",
           "version"
         ],
@@ -15004,6 +15005,15 @@
               "string"
             ],
             "description": "Its editions in the collection, an edition targeted by a purchase intent being none\n(fonctionnel/regles-metier/intention-d-acquisition.md).",
+            "format": "int32"
+          },
+          "purchaseIntentCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The purchase intents targeting one of its editions, counted apart from them.",
             "format": "int32"
           },
           "modifiedAt": {
