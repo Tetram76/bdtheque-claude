@@ -25,6 +25,8 @@
   const kindOf = (text) => (/\?\s*$/.test(text) ? 'question' : /!\s*$/.test(text) ? 'exclamation' : 'statement');
 
   function skin() {
+    // The observer also sees the head being parsed, before the body exists.
+    if (!document.body) return;
     document.body.dataset.bubbleMode = 'random';
     document.body.dataset.frameMode = 'sketch';
     document.querySelectorAll('section').forEach((section, n) => {
