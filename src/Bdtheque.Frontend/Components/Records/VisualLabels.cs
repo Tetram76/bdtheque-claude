@@ -9,7 +9,8 @@ namespace Bdtheque.Frontend.Components.Records;
 /// <summary>
 /// The names of a visual of an edition, written once for every page that names one: its type, a plate alone being numbered, by
 /// its rank among the plates of the edition, in full (the viewer, the thumbnails of the entry form) or short (the thumbnails of the
-/// album record, too small for the full name, and those of the entry form where a theme finds that the full name does not hold;
+/// album record, too small for the full name, and those of the entry form where a theme finds that the full name does not hold,
+/// each in its own words (« 4e », « 4e de couv. »);
 /// visuel/fiche-album/contenu.md, visuel/saisie-edition/contenu.md, #469). The texts are those of the component that asks (keys
 /// <c>Plate</c> and <c>Short.{type}</c>).
 /// </summary>

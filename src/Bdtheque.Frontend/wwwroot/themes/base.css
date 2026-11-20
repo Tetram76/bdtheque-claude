@@ -321,7 +321,7 @@
 
     /* The mark of each type of visual on the thumbnails of the entry form of an edition (visuel/saisie-edition/contenu.md,
        #469): its full name where it holds on one line in the narrowest thumbnail, in the font of the theme, its short mark
-       otherwise; type by type, each a pair of displays, the full name's and the short mark's. « 4e de couverture » holds in
+       otherwise (« 4e de couv. »); type by type, each a pair of displays, the full name's and the short mark's. « 4e de couverture » holds in
        none of the offered themes. */
     --edition-visual-mark-cover-full: inline;
     --edition-visual-mark-cover-short: none;

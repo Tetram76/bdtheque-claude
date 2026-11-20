@@ -346,7 +346,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         string[][] types =
         [
             ["Cover", "Couverture", "Couv."], ["Dedication", "Dédicace", "Déd."], ["Endpaper", "Page de garde", "Garde"],
-            ["Plate", "Planche 999", "999"], ["BackCover", "4e de couverture", "4e"],
+            ["Plate", "Planche 999", "999"], ["BackCover", "4e de couverture", "4e de couv."],
         ];
         var wrong = await visuals.Locator(".edition-visual").First.EvaluateAsync<string[]>("""
             (thumbnail, types) => {

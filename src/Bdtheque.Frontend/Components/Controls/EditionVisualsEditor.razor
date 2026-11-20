@@ -413,7 +413,8 @@
     private string LabelOf(VisualItem visual) =>
         VisualLabels.TypeOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), Values, L);
 
-    // The short mark of the album record (« Couv. », « 4e »), where the full name does not hold in the theme.
+    // The short mark of the entry form (« Couv. », « 4e de couv. », less short than the « 4e » of the album record), where the full
+    // name does not hold in the theme.
     private string ShortOf(VisualItem visual) =>
         VisualLabels.ShortOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), L);
 
