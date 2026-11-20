@@ -195,7 +195,8 @@
     pointer-events: none;
 }
 
-/* The type, on a dark band at the foot of the thumbnail, readable on any image. */
+/* The type, on a dark band at the foot of the thumbnail, readable on any image: its full name on one line, which the narrowest
+   thumbnail holds in every theme (visuel/saisie-edition/contenu.md, #469). */
 .edition-visual-mark {
     position: absolute;
     inset-block-end: var(--space-xs);
@@ -206,6 +207,7 @@
     color: var(--color-text-on-inverse);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
+    white-space: nowrap;
 }
 
 .edition-visual-actions {

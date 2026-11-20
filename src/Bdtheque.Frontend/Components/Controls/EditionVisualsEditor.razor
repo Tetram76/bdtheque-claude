@@ -3,6 +3,7 @@
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Components.Errors
+@using Bdtheque.Frontend.Components.Records
 @using Bdtheque.Frontend.Entries
 @implements IDisposable
 @inject IStringLocalizer<EditionVisualsEditor> L
@@ -95,7 +96,7 @@
                     @ondragstart="() => _dragged = visual" @ondragend="() => _dragged = null"
                     @ondragover:preventDefault="true" @ondrop="() => DropAsync(visual)">
                     <Cover VisualId="visual.Id" Source="@PendingDisplayOf(visual)" Alt="@label" />
-                    <span class="edition-visual-mark" aria-hidden="true">@ShortOf(visual)</span>
+                    <span class="edition-visual-mark" aria-hidden="true">@label</span>
                     <span class="edition-visual-actions">
                         <ActionsMenu Id="@($"{Id}-visual-{visual.Key:N}")" Label="@L["Actions", label]">
                             <span class="edition-visual-menu-heading">@L["Menu.Type"]</span>
@@ -407,16 +408,10 @@
     private static string OriginalOf(VisualItem visual) =>
         visual.PendingId is { } pending ? PendingVisualMediaRoutes.Original(pending) : VisualMediaRoutes.Original(visual.Id!.Value);
 
-    // « Planche 3 », the rank of a plate counted among the plates: what each visual is, in full.
+    // What each visual is, in full, as the album record names it in its viewer (« Planche 3 », « 4e de couverture »): also the
+    // mark of its thumbnail, whose room holds the full name (visuel/saisie-edition/contenu.md, #469).
     private string LabelOf(VisualItem visual) =>
-        visual.Type == VisualType.Plate ? L["Full.Plate", PlateNumber(visual)] : Values.Of(visual.Type);
-
-    // « Pl. 3 », « Couv. »: the type marked on the thumbnail.
-    private string ShortOf(VisualItem visual) =>
-        visual.Type == VisualType.Plate ? L["Short.Plate", PlateNumber(visual)] : L[$"Short.{visual.Type}"];
-
-    private int PlateNumber(VisualItem visual) =>
-        Visuals.TakeWhile(v => v != visual).Count(v => v.Type == VisualType.Plate) + 1;
+        VisualLabels.TypeOf([.. Visuals.Select(v => v.Type)], Visuals.IndexOf(visual), Values, L);
 
     // In mebibytes, as the operating systems give the size of a file (« 30 Mio »).
     private static string MaxSize(long bytes) => (bytes / (1024d * 1024)).ToString("0.#", CultureInfo.CurrentCulture);

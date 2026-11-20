@@ -151,8 +151,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     {
         var page = OpenOwned();
 
-        Assert.Equal(["Administration", "Albums", "Les Bijoux de la Castafiore (Tintin - T. 21)", "Casterman [2007]"],
+        // The edition by its full label, ISBN included, as everywhere (visuel/saisie-edition/contenu.md, #470): its ISBN in a
+        // block that a line never breaks.
+        Assert.Equal(["Administration", "Albums", "Les Bijoux de la Castafiore (Tintin - T. 21)", "Casterman [2007] - ISBN\u00a0978-2-203-00120-8"],
             page.FindAll(".breadcrumb li").Select(item => item.TextContent.Trim()));
+        Assert.Equal("ISBN\u00a0978-2-203-00120-8", page.Find(".breadcrumb [aria-current] .label-isbn").TextContent);
         Assert.Equal("Modifier l'édition", page.Find("h1").TextContent.Trim());
         Assert.Equal("Casterman [2007] - ISBN 978-2-203-00120-8", page.Find(".entry-form-subject").TextContent.Trim());
         // The album leads to the page of its editions from the breadcrumb, and to its own form from the heading; neither link
@@ -734,10 +737,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Visuals_ABlockOfTheForm_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsType()
+    public void Visuals_ABlockOfTheForm_InASingleGrid_InTheOrderOfTheTypes_EachMarkedWithItsFullType()
     {
         // visuel/saisie-edition/contenu.md, Les visuels: the last block of the form, saved with it, which the block says, then the
-        // drop zone, the number of visuals and their grid, a plate counted among the plates.
+        // drop zone, the number of visuals and their grid, each marked with the full name of its type, a plate numbered among the
+        // plates (#469).
         var page = OpenOwned();
         var block = page.Find("form .edition-visuals");
 
@@ -746,7 +750,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("JPEG, PNG, WebP ou GIF, 30 Mio au plus.", block.QuerySelector(".edition-visuals-formats")!.TextContent);
         Assert.Equal("3 visuels", block.QuerySelector(".edition-visuals-count")!.TextContent);
         var visuals = block.QuerySelectorAll(".edition-visual");
-        Assert.Equal(["Couv.", "Pl. 1", "Pl. 2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark")!.TextContent));
+        Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector(".edition-visual-mark")!.TextContent));
         Assert.Equal(["Couverture", "Planche 1", "Planche 2"], visuals.Select(v => v.QuerySelector("img")!.GetAttribute("alt")));
         Assert.Equal(VisualMediaRoutes.Display(CoverId), visuals[0].QuerySelector("img")!.GetAttribute("src"));
         // Its menu: the type, the current one pressed, the original beside the application, the deletion.
@@ -775,7 +779,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(2048, form.GetProperty(UploadVisualFields.File).GetProperty("length").GetInt64());
         // After the cover, before the plates; shown from the waiting area; an unsaved change of the form.
         var added = page.FindAll(".edition-visual")[1];
-        Assert.Equal(("Déd.", "/admin/visuals/pending/" + AddedId + "/display"),
+        Assert.Equal(("Dédicace", "/admin/visuals/pending/" + AddedId + "/display"),
             (added.QuerySelector(".edition-visual-mark")!.TextContent, added.QuerySelector("img")!.GetAttribute("src")));
         // Its original as uploaded, from the waiting area too, before the form is saved.
         // Opened beside the form, but in the application: without the mark of a site outside it.
@@ -942,7 +946,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         await page.ClickAsync(() => page.FindAll(".edition-visual")[0].QuerySelectorAll(".actions-menu-panel button").First(item => item.TextContent.Trim() == "Planche"));
 
         Assert.Empty(_api.Written);
-        Assert.Equal(["Pl. 1", "Pl. 2", "Pl. 3"], page.FindAll(".edition-visual-mark").Select(mark => mark.TextContent));
+        Assert.Equal(["Planche 1", "Planche 2", "Planche 3"], page.FindAll(".edition-visual-mark").Select(mark => mark.TextContent));
         Assert.Contains("admin.edition-form.visual-type-changed", _audience.Functions);
         await page.SubmitAsync("form");
         Assert.Single(_api.Written);

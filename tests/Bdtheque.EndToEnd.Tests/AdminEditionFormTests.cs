@@ -255,7 +255,8 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await Assertions.Expect(visuals.Locator(".edition-visuals-count")).ToHaveTextAsync("3 visuels");
         await Assertions.Expect(visuals.Locator(".edition-visuals-upload[data-refused] .edition-visuals-upload-reason"))
             .ToContainTextAsync("n'est pas une image lisible");
-        await Assertions.Expect(marks).ToHaveTextAsync(["Pl. 1", "Pl. 2", "Pl. 3"]);
+        await Assertions.Expect(marks).ToHaveTextAsync(["Planche 1", "Planche 2", "Planche 3"]);
+        await AssertEachTypeHoldsOnOneLineAsync(visuals);
         // Nothing saved yet: the form says so.
         Assert.Empty((await GetVisualsAsync(album.Id, edition.Id)).Visuals);
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Modifications non enregistrées");
@@ -263,7 +264,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         // The first plate becomes the cover, which comes first; the last plate dragged onto the first takes its place.
         await visuals.GetByRole(AriaRole.Button, new() { Name = "Actions sur Planche 1" }).ClickAsync();
         await page.Locator(".actions-menu-panel:popover-open").GetByRole(AriaRole.Button, new() { Name = "Couverture", Exact = true }).ClickAsync();
-        await Assertions.Expect(marks).ToHaveTextAsync(["Couv.", "Pl. 1", "Pl. 2"]);
+        await Assertions.Expect(marks).ToHaveTextAsync(["Couverture", "Planche 1", "Planche 2"]);
         var third = await visuals.Locator(".edition-visual img").Nth(2).GetAttributeAsync("src");
         await visuals.Locator(".edition-visual").Nth(2).DragToAsync(visuals.Locator(".edition-visual").Nth(1));
         await Assertions.Expect(visuals.Locator(".edition-visual img").Nth(1)).ToHaveAttributeAsync("src", third!);
@@ -335,6 +336,30 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
     }
 
     // Playwright drops no file of the system; the protocol of Chromium does, as a user would (Input.dispatchDragEvent).
+    // The full name of each type, a plate's with a number of three digits, holds on one line in the narrowest thumbnail of the
+    // grid, 7rem, in the font of the theme (visuel/saisie-edition/contenu.md, #469): measured on a copy of a mark, which keeps
+    // its styles, on one line, so that a thumbnail wider than the narrowest one does not hide a name too long.
+    private static async Task AssertEachTypeHoldsOnOneLineAsync(ILocator visuals)
+    {
+        string[] names = ["Couverture", "Dédicace", "Page de garde", "Planche 999", "4e de couverture"];
+        var overflowing = await visuals.Locator(".edition-visual").First.EvaluateAsync<string[]>("""
+            (thumbnail, names) => {
+                const narrowest = 7 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+                const copy = thumbnail.querySelector('.edition-visual-mark').cloneNode();
+                thumbnail.append(copy);
+                try {
+                    return names.filter(name => {
+                        copy.textContent = name;
+                        return copy.offsetWidth + 2 * copy.offsetLeft > narrowest;
+                    });
+                } finally {
+                    copy.remove();
+                }
+            }
+            """, names);
+        Assert.Empty(overflowing);
+    }
+
     private static async Task DropFileAsync(IPage page, string file, float x, float y)
     {
         var session = await page.Context.NewCDPSessionAsync(page);
