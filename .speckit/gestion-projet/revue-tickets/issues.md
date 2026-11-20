@@ -1,9 +1,9 @@
 ---
 type: Gouvernance
 title: 'Issues'
-description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), étiquette `agent` des tickets créés à l''initiative d''un agent, description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; décision de créer un ticket à l''initiative d''un agent (seulement si la session ne peut pas corriger elle-même), puis recherche d''un ticket existant.'
+description: 'Usage des tickets GitHub : chantiers du plan, bugs et fonctionnalités hors plan, type de tout ticket (Bug, Feature, Task), étiquettes de sujet (`documentation`, `ci`, `tests`, `ui`), étiquette `agent` des tickets créés à l''initiative d''un agent, description de chaque étiquette sur GitHub, tickets de suivi des harnais, leurs étiquettes (celle du harnais, `harness`) et leur description, état de ce qui reste à corriger et non historique ; décision de créer un ticket à l''initiative d''un agent (deux origines principales du besoin, demande qui a évolué ou code d''origine mal écrit, dont le cadre des prochaines sessions est amélioré, problème établi dans le code, ticket seulement si la session ne peut pas corriger elle-même), puis recherche d''un ticket existant.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T08:53:52Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T09:10:42Z }
 ---
 
 # Issues
@@ -96,6 +96,11 @@ Chaque harnais tient **un** ticket de suivi, ouvert tant qu'il a quelque chose �
 
 L'objectif du projet n'est pas de créer des tickets, mais de produire une application (exigence de l'utilisateur). Avant toute création d'un ticket à l'initiative d'un agent sur un problème ou une amélioration qu'il relève (problème relevé en cours de chantier, retour de revue, suite d'un harnais, revue de l'existant…), l'agent décide d'abord s'il faut un ticket, et seulement ensuite cherche s'il en existe déjà un (§ Recherche d'un ticket existant) :
 
+- **Raison d'être du ticket, établie en premier** (exigence de l'utilisateur) : avant de décider d'un ticket, l'agent se demande pourquoi il en faudrait un. Le besoin d'un ticket a deux origines principales :
+  - **la demande a évolué** ;
+  - **le code d'origine n'a pas été écrit correctement dès le départ** : c'est alors que le cadre donné à la session responsable de ce code n'était pas bon. Il faut donc que les prochaines sessions aient un cadre qui corresponde mieux au travail qu'on leur demande : l'agent l'améliore, selon [Qui décide du contenu](../gouvernance/gouvernance-documentaire.md#qui-décide-du-contenu).
+
+  L'agent établit aussi dans le code que le problème existe réellement, au lieu de s'en tenir au constat qu'on lui rapporte : un problème que le code gère déjà n'appelle ni correction ni ticket (ex. #565, qui annonçait une panne que le code gérait déjà, fermé sans réalisation).
 - **La session qui relève un problème le corrige elle-même**, dans sa Pull Request, même un peu en dehors de son objectif, dès que la correction est à sa portée et reste raisonnable : cette Pull Request porte alors la correction, dite dans sa description.
 - **Un ticket seulement quand elle ne peut vraiment pas corriger** : correction trop grosse pour sa Pull Request, décision qui revient à l'utilisateur ([Prise de décision](../gouvernance/prise-de-decision.md)), ou dépendance non remplie (un autre chantier, une version, un déploiement à attendre). Un ticket alors nécessaire est créé sans hésiter, et porte l'analyse de la cause ([Qualité du code](../gouvernance/qualite-du-code.md), la cause de fond).
 - **Un constat sans effet réel**, sur l'application ou sur le travail, n'est ni corrigé ni mis en ticket : il est dit dans la Pull Request, ou consigné dans le concept qu'il concerne quand il éclaire un choix (ex. #569, devenu une remarque de [Navigation par initiale : mise en œuvre](../../choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md)).
