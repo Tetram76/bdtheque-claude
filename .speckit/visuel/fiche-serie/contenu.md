@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''une série : pile de couvertures, avancement, auteurs, albums dans l''ordre de la série.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T15:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T11:00:00Z }
 ---
 
 # Contenu
@@ -14,7 +14,7 @@ De haut en bas :
   - la mention de sa nature, **« Série »**, alignée sur le bord gauche de la pile de couvertures, juste au-dessus d'elle, comme celle de la fiche d'un album ([Contenu](../fiche-album/contenu.md)) : seule sur sa ligne, comme un titre, l'identité de la série commençant sous elle, à la hauteur de la pile ; sur smartphone, la mention, la pile, puis l'identité ;
   - une **pile de trois couvertures**, décorative : celles des premiers tomes de la série ; la pile garde toujours trois cartes, pour qu'une série ne se confonde jamais avec un album, une place au-delà des tomes de la série étant une carte générique ;
   - le titre, puis des étiquettes : le **statut**, le **nombre de tomes prévus** (nombre de tomes théorique) et la mention **Complète** ou **À compléter** ;
-  - l'**avancement de la collection** : « N albums sur M dans la collection », avec une barre de progression ;
+  - l'**avancement de la collection** : « N albums sur M dans la collection », un nombre nul compris (« 0 album sur 3 dans la collection », [Convivialité et efficacité](../charte-graphique/convivialite-et-efficacite.md)), avec une barre de progression ;
   - l'**éditeur** et la **collection** de la série (éditeur et collection template) ; l'éditeur mène à son site web lorsqu'il est connu, signalé comme un lien qui fait sortir de l'application ([Liens qui font sortir de l'application](../charte-graphique/liens-qui-font-sortir-de-l-application.md)), la collection n'est pas un lien ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)) ;
   - les **auteurs de la série** (contributions template), présentés comme les contributions d'un album ([Contenu](../fiche-album/contenu.md)) : une ligne par rôle crédité, repliée au-delà de ce que tient la ligne ;
   - les **genres** et les **univers**, chaque univers avec la chaîne de ses ancêtres, comme sur la fiche d'un album.

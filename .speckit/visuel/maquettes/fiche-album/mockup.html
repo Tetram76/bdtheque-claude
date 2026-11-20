@@ -19,6 +19,10 @@ summary{cursor:pointer}
 [data-bubble][data-shape=star]{padding:30px 44px !important;margin:-18px calc(5% + 16px) 46px !important}
 /* The mention of the kind of a record is alone on its line, over the visual: beside the visual, the identity starts under it. */
 @media (min-width: 780px){.kind-room{padding-top:28px}}
+/* « Et le reste de la série ? »: always whole in columns; on a smartphone, one column, the albums far from the one shown are
+   folded behind « et N autres » until unfolded (visuel/fiche-album/contenu.md). */
+.rest-toggle{display:none !important}
+@media (max-width: 779px){.rest-toggle{display:inline-flex !important}.rest-list[data-folded=true] .rest-far{display:none !important}}
 </style>
 <script src="../shared/mockup.js"></script>
 <script src="../shared/couverture-theme.js"></script>
@@ -288,18 +292,15 @@ summary{cursor:pointer}
 
       <section aria-labelledby="f-serie" data-frame="{{frame}}" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{bg.serie}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.serie}}</span>
-        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 12px 16px">
-          <h2 id="f-serie" data-bubble="{{bubble}}" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Et le reste de la série ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
-          <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Voir la fiche de la série</a>
-        </div>
-        <details open="{{true}}"style="border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
-          <summary style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 40px; padding: 0 14px; font-weight: 700">
-            <span style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">Corto Maltese</span>
-            <span style="font-size: 13px; color: {{t.muted}}">15 albums, dont 13 dans la collection</span>
-          </summary>
-          <ol style="margin: 0; padding: 0 14px 8px; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 0 28px">
+        <h2 id="f-serie" data-bubble="{{bubble}}" style="position: relative; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Et le reste de la série ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+        <div style="border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
+          <p style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-height: 40px; margin: 0; padding: 0 14px; font-weight: 700">
+            <a href="#" style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}; color: {{t.text}}; text-decoration: underline; text-underline-offset: 3px">Corto Maltese</a>
+            <span style="font-size: 13px; font-weight: 400; color: {{t.muted}}">{{seriesCount}}</span>
+          </p>
+          <ol class="rest-list" data-folded="{{restFolded}}" style="margin: 0; padding: 0 14px 8px; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 0 28px">
             <sc-for list="{{seriesAlbums}}" as="s" hint-placeholder-count="15">
-              <li style="display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; border-bottom: {{t.rowB}}">
+              <li class="{{s.cls}}" style="display: flex; align-items: center; gap: 10px; min-height: 32px; font-size: 14px; border-bottom: {{t.rowB}}">
                 <span style="flex: none; min-width: 44px; font-size: 13px; font-weight: 700; color: {{t.muted}}; font-variant-numeric: tabular-nums">{{s.tome}}</span>
                 <sc-if value="{{s.current}}" hint-placeholder-val="{{false}}"><span aria-current="page" style="flex: 1 1 auto; min-width: 0; padding: 2px 10px; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-weight: 700">{{s.title}}</span></sc-if>
                 <sc-if value="{{s.other}}" hint-placeholder-val="{{true}}"><a href="#" style="flex: 1 1 auto; min-width: 0; color: {{t.text}}">{{s.title}}</a></sc-if>
@@ -307,7 +308,8 @@ summary{cursor:pointer}
               </li>
             </sc-for>
           </ol>
-        </details>
+          <button type="button" class="rest-toggle" aria-expanded="{{restExpanded}}" onClick="{{restToggle}}" style="min-height: 26px; margin: 0 6px 8px; padding: 0 8px; border: 0; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer">{{restLabel}}</button>
+        </div>
       </section>
     </main>
   </div>
@@ -590,6 +592,9 @@ const SERIES = [
 ];
 // Tomes 13 and 15 are catalogued without being owned: the series list still shows them.
 const NOT_OWNED = [12, 14];
+// The album shown in the series, and the albums kept on either side of it when the list is folded on a smartphone.
+const SHOWN = 4;
+const NEIGHBOURS = 3;
 
 class View extends Mockup {
   renderVals() {
@@ -609,6 +614,8 @@ class View extends Mockup {
     const people = CREDITS[this.props.contributions] ?? CREDITS.nombreuses;
     const distinct = new Set(ROLES.flatMap(([role]) => people[role])).size;
     const unfolded = this.state?.unfolded ?? {};
+    const restOpen = Boolean(this.state?.restOpen);
+    const farCount = SERIES.filter((_, i) => Math.abs(i - SHOWN) > NEIGHBOURS).length;
     // Three page layouts alternate, so that consecutive plates do not look identical.
     const plate = visKind === 'planche' ? vi % 3 : -1;
     const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
@@ -708,11 +715,16 @@ class View extends Mockup {
         { title: "L'exemplaire", rows: ed.exemplaire.filter(([, v]) => v).map(row) }
       ],
       cur: { meta: ed.meta },
+      seriesCount: (SERIES.length - NOT_OWNED.length) + ' albums sur ' + SERIES.length + ' dans la collection',
+      restFolded: restOpen ? 'false' : 'true',
+      restExpanded: restOpen ? 'true' : 'false',
+      restLabel: restOpen ? 'Réduire' : 'et ' + farCount + (farCount > 1 ? ' autres' : ' autre'),
+      restToggle: () => this.setState({ restOpen: !restOpen }),
       seriesAlbums: SERIES.map((title, i) => {
         const owned = !NOT_OWNED.includes(i);
         return {
-          tome: 'T. ' + (i + 1), title, current: i === 4, other: i !== 4,
-          own: owned ? 'Possédé' : 'Hors collection', ownColor: owned ? t.muted : t.link
+          tome: 'T. ' + (i + 1), title, current: i === SHOWN, other: i !== SHOWN, cls: Math.abs(i - SHOWN) > NEIGHBOURS ? 'rest-far' : '',
+          own: owned ? 'Possédé' : 'Non possédé', ownColor: owned ? t.muted : t.link
         };
       })
     };

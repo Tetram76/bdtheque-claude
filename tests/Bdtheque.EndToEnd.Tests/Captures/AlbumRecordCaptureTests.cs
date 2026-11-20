@@ -9,12 +9,13 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// whose albums and dates are fixed: an album with its editions, its visuals, an intent on another edition, a collective drawing
 /// and the rest of its series, as it opens, then with the viewer open on a plate, then, on a smartphone, whose line does not hold
 /// every drawer, the authors of a role unfolded; an album targeted by a purchase intent, and one out of the collection, each
-/// marked as such, without edition.
+/// marked as such, without edition; on a smartphone, the first album of a series of seven, the albums far from it folded in
+/// the rest of its series.
 /// </summary>
 [Collection(RecordsApplication.Name)]
 public sealed class AlbumRecordCaptureTests(RecordsApplication application) : BrowserTest<RecordsApplication>(application)
 {
-    private static readonly string[] States = ["album", "viewer", "unfolded", "intent", "out"];
+    private static readonly string[] States = ["album", "viewer", "unfolded", "intent", "out", "series"];
 
     public static TheoryData<string, string, string> Captures
     {
@@ -23,7 +24,7 @@ public sealed class AlbumRecordCaptureTests(RecordsApplication application) : Br
             var captures = new TheoryData<string, string, string>();
             foreach (var theme in TestThemes.Covered)
             foreach (var state in States)
-            foreach (var viewport in ScreenCaptureTests.Viewports.Keys.Where(viewport => state != "unfolded" || viewport == "smartphone"))
+            foreach (var viewport in ScreenCaptureTests.Viewports.Keys.Where(viewport => state is not ("unfolded" or "series") || viewport == "smartphone"))
                 captures.Add(theme.Key, state, viewport);
             return captures;
         }
@@ -38,6 +39,7 @@ public sealed class AlbumRecordCaptureTests(RecordsApplication application) : Br
         {
             "intent" => AppPaths.Album(Application.IntendedAlbumId),
             "out" => AppPaths.Album(Application.CataloguedAlbumId),
+            "series" => AppPaths.Album(Application.KirkFirstAlbumId),
             // The viewer open on a plate, above the record.
             "viewer" => AlbumRecordQuery.ForVisual(Application.FirstEditionId, 2).Href(Application.AlbumId),
             _ => AppPaths.Album(Application.AlbumId),
