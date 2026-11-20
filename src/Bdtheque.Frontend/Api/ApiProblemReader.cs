@@ -42,7 +42,7 @@ internal static class ApiProblemReader
                 ? new ApiProblem(category, status, ruleCode, impact)
                 {
                     Fields = FieldsOf(root, ProblemTypes.FieldsExtension), RelatedFields = FieldsOf(root, ProblemTypes.RelatedFieldsExtension),
-                    Record = Guid.TryParse(StringOf(root, ProblemTypes.RecordExtension), out var record) ? record : null,
+                    Record = RecordOf(root),
                 }
                 : new ApiProblem(category, status, ruleCode, impact);
         }
@@ -57,6 +57,10 @@ internal static class ApiProblemReader
         root.TryGetProperty(extension, out var fields) && fields.ValueKind == JsonValueKind.Array
             ? [.. fields.EnumerateArray().Where(field => field.ValueKind == JsonValueKind.String).Select(field => field.GetString()!)]
             : [];
+
+    // The record in cause the problem names, if as expected: an identifier.
+    private static Guid? RecordOf(JsonElement root) =>
+        Guid.TryParse(StringOf(root, ProblemTypes.RecordExtension), out var record) ? record : null;
 
     private static string? StringOf(JsonElement root, string property) =>
         root.ValueKind == JsonValueKind.Object && root.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
