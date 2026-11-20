@@ -609,14 +609,15 @@ class View extends Mockup {
     // The edition label is rebuilt as the form changes (fonctionnel/presentation.md § Libellé d'une édition).
     const label = x.publisher + (x.collection ? ' (' + x.collection + ')' : '') + (x.year ? ' [' + x.year + ']' : '') + (isbn ? ' - ISBN ' + isbn : '');
     const field = 'box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
-    // One grid in the fixed order of types, each thumbnail marked with its full type, plates alone numbered (#469):
-    // a type with a single visual does not take a line of its own.
+    // One grid in the fixed order of types, each thumbnail marked with its full type where it holds in the narrowest
+    // thumbnail, its short mark otherwise (« 4e » in every offered theme), plates alone numbered (#469): a type with a single
+    // visual does not take a line of its own.
     const visuals = VISUAL_TYPES.filter((type) => x.visuals[type]).flatMap((type, g) => {
       const n = x.visuals[type];
       return Array.from({ length: n }, (_, i) => {
           const key = type + '-' + i;
           return {
-            mark: type + (type === 'Planche' ? ' ' + (i + 1) : ''),
+            mark: type === '4e de couverture' ? '4e' : type + (type === 'Planche' ? ' ' + (i + 1) : ''),
             alt: type + (type === 'Planche' ? ' ' + (i + 1) : ''),
             bg: 'hsl(' + ((g * 70 + i * 23 + 200) % 360) + ', 38%, 38%)',
             menuOpen: visualMenu === key,
