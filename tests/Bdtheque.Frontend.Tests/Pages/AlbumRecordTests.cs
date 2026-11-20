@@ -621,12 +621,15 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var page = Open();
 
         var series = BlockOf(page, "Et le reste de la série ?");
-        Assert.Equal(AppPaths.SeriesRecord(SeriesId), series.QuerySelector("a.series-record")!.GetAttribute("href"));
-        Assert.Equal("Voir la fiche de la série", series.QuerySelector("a.series-record")!.TextContent.Trim());
-        Assert.NotNull(series.QuerySelector("details[open] > summary"));
-        Assert.Equal("Corto Maltese 4 albums, dont 2 dans la collection",
-            string.Join(' ', series.QuerySelectorAll("summary > span").Select(s => s.TextContent.Trim())));
-        var albums = series.QuerySelectorAll("details ol > li");
+        // The name of the series opens its record, and no other link leads there; the list is no disclosure (#554).
+        var name = series.QuerySelector(".series-albums-head a.series-albums-title")!;
+        Assert.Equal("Corto Maltese", name.TextContent.Trim());
+        Assert.Equal(AppPaths.SeriesRecord(SeriesId), name.GetAttribute("href"));
+        Assert.Single(series.QuerySelectorAll($"a[href='{AppPaths.SeriesRecord(SeriesId)}']"));
+        Assert.Empty(series.QuerySelectorAll("summary:has(.series-albums-title)"));
+        // The albums of the series in the collection, out of all of them (#468).
+        Assert.Equal("2 albums sur 4 dans la collection", series.QuerySelector(".series-albums-count")!.TextContent.Trim());
+        var albums = series.QuerySelectorAll("ol > li");
         // The series being plain, an album without its own title is named by its volume in full; the column of the volume, a
         // special case, is always given (visuel/fiche-album/contenu.md).
         Assert.Equal(["T. 1", "T. 5", "T. 6", "HS 1"], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
@@ -638,7 +641,49 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("page", albums[1].QuerySelector(".series-album-title")!.GetAttribute("aria-current"));
         Assert.Null(albums[1].QuerySelector("a"));
         Assert.Equal([AppPaths.Album(SeriesAlbumIds[0]), AppPaths.Album(SeriesAlbumIds[2]), AppPaths.Album(SeriesAlbumIds[3])],
-            series.QuerySelectorAll("details ol a").Select(a => a.GetAttribute("href")));
+            series.QuerySelectorAll("ol a").Select(a => a.GetAttribute("href")));
+        // Its neighbours only: nothing to fold on a smartphone.
+        Assert.Empty(series.QuerySelectorAll("li[data-far]"));
+        Assert.Empty(series.QuerySelectorAll("details"));
+    }
+
+    // A zero out of a total is written « 0 » (visuel/charte-graphique/convivialite-et-efficacite.md, #468).
+    [Fact]
+    public void RestOfTheSeries_OfASeriesWithoutAnyAlbumInTheCollection_CountsZeroOutOfItsAlbums()
+    {
+        _catalog.Album = Album() with
+        {
+            SeriesAlbums = [.. SeriesAlbums().Select(card => card with { Album = card.Album with { IsInCollection = false } })],
+        };
+
+        var page = Open();
+
+        Assert.Equal("0 album sur 4 dans la collection", BlockOf(page, "Et le reste de la série ?").QuerySelector(".series-albums-count")!.TextContent.Trim());
+    }
+
+    // On a smartphone, a long series shows the album shown and its neighbours, three before and three after; the others are
+    // marked, folded behind « et N autres » until unfolded (visuel/fiche-album/contenu.md, #554).
+    [Theory]
+    [InlineData(10, 0, new[] { 4, 5, 6, 7, 8, 9 }, "et 6 autres")]
+    [InlineData(10, 5, new[] { 0, 1, 9 }, "et 3 autres")]
+    [InlineData(10, 9, new[] { 0, 1, 2, 3, 4, 5 }, "et 6 autres")]
+    [InlineData(8, 3, new[] { 7 }, "et 1 autre")]
+    public void RestOfTheSeries_MarksTheAlbumsFarFromTheOneShown_FoldedBehindTheirCount(int count, int shown, int[] far, string more)
+    {
+        var cards = Enumerable.Range(0, count)
+            .Select(i => new AlbumCard(Summary() with { Id = i == shown ? AlbumId : Guid.NewGuid(), Title = $"Album {i + 1}", VolumeNumber = i + 1 }, null, null,
+                AlbumCollectionState.InCollection))
+            .ToList();
+        _catalog.Album = Album() with { Album = cards[shown].Album, SeriesAlbums = cards };
+
+        var page = Open();
+
+        var series = BlockOf(page, "Et le reste de la série ?");
+        var lines = series.QuerySelectorAll("ol > li");
+        Assert.Equal(far, Enumerable.Range(0, lines.Length).Where(i => lines[i].HasAttribute("data-far")));
+        var toggle = series.QuerySelector("ol + details.series-albums-toggle:not([open]) > summary")!;
+        Assert.Equal(more, toggle.QuerySelector(".series-albums-more")!.TextContent.Trim());
+        Assert.Equal("Réduire", toggle.QuerySelector(".series-albums-less")!.TextContent.Trim());
     }
 
     // An omnibus that is no special issue shows the range of its volumes in the column, and its name leaves it out
@@ -651,7 +696,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        var line = BlockOf(page, "Et le reste de la série ?").QuerySelectorAll("details ol > li")[0];
+        var line = BlockOf(page, "Et le reste de la série ?").QuerySelectorAll("ol > li")[0];
         Assert.Equal("T. 1 à T. 4", line.QuerySelector(".series-album-volume")!.TextContent.Trim());
         Assert.Equal("Intégrale - 1", line.QuerySelector(".series-album-title")!.TextContent.Trim());
         // Every line keeps room for the longest volume of the list, so that the names line up.
