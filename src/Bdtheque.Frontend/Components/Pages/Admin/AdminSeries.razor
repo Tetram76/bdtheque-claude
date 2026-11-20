@@ -101,15 +101,11 @@
                                 }
                             </span>
                             <span class="series-albums" role="cell" data-zero="@(row.Overview.AlbumCount == 0)"><ListCount Value="row.Overview.AlbumCount" None="@L["Albums.None"]">@AlbumsText(row)</ListCount></span>
+                            @* A single form for both values, as the possession of an album: filled for what is there, dashed
+                               for what is only expected (visuel/listes/liste-par-liste.md). *@
                             <span class="series-complete" role="cell" data-complete="@row.IsComplete">
-                                @if (row.IsComplete)
-                                {
-                                    <Tag Text="@L["Complete"]" Variant="TagVariant.Filled" />
-                                }
-                                else
-                                {
-                                    @L["Incomplete"]
-                                }
+                                <Tag Text="@L[row.IsComplete ? "Complete" : "Incomplete"]"
+                                     Variant="@(row.IsComplete ? TagVariant.Filled : TagVariant.Dashed)" />
                             </span>
                         </span>
                         <span class="series-modified" role="cell"><LocalDateTime Value="row.ModifiedAt" DateOnly="true" /></span>

@@ -109,6 +109,17 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Rows_TheProgressAlwaysATag_FilledWhenComplete_DashedToComplete()
+    {
+        // A single form for both values: filled for what is there, dashed for what is only expected, as the possession of an
+        // album (visuel/listes/liste-par-liste.md, #538).
+        var tags = Open("").FindAll(".series-row:not(.series-row-head) .series-complete").Select(cell =>
+            cell.QuerySelector(".tag")?.GetAttribute("data-variant"));
+
+        Assert.Equal(["filled", "dashed", "dashed", "dashed"], tags);
+    }
+
+    [Fact]
     public void Rows_MarkASeriesWithoutAlbumAndACompleteOne_ByThePresenceOfTheirAttribute()
     {
         // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.

@@ -2,14 +2,14 @@
 type: Référence visuelle
 title: 'Liste par liste'
 description: 'Visuel, entrée, colonnes et filtres de chaque liste de l''administration.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T22:15:00Z }
 ---
 
 # Liste par liste
 
 | Liste | Visuel | Entrée | Colonnes | Recherche, navigation, filtres, ordre |
 | --- | --- | --- | --- | --- |
-| Séries | petite pile de trois couvertures, comme en consultation | titre | statut, albums et albums dans la collection, en une phrase : « 7 albums dans la collection » quand tous y sont, « 9 albums dont 4 dans la collection » quand une partie y est, « 9 albums » quand aucun n'y est (décision de l'utilisateur, #416), « Complète » ou « À compléter » (colonne « Avancement », décision de l'utilisateur, #425), modification | titre ; navigation par initiale ; filtres auteur, éditeur, collection (« Collection »), genre, univers ; par titre |
+| Séries | petite pile de trois couvertures, comme en consultation | titre | statut, albums et albums dans la collection, en une phrase : « 7 albums dans la collection » quand tous y sont, « 9 albums dont 4 dans la collection » quand une partie y est, « 9 albums » quand aucun n'y est (décision de l'utilisateur, #416), « Complète » ou « À compléter » (colonne « Avancement », décision de l'utilisateur, #425), toujours en étiquette : pleine pour « Complète », à bord en tirets pour « À compléter », comme la possession dans la liste des albums, pleine pour ce qui est là, en tirets pour ce qui n'est qu'attendu ([États d'un album](../../fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album), décision de l'utilisateur, #538), modification | titre ; navigation par initiale ; filtres auteur, éditeur, collection (« Collection »), genre, univers ; par titre |
 | Éditions | vignette de couverture (visuel générique sans couverture) | libellé de l'édition, et l'album dessous | année, catégorie, acquisition (mode et année), modification ; seules les éditions de la collection, une édition visée figurant parmi les intentions d'acquisition ([Intention d'acquisition](../../fonctionnel/regles-metier/intention-d-acquisition.md)) | ISBN ; navigation par initiale de l'album ; filtres série, album, éditeur, collection (« Collection ») ; dans l'ordre des albums, puis par année |
 | Intentions d'acquisition | vignette de couverture de l'album | libellé de l'album visé | ce qu'elle vise, distingué au premier coup d'œil par une étiquette : **Album**, pleine, de la couleur d'accent, suivie de « toute édition » en texte atténué, ou **Édition**, en contour, suivie du libellé de l'édition en gras, chacune avec sa propre icône ; possession de l'album (colonne « Possession »), « Possédé » ou « Intention », étiquettes de la liste des albums ([États d'un album](../../fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album)) ; date | titre de l'album ou de sa série ; navigation par initiale de l'album ; dans l'ordre des albums |
 | Auteurs | monogramme | identifiant principal, et le prénom et le nom dessous sous un pseudonyme | nationalité, nombre d'albums crédités, rôles tenus, modification | nom, prénom ou pseudonyme ; navigation par initiale ; par clé de tri |
