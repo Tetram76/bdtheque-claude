@@ -1,0 +1,40 @@
+@using Bdtheque.Contracts.Deletion
+@inject IStringLocalizer<RefusalLines> L
+@inject IStringLocalizer<EntityNames> Entities
+
+@* What blocks a deletion, or the removal of a record by the form of another, one line per entity type blocking it, in the
+   order of the impact (fonctionnel/presentation/ordre-des-types-de-fiche.md): its number, then what to do about it
+   (fonctionnel/regles-metier/suppression-des-entites.md). The refusal of the dialog of a list and the error of the saving of
+   a form present it alike: written once. *@
+<ul class="deletion-refusal" @attributes="AdditionalAttributes">
+    @for (var i = 0; i < Impact.BlockedBy.Count; i++)
+    {
+        var count = Impact.BlockedBy[i];
+        <li data-kind="@count.Kind">@Line(count, last: i == Impact.BlockedBy.Count - 1)</li>
+    }
+</ul>
+
+@code {
+    [Parameter, EditorRequired]
+    public DeletionImpact Impact { get; set; } = null!;
+
+    /// <summary>
+    /// What to do about the records of a type that block, agreeing with their number (« rattachez-les à un autre éditeur, ou
+    /// supprimez-les »), given the key of the type and of the number (e.g. <c>Edition.Other</c>, <see cref="EntityCounts.Form"/>);
+    /// none for lines that give their number only.
+    /// </summary>
+    [Parameter]
+    public Func<string, string>? Hint { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string Line(ImpactCount count, bool last)
+    {
+        if (Hint is null)
+            return Entities.Of(count);
+        // The last line ends the sentence, the others continue it.
+        var line = last ? "LastLine" : "Line";
+        return L[line, Entities.Of(count), Hint($"{count.Kind}.{EntityCounts.Form(count.Count)}")];
+    }
+}

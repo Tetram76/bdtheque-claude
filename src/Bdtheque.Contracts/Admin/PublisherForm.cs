@@ -18,13 +18,16 @@ public sealed record PublisherForm(
     uint Version);
 
 /// <summary>
-/// A collection of a publisher as the form of its publisher presents it: what references it, editions, purchase intents and series
-/// templates, which forbids its removal, counted as the impact of its deletion (fonctionnel/regles-metier/suppression-des-entites.md).
+/// A collection of a publisher as the form of its publisher presents it: what references it, series templates, editions, purchase
+/// intents and saved searches, which forbids its removal, counted as the impact of its deletion
+/// (fonctionnel/regles-metier/suppression-des-entites.md).
 /// </summary>
 /// <param name="EditionCount">The editions of the collection no purchase intent targets.</param>
 /// <param name="PurchaseIntentCount">The purchase intents targeting an edition of the collection, never counted among its editions.</param>
 /// <param name="SeriesCount">The series whose new editions are proposed the collection.</param>
-public sealed record PublisherCollectionUse(Guid Id, string Name, int EditionCount, int PurchaseIntentCount, int SeriesCount);
+/// <param name="SavedSearchCount">The saved searches designating the collection.</param>
+public sealed record PublisherCollectionUse(
+    Guid Id, string Name, int EditionCount, int PurchaseIntentCount, int SeriesCount, int SavedSearchCount);
 
 /// <summary>
 /// Everything the user edits on a publisher, sent to create it, and sent whole to modify it: its collections are replaced

@@ -100,7 +100,8 @@
     font-size: inherit;
 }
 
-[data-error-impact] {
+/* The lines of a refusal (RefusalLines), placed within the message. */
+.error-content ::deep [data-error-impact] {
     margin: var(--space-s) 0 0;
     padding-inline-start: var(--space-xl);
 }

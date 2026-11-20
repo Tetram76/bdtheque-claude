@@ -148,7 +148,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
           <section aria-labelledby="s-imprints" style="{{block}}">
             <span style="{{kickStyle}}">{{k.imprints}}</span>
             <h2 id="s-imprints" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Les collections</h2>
-            <span style="{{help}}">Elles s'enregistrent avec l'éditeur. Une collection que désigne une édition ou une série ne peut pas être retirée.</span>
+            <span style="{{help}}">Elles s'enregistrent avec l'éditeur. Une collection que désigne une série, une édition, une intention d'acquisition ou une recherche enregistrée ne peut pas être retirée.</span>
             <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
               <sc-for list="{{imprints}}" as="c">
                 <li class="se-imprint" style="padding: 8px 0; border-bottom: {{t.rowB}}">
@@ -424,7 +424,8 @@ const EXAMPLES = {
     name: 'Casterman', web: 'https://www.casterman.com',
     imprints: [
       { name: 'Écritures', editions: 58, series: 3 },
-      { name: 'Fac-similé', editions: 34, series: 0 },
+      { name: 'Fac-similé', editions: 34, series: 0, intents: 1 },
+      { name: 'Grand format', editions: 0, series: 0, searches: 1 },
       { name: 'Les Romans (À suivre)', editions: 0, series: 0, state: 'removed' },
       { name: 'Sakka', editions: 0, series: 0, state: 'new' },
       { name: 'Univers d\'auteurs', editions: 21, series: 1 }
@@ -454,10 +455,17 @@ class View extends Mockup {
     const name = nameError ? 'Dargaud' : x.name;
     const c = commonVals(this, t, kick);
     const imprints = x.imprints.map((p, i) => {
-      const used = p.editions + p.series > 0;
-      const usage = used
-        ? [p.editions ? plural(p.editions, 'édition', 'éditions') : '', p.series ? plural(p.series, 'série', 'séries') : ''].filter(Boolean).join(' · ')
-        : (p.state === 'removed' ? 'Retirée à l\'enregistrement' : 'Aucune édition ni série');
+      // What designates it, in the order of the record types (fonctionnel/presentation/ordre-des-types-de-fiche.md), saved
+      // searches included: what the line shows is what decides of its removal (#471).
+      const counts = [
+        p.series ? plural(p.series, 'série', 'séries') : '',
+        p.editions ? plural(p.editions, 'édition', 'éditions') : '',
+        p.intents ? plural(p.intents, 'intention', 'intentions') : '',
+        p.searches ? plural(p.searches, 'recherche enregistrée', 'recherches enregistrées') : ''
+      ].filter(Boolean);
+      const used = counts.length > 0;
+      const usage = p.state === 'removed' ? 'Retirée à l\'enregistrement'
+        : (used ? counts.join(' · ') : 'Inutilisée');
       return {
         ...p, id: 'f-imp-' + i, label: p.name, usage, used,
         removed: p.state === 'removed', kept: p.state !== 'removed', isNew: p.state === 'new',

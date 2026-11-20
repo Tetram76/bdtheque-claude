@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Errors;
+using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -232,8 +233,8 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         var created = (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
         Assert.Equal(
-            [("Âge d'or", 0, 0, 0), ("Écritures", 0, 0, 0)],
-            created.Collections.Select(c => (c.Name, c.EditionCount, c.PurchaseIntentCount, c.SeriesCount)));
+            [("Âge d'or", 0, 0, 0, 0), ("Écritures", 0, 0, 0, 0)],
+            created.Collections.Select(c => (c.Name, c.EditionCount, c.PurchaseIntentCount, c.SeriesCount, c.SavedSearchCount)));
         Assert.NotEqual(default, created.CreatedAt);
         Assert.Equal(created.CreatedAt, created.ModifiedAt);
         SameForm(created, await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{created.Id}"));
@@ -242,17 +243,18 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     [Fact]
     public async Task Get_CountsWhatReferencesEachCollection()
     {
-        // visuel/saisie-editeur/contenu.md: « 58 éditions · 1 intention · 3 séries », counted as the impact of its deletion,
-        // an edition targeted by an intent counted as its intent.
+        // visuel/saisie-editeur/contenu.md: « 3 séries · 58 éditions · 1 intention · 1 recherche enregistrée », counted as the
+        // impact of its deletion, an edition targeted by an intent counted as its intent, saved searches included (#471).
         var publisher = await CreateAsync("Glénat", "Treize étrange", "Vécu");
         var thirteen = publisher.Collections.Single(c => c.Name == "Treize étrange");
         await SeedReferencesAsync(publisher.Id, thirteen.Id, editions: 2, series: 1, intents: 1);
+        await DesignateAsync(thirteen.Id);
 
         var form = await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}");
 
         Assert.Equal(
-            [("Treize étrange", 2, 1, 1), ("Vécu", 0, 0, 0)],
-            form!.Collections.Select(c => (c.Name, c.EditionCount, c.PurchaseIntentCount, c.SeriesCount)));
+            [("Treize étrange", 2, 1, 1, 1), ("Vécu", 0, 0, 0, 0)],
+            form!.Collections.Select(c => (c.Name, c.EditionCount, c.PurchaseIntentCount, c.SeriesCount, c.SavedSearchCount)));
     }
 
     [Fact]
@@ -277,20 +279,28 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
     }
 
     [Fact]
-    public async Task Update_RemovingACollectionAnEditionOrASeriesReferences_IsABusinessError_AndChangesNothing()
+    public async Task Update_RemovingACollectionAnEditionASeriesOrASavedSearchReferences_IsRefusedWithItsImpact_AndChangesNothing()
     {
-        // fonctionnel/regles-metier/suppression-des-entites.md: a collection referenced cannot be removed.
-        foreach (var (editions, series) in new[] { (1, 0), (0, 1) })
+        // fonctionnel/regles-metier/suppression-des-entites.md: a collection referenced cannot be removed, which the refusal
+        // presents line by line, naming the collection (visuel/saisie-editeur/contenu.md, decision of the user, #471).
+        foreach (var (editions, series, searches) in new[] { (1, 0, 0), (0, 1, 0), (0, 0, 1) })
         {
-            var publisher = await CreateAsync($"Dupuis {editions}{series}", "Repérages", "Aire libre");
+            var publisher = await CreateAsync($"Dupuis {editions}{series}{searches} {Guid.NewGuid():N}", "Repérages", "Aire libre");
             var used = publisher.Collections.Single(c => c.Name == "Repérages");
             var free = publisher.Collections.Single(c => c.Name == "Aire libre");
             await SeedReferencesAsync(publisher.Id, used.Id, editions, series);
+            if (searches > 0)
+                await DesignateAsync(used.Id);
 
             var response = await _client.PutAsJsonAsync($"/admin/publishers/{publisher.Id}", new UpdatePublisherRequest(
                 new PublisherContent(publisher.Name, null, [new(free.Id, free.Name)]), publisher.Version));
 
-            await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionInUse);
+            var problem = await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.PublisherCollectionInUse);
+            Assert.Equal(used.Id, problem.GetProperty(ProblemTypes.RecordExtension).GetGuid());
+            Assert.Equal(
+                new[] { (EntityKind.Series, series), (EntityKind.Edition, editions), (EntityKind.SavedSearch, searches) }
+                    .Where(c => c.Item2 > 0).Select(c => new ImpactCount(c.Item1, c.Item2)),
+                ProblemAssert.ImpactOf(problem).BlockedBy);
             var form = await _client.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{publisher.Id}");
             Assert.Equal([free.Id, used.Id], form!.Collections.Select(c => c.Id));
             Assert.Equal(publisher.Version, form.Version);
@@ -534,6 +544,15 @@ public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFac
         }
 
         await context.SaveChangesAsync();
+    }
+
+    // A saved search of the editions of the collection, which designates it.
+    private async Task DesignateAsync(Guid collectionId)
+    {
+        var response = await _client.PostAsJsonAsync("/admin/saved-searches", new SavedSearchContent(
+            $"Éditions de {collectionId:N}", EntityKind.Edition,
+            new SearchLink("publisherCollection", new SearchCriterion("record", SearchComparison.Is, [collectionId.ToString()])), []));
+        response.EnsureSuccessStatusCode();
     }
 
     private async Task SeedEditionAndSeriesTemplateOfAsync(Guid publisherId)

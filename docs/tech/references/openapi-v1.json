@@ -15106,7 +15106,8 @@
           "name",
           "editionCount",
           "purchaseIntentCount",
-          "seriesCount"
+          "seriesCount",
+          "savedSearchCount"
         ],
         "type": "object",
         "properties": {
@@ -15143,9 +15144,18 @@
             ],
             "description": "The series whose new editions are proposed the collection.",
             "format": "int32"
+          },
+          "savedSearchCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The saved searches designating the collection.",
+            "format": "int32"
           }
         },
-        "description": "A collection of a publisher as the form of its publisher presents it: what references it, editions, purchase intents and series\ntemplates, which forbids its removal, counted as the impact of its deletion (fonctionnel/regles-metier/suppression-des-entites.md)."
+        "description": "A collection of a publisher as the form of its publisher presents it: what references it, series templates, editions, purchase\nintents and saved searches, which forbids its removal, counted as the impact of its deletion\n(fonctionnel/regles-metier/suppression-des-entites.md)."
       },
       "PublisherContent": {
         "required": [

@@ -41,7 +41,7 @@ public sealed class PublisherEntry
         Collections = [.. form.Collections.Select(c => new CollectionEntry
         {
             Key = c.Id, Id = c.Id, Name = c.Name, EditionCount = c.EditionCount, PurchaseIntentCount = c.PurchaseIntentCount,
-            SeriesCount = c.SeriesCount,
+            SeriesCount = c.SeriesCount, SavedSearchCount = c.SavedSearchCount,
         })],
     };
 
@@ -103,6 +103,9 @@ public sealed class CollectionEntry
     /// <summary>The series whose new editions are proposed the collection, when it was read.</summary>
     public int SeriesCount { get; set; }
 
+    /// <summary>The saved searches designating the collection, when it was read.</summary>
+    public int SavedSearchCount { get; set; }
+
     /// <summary>Removed at the saving: a collection read, struck until then.</summary>
     public bool Removed { get; set; }
 
@@ -110,5 +113,5 @@ public sealed class CollectionEntry
     /// Referenced when it was read: it cannot be removed (fonctionnel/regles-metier/suppression-des-entites.md), which the
     /// saving would refuse anyway.
     /// </summary>
-    public bool InUse => EditionCount > 0 || PurchaseIntentCount > 0 || SeriesCount > 0;
+    public bool InUse => EditionCount > 0 || PurchaseIntentCount > 0 || SeriesCount > 0 || SavedSearchCount > 0;
 }

@@ -2,7 +2,6 @@
 @using Bdtheque.Frontend.Api
 @inject IStringLocalizer<ErrorMessage> L
 @inject IStringLocalizer<RuleMessages> Rules
-@inject IStringLocalizer<EntityNames> Entities
 
 @* The category tells the three kinds of errors apart at first glance (fonctionnel/presentation-des-erreurs.md), by its
    name, its icon, its color and its frame (visuel/saisie-album/contenu.md), carried by an attribute
@@ -15,12 +14,7 @@
         <p data-error-text>@Text</p>
         @if (Problem.Category != ProblemCategory.Technical && Problem.Impact is { BlockedBy.Count: > 0 } impact)
         {
-            <ul data-error-impact>
-                @foreach (var count in impact.BlockedBy)
-                {
-                    <li>@Entities.Of(count)</li>
-                }
-            </ul>
+            <RefusalLines Impact="impact" Hint="RefusalHint" data-error-impact="" />
         }
         @if (Actions is not null)
         {
@@ -53,6 +47,13 @@
     /// </summary>
     [Parameter]
     public string? TechnicalText { get; set; }
+
+    /// <summary>
+    /// What to do about the records of a type that block a refused deletion or removal, given the key of the type and of the
+    /// number (<see cref="RefusalLines.Hint"/>); without it, each line gives the number of records only.
+    /// </summary>
+    [Parameter]
+    public Func<string, string>? RefusalHint { get; set; }
 
     /// <summary>What the user can do about the error (e.g. reload the record, try again).</summary>
     [Parameter]

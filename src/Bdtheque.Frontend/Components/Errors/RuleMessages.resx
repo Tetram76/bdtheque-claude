@@ -139,7 +139,7 @@
     <value>Le nom de la collection est obligatoire.</value>
   </data>
   <data name="PublisherCollection.InUse" xml:space="preserve">
-    <value>Une collection retirée est désignée par une édition, une série ou une recherche enregistrée : elle ne peut pas être retirée. Rétablissez-la.</value>
+    <value>Une collection que vous avez retirée est encore utilisée par</value>
   </data>
   <data name="Author.DisplayNameAlreadyUsed" xml:space="preserve">
     <value>Deux auteurs ne peuvent pas porter le même nom, sans tenir compte de la casse ni des accents.</value>
