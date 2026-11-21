@@ -2,7 +2,7 @@
 
 Ce paquet contient ce qu'il faut pour déployer cette version de BDthèque avec Docker Compose, par exemple sur un NAS Synology avec Container Manager, sans les sources de l'application. Son `docker-compose.yml` télécharge les images publiques de la version depuis `ghcr.io`, sans authentification.
 
-Le détail de chaque réglage et de l'exploitation (sauvegarde des données, mise à jour de l'image PostgreSQL) se trouve dans le [README du projet](https://github.com/Tetram76/bdtheque-claude#déploiement).
+Le détail de chaque réglage et de l'exploitation (sauvegarde des données, mise à jour de l'image PostgreSQL) se trouve dans le [README du projet](https://github.com/Tetram76/bdtheque-claude/blob/v{{VERSION}}/README.md#déploiement), tel que l'a laissé cette version.
 
 ## Installation
 

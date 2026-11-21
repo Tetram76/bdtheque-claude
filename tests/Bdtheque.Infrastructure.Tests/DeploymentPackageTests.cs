@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Bdtheque.Infrastructure.Tests;
 
@@ -56,6 +57,18 @@ public sealed class DeploymentPackageTests : IDisposable
         Assert.DoesNotContain("Docker Hub", environment, StringComparison.Ordinal);
         Assert.Contains("POSTGRES_PASSWORD=", environment, StringComparison.Ordinal);
         Assert.Contains("VISUELS_HOST_PATH=", environment, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Procedure_LinksToTheSourcesOfTheVersion()
+    {
+        // The procedure goes with one version: what it links to is the repository as that version left it.
+        var procedure = (await BuildAsync("0.1.0"))["bdtheque-0.1.0/DEPLOIEMENT.md"];
+        var links = Regex.Matches(procedure, @"https://github\.com/Tetram76/bdtheque-claude[^\s)]*").Select(match => match.Value).ToList();
+
+        Assert.NotEmpty(links);
+        Assert.All(links, link => Assert.StartsWith("https://github.com/Tetram76/bdtheque-claude/blob/v0.1.0/", link, StringComparison.Ordinal));
+        Assert.DoesNotContain("{{", procedure, StringComparison.Ordinal);
     }
 
     [Theory]

@@ -52,12 +52,19 @@ $compose = Edit-Exactly $compose '^    build:\r?\n(?:      .*\r?\n)+' '' 2 'dock
 $environment = Get-Content -Raw (Join-Path $root '.env.example')
 $environment = Edit-Exactly $environment '(?:^#.*\r?\n)*^BDTHEQUE_TAG=.*\r?\n(?:\r?\n)?' '' 1 '.env.example'
 
+# The procedure goes with this version: its links lead to the sources of its tag, never to those of `main`.
+$procedure = Get-Content -Raw (Join-Path $root '.github' 'deployment' 'DEPLOIEMENT.md')
+$procedure = $procedure.Replace('{{VERSION}}', $Version)
+if ($procedure.Contains('{{')) {
+    throw '.github/deployment/DEPLOIEMENT.md holds a placeholder other than {{VERSION}}.'
+}
+
 $staging = Join-Path ([IO.Path]::GetTempPath()) ([IO.Path]::GetRandomFileName())
 try {
     $folder = New-Item -ItemType Directory -Path (Join-Path $staging $name)
     Set-Content -NoNewline -Path (Join-Path $folder 'docker-compose.yml') -Value $compose
     Set-Content -NoNewline -Path (Join-Path $folder '.env.example') -Value $environment
-    Copy-Item (Join-Path $root '.github' 'deployment' 'DEPLOIEMENT.md') $folder
+    Set-Content -NoNewline -Path (Join-Path $folder 'DEPLOIEMENT.md') -Value $procedure
 
     New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
     $archive = Join-Path (Resolve-Path $OutputDirectory).Path "$name.zip"
