@@ -13,8 +13,9 @@ Le détail de chaque réglage et de l'exploitation (sauvegarde des données, mis
    - `ADMIN_LOGIN` et `ADMIN_PASSWORD`, le compte qui se connecte à l'administration, avec un mot de passe long, par exemple une phrase de plusieurs mots ;
    - `FRONTEND_PORT`, le port du NAS sur lequel l'application répond ;
    - `VISUELS_HOST_PATH`, le dossier du NAS où sont rangés les visuels ;
+   - `API_USER`, facultatif : l'utilisateur sous lequel tourne le conteneur `api`, sous la forme `uid:gid` (étape suivante) ;
    - `PUBLIC_URL`, seulement si l'application est servie derrière le reverse proxy du NAS : c'est alors l'adresse sous laquelle le navigateur l'atteint, par exemple `https://bdtheque.example.com`.
-3. Créez le dossier des visuels et donnez-le à l'utilisateur du conteneur `api` (UID `1654`), faute de quoi l'application refuse de démarrer. En SSH, depuis le dossier de l'application :
+3. Créez le dossier des visuels, que le conteneur `api` doit pouvoir écrire, faute de quoi l'application refuse de démarrer. Sans SSH : créez-le depuis File Station, sous votre utilisateur du NAS, et renseignez cet utilisateur dans `API_USER` ; le [README du projet](https://github.com/Tetram76/bdtheque-claude/blob/v{{VERSION}}/README.md#dossier-des-visuels) explique comment trouver son `uid` et son `gid` depuis le Panneau de configuration. Sans `API_USER`, donnez le dossier à l'utilisateur de l'image (UID `1654`), en SSH, depuis le dossier de l'application :
 
    ```bash
    mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels
