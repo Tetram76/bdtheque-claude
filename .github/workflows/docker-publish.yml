@@ -301,6 +301,10 @@ jobs:
           fi
           # The notes as published, which the package carries: a later edit of the release calls for a new run.
           gh release view "$GITHUB_REF_NAME" --json body --jq .body > "$RUNNER_TEMP/release-notes.md"
+          # The published releases, whose notes make the history of the package; drafts are not published.
+          gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
+            --jq '.[] | select(.draft | not) | {tag: .tag_name, name, prerelease, body}' > "$RUNNER_TEMP/releases.jsonl"
           package=$(pwsh -NoProfile -NonInteractive -File .github/scripts/New-DeploymentPackage.ps1 \
-            -Version "$VERSION" -ReleaseNotes "$RUNNER_TEMP/release-notes.md" -OutputDirectory "$RUNNER_TEMP/package")
+            -Version "$VERSION" -ReleaseNotes "$RUNNER_TEMP/release-notes.md" -PreviousReleases "$RUNNER_TEMP/releases.jsonl" \
+            -OutputDirectory "$RUNNER_TEMP/package")
           gh release upload "$GITHUB_REF_NAME" "$package" --clobber
