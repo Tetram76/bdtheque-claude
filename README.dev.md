@@ -247,9 +247,9 @@ Le déploiement de la version reste ensuite une décision distincte.
 
 ## Plusieurs versions sur le NAS
 
-Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, déployé selon la procédure du [`README.md`](README.md#procédure-synology-container-manager) dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version (celui du dépôt au tag de la version, ou au commit de `sha-<commit>`), qui peut différer d'une version à l'autre, et son propre `.env` :
+Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version, qui peut différer d'une version à l'autre, et son propre `.env`. La production, version publiée, s'installe depuis le paquet de déploiement de sa release ([`README.md`](README.md#installer-une-version-publiée)) ; une pré-version, depuis le dépôt au commit de `sha-<commit>` ([`README.md`](README.md#déployer-depuis-le-dépôt-pré-versions)). Dans chaque `.env` :
 
-- `BDTHEQUE_TAG` : le numéro de la version en production (ex. `0.1.0`), `sha-<commit>` pour une pré-version ;
+- `BDTHEQUE_TAG` : `sha-<commit>` pour une pré-version ; la production n'en a pas, le `docker-compose.yml` de son paquet fixant sa version ;
 - `FRONTEND_PORT` : un port différent pour chaque version ;
 - `VISUELS_HOST_PATH` : un dossier différent pour chaque version ;
 - `PUBLIC_URL` : en production seulement ; les pré-versions sont atteintes en interne, sur `http://<NAS>:<FRONTEND_PORT>`.
