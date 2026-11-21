@@ -204,7 +204,7 @@ Publiée sur le tag d'une version, la paire d'images est aussi poussée sur GitH
 
 ## Publication d'une version
 
-Une version est publiable quand tous les tickets de son jalon sont fermés ; elle n'est publiée que sur la décision du propriétaire du dépôt. Les règles qui suivent sont celles de [Versions et releases](.speckit/gestion-projet/depot/versions-et-releases.md). Les étapes se suivent dans cet ordre, chacune ne commençant qu'une fois la précédente réussie. Les exemples publient `v0.1.0`, dont la version précédente est `v0.0.3`.
+Une version est publiable quand tous les tickets de son jalon sont fermés ; elle n'est publiée que publiable, et sur la décision du propriétaire du dépôt. Les règles qui suivent sont celles de [Versions et releases](.speckit/gestion-projet/depot/versions-et-releases.md). Les étapes se suivent dans cet ordre, chacune ne commençant qu'une fois la précédente réussie. Les exemples publient `v0.1.0`, dont la version précédente est `v0.0.3`.
 
 1. **Vérifier que la version est publiable**, et que le CI de `main` est vert sur le commit à publier :
 
