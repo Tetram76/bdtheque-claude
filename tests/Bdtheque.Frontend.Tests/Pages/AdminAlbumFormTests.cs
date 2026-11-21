@@ -341,6 +341,28 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Empty(page.FindAll(".classification-tags [role=alert]"));
     }
 
+    // A universe removed while its ancestors are read: their failure concerns a universe the record no longer cites, and says
+    // nothing, as their reading, when it succeeds, names nothing.
+    [Fact]
+    public async Task Universe_RemovedWhileItsAncestorsAreRead_LeavesNoFailure()
+    {
+        var hierarchy = new TaskCompletionSource();
+        var harbour = Guid.NewGuid();
+        _api.Hold = (path, _) => path.EndsWith("/hierarchy", StringComparison.Ordinal) ? hierarchy.Task : Task.CompletedTask;
+        _api.Failures[$"/admin/universes/{harbour}/hierarchy"] = HttpStatusCode.InternalServerError;
+        var page = OpenAlbum();
+        var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == RecordKind.Universe);
+        var universe = new RecordOption(harbour, "Le port", "Univers Hergé");
+
+        var adding = tags.InvokeAsync(() => tags.Instance.OnAdd.InvokeAsync(universe));
+        await tags.InvokeAsync(() => tags.Instance.OnRemove.InvokeAsync(universe));
+        hierarchy.SetResult();
+        await adding.EndAsync("The addition of the universe");
+
+        Assert.DoesNotContain("Le port", page.FindAll(".classification-tags .tag").Select(tag => tag.TextContent.Trim()));
+        Assert.Empty(page.FindAll(".classification-tags [role=alert]"));
+    }
+
     // A key that cannot be computed is an error with nothing to correct in the field: said under it, until the next computation.
     [Fact]
     public async Task SortKey_ComputationThatFails_IsPresentedUnderTheField_UntilTheNextOne()

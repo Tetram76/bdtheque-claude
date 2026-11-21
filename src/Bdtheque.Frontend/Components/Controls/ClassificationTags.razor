@@ -21,14 +21,14 @@
 <div class="classification-tags">
     <span class="classification-tags-name">@L["Universes"]</span>
     <RecordTags Id="@($"{Id}-add-universe")" Kind="RecordKind.Universe" Items="Records.Universes" AddText="@L["Add"]"
-                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="RemoveUniverseAsync"
+                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => RemoveAsync(Records.Universes, universe)"
                 OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)"
                 ErrorOf="universe => ErrorOf(universe.Id)" />
     <InheritedTags Label="@InheritedLabel" Items="InheritedUniverses" />
-    @if (_universeFailure is { } failure)
+    @if (UniverseFailure is { } failure)
     {
-        @* The ancestors of a universe added that could not be read, said at the scale of the universes until their next change
-           (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
+        @* The ancestors of a universe added that could not be read, said at the scale of the universes while the record cites
+           it, until another universe is added (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
         <div class="classification-tags-failure">
             <ErrorMessage Problem="failure" Compact="true" TechnicalText="@L["Failed"]" />
         </div>
@@ -49,7 +49,12 @@
 @code {
     private string? _genreCreation;
     private string? _universeCreation;
-    private ApiProblem? _universeFailure;
+    // The failure of the reading of the ancestors of a universe, kept with that universe: it concerns it alone, and says
+    // nothing once the record no longer cites it, as the reading, when it succeeds, names it only if it is still cited.
+    private (Guid Universe, ApiProblem Problem)? _universeFailure;
+
+    private ApiProblem? UniverseFailure =>
+        _universeFailure is { } failure && Records.Universes.Any(u => u.Id == failure.Universe) ? failure.Problem : null;
 
     /// <summary>The prefix of the identifiers of its fields, unique in the page (e.g. « album »).</summary>
     [Parameter, EditorRequired]
@@ -121,14 +126,8 @@
         catch (ApiProblemException exception)
         {
             // Named without its ancestors, which the failure says.
-            _universeFailure = exception.Problem;
+            _universeFailure = (universe.Id, exception.Problem);
         }
-    }
-
-    private Task RemoveUniverseAsync(RecordOption universe)
-    {
-        _universeFailure = null;
-        return RemoveAsync(Records.Universes, universe);
     }
 
     // The records added on the spot are created with the record, when it is saved: cancelling creates none of them.
