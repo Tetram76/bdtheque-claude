@@ -18,9 +18,6 @@
   <data name="New" xml:space="preserve">
     <value>Nouvel auteur</value>
   </data>
-  <data name="Kicker" xml:space="preserve">
-    <value>Fiches</value>
-  </data>
   <data name="ListTitle" xml:space="preserve">
     <value>Liste des auteurs</value>
   </data>
@@ -111,8 +108,8 @@
   <data name="Empty.None" xml:space="preserve">
     <value>Aucun auteur n'est encore enregistré.</value>
   </data>
-  <data name="Empty.Hint" xml:space="preserve">
-    <value>La recherche porte sur le nom, le prénom et le pseudonyme de l'auteur, sans tenir compte des majuscules ni des accents.</value>
+  <data name="Empty.SearchedIn" xml:space="preserve">
+    <value>le nom, le prénom et le pseudonyme de l'auteur</value>
   </data>
   <data name="Empty.Clear" xml:space="preserve">
     <value>Effacer la recherche</value>

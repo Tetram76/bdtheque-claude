@@ -1,10 +1,13 @@
+@inject IStringLocalizer<EmptyList> L
+
 @* A list that finds nothing (visuel/liste-albums/contenu.md): it says so, recalls what the search looks into, and offers what
-   to do next (e.g. clear the search, create the record looked for). *@
+   to do next (e.g. clear the search, create the record looked for). The recall of a search by text is written here once, every
+   list giving only what its search looks into, so that the same search is recalled the same way everywhere (#474). *@
 <div class="empty-list" role="status">
     <strong>@Message</strong>
-    @if (Hint is not null)
+    @if (HintText is { } hint)
     {
-        <span>@Hint</span>
+        <span>@hint</span>
     }
     @if (Actions is not null)
     {
@@ -16,9 +19,19 @@
     [Parameter, EditorRequired]
     public string Message { get; set; } = null!;
 
+    /// <summary>
+    /// What a search by text looks into (e.g. « le titre de la série »), which it compares without case nor accents
+    /// (choix-implementation/api/recherche.md): the list recalls it in the common sentence.
+    /// </summary>
+    [Parameter]
+    public string? SearchedIn { get; set; }
+
+    /// <summary>Any other hint (where a record is set, how an ISBN is looked for).</summary>
     [Parameter]
     public string? Hint { get; set; }
 
     [Parameter]
     public RenderFragment? Actions { get; set; }
+
+    private string? HintText => SearchedIn is not null ? L["SearchedIn", SearchedIn] : Hint;
 }

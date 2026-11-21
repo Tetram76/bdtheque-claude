@@ -87,19 +87,20 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         var page = Open("");
         var rows = page.FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
             Text(row.QuerySelector(".row-entry")!),
-            Text(row.QuerySelector(".publisher-collection-names")!),
+            row.QuerySelector(".row-entry-detail") is { } collections ? Text(collections) : null,
             Text(row.QuerySelector(".publisher-website")!),
             Text(row.QuerySelector(".publisher-catalogue")!)));
 
         // The website without its scheme, « www. » nor final slash, announced as leaving the application. Its numbers in a
         // single column, each followed by what it counts, in the order of the entity types, an intent never one of the
         // editions; a zero is left out beside the others, and takes the dash of a missing data alone
-        // (visuel/listes/liste-par-liste.md, visuel/charte-graphique/convivialite-et-efficacite.md).
+        // (visuel/listes/liste-par-liste.md, visuel/charte-graphique/convivialite-et-efficacite.md). Under the name, a column of
+        // a card, no collection shows nothing (#476).
         Assert.Equal(
             [
                 ("Casterman", "Écritures, Fac-similé, Univers d'auteurs", "casterman.com, site externe", "3 collections · 412 éditions · 2 intentions"),
                 ("Dargaud", "Long courrier", "dargaud.com/bd, site externe", "1 collection · 1 intention"),
-                ("Futuropolis", "Aucune collection", "—Non renseigné", "—Ni collection, ni édition, ni intention"),
+                ("Futuropolis", null, "—Non renseigné", "—Ni collection, ni édition, ni intention"),
             ],
             rows);
         Assert.Equal("Catalogue", Text(page.Find(".publisher-row-head .publisher-catalogue")));
@@ -109,11 +110,10 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
     public void Rows_MarkWhatIsMissing_ByThePresenceOfTheirAttribute()
     {
         // A boolean attribute of Blazor has no value: present when true, absent when false, which the styles select on.
-        var rows = Open("").FindAll(".publisher-row:not(.publisher-row-head)").Select(row => (
-            row.QuerySelector(".publisher-collection-names")!.HasAttribute("data-empty"),
-            row.QuerySelector(".publisher-catalogue")!.HasAttribute("data-zero")));
+        var rows = Open("").FindAll(".publisher-row:not(.publisher-row-head)").Select(row =>
+            row.QuerySelector(".publisher-catalogue")!.HasAttribute("data-zero"));
 
-        Assert.Equal([(false, false), (false, false), (true, true)], rows);
+        Assert.Equal([false, false, true], rows);
     }
 
     [Fact]
@@ -172,6 +172,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub").Find(".empty-list");
 
         Assert.Equal("Aucun éditeur ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur le nom de l'éditeur, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal(
             [("Effacer la recherche", AppPaths.AdminPublishers), ("Créer l'éditeur « Zorglub »", AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, "Zorglub"))],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));

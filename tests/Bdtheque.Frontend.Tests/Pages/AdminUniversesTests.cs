@@ -292,7 +292,9 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     {
         Answer([], totalCount: 0);
 
-        var link = Open("q=Mu").Find(".empty-list a.button[data-variant='primary']");
+        var empty = Open("q=Mu").Find(".empty-list");
+        Assert.Equal("La recherche porte sur le nom de l'univers, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
+        var link = empty.QuerySelector("a.button[data-variant='primary']")!;
         Assert.Equal(("Créer l'univers « Mu »", $"{AppPaths.AdminUniverses}?q=Mu&new=open"), (Text(link), link.GetAttribute("href")));
 
         Assert.Equal("Mu", Open("q=Mu&new=open").Find("input[name='name']").GetAttribute("value"));

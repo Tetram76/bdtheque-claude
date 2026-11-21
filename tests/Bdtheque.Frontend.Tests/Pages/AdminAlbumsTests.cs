@@ -7,6 +7,7 @@ using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages.Admin;
+using Bdtheque.Frontend.Components.Presentation;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Tests.Audience;
@@ -96,7 +97,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
     {
         var rows = Open("").FindAll(".album-row:not(.album-row-head)").Select(row => (
             Text(row.QuerySelector(".row-entry")!),
-            Text(row.QuerySelector(".album-authors")!),
+            row.QuerySelector(".row-entry-detail") is { } authors ? Text(authors) : null,
             Text(row.QuerySelector(".album-date")!),
             Text(row.QuerySelector(".album-editions")!),
             Text(row.QuerySelector(".album-state")!)));
@@ -105,8 +106,9 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
             [
                 ("Les Bijoux de la Castafiore (Tintin - T. 21)", "Hergé", "1963", "2 éditions · 1 intention", "Possédé"),
                 ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido", "octobre 2023", "1 intention", "Intention"),
-                // No edition nor intent: a zero is not shown, but the dash of a missing data, said to a screen reader.
-                ("Le Bleu est une couleur chaude", "", "—Non renseignée", "—Aucune édition", "Non possédé"),
+                // No edition nor intent: a zero is not shown, but the dash of a missing data, said to a screen reader. No author:
+                // nothing under the label, a column of a card (visuel/charte-graphique/convivialite-et-efficacite.md, #476).
+                ("Le Bleu est une couleur chaude", null, "—Non renseignée", "—Aucune édition", "Non possédé"),
             ],
             rows);
     }
@@ -252,6 +254,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub").Find(".empty-list");
 
         Assert.Equal("Aucun album ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur le titre de l'album et sur celui de sa série, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal(
             [("Effacer la recherche", AppPaths.AdminAlbums), ("Créer l'album « Zorglub »", $"{AppPaths.AdminNewAlbum}?searched=Zorglub")],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
@@ -397,6 +400,19 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
     private static Page<AlbumAdminListItem> Page(IReadOnlyList<AlbumAdminListItem> items, int totalCount) =>
         new(items, 1, AlbumListQuery.PageSize, totalCount);
+
+    [Fact]
+    // The way to the editions and intents of an album has the icon of the editions wherever it is (visuel/listes/principes-communs.md,
+    // Actions, #474).
+    public void Rows_LeadToTheEditionsOfTheAlbum_WithTheIconOfTheEditions()
+    {
+        var row = Open("q=bijoux").FindAll(".album-row:not(.album-row-head)")[0];
+
+        var button = row.QuerySelector($".album-actions a.button[href='{AppPaths.AdminAlbumEditions(Bijoux.Album.Id)}']")!;
+        Assert.Equal(
+            Render<Icon>(parameters => parameters.Add(p => p.Name, IconName.Edition)).Find("path").GetAttribute("d"),
+            button.QuerySelector("svg.icon path")!.GetAttribute("d"));
+    }
 
     private static string Text(IElement element) => string.Join(' ', element.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

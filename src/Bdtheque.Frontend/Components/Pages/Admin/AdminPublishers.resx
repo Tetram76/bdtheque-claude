@@ -18,9 +18,6 @@
   <data name="New" xml:space="preserve">
     <value>Nouvel éditeur</value>
   </data>
-  <data name="Kicker" xml:space="preserve">
-    <value>Fiches</value>
-  </data>
   <data name="ListTitle" xml:space="preserve">
     <value>Liste des éditeurs</value>
   </data>
@@ -56,9 +53,6 @@
   </data>
   <data name="Column.Actions" xml:space="preserve">
     <value>Actions</value>
-  </data>
-  <data name="Collections.Zero" xml:space="preserve">
-    <value>Aucune collection</value>
   </data>
   <data name="Collections.One" xml:space="preserve">
     <value>1 collection</value>
@@ -102,8 +96,8 @@
   <data name="Empty.Text" xml:space="preserve">
     <value>Aucun éditeur ne correspond à « {0} ».</value>
   </data>
-  <data name="Empty.Hint" xml:space="preserve">
-    <value>La recherche porte sur le nom de l'éditeur, sans tenir compte des majuscules ni des accents.</value>
+  <data name="Empty.SearchedIn" xml:space="preserve">
+    <value>le nom de l'éditeur</value>
   </data>
   <data name="Empty.Clear" xml:space="preserve">
     <value>Effacer la recherche</value>
