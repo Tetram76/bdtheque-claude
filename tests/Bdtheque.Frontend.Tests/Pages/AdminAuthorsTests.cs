@@ -243,6 +243,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
 
         Assert.Equal(("Supprimer cet auteur ?", "Alain Gomez"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Equal("Aucune autre fiche n'est concernée.", Text(dialog.QuerySelector(".deletion-impact")!));
         var form = dialog.QuerySelector("form[method='post']")!;
         Assert.Equal(

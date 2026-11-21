@@ -321,6 +321,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal("Supprimer cet univers ?", Text(dialog.QuerySelector(".dialog-title")!));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Contains("4 albums", Text(dialog.QuerySelector(".deletion-impact")!));
         Assert.Equal(
             [("Version", "43"), ("Fingerprint", "f2")],

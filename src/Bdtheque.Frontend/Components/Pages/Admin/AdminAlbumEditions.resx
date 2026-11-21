@@ -180,17 +180,11 @@
   <data name="Deletion.Title" xml:space="preserve">
     <value>Supprimer cette édition ?</value>
   </data>
-  <data name="Deletion.Lead" xml:space="preserve">
-    <value>La suppression est définitive et emporte avec l&apos;édition :</value>
-  </data>
   <data name="Deletion.Refusal.Lead" xml:space="preserve">
     <value>L'édition est encore désignée par :</value>
   </data>
   <data name="Removal.Title" xml:space="preserve">
     <value>Retirer cette intention d&apos;acquisition ?</value>
-  </data>
-  <data name="Removal.Lead" xml:space="preserve">
-    <value>Le retrait est définitif et emporte avec l&apos;intention :</value>
   </data>
   <data name="Removal.Refusal.Lead" xml:space="preserve">
     <value>L'intention est encore désignée par :</value>
