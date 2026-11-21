@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T13:55:00Z }
 ---
 
 # Thèmes
@@ -55,6 +55,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:00:00Z }
   - **Alternative écartée (teintes distribuées tour à tour selon la place de la ligne, comme dans les maquettes)** : deux voisins ne se ressemblaient jamais, mais un auteur changeait de couleur avec sa place dans la liste.
 - **Icônes dessinées pour l'application**, en SVG de la couleur du texte : aucune police d'icônes ni bibliothèque à servir ou à licencier.
 - **Contrastes vérifiés par un test** dans chaque thème (WCAG 2.2, 1.4.3 et 1.4.11) : 4,5:1 pour un texte, 3:1 pour la bordure d'un contrôle. Un filet décoratif n'y est pas soumis : la bordure des contrôles est donc un contrat distinct.
+- **Surlignage porté par un contrat propre**, l'accent par défaut : ce que désignent le pointeur ou le clavier, l'entrée active d'une liste d'options (choix d'une fiche par son nom, collections d'un éditeur), seule marque de l'entrée qu'Entrée choisira, comme un contrôle discret survolé ou ouvert (« ⋯ », bouton des filtres). Le test des contrastes le vérifie, dans chaque thème, sur la surface flottante de la liste comme sur la surface (3:1), et son texte sur lui (4,5:1). Un thème dont l'accent se confond avec ses surfaces (« La gazette », « La couverture du jour » d'une couverture pâle) lui donne sa propre couleur ; le bouton d'aide survolé a son contrat, le surlignage par défaut, pour le thème dont l'aide a déjà cette couleur (#531).
+  - **Contrat d'une étiquette réservé à ce qui est dessiné comme une étiquette**, fond et bordure ensemble : un thème qui donne à ses étiquettes la couleur de ses surfaces et les cerne (« La planche encrée ») ne la distinguerait sinon de rien.
+  - **Alternative écartée (fond d'une étiquette pour le surlignage)** : c'est ainsi que l'entrée active était invisible dans « La planche encrée », l'étiquette blanche cernée de noir y ayant la couleur de la liste, sans que le thème sache que son étiquette servait aussi au surlignage (#531).
 - **Focus en contour de la couleur du texte, détaché par une bande de la couleur de la surface** : il contraste avec l'élément, coloré ou non, comme avec cette surface ([Contrôles](../../visuel/liste-albums/controles.md)).
 - **Texte indicatif porté par un contrat propre**, sans opacité, valant par défaut le texte atténué : un thème dont le texte atténué se confond avec son texte (« La planche encrée », noir sur noir) lui donne sa propre couleur, celle du texte éclaircie, pour qu'il se distingue du texte saisi ([Contrôles](../../visuel/liste-albums/controles.md)). Celui de la recherche de l'en-tête de « La couverture du jour », couleur du jour, est le blanc de son texte atténué vers le champ, et lisible sur lui seul : éclairci aussi pour le reflet d'un accent pâle, comme les textes clairs de la scène, il atteignait ce blanc ; le champ s'assombrit au besoin pour qu'il s'en distingue. Le test des contrastes vérifie, dans chaque thème, qu'il se lit sur le champ et qu'il se distingue du texte.
 - **Polices servies par l'application**, en WOFF2, sous licence libre ([Licences](../../contraintes-techniques/licences.md)), contrôlées par leur empreinte d'intégrité, sans service extérieur à l'exécution ([Mesure d'audience de l'interface web](../../fonctionnel/mesure-audience.md)). Une police de plusieurs thèmes est déclarée une fois, une police déclarée n'étant téléchargée que par une page qui l'emploie ; la page précharge la police du texte de son thème.

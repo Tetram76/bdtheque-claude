@@ -34,6 +34,11 @@ public sealed partial class ThemeContrastTests
         ("text-on-info", "info", Text),
         ("text-on-delete", "delete", Text),
         ("text-on-tag", "tag", Text),
+        // What the pointer or the keyboard designates: the active entry of a list of options, which alone tells the entry
+        // that Enter chooses, on the floating surface of the list; a quiet control hovered or open, on the surface.
+        ("text-on-highlight", "highlight", Text),
+        ("highlight", "surface-raised", NonText),
+        ("highlight", "surface", NonText),
         ("control-border", "background", NonText),
         ("control-border", "surface", NonText),
         ("control-border", "surface-raised", NonText),
@@ -59,6 +64,7 @@ public sealed partial class ThemeContrastTests
         ("header-field-border", "header", NonText),
         ("text-on-header-tag", "header-tag", Text),
         ("text-on-help", "help", Text),
+        ("text-on-help-hover", "help-hover", Text),
         // A notice within a block (e.g. the authors of an album taken from its series): its text, and its frame, which alone
         // tells it from the block.
         ("text-on-notice", "notice", Text),

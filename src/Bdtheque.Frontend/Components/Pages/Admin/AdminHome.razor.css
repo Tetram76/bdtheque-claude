@@ -238,6 +238,8 @@
     border-radius: var(--radius-pill);
     background: var(--color-tag);
     color: var(--color-text-on-tag);
+    /* Drawn as a tag, it wears its border too, without taking room: a theme may give the tag the color of its surfaces. */
+    box-shadow: inset 0 0 0 var(--border-width-control) var(--color-tag-border);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
     text-align: center;
@@ -246,6 +248,7 @@
 .admin-check-count[data-alert] {
     background: var(--color-alert);
     color: var(--color-text-on-alert);
+    box-shadow: none;
 }
 
 .admin-change {

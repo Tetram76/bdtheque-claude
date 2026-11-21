@@ -50,6 +50,9 @@
     --color-text-on-info: #FBF3EA;
     --color-tag: #FFB547;
     --color-text-on-tag: #2B1030;
+    /* Amber hardly stands out from the paper: what is highlighted is printed in reverse, cream on violet ink. */
+    --color-highlight: #2B1030;
+    --color-text-on-highlight: #FBF3EA;
     --color-text-on-palette: #2B1030;
 
     /* Typography */
