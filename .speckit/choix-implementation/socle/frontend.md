@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T15:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T14:00:00Z }
 ---
 
 # Frontend
@@ -116,6 +116,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-20T15:30:00Z }
 - **La recherche de l'en-tête est une section Blazor**, qu'une page peut vider (écran d'une collection vide, [Collection vide](../../visuel/dashboard/collection-vide.md)) : la dernière section rendue l'emporte (documentation d'ASP.NET Core, *Blazor sections*).
   - **Alternative écartée (paramètre de la mise en page)** : une page ne passe rien à sa mise en page, rendue avant elle, et ne sait qu'à l'exécution si la collection est vide.
 - **Nombres de fiches du menu de l'administration lus une fois par requête** ; sans eux, le menu mène partout de même.
+- **Ordre des types de fiche de l'administration écrit une fois**, par le plan de l'administration, que présente son menu et que suivent les cartes de son accueil ([En-tête et menu](../../visuel/administration/en-tete-et-menu.md), décision de l'utilisateur, #477) : une carte dont la liste n'est pas au plan n'y aurait pas de place, ce que le plan refuse.
+  - **Alternative écartée (ordre écrit dans chaque composant)** : c'est ainsi que l'accueil et le menu avaient divergé, les éditions avant les séries sur l'un, après elles sur l'autre (contrôle de cohérence, #477).
 - **Lignes défilantes** (menu de la consultation, navigation par initiale), sans retour à la ligne : un script ne montre un chevron que s'il reste des entrées hors de vue, d'après les largeurs qu'il observe, et centre la ligne sur son entrée courante, de nouveau à la **fin du premier chargement de polices**, qui change la largeur des entrées, jamais sur la promesse des polices, parfois déjà résolue avant que la police du texte soit demandée (CSS Font Loading). Les chevrons sont réservés à la souris, le clavier atteignant chaque entrée.
 - **Pagination de largeur à peu près constante** : toutes les pages jusqu'à sept, sinon les extrémités et le voisinage de la page courante.
 - **Entrée du menu courante sur les pages de sa section** avant que sa propre page existe (la fiche d'un album sous « Albums », dont la liste reste à réaliser) : l'entrée garde le lien « Pas encore implémenté » et connaît le chemin que sa page aura.

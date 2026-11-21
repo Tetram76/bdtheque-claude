@@ -154,17 +154,21 @@
         ("Publisher", AppPaths.AdminNewPublisher),
     ];
 
-    // A card per type of record; the editions are entered from their album, never created here. The purchase intents, which
-    // have no record of their own, stand apart in a block of their own.
+    // A card per type of record, put in the order of the plan of the administration, which the menu presents: the order is
+    // written once, by the plan, so that the home and the menu cannot diverge (#477). The editions are entered from their
+    // album, never created here. The purchase intents, which have no record of their own, stand apart in a block of their own.
     private static readonly IReadOnlyList<RecordCard> Records =
     [
-        new("Albums", IconName.Album, AppPaths.AdminAlbums, AppPaths.AdminNewAlbum, c => c.Albums, c => c.AlbumsOutsideCollection),
-        new("Editions", IconName.Edition, AppPaths.AdminEditions, null, c => c.Editions, null),
-        new("Series", IconName.Series, AppPaths.AdminSeries, AppPaths.AdminNewSeries, c => c.Series, c => c.SeriesWithoutStatus),
-        new("Authors", IconName.Author, AppPaths.AdminAuthors, AppPaths.AdminNewAuthor, c => c.Authors, null),
-        new("Publishers", IconName.Publisher, AppPaths.AdminPublishers, AppPaths.AdminNewPublisher, c => c.Publishers, c => c.PublisherCollections),
-        new("Genres", IconName.Genre, AppPaths.AdminGenres, AppPaths.AdminNewGenre, c => c.Genres, null),
-        new("Universes", IconName.Universe, AppPaths.AdminUniverses, AppPaths.AdminNewUniverse, c => c.Universes, c => c.SubUniverses),
+        .. new RecordCard[]
+        {
+            new("Series", IconName.Series, AppPaths.AdminSeries, AppPaths.AdminNewSeries, c => c.Series, c => c.SeriesWithoutStatus),
+            new("Albums", IconName.Album, AppPaths.AdminAlbums, AppPaths.AdminNewAlbum, c => c.Albums, c => c.AlbumsOutsideCollection),
+            new("Editions", IconName.Edition, AppPaths.AdminEditions, null, c => c.Editions, null),
+            new("Authors", IconName.Author, AppPaths.AdminAuthors, AppPaths.AdminNewAuthor, c => c.Authors, null),
+            new("Publishers", IconName.Publisher, AppPaths.AdminPublishers, AppPaths.AdminNewPublisher, c => c.Publishers, c => c.PublisherCollections),
+            new("Genres", IconName.Genre, AppPaths.AdminGenres, AppPaths.AdminNewGenre, c => c.Genres, null),
+            new("Universes", IconName.Universe, AppPaths.AdminUniverses, AppPaths.AdminNewUniverse, c => c.Universes, c => c.SubUniverses),
+        }.OrderBy(card => AdminPlan.PlaceOf(card.List)),
     ];
 
     private RecordCounts? _counts;
