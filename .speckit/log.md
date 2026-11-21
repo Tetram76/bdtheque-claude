@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-21
+
+* **Exigence de l'utilisateur** : dans un lot de chantiers, le modèle appliqué à chaque session est adapté à la tâche qu'elle reçoit, suffisant sans être surdimensionné, choisi par l'orchestrateur au lancement ; le skill `chantiers-paralleles` la met en œuvre.
+
 ## 2026-11-20
 
 * **Décision de l'utilisateur** : toute zone de recherche (en-tête de la consultation et de l'administration, listes, recherche de l'autre fiche d'une fusion, recherche d'une édition par son ISBN à l'accueil de l'administration) porte une croix d'effacement dessinée par l'application, de la taille et de la couleur de la loupe, la même dans tous les navigateurs et tous les thèmes, celle du navigateur n'apparaissant jamais ; elle ne paraît que lorsqu'un texte est saisi ; dans une liste, elle ramène aussitôt la liste sans recherche, à sa première page, les autres critères et l'entrée gardés, comme « Effacer la recherche », et ramène de même le dialogue de fusion à son invite ; dans l'en-tête et la recherche par ISBN, elle vide le champ ; au clavier, elle suit immédiatement le champ, et s'annonce « Effacer la recherche » ; la croix qui retire la fiche choisie d'un choix par le nom a le même visuel, l'action étant la même, réinitialiser le champ. **Choix** : composant unique placé après le champ, lien vers l'adresse de « Effacer la recherche », écrite une fois, ou bouton de réinitialisation dans l'en-tête, dont un script rend le focus au champ ; croix montrée par `:placeholder-shown`, croix du navigateur masquée ; relevée par la mesure d'audience comme « Effacer la recherche », sans fonction propre ; le bouton de la recherche lu par les seules technologies d'assistance sort du parcours au clavier, où il recevait un focus invisible (#542).
