@@ -12,4 +12,4 @@
 * [Règle absolue : interdiction de pousser directement sur `main`](regle-absolue-interdiction-de-pousser-directement-sur-main.md) - Interdiction de commiter ou pousser sur main : toute modification passe par une Pull Request.
 * [Stratégie de branches](strategie-de-branches.md) - Branches persistantes (main et branches de release seules), nommage des branches (feat/, fix/, chore/), branche de travail tenue à jour de sa branche de destination.
 * [Conventions de commit](conventions-de-commit.md) - Conventional Commits pour les commits et titres de PR, description de PR devenue corps du commit squashé, template de PR.
-* [Versions et releases](versions-et-releases.md) - Numérotation semver, jalons, rattachement des tickets et PR, publication d'une version (tag, release, analyse, images).
+* [Versions et releases](versions-et-releases.md) - Numérotation semver, jalons, rattachement des tickets et PR, version publiable signalée à l'utilisateur, publication sur sa seule décision, menée par l'agent (tag, release, analyse, images).
