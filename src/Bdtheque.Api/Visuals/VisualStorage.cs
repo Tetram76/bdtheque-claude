@@ -72,9 +72,9 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
                 throw new InvalidOperationException(
-                    $"The visuals volume cannot be written at '{path}'. Give write access to the user of the 'api' "
-                    + $"container (UID {Environment.GetEnvironmentVariable("APP_UID") ?? "of the process"}) on the folder "
-                    + "mounted there (VISUELS_HOST_PATH).",
+                    $"The visuals volume cannot be written at '{path}'. Give write access to the user the 'api' "
+                    + $"container runs as ({ProcessIdentity.Describe() ?? "the user of the process"}) on the folder "
+                    + "mounted there (VISUELS_HOST_PATH), or run it as a user that can write to it (API_USER).",
                     exception);
             }
         }

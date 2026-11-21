@@ -204,6 +204,14 @@ jobs:
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
 
+      # The action would download its binary without the token, under the anonymous limit of the runner's shared
+      # address (gestion-projet/depot/integration-continue-ci.md, quotas).
+      - name: Install Docker Scout
+        if: steps.previous.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/install-docker-scout.sh
+
       # An image that holds a fixable vulnerability of a package the repository chooses is never
       # published, nor is the other image of the pair (same check as the CI, see ci.yml).
       - name: Check vulnerabilities of the api image

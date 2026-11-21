@@ -477,6 +477,14 @@ jobs:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # The action would download its binary without the token, under the anonymous limit of the runner's shared
+      # address (gestion-projet/depot/integration-continue-ci.md, quotas).
+      - name: Install Docker Scout
+        if: needs.changes.outputs.images == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: .github/scripts/install-docker-scout.sh
+
       # Fails on any fixable vulnerability of a package the repository chooses, the .NET runtime among them, whether
       # the published image holds it or not; the system packages of the chiseled base image are fixed by its rebuild,
       # which every build takes (choix-implementation/deploiement/publication-des-images-docker.md).

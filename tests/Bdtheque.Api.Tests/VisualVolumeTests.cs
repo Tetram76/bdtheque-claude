@@ -87,6 +87,28 @@ public sealed class VisualVolumeTests
         Assert.Equal(expected, MountInfo.IsOnMount(path, mountPoints));
     }
 
+    [Fact]
+    public void ProcessIdentity_IsTheEffectiveUserAndGroupOfTheProcess()
+    {
+        // The deployment may run `api` as another user than the one of its image (API_USER): the
+        // identity reported is the one the process runs as, not the one the image declares.
+        string[] status =
+        [
+            "Name:\tdotnet",
+            "Uid:\t1000\t1026\t1026\t1026",
+            "Gid:\t1000\t100\t100\t100",
+            "Groups:\t100",
+        ];
+
+        Assert.Equal("UID 1026, GID 100", ProcessIdentity.Describe(status));
+    }
+
+    [Fact]
+    public void ProcessIdentity_UnknownWhenTheStatusDoesNotTell()
+    {
+        Assert.Null(ProcessIdentity.Describe(["Name:\tdotnet"]));
+    }
+
     private static VisualStorage StorageAt(string root) =>
         new(Options.Create(new VisualStorageOptions { RootPath = root }), NullLogger<VisualStorage>.Instance);
 }
