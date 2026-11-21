@@ -12,6 +12,9 @@ public sealed partial class DockerComposeTests
 {
     private static readonly string Compose = RepositoryFiles.Read("docker-compose.yml");
 
+    // db itself and its only caller, in order.
+    private static readonly string[] DbNetworkMembers = ["api", "db"];
+
     [Fact]
     public void Names_AreLeftToTheProject()
     {
@@ -52,6 +55,74 @@ public sealed partial class DockerComposeTests
         Assert.NotEmpty(ports);
         Assert.All(ports, port => Assert.StartsWith("127.0.0.1:", port));
     }
+
+    [Fact]
+    public void Networks_AreNamedAfterTheServiceTheyGiveAccessTo()
+    {
+        // One naming rule for every network, so that a network says which container it protects and joining it says
+        // that a service calls that container (choix-implementation/deploiement/reseaux-des-conteneurs.md).
+        var services = ServiceNetworks(Compose);
+        var networks = DeclaredNetworks(Compose);
+
+        Assert.NotEmpty(networks);
+        Assert.All(networks, network =>
+        {
+            Assert.True(services.ContainsKey(network), $"Network '{network}' is named after no service.");
+            Assert.Contains(network, services[network]);
+        });
+    }
+
+    [Fact]
+    public void Db_IsReachedByApiOnly()
+    {
+        // contraintes-techniques/architecture-deploiement/architecture-des-tiers.md: api alone accesses db.
+        var members = ServiceNetworks(Compose).Where(service => service.Value.Contains("db")).Select(service => service.Key);
+
+        Assert.Equal(DbNetworkMembers, members.Order());
+    }
+
+    [Fact]
+    public void NetworksOfTheValidation_AreThoseOfTheDeployment()
+    {
+        // The validation environment overrides docker-compose.yml: its services join the networks of the deployment,
+        // under the same rule, and declare none of their own.
+        var validation = RepositoryFiles.Read("docker/validation/compose.yaml");
+        var joined = ServiceNetworks(validation).SelectMany(service => service.Value).ToList();
+
+        Assert.NotEmpty(joined);
+        Assert.Empty(DeclaredNetworks(validation));
+        Assert.All(joined, network => Assert.Contains(network, DeclaredNetworks(Compose)));
+    }
+
+    /// <summary>The networks of the top-level <c>networks</c> element.</summary>
+    private static List<string> DeclaredNetworks(string compose) =>
+        TopLevelElement(compose, "networks") is { } element
+            ? [.. TopLevelKey().Matches(element).Select(match => match.Groups["key"].Value)]
+            : [];
+
+    /// <summary>Each service of the top-level <c>services</c> element, with the networks it joins.</summary>
+    private static Dictionary<string, List<string>> ServiceNetworks(string compose) =>
+        ServiceBlock().Matches(TopLevelElement(compose, "services") ?? "").ToDictionary(
+            match => match.Groups["service"].Value,
+            match => JoinedNetworks().Matches(match.Groups["body"].Value)
+                .SelectMany(networks => networks.Groups["network"].Captures.Select(capture => capture.Value))
+                .ToList());
+
+    /// <summary>The indented content of a top-level element, up to the next one.</summary>
+    private static string? TopLevelElement(string compose, string name) =>
+        TopLevel().Matches(compose).FirstOrDefault(match => match.Groups["name"].Value == name)?.Groups["body"].Value;
+
+    [GeneratedRegex(@"^(?<name>[a-z]+):[ \t]*\r?\n(?<body>(?:(?:[ \t]+.*|[ \t]*)(?:\r?\n|$))*)", RegexOptions.Multiline)]
+    private static partial Regex TopLevel();
+
+    [GeneratedRegex(@"^  (?<key>[\w-]+):", RegexOptions.Multiline)]
+    private static partial Regex TopLevelKey();
+
+    [GeneratedRegex(@"^  (?<service>[\w-]+):[ \t]*\r?\n(?<body>(?:(?:    .*|[ \t]*)(?:\r?\n|$))*)", RegexOptions.Multiline)]
+    private static partial Regex ServiceBlock();
+
+    [GeneratedRegex(@"^    networks:[ \t]*\r?\n(?:      -[ \t]+(?<network>[\w-]+)[ \t]*(?:\r?\n|$))+", RegexOptions.Multiline)]
+    private static partial Regex JoinedNetworks();
 
     [GeneratedRegex(@"^\s+-\s+""(?<port>[^""]+:\d+)""\s*$", RegexOptions.Multiline)]
     private static partial Regex ValidationPort();

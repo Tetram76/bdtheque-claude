@@ -13,7 +13,7 @@ BDthèque est une application web découpée en trois conteneurs Docker, assembl
 
 ## Les conteneurs et leurs réseaux
 
-Docker Compose relie les conteneurs par deux réseaux privés. Le réseau `frontend-net` réunit `frontend` et `api`, le réseau `backend` réunit `api` et `db`. Comme `frontend` ne rejoint pas `backend`, il n'a aucun moyen d'atteindre la base, même s'il était compromis. Un seul port est publié sur la machine hôte, celui de `frontend` (variable `FRONTEND_PORT`, 8080 par défaut) : `api` et `db` ne sont joignables que de l'intérieur de leurs réseaux.
+Docker Compose relie les conteneurs par deux réseaux privés, chacun nommé d'après le conteneur auquel il donne accès et rejoint par les seuls conteneurs qui l'appellent. Le réseau `api` réunit donc `api` et `frontend`, et le réseau `db` réunit `db` et `api`. Comme `frontend` ne rejoint pas le réseau `db`, il n'a aucun moyen d'atteindre la base, même s'il était compromis ; un test du dépôt, [`DockerComposeTests`](../../../tests/Bdtheque.Infrastructure.Tests/DockerComposeTests.cs), vérifie cette règle de nommage dans les fichiers Compose et le fait que seul `api` rejoigne le réseau `db`. Les raisons de cette règle sont dans [Réseaux des conteneurs](../../../.speckit/choix-implementation/deploiement/reseaux-des-conteneurs.md). Un seul port est publié sur la machine hôte, celui de `frontend` (variable `FRONTEND_PORT`, 8080 par défaut) : `api` et `db` ne sont joignables que de l'intérieur de leurs réseaux.
 
 Le schéma suivant, tracé à la main d'après `docker-compose.yml`, répond à une seule question : quel conteneur peut joindre quel autre, par quel réseau, et où sont rangées les données ?
 
@@ -27,8 +27,8 @@ flowchart TB
     visuals[["Dossier des visuels<br/>monté dans api"]]
 
     host -- "port publié<br/>FRONTEND_PORT" --> frontend
-    frontend -- "réseau frontend-net" --> api
-    api -- "réseau backend" --> db
+    frontend -- "réseau api" --> api
+    api -- "réseau db" --> db
     db --- dbdata
     api --- visuals
 ```
@@ -36,8 +36,8 @@ flowchart TB
 | Conteneur | Rôle | Exposition |
 | --- | --- | --- |
 | `frontend` | Il rend les pages de la consultation et de l'administration, gère la connexion de l'administrateur et relaie au navigateur les fichiers des visuels, qu'il obtient d'`api`. | C'est le seul conteneur publié sur l'hôte, et il n'écoute qu'en HTTP. |
-| `api` | Il expose les endpoints des familles `/admin`, `/catalog` et `/audience`, applique les règles, lit et écrit la base et le dossier des visuels, et applique les migrations du schéma à son démarrage. | Il n'est publié sur aucun port : seul `frontend` le joint, par le réseau `frontend-net`. |
-| `db` | Il exécute PostgreSQL, dans une image dont la version est épinglée dans `docker-compose.yml`. | Il n'est relié qu'au réseau `backend`, que `frontend` ne rejoint pas. |
+| `api` | Il expose les endpoints des familles `/admin`, `/catalog` et `/audience`, applique les règles, lit et écrit la base et le dossier des visuels, et applique les migrations du schéma à son démarrage. | Il n'est publié sur aucun port : seul `frontend` le joint, par le réseau `api`. |
+| `db` | Il exécute PostgreSQL, dans une image dont la version est épinglée dans `docker-compose.yml`. | Il n'est relié qu'au réseau `db`, que `frontend` ne rejoint pas. |
 
 ## Le parcours d'une requête
 
