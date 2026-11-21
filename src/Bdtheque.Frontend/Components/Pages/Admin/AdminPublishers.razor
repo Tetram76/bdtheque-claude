@@ -17,7 +17,7 @@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminPublishers" />
 
-<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Records" Problem="_problem" Loaded="@(_list is not null)">
     <Heading>
         <ListHeading Title="@L["Title"]" TotalCount="_counts?.Publishers" NewHref="@AppPaths.AdminNewPublisher" NewLabel="@L["New"]" />
     </Heading>
@@ -36,7 +36,7 @@
             switch (_query)
             {
                 case { EmptyReason: EmptyListReason.Search, Text: { } text }:
-                    <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                    <EmptyList Message="@L["Empty.Text", text]" SearchedIn="@L["Empty.SearchedIn"]">
                         <Actions>
                             <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                             <Button Href="@AppPaths.NewWithSearched(AppPaths.AdminNewPublisher, text)" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", text]" />
@@ -73,10 +73,7 @@
                 {
                     <div class="publisher-row" role="row">
                         <span class="publisher-main" role="cell">
-                            <RowEntry>@row.Name</RowEntry>
-                            <span class="publisher-collection-names" data-empty="@(row.Collections.Count == 0)">
-                                @(row.Collections.Count == 0 ? L["Collections.Zero"] : string.Join(", ", row.Collections))
-                            </span>
+                            <RowEntry Detail="@string.Join(", ", row.Collections)">@row.Name</RowEntry>
                         </span>
                         <span class="publisher-meta">
                             <span class="publisher-website" role="cell">

@@ -20,7 +20,7 @@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminGenres" />
 
-<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Reference" Problem="_problem" Loaded="@(_list is not null)">
     <Heading>
         <ListHeading Title="@L["Title"]" TotalCount="_counts?.Genres" NewHref="@NewHref" NewLabel="@L["New"]" />
     </Heading>
@@ -39,7 +39,7 @@
             switch (_query)
             {
                 case { EmptyReason: EmptyListReason.Search, Text: { } searched }:
-                    <EmptyList Message="@L["Empty.Text", searched]" Hint="@L["Empty.Hint"]">
+                    <EmptyList Message="@L["Empty.Text", searched]" SearchedIn="@L["Empty.SearchedIn"]">
                         <Actions>
                             <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                             <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", searched]" />

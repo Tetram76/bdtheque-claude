@@ -338,6 +338,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub").Find(".empty-list");
 
         Assert.Equal("Aucun genre ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur le libellé du genre, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal(
             [("Effacer la recherche", AppPaths.AdminGenres), ("Créer le genre « Zorglub »", $"{AppPaths.AdminGenres}?q=Zorglub&new=open")],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));

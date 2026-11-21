@@ -71,7 +71,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors, $"?q={_marker}"));
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"JVH {_marker}"]);
-        await Assertions.Expect(page.Locator(".author-identity")).ToHaveTextAsync($"Jean {_marker}");
+        await Assertions.Expect(page.Locator(".row-entry-detail")).ToHaveTextAsync($"Jean {_marker}");
         await Assertions.Expect(page.Locator(".author-row:not(.author-row-head) .author-nationality")).ToHaveTextAsync("Belge");
     }
 

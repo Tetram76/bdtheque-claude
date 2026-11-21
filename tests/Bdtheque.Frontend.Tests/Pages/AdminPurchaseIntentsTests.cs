@@ -6,6 +6,7 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Components.Pages.Admin;
+using Bdtheque.Frontend.Components.Presentation;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Tests.Audience;
@@ -85,6 +86,24 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         Assert.Equal(
             "Une intention se pose depuis la page des éditions et intentions d'acquisition de son album.",
             Text(heading.QuerySelector(".list-heading-note")!));
+    }
+
+    [Fact]
+    // The block of the list bears the mention of its set on the home of the administration, the intents being no records of
+    // their own (visuel/listes/declinaison-par-theme.md, #474).
+    public void Block_BearsTheMentionOfTheAcquisitions()
+    {
+        Assert.Equal("Acquisitions", Text(Open("").Find(".block-kicker")));
+    }
+
+    [Fact]
+    // Wherever it is, the way to the editions and intents of an album has the icon of the editions (visuel/listes/principes-communs.md,
+    // Actions, #474), never that of the album, which the tag of an intent on the whole album has.
+    public void Menu_LeadsToTheEditionsOfTheAlbum_WithTheIconOfTheEditions()
+    {
+        var item = Open("").Find($".intent-actions a.menu-item[href='{AppPaths.AdminAlbumEditions(Blacksad.Id)}']");
+
+        Assert.Equal(IconPath(IconName.Edition), item.QuerySelector("svg.icon path")!.GetAttribute("d"));
     }
 
     [Fact]
@@ -181,6 +200,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub").Find(".empty-list");
 
         Assert.Equal("Aucune intention d'acquisition ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur le titre de l'album et sur celui de sa série, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal([("Effacer la recherche", AppPaths.AdminPurchaseIntents)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
@@ -305,6 +325,8 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
     private static List<(string Text, string? Href)> Items(IElement row) =>
         [.. row.QuerySelectorAll(".actions-menu-panel .menu-item").Select(item => (Text(item), item.GetAttribute("href")))];
+
+    private string? IconPath(IconName name) => Render<Icon>(parameters => parameters.Add(p => p.Name, name)).Find("path").GetAttribute("d");
 
     private static string Text(IElement element) => Normalized(element.TextContent);
 

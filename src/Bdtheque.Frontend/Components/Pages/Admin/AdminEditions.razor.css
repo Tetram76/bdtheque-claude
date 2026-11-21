@@ -58,14 +58,6 @@
     min-inline-size: 0;
 }
 
-.edition-album {
-    overflow: hidden;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .edition-year {
     grid-area: year;
 }

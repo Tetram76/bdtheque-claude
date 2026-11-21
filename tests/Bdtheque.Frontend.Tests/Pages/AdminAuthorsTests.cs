@@ -95,7 +95,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     {
         var rows = Open("").FindAll(".author-row:not(.author-row-head)").Select(row => (
             Text(row.QuerySelector(".row-entry")!),
-            row.QuerySelector(".author-identity") is { } identity ? Text(identity) : null,
+            row.QuerySelector(".row-entry-detail") is { } identity ? Text(identity) : null,
             Text(row.QuerySelector(".author-nationality")!),
             Text(row.QuerySelector(".author-albums")!),
             Text(row.QuerySelector(".author-roles")!)));
@@ -193,6 +193,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub&entry=Z").Find(".empty-list");
 
         Assert.Equal("Aucun auteur ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur le nom, le prénom et le pseudonyme de l'auteur, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal(
             [("Effacer la recherche", $"{AppPaths.AdminAuthors}?entry=Z"), ("Créer l'auteur « Zorglub »", $"{AppPaths.AdminAuthors}?q=Zorglub&entry=Z&new=open")],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));

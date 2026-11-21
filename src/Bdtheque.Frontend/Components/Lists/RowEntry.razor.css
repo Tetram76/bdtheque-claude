@@ -6,3 +6,13 @@
     font-weight: var(--font-weight-strong);
     overflow-wrap: anywhere;
 }
+
+/* Its detail, muted and in small, on a single line that an ellipsis ends when it does not fit: a long detail never makes its
+   row taller than the others. */
+.row-entry-detail {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

@@ -1,3 +1,5 @@
+@inject IStringLocalizer<RecordSet> Sets
+
 @* The page of a list of the administration (visuel/liste-albums/contenu.md, model of the other lists): its heading, then the
    list in a single block without a visible title, and the dialogs of a row; the error of the API instead of the list. *@
 <div class="admin-list">
@@ -9,7 +11,7 @@
     }
     else if (Loaded)
     {
-        <Block Title="@Title" Kicker="@Kicker" TitleHidden="true">
+        <Block Title="@Title" Kicker="@Sets[Set.ToString()]" TitleHidden="true">
             <div class="admin-list-body">
                 @ChildContent
             </div>
@@ -28,9 +30,11 @@
     [Parameter, EditorRequired]
     public string Title { get; set; } = null!;
 
-    /// <summary>The mention of the block of the list, which only some themes show (visuel/listes/declinaison-par-theme.md).</summary>
-    [Parameter]
-    public string? Kicker { get; set; }
+    /// <summary>
+    /// The set the list presents, whose mention its block bears, which only some themes show (visuel/listes/declinaison-par-theme.md).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public RecordSet Set { get; set; }
 
     /// <summary>The error of the API that prevented the list from being read, presented instead of it.</summary>
     [Parameter]

@@ -18,9 +18,6 @@
   <data name="NoCreation" xml:space="preserve">
     <value>Une édition se saisit depuis la page des éditions et intentions d&apos;acquisition de son album.</value>
   </data>
-  <data name="Kicker" xml:space="preserve">
-    <value>Fiches</value>
-  </data>
   <data name="ListTitle" xml:space="preserve">
     <value>Liste des éditions</value>
   </data>
