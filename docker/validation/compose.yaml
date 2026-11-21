@@ -55,7 +55,7 @@ services:
       api:
         condition: service_healthy
     networks:
-      - frontend-net
+      - api
 
 volumes:
   visuels:

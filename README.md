@@ -51,7 +51,7 @@ L'application est déployée en **3 conteneurs Docker** :
 
 Le `frontend` communique avec l'`api` via le réseau Docker interne. L'`api` est le seul tier à accéder à `db`.
 
-Deux réseaux Docker isolent les tiers : `backend` (`db` ↔ `api`) et `frontend-net` (`api` ↔ `frontend`). Seul `frontend` publie un port sur l'hôte ; `api` et `db` ne sont jamais exposés à l'extérieur du réseau Docker.
+Deux réseaux Docker isolent les tiers, chacun nommé d'après le conteneur auquel il donne accès : `db` (`db` ↔ `api`) et `api` (`api` ↔ `frontend`). Seul `frontend` publie un port sur l'hôte ; `api` et `db` ne sont jamais exposés à l'extérieur du réseau Docker.
 
 ## Déploiement
 
