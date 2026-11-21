@@ -2,9 +2,9 @@
 name: chantiers-paralleles
 description: >-
   Runs a batch of chantiers in parallel on this repository, each in its own
-  session and worktree, to complete the current milestone: picks them among
-  its open tickets (within the user's scope, if any) in the order of priority
-  of the .speckit, linking tickets on close subjects into one chantier,
+  session and worktree, to complete the current milestone first: picks them
+  among all its open tickets (within the user's scope, if any) in the order of
+  priority of the .speckit, the current milestone's tickets first, linking tickets on close subjects into one chantier,
   briefs each session to notify the orchestrator of major
   events and to run its own time-boxed watches, evaluates the
   resources of the machine before each
@@ -34,9 +34,9 @@ under `.claude/worktrees/`), say so to the user in your first message; when
 the session is archived, its worktree and branch are removed like a
 chantier's (step 4, cleanup).
 
-A batch serves to **complete the current milestone**, never to anticipate
-future work: its chantiers are chosen among that milestone's tickets only
-(step 2.2). The user may also **restrict the candidates to a scope** (a list
+A batch serves to **complete the current milestone first**: the current
+milestone has priority, it is not exclusive. Its chantiers are chosen among
+all the open tickets, that milestone's tickets before the others (step 2.2). The user may also **restrict the candidates to a scope** (a list
 of tickets, a label, a screen, a part of the plan…): take the latest scope the
 user gave in this conversation; only the tickets within it are candidates.
 
@@ -89,8 +89,8 @@ never taking one of the places of the chantiers run at once.
   request. What it does open as a ticket (consistency gap, the check having
   no pull request; major version bump of the stack, its review of the
   existing code included; improvement too big for a bump's pull request;
-  deferred quality entry) is a ticket like any other: a candidate when it is
-  in the current milestone.
+  deferred quality entry) is a ticket like any other: a candidate like any
+  open ticket.
 - Its heavy runs count in the resources (step 2.3) like any session's.
 
 ## 2. Before each launch — every time, never reused
@@ -118,13 +118,13 @@ never taking one of the places of the chantiers run at once.
    chantier) and depends on the sub-tickets its parent orders before it.
    Order them:
    CI stabilization (a flaky test, an intermittent failure — not an
-   optimization) → plan of
+   optimization, any milestone) → plan of
    `.speckit/suivi-implementation/` **in** the milestone of the next version →
-   the other tickets of that milestone. A ticket outside the current
-   milestone (another milestone or none, plan tickets included) is **not a
-   candidate**, unless the user asked for it explicitly for the batch; only
-   CI stabilization (any milestone) is exempt. A harness is never a
-   candidate (above).
+   the other tickets of that milestone → plan chantiers outside that milestone
+   (another milestone or none) → the other tickets outside it. The current
+   milestone has priority, it is not exclusive: a ticket outside it is a
+   candidate like any open ticket, planned the same way, **after** those of
+   the current milestone. A harness is never a candidate (above).
 
    **Scope of the user**, if given: keep only the tickets within it, and the
    sub-tickets of those tickets. It adds to the criteria above and to the
