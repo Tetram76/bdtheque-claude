@@ -61,12 +61,13 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             Text(card.QuerySelector(".admin-record-detail")!),
             string.Join(" | ", card.QuerySelectorAll(".admin-record-links a").Select(link => link.TextContent.Trim()))));
 
-        // The purchase intents stand apart (#358); the editions are entered from their album, never created here.
+        // In the order of the menu (#477); the purchase intents stand apart (#358); the editions are entered from their album,
+        // never created here.
         Assert.Equal(
             [
+                ("412", "dont 28 sans statut", "+ Nouvelle série"),
                 ("2 847", "non possédés : 214", "+ Nouvel album"),
                 ("2 913", "saisies depuis leur album, avec leurs visuels", ""),
-                ("412", "dont 28 sans statut", "+ Nouvelle série"),
                 ("1 106", "scénaristes, dessinateurs, coloristes…", "+ Nouvel auteur"),
                 ("96", "collections : 214", "+ Nouvel éditeur"),
                 ("24", "référentiel", "+ Nouveau genre"),
@@ -87,9 +88,9 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             link.TextContent.Trim(), link.GetAttribute("aria-label"), link.GetAttribute("href")));
         Assert.Equal(
             [
+                ("Séries", "Séries, voir la liste", AppPaths.AdminSeries),
                 ("Albums", "Albums, voir la liste", AppPaths.AdminAlbums),
                 ("Éditions", "Éditions, voir la liste", AppPaths.AdminEditions),
-                ("Séries", "Séries, voir la liste", AppPaths.AdminSeries),
                 ("Auteurs", "Auteurs, voir la liste", AppPaths.AdminAuthors),
                 ("Éditeurs", "Éditeurs, voir la liste", AppPaths.AdminPublishers),
                 ("Genres", "Genres, voir la liste", AppPaths.AdminGenres),
@@ -97,6 +98,18 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
             ],
             titles);
         Assert.DoesNotContain(BlockOf(page, "Les fiches").QuerySelectorAll("a"), link => link.TextContent.Contains("Voir les", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Records_TheCardsFollowTheOrderOfThePlanOfTheAdministration()
+    {
+        var page = Render<AdminHome>();
+
+        // The home and the menu present the types of record in a single order, that of the plan (#477): the lists of the cards
+        // come in the order the menu gives them.
+        var cards = BlockOf(page, "Les fiches").QuerySelectorAll("h3 > a").Select(link => link.GetAttribute("href")!).ToList();
+        var plan = AdminPlan.Groups.SelectMany(group => group.Entries).Select(entry => entry.Path).Where(cards.Contains);
+        Assert.Equal(plan, cards);
     }
 
     [Fact]
