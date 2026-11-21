@@ -35,8 +35,8 @@
 
 .option-list ::deep .option-list-option:hover,
 .option-list ::deep .option-list-option[aria-selected="true"] {
-    background: var(--color-tag);
-    color: var(--color-text-on-tag);
+    background: var(--color-highlight);
+    color: var(--color-text-on-highlight);
 }
 
 .option-list ::deep .option-list-detail,

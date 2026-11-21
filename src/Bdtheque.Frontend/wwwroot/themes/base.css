@@ -96,7 +96,17 @@
     --color-text-on-tag: #1D1D21;
     /* The border of a tag: none to see by default, its fill showing through it. */
     --color-tag-border: transparent;
-    /* The header, of the surface by default; a theme may give it a color of its own (the deep color of « La couverture
+    /* The entry hovered or active of a list laid over the page (the options of a field, a menu), and a control pressed or
+       open (the « ⋯ » button, the button of the filters): a fill that stands out from the surface it is laid on (3:1, WCAG
+       2.2, 1.4.11), which the fill of a tag does not, a tag being free to be as pale as, or the same as, that surface (« La
+       planche encrée »). The inverse surface by default, dark on the surfaces of every theme. */
+    --color-highlight: var(--color-surface-inverse);
+    --color-text-on-highlight: var(--color-text-on-inverse);
+    /* The same for the help button of a header, whose own fill is that of the header or its accent: the header of a theme
+       may be the inverse surface itself. */
+    --color-help-hover: var(--color-highlight);
+    --color-text-on-help-hover: var(--color-text-on-highlight);
+    /* The header,of the surface by default; a theme may give it a color of its own (the deep color of « La couverture
        du jour »), with what is read on it: its texts and entries, its search field, the tag of the administration. */
     --color-header: var(--color-surface);
     --color-text-on-header: var(--color-text);

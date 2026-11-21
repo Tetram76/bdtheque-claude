@@ -152,6 +152,29 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(last).ToBeInViewportAsync();
     }
 
+    // The active suggestion is filled with the highlight of the theme, which stands out from the list it is in, whatever
+    // the fill of the tags of the theme (« La planche encrée »: white tags on a white list, #531).
+    [Theory, InEachTheme]
+    public async Task RecordPicker_ActiveSuggestion_IsFilledWithTheHighlight_ApartFromTheList(string theme)
+    {
+        var token = $"Spirou{Guid.NewGuid():N}"[..12];
+        await CreateGenreAsync(token);
+        var page = await OpenAsync(theme);
+        var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
+        await TypeAndAwaitSuggestionsAsync(page, input, token);
+        await input.PressAsync("ArrowDown");
+
+        var option = Suggestions(page).First;
+        await Assertions.Expect(option).ToHaveAttributeAsync("aria-selected", "true");
+        var fills = await option.EvaluateAsync<string[]>("""
+            option => [getComputedStyle(option).backgroundColor, getComputedStyle(option.parentElement).backgroundColor,
+                       resolve('--color-highlight')]
+            """.Replace("resolve(", ResolveColor));
+
+        Assert.Equal(fills[2], fills[0]);
+        Assert.NotEqual(fills[1], fills[0]);
+    }
+
     [Theory, InEachTheme]
     public async Task RecordPicker_Escape_ClosesTheSuggestions_WithoutErasingTheText(string theme)
     {

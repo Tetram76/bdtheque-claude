@@ -34,6 +34,13 @@ public sealed partial class ThemeContrastTests
         ("text-on-info", "info", Text),
         ("text-on-delete", "delete", Text),
         ("text-on-tag", "tag", Text),
+        // The entry hovered or active of a list laid over the page, and a control pressed or open: its fill stands out from
+        // the surfaces it is laid on, which the fill of a tag need not do (« La planche encrée »: white on white, #531).
+        ("text-on-highlight", "highlight", Text),
+        ("highlight", "background", NonText),
+        ("highlight", "surface", NonText),
+        ("highlight", "surface-raised", NonText),
+        ("text-on-help-hover", "help-hover", Text),
         ("control-border", "background", NonText),
         ("control-border", "surface", NonText),
         ("control-border", "surface-raised", NonText),

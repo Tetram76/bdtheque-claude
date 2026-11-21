@@ -3,6 +3,7 @@
 ## 2026-11-21
 
 * **Exigence de l'utilisateur** : un lot de chantiers sert à compléter en priorité le jalon en cours, sans l'exclusivité : tous les tickets ouverts sont candidats, ceux du jalon en cours passant en priorité (le plan d'abord), les autres, plan compris, planifiés de la même façon après eux ; la stabilisation du CI reste en tête, et l'indépendance et les dépendances (toute condition préalable, calendrier compris) restent vérifiées pour chaque candidat. Le skill `chantiers-paralleles` la met en œuvre (#582).
+* **Choix** : l'entrée survolée ou active d'une liste posée sur la page et un contrôle enfoncé ou ouvert lisent un contrat de surlignage propre, la surface inverse par défaut, et non plus celui de l'étiquette, que « La planche encrée » donne de la couleur de la surface ; le test des contrastes le vérifie dans chaque thème (#531).
 * **Exigence de l'utilisateur** : dans un lot de chantiers, le modèle appliqué à chaque session est adapté à la tâche qu'elle reçoit, suffisant sans être surdimensionné, choisi par l'orchestrateur au lancement ; le skill `chantiers-paralleles` la met en œuvre.
 
 ## 2026-11-20

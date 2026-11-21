@@ -83,6 +83,9 @@
     --color-text-on-header-tag: #FFFFFF;
     --color-help: var(--day-accent);
     --color-text-on-help: var(--day-text-on-accent);
+    /* On the deep colour of the header, the inverse surface would melt into it: the help takes the tint of the day. */
+    --color-help-hover: var(--color-tag);
+    --color-text-on-help-hover: var(--color-text-on-tag);
     --border-width-help: 0;
     --radius-help: 50%;
     --border-header: 0 solid transparent;
