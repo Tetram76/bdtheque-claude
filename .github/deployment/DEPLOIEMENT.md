@@ -29,13 +29,3 @@ Le détail de chaque réglage et de l'exploitation (sauvegarde des données, mis
 5. Vérifiez que l'application répond sur `http://<NAS>:<FRONTEND_PORT>/health`.
 
 Le chiffrement HTTPS est assuré par le reverse proxy du NAS, qui relaie les requêtes en HTTP vers `FRONTEND_PORT` : l'application elle-même ne sert que du HTTP.
-
-## Passer à une autre version
-
-Téléchargez le paquet de la nouvelle version, et remplacez le `docker-compose.yml` du dossier de l'application par le sien. Gardez votre `.env`, en le complétant si le `.env.example` de la nouvelle version ajoute un réglage. Puis, en SSH, depuis ce dossier :
-
-```bash
-docker compose pull && docker compose up -d
-```
-
-Le schéma de la base est mis à jour automatiquement au démarrage, et les données comme les visuels sont conservés.
