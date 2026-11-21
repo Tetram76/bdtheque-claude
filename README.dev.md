@@ -223,13 +223,18 @@ Une version est publiable quand tous les tickets de son jalon sont fermés ; ell
 
    Sur GitHub, le tag doit apparaître « Verified ».
 
-3. **Créer la release**, d'abord en brouillon. Une version `0.0.x` est une pré-release (`--prerelease`) ; une version `0.x` à partir de `0.1.0` n'en est pas une, mais reste une version 0. Les notes suivent l'ordre que fixe [Versions et releases](.speckit/gestion-projet/depot/versions-et-releases.md) : présentation de la version, qui annonce une version 0 et toute rupture de compatibilité ; encadré `> [!WARNING]` d'une rupture ; compatibilité fonctionnelle, d'hébergement et de déploiement avec les versions précédentes, et montée de version ; détail généré par GitHub ; historique. Les trois premières parties sont écrites dans un fichier, `notes.md`, d'après ce qui a changé depuis le tag de la version précédente (Pull Requests de la version pour le fonctionnel ; `git diff v0.0.3 v0.1.0 -- docker-compose.yml .env.example .github/deployment docker` et migrations de la base pour l'hébergement et le déploiement) ; GitHub y ajoute le détail :
+3. **Créer la release**, d'abord en brouillon. Une version `0.0.x` est une pré-release (`--prerelease`) ; une version `0.x` à partir de `0.1.0` n'en est pas une, mais reste une version 0. Les notes, écrites dans un fichier `notes.md`, suivent l'ordre que fixe [Versions et releases](.speckit/gestion-projet/depot/versions-et-releases.md) :
+   - la présentation de la version, qui annonce une version 0 et toute rupture de compatibilité ;
+   - l'encadré `> [!WARNING]` d'une rupture ;
+   - la compatibilité fonctionnelle, d'hébergement et de déploiement avec les versions précédentes, et la montée de version, d'après ce qui a changé depuis le tag de la version précédente (`git diff v0.0.3 v0.1.0 -- docker-compose.yml .env.example .github/deployment docker` et migrations de la base pour l'hébergement et le déploiement) ;
+   - la liste des changements, rédigée à partir des commits de la version (`git log --first-parent --format=%s v0.0.3..v0.1.0`), regroupée par nature, les changements qui vont ensemble réunis en un point, sans citer ni ticket ni Pull Request ;
+   - l'historique : les notes des releases précédentes, de la plus récente à la plus ancienne (`gh release view v0.0.3 --json body --jq .body`), pour qui saute plusieurs versions.
 
    ```powershell
-   gh release create v0.1.0 --draft --verify-tag --title "v0.1.0 — Phase 3, partie 1" --notes-file notes.md --generate-notes --notes-start-tag v0.0.3
+   gh release create v0.1.0 --draft --verify-tag --title "v0.1.0 — Phase 3, partie 1" --notes-file notes.md
    ```
 
-   Ajouter ensuite aux notes du brouillon l'historique : les notes des releases précédentes, de la plus récente à la plus ancienne (`gh release view v0.0.3 --json body --jq .body`), pour qui saute plusieurs versions. Relire les notes du brouillon, qui ne doivent mentionner Codex nulle part ([Budget IA](.speckit/gestion-projet/gouvernance/budget-ia.md)), puis publier la release : `gh release edit v0.1.0 --draft=false`.
+   Relire les notes du brouillon, qui ne doivent mentionner Codex nulle part ([Budget IA](.speckit/gestion-projet/gouvernance/budget-ia.md)), puis publier la release : `gh release edit v0.1.0 --draft=false`.
 
 4. **Relancer l'analyse SonarQube Cloud de `main`**, pour que la période du nouveau code commence au commit publié : `gh workflow run ci.yml --ref main`.
 
