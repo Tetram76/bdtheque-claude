@@ -18,6 +18,6 @@
 }
 
 .header-help:hover {
-    background: var(--color-tag);
-    color: var(--color-text-on-tag);
+    background: var(--color-help-hover);
+    color: var(--color-text-on-help-hover);
 }

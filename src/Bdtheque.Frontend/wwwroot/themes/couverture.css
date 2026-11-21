@@ -47,6 +47,9 @@
     --color-accent-text: var(--day-link);
     --color-tag: var(--day-tint);
     --color-text-on-tag: var(--day-deep-text);
+    /* The accent of a pale cover hardly stands out from the papers: what is highlighted takes the deep colour. */
+    --color-highlight: var(--day-deep);
+    --color-text-on-highlight: #FFFFFF;
     /* The genres keep each their own colour, to stay apart (a tint of blue, red, yellow, green, violet, cyan, orange). */
     --color-palette-1: #DAE2EF;
     --color-palette-2: #F8DAD9;
@@ -83,6 +86,9 @@
     --color-text-on-header-tag: #FFFFFF;
     --color-help: var(--day-accent);
     --color-text-on-help: var(--day-text-on-accent);
+    /* The help, already of the accent, lights up in a tint of the day when hovered, on the deep colour of the header. */
+    --color-help-hover: var(--day-tint);
+    --color-text-on-help-hover: var(--day-deep-text);
     --border-width-help: 0;
     --radius-help: 50%;
     --border-header: 0 solid transparent;

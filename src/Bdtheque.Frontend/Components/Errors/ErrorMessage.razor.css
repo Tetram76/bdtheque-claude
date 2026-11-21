@@ -7,6 +7,8 @@
     --error-color: var(--color-text-muted);
     --error-icon-fill: var(--color-tag);
     --error-icon-text: var(--color-text-on-tag);
+    /* The icon of a technical error is drawn as a tag, with its border; those of the other categories have a fill of their own. */
+    --error-icon-ring: var(--color-tag-border);
     --error-frame: dotted;
     display: flex;
     align-items: flex-start;
@@ -23,6 +25,7 @@
     --error-color: var(--color-alert);
     --error-icon-fill: var(--color-alert);
     --error-icon-text: var(--color-text-on-alert);
+    --error-icon-ring: transparent;
     --error-frame: solid;
 }
 
@@ -30,6 +33,7 @@
     --error-color: var(--color-info);
     --error-icon-fill: var(--color-info);
     --error-icon-text: var(--color-text-on-info);
+    --error-icon-ring: transparent;
     --error-frame: dashed;
 }
 
@@ -43,6 +47,7 @@
     border-radius: 50%;
     background: var(--error-icon-fill);
     color: var(--error-icon-text);
+    box-shadow: inset 0 0 0 var(--border-width-control) var(--error-icon-ring);
 }
 
 .error-icon ::deep .icon {

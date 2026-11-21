@@ -152,6 +152,36 @@ public sealed partial class ControlsTests(ApplicationHost application) : Browser
         await Assertions.Expect(last).ToBeInViewportAsync();
     }
 
+    // The active suggestion is the only sign of the entry that Enter chooses: it takes the highlight of the theme, never the
+    // fill of a tag, which a theme may give the color of the floating surface of the list (#531).
+    [Theory, InEachTheme]
+    public async Task RecordPicker_TheActiveSuggestion_TakesTheHighlight_SetApartFromTheList(string theme)
+    {
+        var token = $"Spirou{Guid.NewGuid():N}"[..12];
+        await CreateGenreAsync($"{token} 1");
+        await CreateGenreAsync($"{token} 2");
+        var page = await OpenAsync(theme);
+        var input = page.GetByRole(AriaRole.Combobox, new() { Name = "Genre" });
+
+        await TypeAndAwaitSuggestionsAsync(page, input, token, atOnce: true);
+        await Assertions.Expect(Suggestions(page)).ToHaveTextAsync([$"{token} 1", $"{token} 2"]);
+        await input.PressAsync("ArrowDown");
+        var active = Suggestions(page).First;
+        await Assertions.Expect(active).ToHaveAttributeAsync("aria-selected", "true");
+
+        var colors = await active.EvaluateAsync<string[]>("""
+            option => {
+                const style = getComputedStyle(option);
+                return [style.backgroundColor, style.color, getComputedStyle(option.closest('[role=listbox]')).backgroundColor,
+                    resolve('--color-highlight'), resolve('--color-text-on-highlight')];
+            }
+            """.Replace("resolve(", ResolveColor));
+
+        Assert.Equal(colors[3], colors[0]);
+        Assert.Equal(colors[4], colors[1]);
+        Assert.NotEqual(colors[2], colors[0]);
+    }
+
     [Theory, InEachTheme]
     public async Task RecordPicker_Escape_ClosesTheSuggestions_WithoutErasingTheText(string theme)
     {
