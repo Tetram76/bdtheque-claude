@@ -181,9 +181,9 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
     // As on an entry form (visuel/listes/saisie-selon-l-entite.md, #411): changed or deleted meanwhile, the genre reloaded at its
     // address, what was typed staying in its row until then.
     [Theory]
-    [InlineData(HttpStatusCode.Conflict, "Le genre a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans la ligne jusque-là.")]
-    [InlineData(HttpStatusCode.NotFound, "Le genre a été supprimé entre-temps : rien n'a été enregistré.")]
-    public async Task Edit_OfAGenreChangedOrDeletedMeanwhile_OffersToReloadIt(HttpStatusCode status, string text)
+    [InlineData(HttpStatusCode.Conflict, "Fiche modifiée entre-temps", "Le genre a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans la ligne jusque-là.")]
+    [InlineData(HttpStatusCode.NotFound, "Fiche supprimée entre-temps", "Le genre a été supprimé entre-temps : rien n'a été enregistré.")]
+    public async Task Edit_OfAGenreChangedOrDeletedMeanwhile_OffersToReloadIt(HttpStatusCode status, string title, string text)
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, status);
         var page = Open($"q=a&edit={Biography.Id}");
@@ -192,7 +192,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         await page.SubmitAsync("form.genre-row");
 
         var error = page.Find("form.genre-row [data-error-category]");
-        Assert.Equal(("functional", "Modifiée entre-temps", text),
+        Assert.Equal(("functional", title, text),
             (error.GetAttribute("data-error-category"), Text(error.QuerySelector("[data-error-label]")!), Text(error.QuerySelector("[data-error-text]")!)));
         Assert.Equal([("Recharger la fiche", $"{AppPaths.AdminGenres}?q=a&edit={Biography.Id}")],
             error.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));

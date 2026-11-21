@@ -35,6 +35,26 @@ public sealed class ErrorMessageTests : BunitContext
         Assert.Equal(path, message.Find(".error-icon path").GetAttribute("d"));
     }
 
+    // The title names the situation met, in agreement with its message, the same wherever that situation occurs; the category
+    // is told by the icon, the color and the frame (fonctionnel/presentation-des-erreurs.md, titre d'une erreur, #472).
+    [Theory]
+    [InlineData(ProblemCategory.Business, 422, true, false, "Saisie à corriger")]
+    [InlineData(ProblemCategory.Business, 422, false, false, "Action refusée")]
+    [InlineData(ProblemCategory.Functional, 409, false, false, "Fiche modifiée entre-temps")]
+    [InlineData(ProblemCategory.Functional, 404, false, false, "Fiche supprimée entre-temps")]
+    [InlineData(ProblemCategory.Functional, 409, false, true, "Conséquences modifiées entre-temps")]
+    [InlineData(ProblemCategory.Technical, 500, false, false, "Problème technique")]
+    public void Title_NamesTheSituationMet(ProblemCategory category, int status, bool entry, bool impactChanged, string expected)
+    {
+        var impact = impactChanged ? new DeletionImpact([], [], [], [], "x") : null;
+
+        var message = Render<ErrorMessage>(parameters => parameters
+            .Add(p => p.Problem, new ApiProblem(category, status, null, impact))
+            .Add(p => p.Entry, entry));
+
+        Assert.Equal(expected, message.Find("[data-error-label]").TextContent.Trim());
+    }
+
     [Fact]
     public void ErrorFoundByTheFrontend_IsNamedAndWordedByIt()
     {

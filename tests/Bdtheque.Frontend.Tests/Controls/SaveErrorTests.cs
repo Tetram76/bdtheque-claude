@@ -16,10 +16,10 @@ public sealed class SaveErrorTests : BunitContext
 
     public SaveErrorTests() => Services.AddLocalization();
 
-    // A technical error bears the same mention wherever it occurs (fonctionnel/presentation-des-erreurs.md, #411): that of the
+    // A technical error bears the same title wherever it occurs (fonctionnel/presentation-des-erreurs.md, #411): that of the
     // saving of a record is that of every other error box.
     [Fact]
-    public void TechnicalError_BearsTheMentionOfEveryTechnicalError()
+    public void TechnicalError_BearsTheTitleOfEveryTechnicalError()
     {
         var saveError = RenderSaveError(ApiProblem.Technical(), staticForm: false);
         var errorMessage = Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem, ApiProblem.Technical()));
@@ -42,6 +42,22 @@ public sealed class SaveErrorTests : BunitContext
 
     // The reload of a form sent by the browser reads the record anew at its address; what was typed stays in front of the user
     // until then, without « Voir mes changements ».
+    // The title of the situation met, the same as that of the same situation elsewhere (fonctionnel/presentation-des-erreurs.md,
+    // titre d'une erreur, #472): a saving is an entry, whose business error asks to correct what was typed.
+    [Theory]
+    [InlineData(ProblemCategory.Business, StatusCodes.Status422UnprocessableEntity, "Saisie à corriger")]
+    [InlineData(ProblemCategory.Functional, StatusCodes.Status409Conflict, "Fiche modifiée entre-temps")]
+    [InlineData(ProblemCategory.Functional, StatusCodes.Status404NotFound, "Fiche supprimée entre-temps")]
+    public void Error_BearsTheTitleOfItsSituation(ProblemCategory category, int status, string title)
+    {
+        var problem = new ApiProblem(category, status, null, null);
+        var saveError = RenderSaveError(problem, staticForm: false);
+        var elsewhere = Render<ErrorMessage>(parameters => parameters.Add(p => p.Problem, problem).Add(p => p.Entry, true));
+
+        Assert.Equal(title, saveError.Find("[data-error-label]").TextContent.Trim());
+        Assert.Equal(elsewhere.Find("[data-error-label]").TextContent.Trim(), title);
+    }
+
     [Theory]
     [InlineData(StatusCodes.Status409Conflict, "Conflit.")]
     [InlineData(StatusCodes.Status404NotFound, "Supprimée.")]
@@ -49,7 +65,6 @@ public sealed class SaveErrorTests : BunitContext
     {
         var saveError = RenderSaveError(new ApiProblem(ProblemCategory.Functional, status, null, null), staticForm: true);
 
-        Assert.Equal("Modifiée entre-temps", saveError.Find("[data-error-label]").TextContent.Trim());
         Assert.Equal(text, saveError.Find("[data-error-text]").TextContent.Trim());
         var reload = Assert.Single(saveError.FindAll(".error-actions a"));
         Assert.Equal(ReloadHref, reload.GetAttribute("href"));

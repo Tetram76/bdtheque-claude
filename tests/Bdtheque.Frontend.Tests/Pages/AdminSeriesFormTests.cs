@@ -466,7 +466,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
 
         var error = page.Find("[role=alert]");
         Assert.Equal("business", error.GetAttribute("data-error-category"));
-        Assert.Equal("À corriger", error.QuerySelector("[data-error-label]")!.TextContent);
+        Assert.Equal("Saisie à corriger", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Equal("true", page.Find($"#{field}").GetAttribute("aria-invalid"));
         Assert.Contains(message, page.Find($"#{field}-error").TextContent);
     }

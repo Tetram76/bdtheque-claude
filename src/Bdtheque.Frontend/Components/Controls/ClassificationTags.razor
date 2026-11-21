@@ -21,10 +21,18 @@
 <div class="classification-tags">
     <span class="classification-tags-name">@L["Universes"]</span>
     <RecordTags Id="@($"{Id}-add-universe")" Kind="RecordKind.Universe" Items="Records.Universes" AddText="@L["Add"]"
-                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => RemoveAsync(Records.Universes, universe)"
+                AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="RemoveUniverseAsync"
                 OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)"
                 ErrorOf="universe => ErrorOf(universe.Id)" />
     <InheritedTags Label="@InheritedLabel" Items="InheritedUniverses" />
+    @if (_universeFailure is { } failure)
+    {
+        @* The ancestors of a universe added that could not be read, said at the scale of the universes until their next change
+           (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
+        <div class="classification-tags-failure">
+            <ErrorMessage Problem="failure" Compact="true" TechnicalText="@L["Failed"]" />
+        </div>
+    }
 </div>
 <p class="classification-tags-help">@Help</p>
 
@@ -41,6 +49,7 @@
 @code {
     private string? _genreCreation;
     private string? _universeCreation;
+    private ApiProblem? _universeFailure;
 
     /// <summary>The prefix of the identifiers of its fields, unique in the page (e.g. « album »).</summary>
     [Parameter, EditorRequired]
@@ -103,15 +112,23 @@
     {
         if (!Records.AddUniverse(universe))
             return;
+        _universeFailure = null;
         await OnChange.InvokeAsync();
         try
         {
             Records.Rename(CitedRecords.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")));
         }
-        catch (ApiProblemException)
+        catch (ApiProblemException exception)
         {
-            // Named without its ancestors.
+            // Named without its ancestors, which the failure says.
+            _universeFailure = exception.Problem;
         }
+    }
+
+    private Task RemoveUniverseAsync(RecordOption universe)
+    {
+        _universeFailure = null;
+        return RemoveAsync(Records.Universes, universe);
     }
 
     // The records added on the spot are created with the record, when it is saved: cancelling creates none of them.
@@ -127,6 +144,7 @@
     private async Task UniverseCreatedAsync(NewUniverse universe)
     {
         _universeCreation = null;
+        _universeFailure = null;
         Records.NewUniverses.Add(universe);
         Records.Universes.Add(new RecordOption(universe.Key, universe.Name, null));
         await OnChange.InvokeAsync();

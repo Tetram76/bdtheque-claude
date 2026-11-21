@@ -89,7 +89,7 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'éditeur" }).ClickAsync();
 
         var error = page.GetByRole(AriaRole.Alert);
-        await Assertions.Expect(error).ToContainTextAsync("À corriger");
+        await Assertions.Expect(error).ToContainTextAsync("Saisie à corriger");
         var name = page.GetByLabel("Nom(obligatoire)");
         await Assertions.Expect(name).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(name).ToBeFocusedAsync();
@@ -110,7 +110,7 @@ public sealed class AdminPublisherFormTests(ApplicationHost application) : Brows
         await names.Last.FillAsync("carnets");
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
+        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("Saisie à corriger");
         await Assertions.Expect(names.First).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(names.Last).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(names.Last).ToBeFocusedAsync();

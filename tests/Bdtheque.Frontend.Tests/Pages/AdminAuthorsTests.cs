@@ -367,7 +367,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
             panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-invalid")));
         Assert.Equal("Au moins le nom ou le pseudonyme.", Text(panel.QuerySelector(".field-error")!));
         Assert.StartsWith("author-last-name-error", panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-describedby"));
-        Assert.Equal(("business", "À corriger"), ErrorOf(panel));
+        Assert.Equal(("business", "Saisie à corriger"), ErrorOf(panel));
         Assert.Equal(["lastName"], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
         // Declared: without it, Blazor, which focuses the field after an enhanced navigation, would take it out of the
         // keyboard path (#443).
@@ -392,7 +392,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(["true"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("aria-invalid")));
         Assert.Equal(field, panel.QuerySelector("[aria-invalid]")!.GetAttribute("name"));
         Assert.StartsWith(message, Text(panel.QuerySelector(".field-error")!));
-        Assert.Equal(("business", "À corriger"), ErrorOf(panel));
+        Assert.Equal(("business", "Saisie à corriger"), ErrorOf(panel));
         Assert.Equal([field], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
     }
 
@@ -414,9 +414,9 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     // Changed or deleted meanwhile: nothing overwritten nor saved, the author reloaded at its address, what was typed staying in
     // the panel until then.
     [Theory]
-    [InlineData(HttpStatusCode.Conflict, "L'auteur a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans le panneau jusque-là.")]
-    [InlineData(HttpStatusCode.NotFound, "L'auteur a été supprimé entre-temps : rien n'a été enregistré.")]
-    public async Task Panel_AnAuthorChangedOrDeletedMeanwhile_OffersToReloadIt(HttpStatusCode status, string text)
+    [InlineData(HttpStatusCode.Conflict, "Fiche modifiée entre-temps", "L'auteur a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans le panneau jusque-là.")]
+    [InlineData(HttpStatusCode.NotFound, "Fiche supprimée entre-temps", "L'auteur a été supprimé entre-temps : rien n'a été enregistré.")]
+    public async Task Panel_AnAuthorChangedOrDeletedMeanwhile_OffersToReloadIt(HttpStatusCode status, string title, string text)
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, status);
         var page = Open($"q=gib&edit={Gotlib.Id}");
@@ -425,7 +425,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal(("functional", "Modifiée entre-temps"), ErrorOf(panel));
+        Assert.Equal(("functional", title), ErrorOf(panel));
         Assert.Equal(text, Text(panel.QuerySelector("[data-error-text]")!));
         Assert.Equal([("Recharger la fiche", $"{AppPaths.AdminAuthors}?q=gib&edit={Gotlib.Id}")],
             panel.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));

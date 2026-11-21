@@ -116,7 +116,11 @@ Tout appel à l'API qui n'aboutit pas fait lever par [`ApiClient`](../../../src/
 
 ### Présentation commune
 
-Le composant [`ErrorMessage`](../../../src/Bdtheque.Frontend/Components/Errors/ErrorMessage.razor) affiche toutes les erreurs. Il se présente en entier en tête d'une page, ou sous une forme compacte à l'intérieur d'un contrôle, comme les suggestions d'un choix, l'envoi d'un visuel ou les collections d'un éditeur. Sa catégorie est portée par l'attribut `data-error-category`, auquel chaque thème associe un cadre, une icône et une couleur. Une erreur technique n'affiche jamais de détail : seulement un texte générique, ou celui de l'action du contrôle qui a échoué.
+Le composant [`ErrorMessage`](../../../src/Bdtheque.Frontend/Components/Errors/ErrorMessage.razor) affiche toutes les erreurs. Il se présente en entier en tête d'une page, ou sous une forme compacte à l'intérieur d'un contrôle, comme les suggestions d'un choix, l'envoi d'un visuel, les collections d'un éditeur, la vérification d'un ISBN, la clé de tri ou les ancêtres d'un univers. Sa catégorie est portée par l'attribut `data-error-category`, auquel chaque thème associe un cadre, une icône et une couleur. Une erreur technique n'affiche jamais de détail : seulement un texte générique, ou celui de l'action du contrôle qui a échoué.
+
+Le titre de l'erreur nomme la situation rencontrée, et c'est `ErrorMessage` qui le choisit, d'après l'erreur reçue : une fiche modifiée ou supprimée entre-temps, des conséquences de suppression qui ont changé, un problème technique, ou une erreur métier. Pour cette dernière, la page indique par le paramètre `Entry` si l'erreur répond à une saisie : le titre demande alors de corriger la saisie, et dit sinon que l'action est refusée. `SaveError` et la page de connexion le posent ; un refus sur une action sans saisie, comme une intention d'acquisition, ne le pose pas. Seules les situations que le frontend constate sans appeler l'API, la connexion suspendue et la page introuvable, donnent leur propre titre par le paramètre `Label`. Une même situation porte ainsi le même titre sur tous les écrans.
+
+Un contrôle qui interroge l'API pendant la saisie garde l'erreur d'un appel qui échoue et la passe au paramètre `Failure` de [`Field`](../../../src/Bdtheque.Frontend/Components/Controls/Field.razor), qui la présente sous le champ en forme compacte, jusqu'à sa tentative suivante. C'est le cas de la vérification de l'ISBN, du calcul de la clé de tri et de la lecture des ancêtres du parent d'un univers ; [`ClassificationTags`](../../../src/Bdtheque.Frontend/Components/Controls/ClassificationTags.razor) présente de même, sous les univers, l'échec de la lecture des ancêtres d'un univers ajouté, qui reste nommé par son seul nom.
 
 Un refus de suppression ou de retrait présente ce qui le bloque en une ligne par type de fiche, avec son nombre et, quand la page la donne, la marche à suivre. Ces lignes sont écrites par un seul composant, [`RefusalLines`](../../../src/Bdtheque.Frontend/Components/Errors/RefusalLines.razor), que partagent le dialogue de suppression des listes et `ErrorMessage` : un refus se présente donc de la même façon dans un dialogue et dans l'erreur d'un enregistrement. La saisie d'un éditeur s'en sert pour le retrait refusé d'une collection, en nommant la collection que l'erreur désigne par `record`.
 
@@ -126,7 +130,7 @@ Le frontend ne référence pas le domaine et ne connaît donc pas le texte des r
 
 - `RuleMessages.resx` donne le texte de chaque code de règle, affiché en tête de l'erreur.
 - `FieldMessages.resx` donne le texte court écrit sous le champ en cause, à défaut duquel le texte de la règle est repris, ainsi que le texte d'un champ associé.
-- `ErrorMessage.resx` donne les noms des catégories et les textes génériques.
+- `ErrorMessage.resx` donne le titre de chaque situation et les textes génériques.
 - `EntityNames.resx` donne le nom des types de fiche qui apparaissent dans l'impact d'une suppression.
 
 ### Champ en cause et focus
@@ -159,5 +163,6 @@ Une nouvelle règle métier traverse toute la chaîne décrite ci-dessus. Il fau
 
 - Aucun endpoint ne construit de réponse d'erreur, et aucune réponse ne contient de détail interne, qu'il s'agisse d'un message d'exception, de SQL ou d'une pile d'appels.
 - Le frontend ne déduit jamais un champ du code de règle : il présente l'erreur sur le champ que désigne la réponse.
-- Une erreur technique porte partout la même mention, « Problème technique ».
+- Une même situation porte partout le même titre, choisi par `ErrorMessage` ; une erreur technique s'intitule partout « Problème technique ».
+- Aucun contrôle qui interroge l'API ne tait l'échec d'un appel.
 - Un code de règle publié n'est jamais renommé ni réaffecté à une autre règle.

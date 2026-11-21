@@ -318,6 +318,52 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         await adding;
     }
 
+    // Ancestors that cannot be read leave the universe named alone: the failure is said at the scale of the universes, as any
+    // control says its own (choix-implementation/socle/frontend.md, erreur dans un contrôle, #480), until the next change of them.
+    [Fact]
+    public async Task Universe_WhoseAncestorsCannotBeRead_IsNamedAlone_AndTheFailureSaid()
+    {
+        var harbour = Guid.NewGuid();
+        _api.Failures[$"/admin/universes/{harbour}/hierarchy"] = HttpStatusCode.InternalServerError;
+        var page = OpenAlbum();
+        var tags = page.FindComponents<RecordTags>().Single(t => t.Instance.Kind == RecordKind.Universe);
+
+        await tags.InvokeAsync(() => tags.Instance.OnAdd.InvokeAsync(new RecordOption(harbour, "Le port", "Univers Hergé")));
+
+        Assert.Contains("Le port", page.FindAll(".classification-tags .tag").Select(tag => tag.TextContent.Trim()));
+        var failure = page.Find(".classification-tags [role=alert]");
+        Assert.Equal("technical", failure.GetAttribute("data-error-category"));
+        Assert.True(failure.HasAttribute("data-error-compact"));
+        Assert.Equal("La lecture des univers parents n'a pas abouti : l'univers est présenté par son nom seul.", failure.QuerySelector("[data-error-text]")!.TextContent.Trim());
+
+        await tags.InvokeAsync(() => tags.Instance.OnRemove.InvokeAsync(new RecordOption(harbour, "Le port", "Univers Hergé")));
+
+        Assert.Empty(page.FindAll(".classification-tags [role=alert]"));
+    }
+
+    // A key that cannot be computed is an error with nothing to correct in the field: said under it, until the next computation.
+    [Fact]
+    public async Task SortKey_ComputationThatFails_IsPresentedUnderTheField_UntilTheNextOne()
+    {
+        var page = OpenAlbum();
+        await page.InputAsync("#album-sort-key", "Castafiore");
+        _api.Failures["/admin/sort-keys/title"] = HttpStatusCode.InternalServerError;
+
+        await page.ClickAsync(".sort-key-reset");
+
+        var failure = page.Find("#album-sort-key-failure [role=alert]");
+        Assert.Equal("technical", failure.GetAttribute("data-error-category"));
+        Assert.True(failure.HasAttribute("data-error-compact"));
+        Assert.Equal("Le calcul de la clé de tri n'a pas abouti. Il reprendra à la prochaine modification du titre.", failure.QuerySelector("[data-error-text]")!.TextContent.Trim());
+
+        _api.Failures.Clear();
+        await page.InputAsync("#album-sort-key", "Castafiore");
+        await page.ClickAsync(".sort-key-reset");
+
+        Assert.Empty(page.FindAll("#album-sort-key-failure"));
+        Assert.Equal("Lotus bleu [Le]", page.Find("#album-sort-key").GetAttribute("value"));
+    }
+
     [Fact]
     public async Task Save_DuringTheChoiceOfASeries_WaitsForItsAuthors()
     {
@@ -368,7 +414,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
         var error = page.Find("[role=alert]");
         Assert.Equal("business", error.GetAttribute("data-error-category"));
-        Assert.Equal("À corriger", error.QuerySelector("[data-error-label]")!.TextContent);
+        Assert.Equal("Saisie à corriger", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Equal("Le titre est obligatoire pour un album qui n'appartient à aucune série.", error.QuerySelector("[data-error-text]")!.TextContent);
         Assert.Equal("true", page.Find("#album-title").GetAttribute("aria-invalid"));
         Assert.Contains("Obligatoire pour un album sans série.", page.Find("#album-title-error").TextContent);
@@ -399,7 +445,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
         var error = page.Find("[role=alert]");
         Assert.Equal("functional", error.GetAttribute("data-error-category"));
-        Assert.Equal("Modifiée entre-temps", error.QuerySelector("[data-error-label]")!.TextContent);
+        Assert.Equal("Fiche modifiée entre-temps", error.QuerySelector("[data-error-label]")!.TextContent);
         Assert.Contains("rien n'a été écrasé", error.TextContent);
         Assert.Equal(["Recharger la fiche", "Voir mes changements"], error.QuerySelectorAll("button").Select(b => b.TextContent.Trim()));
 
