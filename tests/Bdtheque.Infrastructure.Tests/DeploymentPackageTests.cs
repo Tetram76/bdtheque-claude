@@ -9,7 +9,7 @@ namespace Bdtheque.Infrastructure.Tests;
 /// public images on ghcr.io, without the sources (choix-implementation/deploiement/publication-des-images-docker.md).
 /// </summary>
 [Trait("Category", RepositoryFiles.Category)]
-public sealed class DeploymentPackageTests : IDisposable
+public sealed partial class DeploymentPackageTests : IDisposable
 {
     private const string Script = ".github/scripts/New-DeploymentPackage.ps1";
 
@@ -91,7 +91,7 @@ public sealed class DeploymentPackageTests : IDisposable
     {
         // The procedure goes with one version: what it links to is the repository as that version left it.
         var procedure = (await BuildAsync("0.1.0"))["bdtheque-0.1.0/DEPLOIEMENT.md"];
-        var links = Regex.Matches(procedure, @"https://github\.com/Tetram76/bdtheque-claude[^\s)]*").Select(match => match.Value).ToList();
+        var links = RepositoryLink().Matches(procedure).Select(match => match.Value).ToList();
 
         Assert.NotEmpty(links);
         Assert.All(links, link => Assert.StartsWith("https://github.com/Tetram76/bdtheque-claude/blob/v0.1.0/", link, StringComparison.Ordinal));
@@ -131,6 +131,9 @@ public sealed class DeploymentPackageTests : IDisposable
 
         return entries;
     }
+
+    [GeneratedRegex(@"https://github\.com/Tetram76/bdtheque-claude[^\s)]*")]
+    private static partial Regex RepositoryLink();
 
     private Task<ProcessResult> RunAsync(string version) =>
         Processes.PowerShellAsync(
