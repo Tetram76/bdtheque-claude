@@ -134,10 +134,15 @@ Le `frontend` ne redirige jamais vers HTTPS et n'envoie pas d'en-tête HSTS : un
 
 Les visuels (couvertures, planches, etc.) sont stockés sur un dossier du NAS, dont le chemin hôte est configurable via la variable d'environnement `VISUELS_HOST_PATH`. Il n'est monté que dans le conteneur `api`, qui sert les visuels au `frontend`.
 
-Ce dossier doit exister et être **accessible en écriture pour l'utilisateur du conteneur `api`** (UID `1654`, qui n'est pas root) ; sans quoi `api` refuse de démarrer, en indiquant le dossier en cause dans son journal. Docker crée un dossier absent au nom de root : il faut donc le créer et lui donner ce droit avant le premier démarrage, par exemple :
+Ce dossier doit exister et être **accessible en écriture pour l'utilisateur sous lequel tourne le conteneur `api`** ; sans quoi `api` refuse de démarrer, en indiquant dans son journal le dossier en cause et l'utilisateur qui doit y écrire. Docker crée un dossier absent au nom de root : il faut donc le créer avant le premier démarrage, de l'une de ces deux façons.
 
-```bash
-mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels
-```
+- **Sans SSH** : créez le dossier depuis File Station, puis faites tourner `api` sous un utilisateur du NAS qui peut y écrire, par exemple le vôtre, qui l'a créé, en renseignant `API_USER` dans le `.env`, sous la forme `uid:gid` (par exemple `1026:100`). Cet utilisateur n'a pas besoin d'être le propriétaire du dossier : un droit d'écriture, accordé par exemple par les permissions du dossier partagé, suffit. Pour connaître ces deux nombres sans terminal, créez dans le Planificateur de tâches du Panneau de configuration une tâche « Script défini par l'utilisateur », exécutée sous votre utilisateur, dont le script est `id` ; exécutez-la, puis lisez son résultat (« Action », « Afficher le résultat ») : `uid=` et `gid=` donnent les deux nombres.
+- **Sans `API_USER`** : `api` tourne sous l'utilisateur de son image (UID `1654`, qui n'est pas root), à qui il faut donner le dossier, par exemple en SSH :
 
-Sur un NAS Synology, le droit peut aussi être accordé au dossier partagé par ses permissions (ACL). Si aucun dossier de l'hôte n'est monté, `api` le signale par un avertissement : les visuels seraient perdus à chaque recréation du conteneur.
+  ```bash
+  mkdir -p ./data/visuels && sudo chown 1654:1654 ./data/visuels
+  ```
+
+  Sur un NAS Synology, le droit peut aussi être accordé au dossier partagé par ses permissions (ACL).
+
+`API_USER` reste facultatif, et ne concerne que `api`, seul conteneur qui écrit dans un dossier du NAS. Si aucun dossier de l'hôte n'est monté, `api` le signale par un avertissement : les visuels seraient perdus à chaque recréation du conteneur.

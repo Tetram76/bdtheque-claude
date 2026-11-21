@@ -116,11 +116,12 @@ Une analyse qui n'aboutit pas fait échouer ce seul job. La suite à donner à s
 
 ### `Build Docker image (<image>)`
 
-Ce job construit et analyse les deux images de l'application, dans une matrice `image: [api, frontend]`. Quand ce dont elles sont faites a changé, il enchaîne trois étapes :
+Ce job construit et analyse les deux images de l'application, dans une matrice `image: [api, frontend]`. Quand ce dont elles sont faites a changé, il enchaîne quatre étapes :
 
 1. Il construit l'image avec BuildKit pour `linux/amd64`, la plateforme des images publiées, de sorte qu'une Pull Request ne puisse pas casser leur publication. L'image est chargée localement sans être poussée, et chaque image a son propre cache dans celui de GitHub Actions.
 2. Il se connecte ensuite à Docker Hub, avec le compte `tetram76` et le secret `DOCKERHUB_TOKEN`. La connexion vient après la construction pour que rien de ce que télécharge celle-ci ne compte dans le quota du compte.
-3. Il analyse l'image locale avec Docker Scout, l'outil d'analyse des vulnérabilités de Docker, et échoue sur toute vulnérabilité corrigeable d'un package NuGet ([Analyse des vulnérabilités des images Docker](../../../.speckit/gestion-projet/revue-tickets/analyse-des-vulnerabilites-des-images-docker.md)).
+3. Il télécharge l'outil de Docker Scout, l'outil d'analyse des vulnérabilités de Docker, avec le jeton du workflow, par le script [`install-docker-scout.sh`](../../../.github/scripts/install-docker-scout.sh), qui le dépose là où l'action de Docker Scout le cherche avant de le télécharger elle-même. L'action le téléchargerait sinon sans jeton, sous la limite de requêtes anonymes de l'adresse de l'exécuteur, que partagent tous les utilisateurs des exécuteurs de GitHub : elle échouerait alors par un refus `403` dès que d'autres auraient épuisé cette limite. Le script lit la version de l'action dans la copie qu'en a téléchargée l'exécuteur, si bien qu'il suit d'office une montée de l'action.
+4. Il analyse l'image locale avec Docker Scout, et échoue sur toute vulnérabilité corrigeable d'un package NuGet ([Analyse des vulnérabilités des images Docker](../../../.speckit/gestion-projet/revue-tickets/analyse-des-vulnerabilites-des-images-docker.md)).
 
 ## Les tests qui vérifient ce workflow
 
