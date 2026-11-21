@@ -198,6 +198,7 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
 
         Assert.Equal(("Supprimer cet éditeur ?", "Futuropolis"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Contains("2 collections", Text(dialog.QuerySelector(".deletion-impact")!));
         var form = dialog.QuerySelector("form[method='post']")!;
         Assert.Equal(

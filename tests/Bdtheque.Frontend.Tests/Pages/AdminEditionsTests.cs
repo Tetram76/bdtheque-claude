@@ -225,6 +225,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(("Supprimer cette édition ?", "Glénat [2004] - ISBN 978-2-7234-4567-1"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         // The last owned edition of its album: the album leaves the collection (fonctionnel/regles-metier/suppression-des-entites.md).
         Assert.Equal(["Suppression aussi de 2 visuels", "Sortie de la collection de 1 album"],
             dialog.QuerySelectorAll(".deletion-impact li").Select(Text));

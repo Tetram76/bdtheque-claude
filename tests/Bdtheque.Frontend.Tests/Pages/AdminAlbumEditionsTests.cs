@@ -303,6 +303,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(("Supprimer cette édition ?", "Casterman [1963]"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Equal(
             ["Suppression aussi de 2 visuels", "Sortie de la collection de 1 album"],
             dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
@@ -315,16 +316,19 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Removal_OfAnIntentOnAnEdition_AnnouncesTheEditionRemovedWithIt()
+    public void Removal_OfAnIntentOnAnEdition_AnnouncesTheVisualsOfTheEditionTargeted()
     {
         _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents/{OnEdition.Id}/deletion-impact"] = new DeletionImpact(
-            [], [], [new ImpactCount(EntityKind.Edition, 1)], [], "f2");
+            [], [], [new ImpactCount(EntityKind.EditionVisual, 1)], [], "f2");
 
         var dialog = Open($"remove-intent={OnEdition.Id}").Find("dialog");
 
         Assert.Equal(("Retirer cette intention d'acquisition ?", "Les Bijoux de la Castafiore (Tintin - T. 21) · Casterman (Fac-similé) [2013]"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        Assert.Equal(["Suppression aussi de 1 édition"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
+        Assert.Equal("Le retrait est définitif.", Text(dialog.QuerySelector(".dialog-body > p")!));
+        // The edition targeted goes with its intent without being counted, the intent removed standing for it: only its visuals
+        // are (fonctionnel/regles-metier/suppression-des-entites.md).
+        Assert.Equal(["Suppression aussi de 1 visuel"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
     }
 
     [Fact]

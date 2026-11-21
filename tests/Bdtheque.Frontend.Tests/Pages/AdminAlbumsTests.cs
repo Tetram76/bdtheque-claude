@@ -304,6 +304,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
 
         Assert.Equal(("Supprimer cet album ?", "Les Bijoux de la Castafiore (Tintin - T. 21)"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Contains("2 éditions et 9 visuels", Text(dialog.QuerySelector(".deletion-impact")!));
         Assert.Equal(AppPaths.AdminAlbums, dialog.QuerySelector("[data-dialog-close]")!.GetAttribute("href"));
         var form = dialog.QuerySelector("form[method='post']")!;

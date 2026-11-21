@@ -126,7 +126,7 @@
         {
             <DeletionDialog Id="intent-removal" FormName="@RemovalFormName" Title="@L["Removal.Title"]"
                             Subject="@Labels.PurchaseIntent(_dialogIntent.Album, _dialogIntent.Edition, _settings!.AlbumLabelFormat)"
-                            CloseHref="@ListOnly.Href()" Lead="@L["Removal.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                            CloseHref="@ListOnly.Href()" Removal="true" RefusalLead="@L["Refusal.Lead"]"
                             RefusalHint="@(key => L[$"Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_removalProblem"
                             Version="_dialogIntent.AlbumVersion" OnConfirm="RemoveAsync" />
         }

@@ -210,7 +210,7 @@ else if (_page is { } page)
     @if (_dialogEdition is { } deleted)
     {
         <DeletionDialog Id="edition-deletion" FormName="@EditionDeletionFormName" Title="@L["Deletion.Title"]" Subject="@Labels.Edition(deleted.Edition)"
-                        CloseHref="@PageOnly" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Deletion.Refusal.Lead"]"
+                        CloseHref="@PageOnly" RefusalLead="@L["Deletion.Refusal.Lead"]"
                         RefusalHint="@(key => L[$"Deletion.Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_dialogProblem"
                         Version="album.Version" OnConfirm="DeleteEditionAsync" />
     }
@@ -218,7 +218,7 @@ else if (_page is { } page)
     {
         <DeletionDialog Id="intent-removal" FormName="@IntentRemovalFormName" Title="@L["Removal.Title"]"
                         Subject="@Labels.PurchaseIntent(album.Album, removed.Edition, _format)"
-                        CloseHref="@PageOnly" Lead="@L["Removal.Lead"]" RefusalLead="@L["Removal.Refusal.Lead"]"
+                        CloseHref="@PageOnly" Removal="true" RefusalLead="@L["Removal.Refusal.Lead"]"
                         RefusalHint="@(key => L[$"Removal.Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_dialogProblem"
                         Version="album.Version" OnConfirm="RemoveIntentAsync" />
     }
