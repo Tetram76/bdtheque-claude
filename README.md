@@ -57,7 +57,7 @@ Deux réseaux Docker isolent les tiers, chacun nommé d'après le conteneur auqu
 
 Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis **Docker Hub** ou, pour une version publiée, depuis **GitHub Container Registry**.
 
-**Le plus simple, pour une version publiée** : télécharger le **paquet de déploiement** joint à sa [release](https://github.com/Tetram76/bdtheque-claude/releases) (`bdtheque-<version>.zip`). Il contient le `docker-compose.yml` de la version, qui vise ses images publiques sur `ghcr.io` sans authentification, le `.env.example` à renseigner et la procédure d'installation (`DEPLOIEMENT.md`) et les notes de la version (`NOTES-DE-VERSION.md`). La suite de cette section décrit le déploiement depuis les fichiers du dépôt, qui sert aussi aux pré-versions.
+**Le plus simple, pour une version publiée** : télécharger le **paquet de déploiement** joint à sa [release](https://github.com/Tetram76/bdtheque-claude/releases) (`bdtheque-<version>.zip`). Il contient le `docker-compose.yml` de la version, qui vise ses images publiques sur `ghcr.io` sans authentification, le `.env.example` à renseigner et la procédure d'installation (`DEPLOIEMENT.md`) et les notes de la version (`NOTES-DE-VERSION.md`), suivies des changements des versions précédentes, pour qui en saute plusieurs. La suite de cette section décrit le déploiement depuis les fichiers du dépôt, qui sert aussi aux pré-versions.
 
 ### Images publiées
 

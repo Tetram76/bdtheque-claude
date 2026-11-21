@@ -17,6 +17,11 @@
 .PARAMETER ReleaseNotes
     File holding the notes of the release of the version, as published, copied into the package.
 
+.PARAMETER PreviousReleases
+    File listing the published releases, one JSON object per line (tag, name, prerelease, body): the notes of those that
+    precede the version follow its own in the package, most recent first, as the history of whoever skips versions;
+    from 1.0.0, the versions 0 are left out.
+
 .PARAMETER OutputDirectory
     Directory the archive is written to.
 #>
@@ -24,6 +29,7 @@
 param(
     [Parameter(Mandatory)] [string] $Version,
     [Parameter(Mandatory)] [string] $ReleaseNotes,
+    [Parameter(Mandatory)] [string] $PreviousReleases,
     [Parameter(Mandatory)] [string] $OutputDirectory
 )
 
@@ -67,6 +73,26 @@ if ($procedure.Contains('{{')) {
 $notes = Get-Content -Raw $ReleaseNotes
 if ([string]::IsNullOrWhiteSpace($notes)) {
     throw "The release notes ($ReleaseNotes) are empty."
+}
+
+# The history: the changes of each previous version, the other sections of its notes belonging to it alone, under the
+# heading of its release, their own headings one level down. Notes without changes no longer have the expected form.
+$current = [version] $Version
+$previous = @(Get-Content $PreviousReleases | Where-Object { $_.Trim() } | ForEach-Object { $_ | ConvertFrom-Json } |
+    Where-Object { $_.tag -match '^v(\d+\.\d+\.\d+)$' } |
+    ForEach-Object { $_ | Add-Member -NotePropertyName number -NotePropertyValue ([version] $Matches[1]) -PassThru } |
+    Where-Object { $_.number -lt $current -and ($current.Major -eq 0 -or $_.number.Major -gt 0) } |
+    Sort-Object number -Descending)
+if ($previous.Count -gt 0) {
+    $history = foreach ($release in $previous) {
+        $heading = if ($release.prerelease) { "### $($release.name) (pré-release)" } else { "### $($release.name)" }
+        $changes = [regex]::Match($release.body, '(?ms)^## Changements[ \t]*\r?\n(?<content>.*?)(?=^## |\z)')
+        if (-not $changes.Success -or [string]::IsNullOrWhiteSpace($changes.Groups['content'].Value)) {
+            throw "The notes of $($release.tag) have no changes section (## Changements)."
+        }
+        $heading + "`n`n" + [regex]::Replace($changes.Groups['content'].Value.Trim(), '(?m)^(#+) ', '#$1 ')
+    }
+    $notes = $notes.TrimEnd() + "`n`n---`n`n## Historique des versions précédentes`n`n" + ($history -join "`n`n") + "`n"
 }
 
 $staging = Join-Path ([IO.Path]::GetTempPath()) ([IO.Path]::GetRandomFileName())
