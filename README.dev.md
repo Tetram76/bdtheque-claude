@@ -227,7 +227,7 @@ Une version est publiable quand tous les tickets de son jalon sont fermés ; ell
    - la présentation de la version, qui annonce une version 0 et toute rupture de compatibilité ;
    - l'encadré `> [!WARNING]` d'une rupture ;
    - la compatibilité fonctionnelle, d'hébergement et de déploiement avec les versions précédentes, et la montée de version, d'après ce qui a changé depuis le tag de la version précédente (`git diff v0.0.3 v0.1.0 -- docker-compose.yml .env.example .github/deployment docker` et migrations de la base pour l'hébergement et le déploiement) ;
-   - la liste des changements, rédigée à partir des commits de la version (`git log --first-parent --format=%s v0.0.3..v0.1.0`), regroupée par nature, les changements qui vont ensemble réunis en un point, sans citer ni ticket ni Pull Request ;
+   - la liste des changements, rédigée à partir des commits de la version (`git log --first-parent --format=%s v0.0.3..v0.1.0`), regroupée par nature, les changements qui vont ensemble réunis en un point (une Pull Request qui ajuste un point d'une précédente de la même version ne fait qu'une description avec elle), sans citer ni ticket ni Pull Request ;
    - l'historique : les notes des releases précédentes, de la plus récente à la plus ancienne (`gh release view v0.0.3 --json body --jq .body`), pour qui saute plusieurs versions.
 
    ```powershell
