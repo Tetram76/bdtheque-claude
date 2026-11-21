@@ -12,6 +12,9 @@ public sealed partial class DockerComposeTests
 {
     private static readonly string Compose = RepositoryFiles.Read("docker-compose.yml");
 
+    // db itself and its only caller, in order.
+    private static readonly string[] DbNetworkMembers = ["api", "db"];
+
     [Fact]
     public void Names_AreLeftToTheProject()
     {
@@ -75,7 +78,7 @@ public sealed partial class DockerComposeTests
         // contraintes-techniques/architecture-deploiement/architecture-des-tiers.md: api alone accesses db.
         var members = ServiceNetworks(Compose).Where(service => service.Value.Contains("db")).Select(service => service.Key);
 
-        Assert.Equal(new[] { "api", "db" }, members.Order());
+        Assert.Equal(DbNetworkMembers, members.Order());
     }
 
     [Fact]
