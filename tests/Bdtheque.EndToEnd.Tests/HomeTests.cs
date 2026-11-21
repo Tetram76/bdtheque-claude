@@ -123,6 +123,26 @@ public sealed partial class DashboardHomeTests(CollectionApplication application
         Assert.DoesNotContain(universalDay, await Application.SpotlightDaysAsync());
     }
 
+    // A browser without scripts never gives its time zone: the welcome screen sends it to the dashboard, whose spotlight says
+    // what it does without the date, and what would show the edition (visuel/dashboard/contenu-commun.md, À la une); nothing
+    // is drawn for a day the visitor does not live (choix-implementation/socle/transverse/internationalisation.md).
+    [Theory, InEachTheme]
+    public async Task VisitorWithoutScripts_GetsTheDashboard_WithoutAnyEditionInTheSpotlight(string theme)
+    {
+        var spotlightDays = await Application.SpotlightDaysAsync();
+        var context = await NewContextAsync(theme, new BrowserNewContextOptions { JavaScriptEnabled = false });
+        var page = await context.NewPageAsync();
+
+        await page.GotoAsync(AppPaths.Home);
+
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Entrez donc, il y a de quoi lire !");
+        var spotlight = page.Locator("section.block", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "À la une aujourd'hui !" }) });
+        await Assertions.Expect(spotlight).ToContainTextAsync(
+            "Pas d'édition à la une sans la date de votre navigateur : elle apparaît dès qu'il accepte les cookies et les scripts de BDthèque.");
+        await Assertions.Expect(spotlight.GetByRole(AriaRole.Link)).ToHaveCountAsync(0);
+        Assert.Equal(spotlightDays.Order(), (await Application.SpotlightDaysAsync()).Order());
+    }
+
     [Theory, InEachTheme]
     public async Task Foot_LeadsToTheAdministration(string theme)
     {

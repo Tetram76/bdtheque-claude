@@ -55,7 +55,7 @@
     <value>À la une aujourd'hui !</value>
   </data>
   <data name="Spotlight.WithoutDay" xml:space="preserve">
-    <value>L'édition du jour attend la date de votre navigateur.</value>
+    <value>Pas d'édition à la une sans la date de votre navigateur : elle apparaît dès qu'il accepte les cookies et les scripts de BDthèque.</value>
   </data>
   <data name="Latest.Title" xml:space="preserve">
     <value>Tout juste arrivés !</value>
