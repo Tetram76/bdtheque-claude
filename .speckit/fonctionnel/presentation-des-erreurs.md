@@ -21,7 +21,8 @@ Le titre d'une erreur nomme la **situation rencontrée**, en accord avec son mes
 
 | Situation | Titre |
 | --- | --- |
-| Une saisie enfreint une règle de gestion (enregistrement d'une fiche, connexion) | Saisie à corriger |
+| La saisie d'une fiche enfreint une règle de gestion (son enregistrement) | Saisie à corriger |
+| L'identifiant ou le mot de passe de la connexion est incorrect | Connexion refusée |
 | Une action sans saisie est refusée par une règle de gestion (ex. une intention d'acquisition) | Action refusée |
 | La fiche a été modifiée entre-temps | Fiche modifiée entre-temps |
 | Une fiche a été supprimée entre-temps (celle que l'on enregistre, une fiche qu'elle cite, celle que l'on consulte) | Fiche supprimée entre-temps |

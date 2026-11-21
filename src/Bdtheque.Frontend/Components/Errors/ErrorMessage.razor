@@ -30,7 +30,7 @@
 
     /// <summary>
     /// The title of a situation the frontend finds itself, without any call to the API, and which no answer of the API names
-    /// (e.g. too many attempts of login, a page that does not exist).
+    /// (e.g. a login refused, too many attempts of login, a page that does not exist).
     /// </summary>
     [Parameter]
     public string? Label { get; set; }
@@ -61,7 +61,7 @@
     public RenderFragment? Actions { get; set; }
 
     /// <summary>
-    /// Whether the error answers what the user typed (the saving of a record, a login), rather than an action without entry
+    /// Whether the error answers the entry of a record (its saving), rather than an action without entry
     /// (e.g. an intent of acquisition added from a button): a business error then asks to correct the entry, where it
     /// otherwise says the action refused.
     /// </summary>

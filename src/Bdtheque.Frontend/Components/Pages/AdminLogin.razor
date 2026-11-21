@@ -24,7 +24,7 @@
         <p>@L["Intro"]</p>
         @if (_problem is not null)
         {
-            <ErrorMessage Problem="_problem" Entry="true" Label="@_label" Message="@_message" />
+            <ErrorMessage Problem="_problem" Label="@_label" Message="@_message" />
         }
         <form method="post" @formname="@FormName" @onsubmit="SignInAsync">
             <AntiforgeryToken />
@@ -78,7 +78,7 @@
         if (!Credentials.AreValid(Login, Password))
         {
             Throttle.RecordFailure();
-            Refuse(ProblemCategory.Business, "InvalidCredentials");
+            Refuse(ProblemCategory.Business, "InvalidCredentials", L["InvalidCredentials.Label"]);
             return;
         }
 
