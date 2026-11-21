@@ -28,7 +28,7 @@
                 <button type="button" class="admin-menu-close" popovertarget="@MenuId" popovertargetaction="hide" aria-label="@L["CloseMenu"]"><Icon Name="IconName.Close" /></button>
             </div>
             <nav aria-label="@L["AdminPlan"]">
-                @foreach (var group in Groups)
+                @foreach (var group in AdminPlan.Groups)
                 {
                     <div class="admin-menu-group">
                         <p class="admin-menu-group-title" id="admin-menu-@group.Name">@L[$"Group.{group.Name}"]</p>
@@ -58,18 +58,6 @@
 @code {
     /// <summary>The identifier of the menu, which the page uses to stay still while it is open (app.css).</summary>
     public const string MenuId = "admin-menu";
-
-    // The plan of the administration, by groups (visuel/administration/en-tete-et-menu.md); no creation of an edition, which
-    // is entered from its album (visuel/listes/principes-communs.md).
-    private static readonly IReadOnlyList<(string Name, IReadOnlyList<NavigationEntry> Entries)> Groups =
-    [
-        ("Home", [new("Admin.Dashboard", AppPaths.AdminHome, Exact: true)]),
-        ("Collection", [new("Admin.Albums", AppPaths.AdminAlbums), new("Admin.Series", AppPaths.AdminSeries),
-            new("Admin.Editions", AppPaths.AdminEditions), new("Admin.PurchaseIntents", AppPaths.AdminPurchaseIntents)]),
-        ("AuthorsAndPublishers", [new("Admin.Authors", AppPaths.AdminAuthors), new("Admin.Publishers", AppPaths.AdminPublishers)]),
-        ("Referentials", [new("Admin.Genres", AppPaths.AdminGenres), new("Admin.Universes", AppPaths.AdminUniverses)]),
-        ("Settings", [new("Admin.Settings", AppPaths.AdminSettings), new("Admin.Statistics", AppPaths.AdminStatistics)]),
-    ];
 
     // The number of records of the entries that lead to a list (visuel/administration/en-tete-et-menu.md, « le cas échéant »).
     private static readonly IReadOnlyDictionary<string, Func<RecordCounts, int>> Counts = new Dictionary<string, Func<RecordCounts, int>>

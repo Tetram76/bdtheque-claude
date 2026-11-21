@@ -171,7 +171,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal(["Accueil", "Collection", "Auteurs et éditeurs", "Référentiels", "Réglages"],
             plan.QuerySelectorAll(".admin-menu-group-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(
-            ["Tableau de bord", "Albums", "Séries", "Éditions", "Intentions d'acquisition", "Auteurs", "Éditeurs",
+            ["Tableau de bord", "Séries", "Albums", "Éditions", "Intentions d'acquisition", "Auteurs", "Éditeurs",
                 "Genres", "Univers", "Paramétrage", "Statistiques privées"],
             plan.QuerySelectorAll("a > span:first-child").Select(entry => entry.TextContent.Trim()));
         Assert.Equal(AppPaths.AdminHome, plan.QuerySelector("a")?.GetAttribute("href"));
@@ -190,7 +190,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         var counts = layout.FindAll("nav a").Where(link => link.QuerySelector(".admin-menu-count") is not null)
             .Select(link => (link.QuerySelector("span")!.TextContent.Trim(), string.Join(" ", link.QuerySelector(".admin-menu-count")!.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries))));
         Assert.Equal(
-            [("Albums", "2 847"), ("Séries", "412"), ("Éditions", "2 913"), ("Intentions d'acquisition", "18"), ("Auteurs", "1 106"),
+            [("Séries", "412"), ("Albums", "2 847"), ("Éditions", "2 913"), ("Intentions d'acquisition", "18"), ("Auteurs", "1 106"),
                 ("Éditeurs", "96"), ("Genres", "24"), ("Univers", "37")],
             counts.ToList());
     }
