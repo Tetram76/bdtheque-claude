@@ -1,8 +1,8 @@
 ---
 type: Gouvernance
 title: 'Versions et releases'
-description: 'Numérotation semver, jalons, rattachement des tickets et PR, version publiable signalée à l''utilisateur, publication sur sa seule décision, menée par l''agent (tag, release, analyse, images).'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T15:30:50Z }
+description: 'Numérotation semver, jalons, rattachement des tickets et PR, version publiable signalée à l''utilisateur, publication sur sa seule décision, menée par l''agent (tag, release, analyse, images), version 0 annoncée par les notes de sa release.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T16:20:00Z }
 ---
 
 # Versions et releases
@@ -25,7 +25,7 @@ Les versions de l'application sont connues du dépôt avant leur publication : c
 - **Version publiable** : une version est **publiable** quand tous les tickets de son jalon sont fermés. L'agent signale alors à l'utilisateur que la version est publiable, et n'engage aucune étape de sa publication tant que l'utilisateur ne l'a pas demandée.
 - **Publication, sur la seule décision de l'utilisateur** (exigence de l'utilisateur) : une version n'est publiée que lorsque l'utilisateur le décide ; qu'elle soit publiable ne suffit pas. Ce n'est pas un acte de gestion que l'agent accomplit de lui-même ([Prise de décision](../gouvernance/prise-de-decision.md)). Une fois la publication demandée, l'agent en mène toutes les étapes :
   - **tag** annoté et signé (clé GPG de [Signature des commits](signature-des-commits.md)), posé sur le commit de `main` qui la complète ;
-  - **release** GitHub sur ce tag, dont les notes sont générées par GitHub à partir des Pull Requests fusionnées depuis le tag de la version précédente, et vérifiées avant publication comme tout texte publié ([Budget IA](../gouvernance/budget-ia.md), mention de Codex). Une version `0.0.x`, qui ne livre pas d'application utilisable, est marquée **pré-release** ;
+  - **release** GitHub sur ce tag, dont les notes sont générées par GitHub à partir des Pull Requests fusionnées depuis le tag de la version précédente, et vérifiées avant publication comme tout texte publié ([Budget IA](../gouvernance/budget-ia.md), mention de Codex). Une version `0.0.x`, qui ne livre pas d'application utilisable, est marquée **pré-release**. Une version `0.x` à partir de `0.1.0` ne l'est pas, mais **reste une version 0**, de développement initial (exigence de l'utilisateur) : ses notes s'ouvrent, avant les notes générées, sur un court paragraphe qui l'annonce clairement, en disant ce qu'elle livre, qu'elle n'est pas destinée à la production, réservée à la `1.0.0`, quand viendra la première version livrable tant qu'elle n'est pas atteinte ([Phase 3 — Frontend Blazor](../../suivi-implementation/phase-3-frontend-blazor.md)), et que rien n'est garanti d'une version à l'autre jusque-là ;
   - **analyse SonarQube Cloud** de `main`, relancée dès le tag posé : la période du nouveau code commence à la première analyse qui porte la version ([Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)), qui doit être celle du commit publié, et non celle de la fusion suivante, dont les changements en seraient exclus ;
   - **images Docker** de la version, publiées à la demande depuis son tag ([Publication des images Docker](../../choix-implementation/deploiement/publication-des-images-docker.md)) ; les versions `0.0.x` n'en ont pas, faute d'interface ;
   - **fermeture du jalon**.

@@ -2,6 +2,7 @@
 
 ## 2026-11-21
 
+* **Exigence de l'utilisateur** : une version `0.x` à partir de `0.1.0` n'est pas une pré-release, mais reste une version 0, de développement initial, que les notes de sa release annoncent clairement en tête, avant les notes générées ([Versions et releases](gestion-projet/depot/versions-et-releases.md)) (#595).
 * **Choix** : les réseaux des conteneurs suivent une seule règle dans tous les fichiers Compose, un réseau par conteneur appelé, nommé comme lui et rejoint par ses seuls appelants (`backend` devient `db`, `frontend-net` devient `api`) ([Réseaux des conteneurs](choix-implementation/deploiement/reseaux-des-conteneurs.md), nouveau concept) (#589).
 * **Exigence de l'utilisateur** : une version est publiable quand tous les tickets de son jalon sont fermés ; l'agent le signale à l'utilisateur, et ne la publie que sur sa décision, puis en mène toutes les étapes (tag, release, analyse, images, fermeture du jalon), le déploiement restant à l'utilisateur ([Versions et releases](gestion-projet/depot/versions-et-releases.md)) ; la publication d'une version s'ajoute aux actes que [Prise de décision](gestion-projet/gouvernance/prise-de-decision.md) réserve à l'utilisateur (#593).
 * **Choix** : l'entrée active d'une liste d'options et un contrôle discret survolé ou ouvert prennent un contrat de surlignage propre, l'accent par défaut, vérifié à 3:1 sur les surfaces dans chaque thème, et non plus le fond d'une étiquette, réservé à ce qui est dessiné comme une étiquette avec sa bordure ([Thèmes](choix-implementation/socle/themes.md)) (#531).
