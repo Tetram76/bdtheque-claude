@@ -234,7 +234,7 @@ Une version est publiable quand tous les tickets de son jalon sont fermés ; ell
    gh release create v0.1.0 --draft --verify-tag --title "v0.1.0 — Phase 3, partie 1" --notes-file notes.md
    ```
 
-   Relire les notes du brouillon, qui ne doivent mentionner Codex nulle part ([Budget IA](.speckit/gestion-projet/gouvernance/budget-ia.md)), puis publier la release : `gh release edit v0.1.0 --draft=false`.
+   Relire les notes du brouillon, qui ne doivent mentionner Codex nulle part ([Budget IA](.speckit/gestion-projet/gouvernance/budget-ia.md)), et les soumettre à la validation du propriétaire du dépôt. Une fois qu'il les a validées, publier la release : `gh release edit v0.1.0 --draft=false`.
 
 4. **Relancer l'analyse SonarQube Cloud de `main`**, pour que la période du nouveau code commence au commit publié : `gh workflow run ci.yml --ref main`.
 
