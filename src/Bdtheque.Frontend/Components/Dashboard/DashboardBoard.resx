@@ -55,7 +55,7 @@
     <value>À la une aujourd'hui !</value>
   </data>
   <data name="Spotlight.WithoutDay" xml:space="preserve">
-    <value>L'édition du jour attend la date de votre navigateur.</value>
+    <value>Sans la date de votre navigateur, aucune édition n'est mise à la une. Il la donne si les cookies et les scripts sont acceptés.</value>
   </data>
   <data name="Latest.Title" xml:space="preserve">
     <value>Tout juste arrivés !</value>

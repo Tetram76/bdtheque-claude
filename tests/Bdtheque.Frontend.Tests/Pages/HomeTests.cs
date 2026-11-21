@@ -131,7 +131,10 @@ public sealed class HomeTests : BunitContext, IDisposable
         var spotlight = BlockOf(page, "À la une aujourd'hui !");
         Assert.Null(spotlight.QuerySelector("a"));
         Assert.Null(spotlight.QuerySelector("img"));
-        Assert.Contains("L'édition du jour attend la date de votre navigateur.", spotlight.TextContent);
+        // Says what the block does without the date, and what would give it, without promising any wait.
+        Assert.Contains("Sans la date de votre navigateur, aucune édition n'est mise à la une.", spotlight.TextContent);
+        Assert.Contains("cookies et les scripts", spotlight.TextContent);
+        Assert.DoesNotContain("attend", spotlight.TextContent);
         Assert.Equal(3, page.FindAll("[data-counter]").Count);
     }
 
