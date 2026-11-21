@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Présentation des erreurs'
-description: 'Erreurs métier, fonctionnelles et techniques distinguées au premier coup d''œil.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+description: 'Erreurs métier, fonctionnelles et techniques distinguées au premier coup d''œil ; titre d''une erreur, qui nomme la situation rencontrée, le même partout pour une même situation.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T12:00:00Z }
 ---
 
 # Présentation des erreurs
@@ -15,7 +15,22 @@ Toute erreur présentée à l'utilisateur doit lui permettre de distinguer **tr�
 
 Cette distinction s'applique à toutes les parties de l'application (consultation, administration, aide contextuelle).
 
-Une erreur technique porte partout la même mention, **« Problème technique »**, qu'elle survienne à l'enregistrement d'une fiche ou ailleurs (liste, fiche de la consultation, bandeau, contrôle) : l'utilisateur la reconnaît d'un écran à l'autre (décision de l'utilisateur, #411).
+## Titre d'une erreur
+
+Le titre d'une erreur nomme la **situation rencontrée**, en accord avec son message : un titre est un titre, et non le nom générique de sa catégorie, que son icône, sa couleur et son cadre disent déjà. Une même situation porte le **même titre partout** où elle survient, quel que soit l'écran (décision de l'utilisateur, #472) :
+
+| Situation | Titre |
+| --- | --- |
+| Une saisie enfreint une règle de gestion (enregistrement d'une fiche, connexion) | Saisie à corriger |
+| Une action sans saisie est refusée par une règle de gestion (ex. une intention d'acquisition) | Action refusée |
+| La fiche a été modifiée entre-temps | Fiche modifiée entre-temps |
+| Une fiche a été supprimée entre-temps (celle que l'on enregistre, une fiche qu'elle cite, celle que l'on consulte) | Fiche supprimée entre-temps |
+| Ce qu'emporte une suppression a changé depuis que son dialogue l'a présenté | Conséquences modifiées entre-temps |
+| Trop de tentatives de connexion ont échoué | Connexion suspendue |
+| La page demandée n'existe pas | Page introuvable |
+| Erreur technique | Problème technique |
+
+Une erreur technique porte ainsi partout le titre **« Problème technique »**, qu'elle survienne à l'enregistrement d'une fiche ou ailleurs (liste, fiche de la consultation, bandeau, contrôle) : l'utilisateur la reconnaît d'un écran à l'autre (décision de l'utilisateur, #411).
 
 
 <!-- À compléter : cas d'usage, user stories, autres règles métier, flux applicatifs, etc. -->
