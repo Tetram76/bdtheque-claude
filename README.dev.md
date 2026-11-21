@@ -244,6 +244,8 @@ Une version est publiable quand tous les tickets de son jalon sont fermés ; ell
 
 Le déploiement de la version reste ensuite une décision distincte.
 
+**Version corrective d'une version dépassée** : le projet suit le modèle *trunk-based* ([Stratégie de branches](.speckit/gestion-projet/depot/strategie-de-branches.md)). Si `main` a déjà avancé au-delà de la version à corriger, une branche `release/<majeur>.<mineur>` est créée depuis son tag (`git switch -c release/0.1 v0.1.0`), une seule fois. Le correctif est fait sur `main` par sa Pull Request, puis reporté sur la branche (`git cherry-pick <commit>`), qui reçoit le tag de la version corrective (`v0.1.1`) ; les étapes ci-dessus s'appliquent ensuite, la liste des changements se calculant entre `v0.1.0` et `v0.1.1`.
+
 ## Plusieurs versions sur le NAS
 
 Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, déployé selon la procédure du [`README.md`](README.md#procédure-synology-container-manager) dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version (celui du dépôt au tag de la version, ou au commit de `sha-<commit>`), qui peut différer d'une version à l'autre, et son propre `.env` :
