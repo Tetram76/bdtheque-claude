@@ -13,7 +13,12 @@ public sealed class DeploymentPackageTests : IDisposable
 {
     private const string Script = ".github/scripts/New-DeploymentPackage.ps1";
 
+    private const string ReleaseNotes = "**Version 0 : développement initial.**\n\n## What's Changed\n* feat(albums): fiche d'un album (#321)\n";
+
     private readonly string _output = Directory.CreateTempSubdirectory("bdtheque-package-tests-").FullName;
+    private readonly string _notes = Path.Combine(Directory.CreateTempSubdirectory("bdtheque-package-notes-").FullName, "notes.md");
+
+    public DeploymentPackageTests() => File.WriteAllText(_notes, ReleaseNotes);
 
     [Fact]
     public async Task Package_HoldsTheFilesToDeployTheVersion_InAFolderNamedAfterIt()
@@ -21,8 +26,30 @@ public sealed class DeploymentPackageTests : IDisposable
         var entries = await BuildAsync("0.1.0");
 
         Assert.Equal(
-            ["bdtheque-0.1.0/.env.example", "bdtheque-0.1.0/DEPLOIEMENT.md", "bdtheque-0.1.0/docker-compose.yml"],
+            [
+                "bdtheque-0.1.0/.env.example", "bdtheque-0.1.0/DEPLOIEMENT.md", "bdtheque-0.1.0/NOTES-DE-VERSION.md",
+                "bdtheque-0.1.0/docker-compose.yml",
+            ],
             entries.Keys.Order(StringComparer.Ordinal));
+    }
+
+    [Fact]
+    public async Task Package_HoldsTheNotesOfTheRelease_AsPublished()
+    {
+        var notes = (await BuildAsync("0.1.0"))["bdtheque-0.1.0/NOTES-DE-VERSION.md"];
+
+        Assert.Equal(ReleaseNotes, notes);
+    }
+
+    [Fact]
+    public async Task Package_IsRefused_WithoutReleaseNotes()
+    {
+        File.WriteAllText(_notes, "  \n");
+
+        var result = await RunAsync("0.1.0");
+
+        Assert.False(result.Succeeded, result.Output);
+        Assert.Empty(Directory.GetFiles(_output));
     }
 
     [Fact]
@@ -83,7 +110,11 @@ public sealed class DeploymentPackageTests : IDisposable
         Assert.Empty(Directory.GetFiles(_output));
     }
 
-    public void Dispose() => Directory.Delete(_output, recursive: true);
+    public void Dispose()
+    {
+        Directory.Delete(_output, recursive: true);
+        Directory.Delete(Path.GetDirectoryName(_notes)!, recursive: true);
+    }
 
     private async Task<Dictionary<string, string>> BuildAsync(string version)
     {
@@ -103,6 +134,6 @@ public sealed class DeploymentPackageTests : IDisposable
 
     private Task<ProcessResult> RunAsync(string version) =>
         Processes.PowerShellAsync(
-            Path.Combine(RepositoryFiles.Root, Script), ["-Version", version, "-OutputDirectory", _output], RepositoryFiles.Root,
+            Path.Combine(RepositoryFiles.Root, Script), ["-Version", version, "-ReleaseNotes", _notes, "-OutputDirectory", _output], RepositoryFiles.Root,
             TimeSpan.FromMinutes(1));
 }

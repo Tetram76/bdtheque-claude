@@ -6,7 +6,7 @@
 .DESCRIPTION
     The package holds what deploying the version takes, without the sources: docker-compose.yml, its images pointing at
     the public images of the version on ghcr.io and nothing left to build, .env.example without the tag of the images,
-    and the deployment procedure (gestion-projet/depot/versions-et-releases.md,
+    the deployment procedure and the notes of the release (gestion-projet/depot/versions-et-releases.md,
     choix-implementation/deploiement/publication-des-images-docker.md). Each change made to the files of the repository
     must apply exactly as expected: a file that no longer has the expected form fails the script rather than producing
     a package that would deploy something else.
@@ -14,12 +14,16 @@
 .PARAMETER Version
     Number of the version, without its `v` (e.g. 0.1.0).
 
+.PARAMETER ReleaseNotes
+    File holding the notes of the release of the version, as published, copied into the package.
+
 .PARAMETER OutputDirectory
     Directory the archive is written to.
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)] [string] $Version,
+    [Parameter(Mandatory)] [string] $ReleaseNotes,
     [Parameter(Mandatory)] [string] $OutputDirectory
 )
 
@@ -59,12 +63,19 @@ if ($procedure.Contains('{{')) {
     throw '.github/deployment/DEPLOIEMENT.md holds a placeholder other than {{VERSION}}.'
 }
 
+# A package is never attached without the notes of its version.
+$notes = Get-Content -Raw $ReleaseNotes
+if ([string]::IsNullOrWhiteSpace($notes)) {
+    throw "The release notes ($ReleaseNotes) are empty."
+}
+
 $staging = Join-Path ([IO.Path]::GetTempPath()) ([IO.Path]::GetRandomFileName())
 try {
     $folder = New-Item -ItemType Directory -Path (Join-Path $staging $name)
     Set-Content -NoNewline -Path (Join-Path $folder 'docker-compose.yml') -Value $compose
     Set-Content -NoNewline -Path (Join-Path $folder '.env.example') -Value $environment
     Set-Content -NoNewline -Path (Join-Path $folder 'DEPLOIEMENT.md') -Value $procedure
+    Set-Content -NoNewline -Path (Join-Path $folder 'NOTES-DE-VERSION.md') -Value $notes
 
     New-Item -ItemType Directory -Force -Path $OutputDirectory | Out-Null
     $archive = Join-Path (Resolve-Path $OutputDirectory).Path "$name.zip"

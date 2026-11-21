@@ -299,6 +299,8 @@ jobs:
             echo "::error::No release for $GITHUB_REF_NAME: create it, then run again."
             exit 1
           fi
+          # The notes as published, which the package carries: a later edit of the release calls for a new run.
+          gh release view "$GITHUB_REF_NAME" --json body --jq .body > "$RUNNER_TEMP/release-notes.md"
           package=$(pwsh -NoProfile -NonInteractive -File .github/scripts/New-DeploymentPackage.ps1 \
-            -Version "$VERSION" -OutputDirectory "$RUNNER_TEMP/package")
+            -Version "$VERSION" -ReleaseNotes "$RUNNER_TEMP/release-notes.md" -OutputDirectory "$RUNNER_TEMP/package")
           gh release upload "$GITHUB_REF_NAME" "$package" --clobber
