@@ -78,7 +78,7 @@
         if (!Credentials.AreValid(Login, Password))
         {
             Throttle.RecordFailure();
-            Refuse(ProblemCategory.Business, "InvalidCredentials");
+            Refuse(ProblemCategory.Business, "InvalidCredentials", L["InvalidCredentials.Label"]);
             return;
         }
 

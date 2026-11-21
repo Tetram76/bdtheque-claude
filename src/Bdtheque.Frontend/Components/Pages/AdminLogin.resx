@@ -30,6 +30,9 @@
   <data name="InvalidCredentials" xml:space="preserve">
     <value>Identifiant ou mot de passe incorrect : vérifiez votre saisie.</value>
   </data>
+  <data name="InvalidCredentials.Label" xml:space="preserve">
+    <value>Connexion refusée</value>
+  </data>
   <data name="TooManyAttempts" xml:space="preserve">
     <value>Trop de tentatives de connexion ont échoué : réessayez dans quelques minutes.</value>
   </data>

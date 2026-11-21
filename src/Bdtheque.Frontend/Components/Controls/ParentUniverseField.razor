@@ -10,8 +10,10 @@
    parent created on the spot, which the saving of the panel creates: the key tells it created even with an empty name,
    which the saving then refuses, rather than taking it for no parent. It needs interactivity for its choice and its dialog: the caller renders it in
    the InteractiveServer mode, and passes it only what serializes. A parent refused (a cycle, a name already taken) is
-   presented in place, with its reason, until another one is chosen. *@
-<Field Id="@Id" Label="@L["Label"]" Error="@_error" Help="@(_error is null ? HelpText : null)" Context="control">
+   presented in place, with its reason, until another one is chosen. Ancestors that cannot be read leave the parent named
+   alone, the failure said under the field at its scale until another parent is chosen (choix-implementation/socle/frontend.md,
+   erreur dans un contrôle). *@
+<Field Id="@Id" Label="@L["Label"]" Error="@_error" Help="@(_error is null ? HelpText : null)" Failure="_failure" FailureText="@L["Failed"]" Context="control">
     <RecordPicker Id="@control.Id" Kind="RecordKind.Universe" Value="_value" ValueChanged="ChooseAsync" Placeholder="@L["Placeholder"]"
                   OnCreate="text => _creation = text" CreateLabel="@(text => L["Create", text].Value)" Pending="Pending"
                   AutoFocus="@Autofocus" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
@@ -28,6 +30,7 @@
 @code {
     private RecordOption? _value;
     private string? _error;
+    private ApiProblem? _failure;
     // The parent created on the spot, chosen or not since: suggested again when its name is typed, rather than created twice.
     private NewUniverse? _new;
     // The text typed, while the dialog of its creation is open.
@@ -101,6 +104,7 @@
     {
         _value = option;
         _error = null;
+        _failure = null;
         if (option is null || option.Id == _new?.Key)
             return;
 
@@ -111,10 +115,15 @@
             if (_value?.Id == option.Id)
                 _value = Option(parent);
         }
+        catch (ApiProblemException exception) when (_value?.Id == option.Id)
+        {
+            // Its ancestors unread (deleted meanwhile, the API unavailable), the parent keeps its name alone, and the failure
+            // is said, the parent being presented otherwise than with its ancestors.
+            _failure = exception.Problem;
+        }
         catch (ApiProblemException)
         {
-            // Its ancestors unread (deleted meanwhile, the API unavailable), the parent keeps its name alone: the saving
-            // presents the error, if any.
+            // The reading for a parent chosen before no longer matters.
         }
     }
 
@@ -125,6 +134,7 @@
         _new = parent;
         _value = Option(parent);
         _error = null;
+        _failure = null;
     }
 
     private static RecordOption Option(UniverseInHierarchy universe) =>

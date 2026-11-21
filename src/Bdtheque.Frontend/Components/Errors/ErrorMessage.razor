@@ -4,13 +4,14 @@
 @inject IStringLocalizer<RuleMessages> Rules
 
 @* The category tells the three kinds of errors apart at first glance (fonctionnel/presentation-des-erreurs.md), by its
-   name, its icon, its color and its frame (visuel/saisie-album/contenu.md), carried by an attribute
-   (ErrorMessage.razor.css). Compact, at the scale of a control (a list of suggestions, the line of an upload, under a
-   field): the same name, icon, color and frame, smaller. *@
+   icon, its color and its frame (visuel/saisie-album/contenu.md), carried by an attribute (ErrorMessage.razor.css); the title
+   names the situation met, in agreement with the message, written here once so that a same situation bears the same title
+   wherever it occurs (fonctionnel/presentation-des-erreurs.md, titre d'une erreur). Compact, at the scale of a control (a
+   list of suggestions, the line of an upload, under a field): the same title, icon, color and frame, smaller. *@
 <div role="alert" class="error-message" data-error-category="@CategoryName" data-error-compact="@Compact">
     <span class="error-icon"><Icon Name="CategoryIcon" /></span>
     <div class="error-content">
-        <p data-error-label>@(Label ?? L[$"Category.{Problem.Category}"])</p>
+        <p data-error-label>@(Label ?? L[Situation])</p>
         <p data-error-text>@Text</p>
         @if (Problem.Category != ProblemCategory.Technical && Problem.Impact is { BlockedBy.Count: > 0 } impact)
         {
@@ -28,8 +29,8 @@
     public ApiProblem Problem { get; set; } = null!;
 
     /// <summary>
-    /// The name of an error the frontend finds itself, without any call to the API, when the name of its category would
-    /// say more than it (e.g. too many attempts of login, which no data modified in the meantime explains).
+    /// The title of a situation the frontend finds itself, without any call to the API, and which no answer of the API names
+    /// (e.g. a login refused, too many attempts of login, a page that does not exist).
     /// </summary>
     [Parameter]
     public string? Label { get; set; }
@@ -59,6 +60,14 @@
     [Parameter]
     public RenderFragment? Actions { get; set; }
 
+    /// <summary>
+    /// Whether the error answers the entry of a record (its saving), rather than an action without entry
+    /// (e.g. an intent of acquisition added from a button): a business error then asks to correct the entry, where it
+    /// otherwise says the action refused.
+    /// </summary>
+    [Parameter]
+    public bool Entry { get; set; }
+
     /// <summary>Presented within a control rather than over a page or a form: the same error, at the scale of the control.</summary>
     [Parameter]
     public bool Compact { get; set; }
@@ -70,6 +79,16 @@
         ProblemCategory.Business => IconName.Exclamation,
         ProblemCategory.Functional => IconName.Reload,
         _ => IconName.Wrench,
+    };
+
+    // The situations told apart in the same order as the text, which the title introduces.
+    private string Situation => Problem.Category switch
+    {
+        ProblemCategory.Business => Entry ? "Title.EntryToCorrect" : "Title.ActionRefused",
+        ProblemCategory.Functional when Problem.Impact is not null => "Title.ImpactChanged",
+        ProblemCategory.Functional when Problem.Status == StatusCodes.Status404NotFound => "Title.Deleted",
+        ProblemCategory.Functional => "Title.Modified",
+        _ => "Title.Technical",
     };
 
     // A technical error discloses nothing of its cause, which only the logs of the API hold.

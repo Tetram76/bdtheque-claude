@@ -200,7 +200,7 @@ public sealed class AdminSeriesFormTests(ApplicationHost application) : BrowserT
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer la série" }).ClickAsync();
 
         var error = page.GetByRole(AriaRole.Alert);
-        await Assertions.Expect(error).ToContainTextAsync("À corriger");
+        await Assertions.Expect(error).ToContainTextAsync("Saisie à corriger");
         var title = page.GetByLabel("Titre");
         await Assertions.Expect(title).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(title).ToBeFocusedAsync();

@@ -201,7 +201,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
         await page.GetByRole(AriaRole.Option, new() { Name = $"Éditeur{_marker}", Exact = true }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'édition" }).ClickAsync();
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
+        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("Saisie à corriger");
         var mode = page.GetByLabel("Mode d'acquisition");
         await Assertions.Expect(mode).ToHaveAttributeAsync("aria-invalid", "true");
         await Assertions.Expect(mode).ToBeFocusedAsync();

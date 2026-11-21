@@ -7,13 +7,14 @@
    A form sent by the browser (StaticForm: a side panel, a row, a dialog of a list) offers the same actions by the browser
    alone: the reload is a link to the record, read anew, and the retry sends the form again, with what was typed; « Voir mes
    changements » is not there, what was typed staying in front of the user until the reload. *@
+@* A saving answers what was typed: its title is that of an entry, the same as anywhere else (ErrorMessage). *@
 @switch (Problem.Category)
 {
     case ProblemCategory.Business:
-        <ErrorMessage Problem="Problem" Label="@L["Business"]" Message="@Business" RefusalHint="RefusalHint" />
+        <ErrorMessage Problem="Problem" Entry="true" Message="@Business" RefusalHint="RefusalHint" />
         break;
     case ProblemCategory.Functional:
-        <ErrorMessage Problem="Problem" Label="@L["Functional"]" Message="@(Problem.Status == StatusCodes.Status404NotFound ? NotFound : Conflict)">
+        <ErrorMessage Problem="Problem" Entry="true" Message="@(Problem.Status == StatusCodes.Status404NotFound ? NotFound : Conflict)">
             <Actions>
                 @if (CanReload)
                 {
@@ -31,7 +32,7 @@
         </ErrorMessage>
         break;
     default:
-        <ErrorMessage Problem="Problem" Message="@Technical">
+        <ErrorMessage Problem="Problem" Entry="true" Message="@Technical">
             <Actions>
                 @if (StaticForm)
                 {

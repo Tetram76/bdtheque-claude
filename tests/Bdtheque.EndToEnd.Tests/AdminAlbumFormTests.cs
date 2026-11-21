@@ -193,7 +193,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(dialog).ToHaveCountAsync(0);
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
-        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("À corriger");
+        await Assertions.Expect(page.GetByRole(AriaRole.Alert)).ToContainTextAsync("Saisie à corriger");
         // Its removal, the only thing to act on in the tag, gets the focus, described by the message of the list of the genres.
         var removal = page.GetByRole(AriaRole.Button, new() { Name = $"Retirer « polar{_marker} »" });
         await Assertions.Expect(removal).ToBeFocusedAsync();
@@ -214,7 +214,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'album" }).ClickAsync();
 
         var error = page.GetByRole(AriaRole.Alert);
-        await Assertions.Expect(error).ToContainTextAsync("À corriger");
+        await Assertions.Expect(error).ToContainTextAsync("Saisie à corriger");
         await Assertions.Expect(page.GetByLabel("Titre")).ToHaveAttributeAsync("aria-invalid", "true");
         // The field to correct gets the focus, scrolled into view.
         await Assertions.Expect(page.GetByLabel("Titre")).ToBeFocusedAsync();
@@ -234,7 +234,7 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await page.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
 
         var error = page.GetByRole(AriaRole.Alert);
-        await Assertions.Expect(error).ToContainTextAsync("Modifiée entre-temps");
+        await Assertions.Expect(error).ToContainTextAsync("Fiche modifiée entre-temps");
         await error.GetByRole(AriaRole.Button, new() { Name = "Voir mes changements" }).ClickAsync();
         var changes = page.GetByRole(AriaRole.Dialog, new() { Name = "Mes changements" });
         await Assertions.Expect(changes).ToContainTextAsync($"Autre titre {_marker}");

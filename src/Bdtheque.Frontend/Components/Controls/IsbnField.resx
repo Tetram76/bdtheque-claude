@@ -24,4 +24,7 @@
   <data name="Inconsistent" xml:space="preserve">
     <value>Chiffre de contrôle incohérent : vérifiez la saisie. L'ISBN peut être enregistré tel quel.</value>
   </data>
+  <data name="Failed" xml:space="preserve">
+    <value>La vérification de l&apos;ISBN n&apos;a pas abouti. Elle reprendra à sa prochaine modification.</value>
+  </data>
 </root>

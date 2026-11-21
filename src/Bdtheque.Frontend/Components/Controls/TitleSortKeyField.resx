@@ -30,4 +30,7 @@
   <data name="Reset" xml:space="preserve">
     <value>Réinitialiser</value>
   </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Le calcul de la clé de tri n&apos;a pas abouti. Il reprendra à la prochaine modification du titre.</value>
+  </data>
 </root>

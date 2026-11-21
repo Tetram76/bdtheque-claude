@@ -45,6 +45,7 @@ public sealed partial class AdministrationAccessTests(ApplicationHost applicatio
 
         var error = page.GetByRole(AriaRole.Alert);
         await Assertions.Expect(error).ToHaveAttributeAsync("data-error-category", "business");
+        await Assertions.Expect(error).ToContainTextAsync("Connexion refusée");
         await Assertions.Expect(error).ToContainTextAsync("Identifiant ou mot de passe incorrect");
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminLogin));
         // Still refused at the address of the administration: no cookie was given.

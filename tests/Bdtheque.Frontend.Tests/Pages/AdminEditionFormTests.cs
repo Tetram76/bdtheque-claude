@@ -279,6 +279,30 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal("true", page.Find("#edition-isbn").GetAttribute("data-warning"));
     }
 
+    // A check that fails is an error with nothing to correct in the ISBN: presented at the scale of the field, as any control
+    // presents its own (choix-implementation/socle/frontend.md, erreur dans un contrôle, #480), until the next ISBN is checked.
+    [Fact]
+    public async Task Isbn_CheckThatFails_IsPresentedUnderTheField_UntilTheNextCheck()
+    {
+        var page = OpenOwned();
+        _api.Failures["/admin/editions/isbn-check"] = HttpStatusCode.InternalServerError;
+
+        await page.InputAsync("#edition-isbn", "978-2-203-00120-7");
+
+        var failure = page.Find("#edition-isbn-failure [role=alert]");
+        Assert.Equal("technical", failure.GetAttribute("data-error-category"));
+        Assert.True(failure.HasAttribute("data-error-compact"));
+        Assert.Equal("La vérification de l'ISBN n'a pas abouti. Elle reprendra à sa prochaine modification.", failure.QuerySelector("[data-error-text]")!.TextContent.Trim());
+        Assert.Contains("edition-isbn-failure", page.Find("#edition-isbn").GetAttribute("aria-describedby"));
+
+        _api.Failures.Clear();
+        _api.Answers["/admin/editions/isbn-check?isbn=978-2-203-00120-8"] = new IsbnCheck(true, "978-2-203-00120-8");
+        await page.InputAsync("#edition-isbn", "978-2-203-00120-8");
+
+        Assert.Empty(page.FindAll("#edition-isbn-failure"));
+        Assert.Contains("Chiffre de contrôle correct.", page.Find("#edition-isbn-help").TextContent);
+    }
+
     [Fact]
     public async Task Isbn_TheCheckCharacterIsWrittenInCapitalsAsItIsEntered()
     {

@@ -244,7 +244,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal(
             "« star wars » est déjà pris sous ce parent : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.",
             Text(panel.QuerySelector("input[name='name']")!.ParentElement!.QuerySelector(".field-error")!));
-        Assert.Equal("À corriger", Text(panel.QuerySelector("[data-error-category='business'] [data-error-label]")!));
+        Assert.Equal("Saisie à corriger", Text(panel.QuerySelector("[data-error-category='business'] [data-error-label]")!));
     }
 
     // Deleted meanwhile, or its parent: nothing saved, the universe reloaded at its address.

@@ -25,6 +25,14 @@
                 OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)"
                 ErrorOf="universe => ErrorOf(universe.Id)" />
     <InheritedTags Label="@InheritedLabel" Items="InheritedUniverses" />
+    @if (UniverseFailure is { } failure)
+    {
+        @* The ancestors of a universe added that could not be read, said at the scale of the universes while the record cites
+           it, until another universe is added (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
+        <div class="classification-tags-failure">
+            <ErrorMessage Problem="failure" Compact="true" TechnicalText="@L["Failed"]" />
+        </div>
+    }
 </div>
 <p class="classification-tags-help">@Help</p>
 
@@ -41,6 +49,12 @@
 @code {
     private string? _genreCreation;
     private string? _universeCreation;
+    // The failure of the reading of the ancestors of a universe, kept with that universe: it concerns it alone, and says
+    // nothing once the record no longer cites it, as the reading, when it succeeds, names it only if it is still cited.
+    private (Guid Universe, ApiProblem Problem)? _universeFailure;
+
+    private ApiProblem? UniverseFailure =>
+        _universeFailure is { } failure && Records.Universes.Any(u => u.Id == failure.Universe) ? failure.Problem : null;
 
     /// <summary>The prefix of the identifiers of its fields, unique in the page (e.g. « album »).</summary>
     [Parameter, EditorRequired]
@@ -103,14 +117,16 @@
     {
         if (!Records.AddUniverse(universe))
             return;
+        _universeFailure = null;
         await OnChange.InvokeAsync();
         try
         {
             Records.Rename(CitedRecords.Universe(await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{universe.Id}/hierarchy")));
         }
-        catch (ApiProblemException)
+        catch (ApiProblemException exception)
         {
-            // Named without its ancestors.
+            // Named without its ancestors, which the failure says.
+            _universeFailure = (universe.Id, exception.Problem);
         }
     }
 
@@ -127,6 +143,7 @@
     private async Task UniverseCreatedAsync(NewUniverse universe)
     {
         _universeCreation = null;
+        _universeFailure = null;
         Records.NewUniverses.Add(universe);
         Records.Universes.Add(new RecordOption(universe.Key, universe.Name, null));
         await OnChange.InvokeAsync();

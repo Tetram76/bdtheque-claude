@@ -282,6 +282,7 @@ public sealed class EntryControlsTests : BunitContext, IDisposable
         var field = Render<TitleSortKeyField>(parameters => parameters
             .Add(p => p.Id, "sort-key")
             .Add(p => p.Title, "Tintin")
+            .Add(p => p.StoredKey, "Tintin")
             .Add(p => p.ManualKey, "")
             .Add(p => p.UntitledHelp, "—")
             .Add(p => p.Error, "La clé de tri ne peut pas être vide."));

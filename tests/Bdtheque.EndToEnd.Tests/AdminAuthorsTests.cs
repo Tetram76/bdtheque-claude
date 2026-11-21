@@ -115,7 +115,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
 
         panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
         var error = panel.Locator("[data-error-category=functional]");
-        await Assertions.Expect(error).ToContainTextAsync("Modifiée entre-temps");
+        await Assertions.Expect(error).ToContainTextAsync("Fiche supprimée entre-temps");
         await Assertions.Expect(error).ToContainTextAsync("L'auteur a été supprimé entre-temps : rien n'a été enregistré.");
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" })).ToHaveValueAsync("Belge");
         using var api = Application.CreateApiClient();

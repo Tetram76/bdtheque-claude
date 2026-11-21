@@ -30,7 +30,7 @@ public sealed class NotFoundPageTests : BunitContext
     {
         var page = Render<NotFound>();
 
-        Assert.NotEqual("Données modifiées entre-temps", page.Find("[data-error-label]").TextContent.Trim());
+        Assert.NotEqual("Fiche supprimée entre-temps", page.Find("[data-error-label]").TextContent.Trim());
     }
 
     [Fact]

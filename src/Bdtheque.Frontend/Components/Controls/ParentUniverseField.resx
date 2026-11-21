@@ -27,4 +27,7 @@
   <data name="Help.Parent" xml:space="preserve">
     <value>Ses séries et albums sont aussi ceux de {0}.</value>
   </data>
+  <data name="Failed" xml:space="preserve">
+    <value>La lecture des univers parents n&apos;a pas abouti : l&apos;univers est présenté par son nom seul.</value>
+  </data>
 </root>

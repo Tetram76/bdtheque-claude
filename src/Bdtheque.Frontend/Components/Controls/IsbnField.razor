@@ -6,9 +6,11 @@
 @* The ISBN of an edition, whose check digit is checked as it is entered, without blocking (fonctionnel/regles-metier/
    validation-de-l-isbn.md): correct, a tick; inconsistent, a warning that says it may be saved as it is. The check is the
    domain's, asked of the API (choix-implementation/domaine/validation-de-l-isbn.md), which also gives the ISBN as it will be
-   saved, its check character in capitals, taken up as soon as it is typed: the frontend applies no rule of its own. *@
+   saved, its check character in capitals, taken up as soon as it is typed: the frontend applies no rule of its own. A check
+   that fails, with nothing to correct in the ISBN, is presented under the field at its scale until the next ISBN is checked
+   (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
 <div class="@(_checked == false ? "isbn-field isbn-field-warning" : "isbn-field")">
-    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Error="@Error" Context="control">
+    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Error="@Error" Failure="_failure" FailureText="@L["Failed"]" Context="control">
         <span class="isbn-field-control">
             <input id="@control.Id" type="text" inputmode="numeric" autocomplete="off" placeholder="@L["Placeholder"]" value="@Value"
                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
@@ -26,6 +28,7 @@
     // answer for the last ISBN is shown (as the sort key of a title, TitleSortKeyField).
     private int _number;
     private bool? _checked;
+    private ApiProblem? _failure;
     private readonly CancellationTokenSource _disposal = new();
 
     /// <summary>The identifier of the field, unique in the page.</summary>
@@ -54,6 +57,8 @@
     {
         var isbn = args.Value as string;
         var number = ++_number;
+        // The failure was that of the check of the ISBN typed before.
+        _failure = null;
         await ValueChanged.InvokeAsync(isbn);
         if (string.IsNullOrWhiteSpace(isbn))
         {
@@ -73,10 +78,11 @@
                     await ValueChanged.InvokeAsync(saved);
             }
         }
-        catch (ApiProblemException) when (number == _number)
+        catch (ApiProblemException exception) when (number == _number)
         {
-            // Checked again at the next change: the check never blocks the saving anyway.
+            // Neither correct nor inconsistent: the failure is said, the check never blocking the saving anyway.
             _checked = null;
+            _failure = exception.Problem;
         }
         catch (ApiProblemException)
         {

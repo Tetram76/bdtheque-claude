@@ -8,8 +8,9 @@
    change of the title, never computed here; typing a key of one's own fixes it, and Réinitialiser computes it again from the
    title. Interactive. Always required, the field showing a key in either mode, with or without a title; read-only until a
    title is entered, a record without one being sorted by the key of its series, never by one entered by hand
-   (visuel/saisie-album/contenu.md, #465). *@
-<Field Id="@Id" Label="@L["Label"]" Required="true" Help="@Help" Error="@Error" Context="control">
+   (visuel/saisie-album/contenu.md, #465). A computation that fails, with nothing to correct in the field, is presented under
+   it at its scale until the next one (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
+<Field Id="@Id" Label="@L["Label"]" Required="true" Help="@Help" Error="@Error" Failure="_failure" FailureText="@L["Failed"]" Context="control">
     <Beside>
         <span class="sort-key-mode" data-mode="@(IsManual ? "manual" : "auto")">@L[IsManual ? "Manual" : "Auto"]</span>
         @if (IsManual)
@@ -28,6 +29,7 @@
     private int _titleNumber;
     private string? _title;
     private string? _computed;
+    private ApiProblem? _failure;
     private readonly CancellationTokenSource _disposal = new();
 
     /// <summary>The identifier of the field, unique in the page.</summary>
@@ -104,6 +106,8 @@
     private async Task ComputeAsync()
     {
         var number = ++_titleNumber;
+        // The failure was that of the computation of the title before.
+        _failure = null;
         if (!HasTitle)
         {
             _computed = null;
@@ -116,10 +120,11 @@
             if (number == _titleNumber)
                 _computed = key.SortKey;
         }
-        catch (ApiProblemException) when (number == _titleNumber)
+        catch (ApiProblemException exception) when (number == _titleNumber)
         {
-            // Shown again at the next change of the title; the key stored is the domain's anyway, whatever is shown.
+            // No key to show, the failure said; the key stored is the domain's anyway, whatever is shown.
             _computed = null;
+            _failure = exception.Problem;
         }
         catch (ApiProblemException)
         {

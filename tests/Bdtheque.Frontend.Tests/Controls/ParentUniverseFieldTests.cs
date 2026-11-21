@@ -22,19 +22,28 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     // The clock of the pause the field awaits before searching, moved on by the test.
     private readonly FakeTimeProvider _clock = new();
+    private Func<HttpResponseMessage> _hierarchy = () => new HttpResponseMessage(HttpStatusCode.OK)
+    {
+        Content = new StringContent(
+            $$"""{"universe":{"id":"{{Pratt.Id}}","name":"{{Pratt.Name}}"},"ancestors":[]}""", Encoding.UTF8, "application/json"),
+    };
 
     public ParentUniverseFieldTests()
     {
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         Services.AddLocalization();
         Services.AddSingleton<TimeProvider>(_clock);
-        // The search finds a universe that does not contain the text typed of the tests, which none suits.
-        Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler(_ => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-        {
-            Content = new StringContent(
-                $$"""{"items":[{"id":"{{Pratt.Id}}","name":"{{Pratt.Name}}"}],"number":1,"size":10,"totalCount":1}""",
-                Encoding.UTF8, "application/json"),
-        })))
+        // The search finds a universe that does not contain the text typed of the tests, which none suits; the reading of its
+        // ancestors answers what the test sets.
+        Services.AddSingleton(new ApiClient(new HttpClient(new StubHandler(request => Task.FromResult(
+            request.RequestUri!.AbsolutePath.EndsWith("/hierarchy", StringComparison.Ordinal)
+                ? _hierarchy()
+                : new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        $$"""{"items":[{"id":"{{Pratt.Id}}","name":"{{Pratt.Name}}"}],"number":1,"size":10,"totalCount":1}""",
+                        Encoding.UTF8, "application/json"),
+                })))
         {
             BaseAddress = new Uri("http://api"),
         }));
@@ -140,6 +149,29 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         Assert.Equal("true", field.Find("input[role=combobox]").GetAttribute("aria-invalid"));
         Assert.Equal("« Ombrelune » est déjà pris.", field.Find(".field-error").TextContent.Trim());
         Assert.Equal(("", sent.Key.ToString(), "Ombrelune"), Sent(field));
+    }
+
+    // Ancestors that cannot be read leave the parent named alone: the failure is said under the field, as any control says its
+    // own (choix-implementation/socle/frontend.md, erreur dans un contrôle, #480), until another parent is chosen.
+    [Fact]
+    public async Task AParentWhoseAncestorsCannotBeRead_IsNamedAlone_AndTheFailureSaidUnderTheField()
+    {
+        _hierarchy = () => new HttpResponseMessage(HttpStatusCode.InternalServerError);
+        var field = Open();
+
+        await (await field.TypeAsync("input[role=combobox]", "Pratt", _clock)).EndAsync("The search of the text typed");
+        await field.ClickAsync("[role=option]");
+
+        Assert.Equal("Univers Hugo Pratt", field.Find("input[role=combobox]").GetAttribute("value"));
+        Assert.Equal((Pratt.Id.ToString(), "", ""), Sent(field));
+        var failure = field.Find("#universe-parent-failure [role=alert]");
+        Assert.Equal("technical", failure.GetAttribute("data-error-category"));
+        Assert.True(failure.HasAttribute("data-error-compact"));
+        Assert.Equal("La lecture des univers parents n'a pas abouti : l'univers est présenté par son nom seul.", failure.QuerySelector("[data-error-text]")!.TextContent.Trim());
+
+        await field.ClickAsync("button.record-picker-clear");
+
+        Assert.Empty(field.FindAll("#universe-parent-failure"));
     }
 
     private IRenderedComponent<ParentUniverseField> Open(UniverseInHierarchy? parent = null, NewUniverse? newParent = null, string? error = null) =>

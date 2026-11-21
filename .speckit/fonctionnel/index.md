@@ -7,7 +7,7 @@
 * [Design et charte graphique](design-et-charte-graphique.md) - Rendu soigné et personnel, thème tiré au hasard par visite, visuel/ référence visuelle et non contenu ; à lire pour tout écran.
 * [Structure de l'application](structure-de-l-application.md) - Consultation publique (fiches, navigation, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.
 * [Règles d'accès](regles-d-acces.md) - Recherche et consultation publiques, statistiques publiques ou privées, écriture réservée à l'administrateur, mêmes règles pour l'outil pour agents IA.
-* [Présentation des erreurs](presentation-des-erreurs.md) - Erreurs métier, fonctionnelles et techniques distinguées au premier coup d'œil.
+* [Présentation des erreurs](presentation-des-erreurs.md) - Erreurs métier, fonctionnelles et techniques distinguées au premier coup d'œil ; titre d'une erreur, qui nomme la situation rencontrée, le même partout pour une même situation.
 * [Mesure d'audience de l'interface web](mesure-audience.md) - Mesure d'audience de l'interface web conforme à la CNIL : fonctions suivies, visites, minimisation, indicateurs, information et opposition, conservation.
 * [Page d'accueil](page-accueil.md) - Dashboard public : blocs fixes, édition à la une, statistiques tirées au hasard et règles du tirage, écran d'une collection vide.
 * [Présentation des données](presentation/index.md) - Langue, culture et fuseau horaire d'affichage, tri et navigation par initiale, libellés des albums et des éditions, ordre des types de fiche.
