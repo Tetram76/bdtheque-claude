@@ -54,9 +54,6 @@
   <data name="Records.Title" xml:space="preserve">
     <value>Les fiches</value>
   </data>
-  <data name="Records.Kicker" xml:space="preserve">
-    <value>Fiches</value>
-  </data>
   <data name="Records.OpenList" xml:space="preserve">
     <value>{0}, voir la liste</value>
   </data>
@@ -125,9 +122,6 @@
   </data>
   <data name="Intents.Title" xml:space="preserve">
     <value>Intentions d&apos;acquisition</value>
-  </data>
-  <data name="Intents.Kicker" xml:space="preserve">
-    <value>Acquisitions</value>
   </data>
   <data name="Intents.Detail" xml:space="preserve">
     <value>acquisitions à confirmer, posées depuis leur album</value>

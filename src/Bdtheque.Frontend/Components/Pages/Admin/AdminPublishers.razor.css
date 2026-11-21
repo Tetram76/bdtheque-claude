@@ -52,15 +52,6 @@
     min-inline-size: 0;
 }
 
-/* Its collections, on a single line that an ellipsis ends when they do not fit. */
-.publisher-collection-names {
-    overflow: hidden;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .publisher-website {
     display: none;
     grid-area: website;

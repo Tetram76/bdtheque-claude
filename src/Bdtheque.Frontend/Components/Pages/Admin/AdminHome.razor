@@ -4,6 +4,7 @@
 @using Bdtheque.Contracts.Enums
 @using Bdtheque.Frontend.Api
 @inject IStringLocalizer<AdminHome> L
+@inject IStringLocalizer<RecordSetText> Sets
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject RecordLabels Labels
@@ -51,7 +52,7 @@
             </div>
         </Block>
 
-        <Block Title="@L["Records.Title"]" Kicker="@L["Records.Kicker"]">
+        <Block Title="@L["Records.Title"]" Kicker="@Sets[nameof(RecordSet.Records)]">
             <p class="admin-home-note">@L["Records.Note"]</p>
             <ul class="admin-records">
                 @foreach (var record in Records)
@@ -75,7 +76,7 @@
 
         @* Apart from the records: a purchase intent has no record of its own, it is set from its album, and its list serves to
            confirm the purchases (visuel/listes/saisie-selon-l-entite.md). The block is their card itself, with no card in it. *@
-        <Block Title="@L["Intents.Title"]" Kicker="@L["Intents.Kicker"]">
+        <Block Title="@L["Intents.Title"]" Kicker="@Sets[nameof(RecordSet.Acquisitions)]">
             <div class="admin-intents">
                 <span class="admin-record-chip"><Icon Name="IconName.PurchaseIntent" /></span>
                 <strong class="admin-record-count admin-intents-count">@Format.Number(_counts.PurchaseIntents)</strong>

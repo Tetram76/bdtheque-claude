@@ -206,6 +206,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub").Find(".empty-list");
 
         Assert.Equal("Aucune série ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur le titre de la série, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal(
             [("Effacer la recherche", AppPaths.AdminSeries), ("Créer la série « Zorglub »", AppPaths.NewWithSearched(AppPaths.AdminNewSeries, "Zorglub"))],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));

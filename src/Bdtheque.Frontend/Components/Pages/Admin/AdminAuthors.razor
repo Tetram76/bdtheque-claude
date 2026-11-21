@@ -20,7 +20,7 @@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminAuthors" />
 
-<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Records" Problem="_problem" Loaded="@(_list is not null)">
     <Heading>
         <ListHeading Title="@L["Title"]" TotalCount="_counts?.Authors" NewHref="@NewHref" NewLabel="@L["New"]" />
     </Heading>
@@ -39,7 +39,7 @@
             switch (_query.EmptyReason)
             {
                 case EmptyListReason.Search:
-                    <EmptyList Message="@L["Empty.Text", _query.Text!]" Hint="@L["Empty.Hint"]">
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" SearchedIn="@L["Empty.SearchedIn"]">
                         <Actions>
                             <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                             <Button Href="@NewHref" Variant="ButtonVariant.Primary" Label="@L["Empty.Create", _query.Text!]" />
@@ -82,11 +82,7 @@
                             <Monogram LastName="@row.LastName" FirstName="@row.FirstName" Pseudonym="@row.Pseudonym" />
                         </span>
                         <span class="author-main" role="cell">
-                            <RowEntry>@name</RowEntry>
-                            @if (Identity(row) is { } identity)
-                            {
-                                <span class="author-identity">@identity</span>
-                            }
+                            <RowEntry Detail="@Identity(row)">@name</RowEntry>
                         </span>
                         <span class="author-meta">
                             <span class="author-nationality" role="cell">

@@ -56,14 +56,6 @@
     min-inline-size: 0;
 }
 
-.album-authors {
-    overflow: hidden;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
 .album-date {
     grid-area: date;
 }

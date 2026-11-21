@@ -6,6 +6,7 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Components.Pages.Admin;
+using Bdtheque.Frontend.Components.Presentation;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Tests.Audience;
@@ -89,7 +90,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     {
         var rows = Open("").FindAll(".edition-row:not(.edition-row-head)").Select(row => (
             Text(row.QuerySelector(".row-entry")!),
-            Text(row.QuerySelector(".edition-album")!),
+            Text(row.QuerySelector(".row-entry-detail")!),
             Text(row.QuerySelector(".edition-year")!),
             Text(row.QuerySelector(".edition-category")!),
             Text(row.QuerySelector(".edition-acquisition")!)));
@@ -197,6 +198,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         var empty = Open("q=978-0").Find(".empty-list");
 
         Assert.Equal("Aucune édition ne correspond à « 978-0 ».", Text(empty.QuerySelector("strong")!));
+        Assert.Equal("La recherche porte sur l'ISBN, avec ou sans tirets ni espaces.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal(
             [("Effacer la recherche", AppPaths.AdminEditions)],
             empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
@@ -330,6 +332,19 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
 
     private static Page<EditionAdminListItem> Page(IReadOnlyList<EditionAdminListItem> items, int totalCount) =>
         new(items, 1, AdminListQuery.PageSize, totalCount);
+
+    [Fact]
+    // The way to the editions and intents of an album has the icon of the editions wherever it is, its button and the entry of
+    // the menu that takes its place on a smartphone (visuel/listes/principes-communs.md, Actions, #474).
+    public void Rows_LeadToTheEditionsOfTheAlbum_WithTheIconOfTheEditions()
+    {
+        var row = Open("q=978").FindAll(".edition-row:not(.edition-row-head)")[0];
+
+        var icons = row.QuerySelectorAll($".edition-actions a[href='{AppPaths.AdminAlbumEditions(Lunes.Id)}'] svg.icon path");
+        Assert.Equal(2, icons.Length);
+        Assert.All(icons, icon => Assert.Equal(
+            Render<Icon>(parameters => parameters.Add(p => p.Name, IconName.Edition)).Find("path").GetAttribute("d"), icon.GetAttribute("d")));
+    }
 
     private static string Text(IElement element) => Normalized(element.TextContent);
 

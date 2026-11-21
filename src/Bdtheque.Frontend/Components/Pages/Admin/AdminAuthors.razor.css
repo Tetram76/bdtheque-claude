@@ -56,11 +56,6 @@
 }
 
 /* The first name and the last name under a pseudonym, in small. */
-.author-identity {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-small);
-}
-
 .author-nationality {
     display: none;
     grid-area: nationality;

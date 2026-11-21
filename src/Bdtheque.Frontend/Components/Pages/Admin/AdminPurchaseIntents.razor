@@ -20,7 +20,7 @@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminPurchaseIntents" />
 
-<ListLayout Title="@L["ListTitle"]" Kicker="@L["Kicker"]" Problem="_problem" Loaded="@(_list is not null)">
+<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Acquisitions" Problem="_problem" Loaded="@(_list is not null)">
     <Heading>
         <ListHeading Title="@L["Title"]" TotalCount="_counts?.PurchaseIntents" Note="@L["NoCreation"]" />
     </Heading>
@@ -39,7 +39,7 @@
             switch (_query)
             {
                 case { EmptyReason: EmptyListReason.Search, Text: { } text }:
-                    <EmptyList Message="@L["Empty.Text", text]" Hint="@L["Empty.Hint"]">
+                    <EmptyList Message="@L["Empty.Text", text]" SearchedIn="@L["Empty.SearchedIn"]">
                         <Actions>
                             <Button Href="@ListOnly.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
                         </Actions>
@@ -102,7 +102,7 @@
                             <Button Href="@AppPaths.AdminConfirmPurchase(row.Album.Id, row.Id)" Icon="IconName.Check" Label="@L["Confirm"]"
                                     IconOnlyOnSmartphone="true" aria-label="@L["Confirm.Label", album]" title="@L["Confirm.Label", album]" />
                             <ActionsMenu Id="@($"intent-actions-{row.Id:N}")" Label="@L["More", album]">
-                                <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="IconName.Album" Label="@L["Menu.Editions"]" />
+                                <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="PageIcons.AlbumEditions" Label="@L["Menu.Editions"]" />
                                 @if (row.IsConvertible)
                                 {
                                     <MenuItem Href="@AppPaths.AdminConvertPurchaseIntent(row.Album.Id, row.Id)" Icon="IconName.Swap"

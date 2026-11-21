@@ -18,9 +18,6 @@
   <data name="ListTitle" xml:space="preserve">
     <value>Liste des genres</value>
   </data>
-  <data name="Kicker" xml:space="preserve">
-    <value>Référentiel</value>
-  </data>
   <data name="New" xml:space="preserve">
     <value>Nouveau genre</value>
   </data>
@@ -99,8 +96,8 @@
   <data name="Empty.Text" xml:space="preserve">
     <value>Aucun genre ne correspond à « {0} ».</value>
   </data>
-  <data name="Empty.Hint" xml:space="preserve">
-    <value>La recherche porte sur le libellé du genre, sans tenir compte des majuscules ni des accents.</value>
+  <data name="Empty.SearchedIn" xml:space="preserve">
+    <value>le libellé du genre</value>
   </data>
   <data name="Empty.Create" xml:space="preserve">
     <value>Créer le genre « {0} »</value>
