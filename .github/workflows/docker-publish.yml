@@ -21,6 +21,10 @@ concurrency:
 env:
   API_REPOSITORY: tetram76/bdtheque-api
   FRONTEND_REPOSITORY: tetram76/bdtheque-frontend
+  # Public images of the published versions only, alongside Docker Hub
+  # (contraintes-techniques/architecture-deploiement/deploiement.md).
+  GHCR_API_REPOSITORY: ghcr.io/tetram76/bdtheque-api
+  GHCR_FRONTEND_REPOSITORY: ghcr.io/tetram76/bdtheque-frontend
 
 jobs:
   # A single job for both images: `docker-compose.yml` deploys them under the same tag, so neither
@@ -28,6 +32,10 @@ jobs:
   publish:
     name: Publish Docker images
     runs-on: ubuntu-26.04
+    # A run on a version tag also pushes to ghcr.io and attaches the deployment package to the release of the version.
+    permissions:
+      contents: write
+      packages: write
     env:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     steps:
@@ -42,6 +50,16 @@ jobs:
         with:
           username: tetram76
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # The packages are linked to the repository by the source label metadata-action sets, before their first push: the
+      # token of the workflow may then create and write them.
+      - name: Log in to GitHub Container Registry
+        if: github.ref_type == 'tag'
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Immutable tags of an on-demand run: `sha-<commit>` and, when run on the tag of a version
       # (gestion-projet/depot/versions-et-releases.md), the version number without its `v`. Each is only
@@ -143,15 +161,21 @@ jobs:
             type=sha,format=long,enable=${{ github.event_name == 'workflow_dispatch' && steps.immutable.outputs.sha-published != 'true' }}
             type=raw,value=${{ steps.immutable.outputs.version }},enable=${{ steps.immutable.outputs.version != '' && steps.immutable.outputs.version-published != 'true' }}
 
+      # ghcr.io only receives the number of a version, pushed with the Docker Hub tags of the same image: whether it is
+      # new is decided by the Docker Hub probe above. ghcr.io cannot be probed before the first push of a package, which
+      # it refuses to tell from a private one.
       - name: Split tags by image
         id: tags
         if: steps.previous.outputs.publish == 'true'
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
+          VERSION: ${{ steps.immutable.outputs.version-published != 'true' && steps.immutable.outputs.version || '' }}
         run: |
           {
-            echo "api<<EOF"; grep "^$API_REPOSITORY:" <<< "$TAGS"; echo "EOF"
-            echo "frontend<<EOF"; grep "^$FRONTEND_REPOSITORY:" <<< "$TAGS"; echo "EOF"
+            echo "api<<EOF"; grep "^$API_REPOSITORY:" <<< "$TAGS"
+            [ -z "$VERSION" ] || echo "$GHCR_API_REPOSITORY:$VERSION"; echo "EOF"
+            echo "frontend<<EOF"; grep "^$FRONTEND_REPOSITORY:" <<< "$TAGS"
+            [ -z "$VERSION" ] || echo "$GHCR_FRONTEND_REPOSITORY:$VERSION"; echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
       # Build and check both images before pushing either: the push steps below rebuild from the
@@ -261,3 +285,22 @@ jobs:
               *) echo "::error::Deletion of $repository@$previous failed (HTTP $status)."; exit 1 ;;
             esac
           done
+
+      # The deployment package of the version, attached to its release, which the publication creates before the images
+      # (gestion-projet/depot/versions-et-releases.md). Also run when the images were already published, so that a new run
+      # attaches a package that is missing; an attached package is replaced.
+      - name: Attach the deployment package to the release
+        if: steps.immutable.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.immutable.outputs.version }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" --json tagName > /dev/null; then
+            echo "::error::No release for $GITHUB_REF_NAME: create it, then run again."
+            exit 1
+          fi
+          # The notes as published, which the package carries: a later edit of the release calls for a new run.
+          gh release view "$GITHUB_REF_NAME" --json body --jq .body > "$RUNNER_TEMP/release-notes.md"
+          package=$(pwsh -NoProfile -NonInteractive -File .github/scripts/New-DeploymentPackage.ps1 \
+            -Version "$VERSION" -ReleaseNotes "$RUNNER_TEMP/release-notes.md" -OutputDirectory "$RUNNER_TEMP/package")
+          gh release upload "$GITHUB_REF_NAME" "$package" --clobber

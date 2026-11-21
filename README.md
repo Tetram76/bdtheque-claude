@@ -55,7 +55,9 @@ Deux réseaux Docker isolent les tiers, chacun nommé d'après le conteneur auqu
 
 ## Déploiement
 
-Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis **Docker Hub**.
+Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis **Docker Hub** ou, pour une version publiée, depuis **GitHub Container Registry**.
+
+**Le plus simple, pour une version publiée** : télécharger le **paquet de déploiement** joint à sa [release](https://github.com/Tetram76/bdtheque-claude/releases) (`bdtheque-<version>.zip`). Il contient le `docker-compose.yml` de la version, qui vise ses images publiques sur `ghcr.io` sans authentification, le `.env.example` à renseigner et la procédure d'installation (`DEPLOIEMENT.md`) et les notes de la version (`NOTES-DE-VERSION.md`). La suite de cette section décrit le déploiement depuis les fichiers du dépôt, qui sert aussi aux pré-versions.
 
 ### Images publiées
 
@@ -63,6 +65,8 @@ Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container
 | --- | --- |
 | [`tetram76/bdtheque-api`](https://hub.docker.com/r/tetram76/bdtheque-api) | `api` |
 | [`tetram76/bdtheque-frontend`](https://hub.docker.com/r/tetram76/bdtheque-frontend) | `frontend` |
+
+Les versions publiées le sont aussi, en images publiques et sous leur seul numéro, sur GitHub Container Registry : `ghcr.io/tetram76/bdtheque-api` et `ghcr.io/tetram76/bdtheque-frontend`.
 
 Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml), pour l'architecture du NAS (`linux/amd64`), avec les tags suivants :
 
@@ -75,7 +79,7 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 
 Leur publication est décrite dans [`README.dev.md`](README.dev.md#publication-des-images).
 
-Les dépôts sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut). Pour déployer une version publiée, `BDTHEQUE_TAG` est son numéro (ex. `0.1.0`), et `docker-compose.yml` et `.env.example` sont pris dans le dépôt à son tag (ex. `v0.1.0`), car ils peuvent différer d'une version à l'autre.
+Les dépôts Docker Hub sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut). Pour déployer une version publiée, `BDTHEQUE_TAG` est son numéro (ex. `0.1.0`), et `docker-compose.yml` et `.env.example` sont pris dans le dépôt à son tag (ex. `v0.1.0`), car ils peuvent différer d'une version à l'autre.
 
 ### Procédure (Synology Container Manager)
 

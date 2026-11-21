@@ -9,11 +9,13 @@ code:
   - 'scripts/Stop-Validation.ps1'
   - 'scripts/ValidationEnvironment.psm1'
   - '.github/workflows/docker-publish.yml'
+  - '.github/scripts/New-DeploymentPackage.ps1'
+  - '.github/deployment/**'
 ---
 
 # Déploiement et environnement de validation
 
-L'application se déploie toujours à partir du même fichier, [`docker-compose.yml`](../../../docker-compose.yml). En production, Docker Compose l'utilise tel quel et télécharge les images publiées sur Docker Hub. Pour la validation d'une Pull Request sur le poste du développeur, un second fichier vient le surcharger et les images sont construites localement. Les exigences que ces deux usages respectent sont dans [Déploiement](../../../.speckit/contraintes-techniques/architecture-deploiement/deploiement.md) et [Hébergement](../../../.speckit/contraintes-techniques/architecture-deploiement/hebergement.md) ; la procédure d'installation pas à pas est dans le [`README.md`](../../../README.md).
+L'application se déploie toujours à partir du même fichier, [`docker-compose.yml`](../../../docker-compose.yml). En production, Docker Compose l'utilise tel quel et télécharge les images publiées sur Docker Hub, ou bien la version qu'en donne le paquet de déploiement d'une release, qui télécharge celles de GitHub Container Registry. Pour la validation d'une Pull Request sur le poste du développeur, un second fichier vient le surcharger et les images sont construites localement. Les exigences que ces deux usages respectent sont dans [Déploiement](../../../.speckit/contraintes-techniques/architecture-deploiement/deploiement.md) et [Hébergement](../../../.speckit/contraintes-techniques/architecture-deploiement/hebergement.md) ; la procédure d'installation pas à pas est dans le [`README.md`](../../../README.md).
 
 ## Les images et leur publication
 
@@ -37,6 +39,8 @@ flowchart LR
     demand --> tagSha
     demand -- "sur le tag d'une version" --> tagVersion
 ```
+
+Une version publiée a deux particularités. Ses images sont poussées aussi sur GitHub Container Registry, sous `ghcr.io/tetram76/bdtheque-api` et `ghcr.io/tetram76/bdtheque-frontend`, où elles sont publiques ; elles n'y reçoivent que le numéro de la version, et y sont poussées par la même étape que leurs tags Docker Hub, si bien que les deux registres reçoivent la même image. Ensuite, la publication joint à la release de la version un paquet de déploiement, `bdtheque-<version>.zip`, pour installer l'application sans ses sources. Le script [`New-DeploymentPackage.ps1`](../../../.github/scripts/New-DeploymentPackage.ps1) le construit à partir des fichiers du dépôt au tag de la version : il reprend `docker-compose.yml` en faisant pointer ses images sur `ghcr.io`, au numéro de la version, et en retirant les sections `build`, qui exigeraient les sources ; il reprend `.env.example` sans la variable du tag des images, que le fichier Compose fixe désormais ; il y ajoute la procédure [`DEPLOIEMENT.md`](../../../.github/deployment/DEPLOIEMENT.md), dont les liens mènent aux sources du tag de la version, que le script substitue à `{{VERSION}}`, et les notes de la release, que le workflow lit sur la release publiée et que le script refuse vides. Si l'un de ces fichiers n'a plus la forme que le script attend, celui-ci échoue au lieu de produire un paquet qui déploierait autre chose, ce que vérifie [`DeploymentPackageTests`](../../../tests/Bdtheque.Infrastructure.Tests/DeploymentPackageTests.cs).
 
 ## La production et les pré-versions sur le NAS
 
