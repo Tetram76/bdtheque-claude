@@ -153,9 +153,6 @@
   <data name="Deletion.Title" xml:space="preserve">
     <value>Supprimer cette série ?</value>
   </data>
-  <data name="Deletion.Lead" xml:space="preserve">
-    <value>La suppression est définitive et emporte avec la série :</value>
-  </data>
   <data name="Refusal.Lead" xml:space="preserve">
     <value>La série est encore utilisée par :</value>
   </data>

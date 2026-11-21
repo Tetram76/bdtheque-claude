@@ -18,7 +18,7 @@ else if (Impact is not null)
 {
     <Dialog Id="@Id" Title="@Title" Subject="@Subject" Tone="DialogTone.Deletion" CloseHref="@CloseHref">
         <ChildContent>
-            <p>@Lead</p>
+            <p>@L[Removal ? "Removal.Lead" : "Lead"]</p>
             <DeletionImpactSummary Impact="Impact" />
             @if (Problem is not null)
             {
@@ -67,9 +67,13 @@ else if (Problem is not null)
     [Parameter, EditorRequired]
     public string CloseHref { get; set; } = null!;
 
-    /// <summary>What the deletion takes with the record, before its impact.</summary>
-    [Parameter, EditorRequired]
-    public string Lead { get; set; } = null!;
+    /// <summary>
+    /// Whether the record is removed rather than deleted (an intent of acquisition): the confirmation opens on the same sentence
+    /// for every list, the lines of the impact alone telling what goes with the record
+    /// (fonctionnel/regles-metier/suppression-des-entites.md).
+    /// </summary>
+    [Parameter]
+    public bool Removal { get; set; }
 
     /// <summary>What the record is still used by, before the lines of what blocks its deletion (« L'éditeur est encore utilisé par : »).</summary>
     [Parameter, EditorRequired]

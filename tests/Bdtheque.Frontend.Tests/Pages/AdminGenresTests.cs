@@ -301,6 +301,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal(("Supprimer ce genre ?", "Aventure"), (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Contains("118 séries et 612 albums", Text(dialog.QuerySelector(".deletion-impact")!));
     }
 
