@@ -18,17 +18,25 @@ Application web de gestion de collection de bandes dessinées — réécriture d
 
 Ce document présente l'application, son installation et son exploitation. Pour maintenir le projet ou rejoindre l'équipe (organisation du code, développement local, tests, validation fonctionnelle, spécifications), ou pour valider une version avant de l'installer, voir [`README.dev.md`](README.dev.md).
 
-## Fonctionnalités principales
+## Versions
 
-- Catalogue d'albums, séries et auteurs avec navigation inter-entités
-- Gestion de la collection personnelle : éditions, modes d'acquisition, visuels
-- Dashboard public avec statistiques de la collection
-- Recherche simple et avancée (multi-entités)
-- Détection des albums manquants dans une série
-- Estimation de la valeur des éditions (Random Forest via ML.NET)
-- Estimation de la date de sortie du prochain tome d'une série
-- Gestion des intentions d'acquisition
-- Interface d'administration (compte unique, authentification par cookie)
+Les versions publiées, leurs notes et leur paquet de déploiement sont sur la [page des releases](https://github.com/Tetram76/bdtheque-claude/releases). Jusqu'à la version 1.0.0, l'application est en **développement initial** : ses versions 0 ne sont pas destinées à la production, et rien n'est garanti d'une version à l'autre.
+
+## Fonctionnalités
+
+Disponibles :
+
+- Consultation publique : tableau de bord de la collection avec l'édition « À la une », fiches d'un album, d'une série et d'un auteur, avec navigation de l'une à l'autre
+- Administration, réservée à un compte unique : listes, recherche et saisie des albums, séries, éditions et visuels, intentions d'acquisition, auteurs, éditeurs et collections, genres et univers
+- Trois thèmes, tirés au hasard à chaque visite, sur smartphone, tablette et grand écran
+- Mesure d'audience respectueuse de la vie privée, avec droit d'opposition des visiteurs
+
+Prévues :
+
+- Recherche avancée et recherches enregistrées (multi-entités)
+- Statistiques de la collection, détection des albums manquants dans une série
+- Estimation de la valeur des éditions (Random Forest via ML.NET) et de la date de sortie du prochain tome d'une série
+- Aide intégrée à l'application et documentation utilisateur
 
 ## Stack
 
@@ -38,7 +46,7 @@ Ce document présente l'application, son installation et son exploitation. Pour 
 | Backend API | ASP.NET Core Minimal API (.NET 10) |
 | ORM | EF Core 10 + Npgsql |
 | Base de données | PostgreSQL 18 |
-| ML | ML.NET (embarqué dans l'API) |
+| ML | ML.NET, embarqué dans l'API (prévu) |
 | Conteneurisation | Docker Compose |
 
 ## Architecture
@@ -46,7 +54,7 @@ Ce document présente l'application, son installation et son exploitation. Pour 
 L'application est déployée en **3 conteneurs Docker** :
 
 - `frontend` — Blazor, rendu côté serveur (pages, interface utilisateur)
-- `api` — Minimal API (logique métier, accès données, modèle ML)
+- `api` — Minimal API (logique métier, accès aux données)
 - `db` — PostgreSQL (persistance)
 
 Le `frontend` communique avec l'`api` via le réseau Docker interne. L'`api` est le seul tier à accéder à `db`.
@@ -55,9 +63,20 @@ Deux réseaux Docker isolent les tiers, chacun nommé d'après le conteneur auqu
 
 ## Déploiement
 
-Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis **Docker Hub** ou, pour une version publiée, depuis **GitHub Container Registry**.
+Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container Manager). Il n'utilise pas les sources : les images de l'application sont téléchargées depuis un registre.
 
-**Le plus simple, pour une version publiée** : télécharger le **paquet de déploiement** joint à sa [release](https://github.com/Tetram76/bdtheque-claude/releases) (`bdtheque-<version>.zip`). Il contient le `docker-compose.yml` de la version, qui vise ses images publiques sur `ghcr.io` sans authentification, le `.env.example` à renseigner et la procédure d'installation (`DEPLOIEMENT.md`) et les notes de la version (`NOTES-DE-VERSION.md`), suivies des changements des versions précédentes, pour qui en saute plusieurs. La suite de cette section décrit le déploiement depuis les fichiers du dépôt, qui sert aussi aux pré-versions.
+### Installer une version publiée
+
+Une version publiée s'installe à partir de son **paquet de déploiement**, `bdtheque-<version>.zip`, joint à sa [release](https://github.com/Tetram76/bdtheque-claude/releases). Il contient :
+
+- le `docker-compose.yml` de la version, qui vise ses images publiques sur `ghcr.io`, téléchargées sans authentification ;
+- le `.env.example` des réglages à renseigner ;
+- la procédure d'installation, `DEPLOIEMENT.md` ;
+- les notes de la version, `NOTES-DE-VERSION.md`, suivies des changements des versions précédentes, pour qui en saute plusieurs.
+
+Il suffit de suivre `DEPLOIEMENT.md`. Le HTTPS et le dossier des visuels sont détaillés ci-dessous.
+
+**Passer à une autre version** : les notes de la nouvelle version, sur sa release comme dans son paquet, disent dans leur section « Compatibilité et montée de version » ce qui change pour l'application, son hébergement et son déploiement, depuis quelles versions la montée est directe, et les étapes à suivre. Une rupture de compatibilité y est signalée en tête, dans un encadré d'avertissement.
 
 ### Images publiées
 
@@ -68,7 +87,7 @@ Le déploiement cible un **NAS Synology** via Docker Compose (Synology Container
 
 Les versions publiées le sont aussi, en images publiques et sous leur seul numéro, sur GitHub Container Registry : `ghcr.io/tetram76/bdtheque-api` et `ghcr.io/tetram76/bdtheque-frontend`.
 
-Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml), pour l'architecture du NAS (`linux/amd64`), avec les tags suivants :
+Elles sont publiées pour l'architecture du NAS (`linux/amd64`), avec les tags suivants :
 
 | Tag | Contenu |
 | --- | --- |
@@ -79,9 +98,11 @@ Elles sont publiées par le workflow [`docker-publish.yml`](.github/workflows/do
 
 Leur publication est décrite dans [`README.dev.md`](README.dev.md#publication-des-images).
 
-Les dépôts Docker Hub sont privés : leur téléchargement exige une authentification (cf. procédure). Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut). Pour déployer une version publiée, `BDTHEQUE_TAG` est son numéro (ex. `0.1.0`), et `docker-compose.yml` et `.env.example` sont pris dans le dépôt à son tag (ex. `v0.1.0`), car ils peuvent différer d'une version à l'autre.
+Les dépôts Docker Hub sont privés : leur téléchargement exige une authentification (cf. procédure ci-dessous).
 
-### Procédure (Synology Container Manager)
+### Déployer depuis le dépôt (pré-versions)
+
+Une pré-version, version candidate ou de développement (cf. [`README.dev.md`](README.dev.md#plusieurs-versions-sur-le-nas)), se déploie à partir des fichiers du dépôt et des images de Docker Hub. Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut, ou `sha-<commit>`), et `docker-compose.yml` et `.env.example` sont pris dans le dépôt à ce même commit, car ils peuvent différer d'une version à l'autre.
 
 1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
 2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), le compte administrateur `ADMIN_LOGIN` et `ADMIN_PASSWORD` (un mot de passe long, ex. une phrase de plusieurs mots), `BDTHEQUE_TAG`, `FRONTEND_PORT`, `VISUELS_HOST_PATH` et, derrière le reverse proxy, `PUBLIC_URL` (ci-dessous).
@@ -90,7 +111,7 @@ Les dépôts Docker Hub sont privés : leur téléchargement exige une authentif
 5. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
 6. Vérifier que l'application répond sur `http://<NAS>:<FRONTEND_PORT>/health`.
 
-**Mise à jour** : modifier `BDTHEQUE_TAG` si besoin, puis télécharger les nouvelles images et recréer les conteneurs, en SSH depuis le dossier du projet : `docker compose pull && docker compose up -d`. Le schéma de la base est mis à jour automatiquement au démarrage d'`api` ; les données (volume `db-data`) et les visuels sont conservés.
+**Mise à jour d'une pré-version** : modifier `BDTHEQUE_TAG` si besoin, puis télécharger les nouvelles images et recréer les conteneurs, en SSH depuis le dossier du projet : `docker compose pull && docker compose up -d`. Le schéma de la base est mis à jour automatiquement au démarrage d'`api` ; les données (volume `db-data`) et les visuels sont conservés.
 
 **Mise à jour de l'image PostgreSQL** : une nouvelle image `postgres` peut embarquer une autre version d'ICU, qui définit le tri et la comparaison des textes. Au démarrage, `api` le détecte et reconstruit alors tous les index de la base, ce que son journal signale par un avertissement (`The version of the collations … changed`). Si un index unique ne peut pas être reconstruit — deux libellés de genre devenus égaux sous la nouvelle définition —, `api` refuse de démarrer et son journal nomme l'index en cause (`IX_Genres_Label`). Il faut alors renommer l'un des genres en double, puis redémarrer `api`. En SSH, depuis le dossier du projet :
 
