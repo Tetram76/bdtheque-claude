@@ -11,7 +11,7 @@ set -euo pipefail
 actions="$(dirname "$RUNNER_WORKSPACE")/_actions/docker/scout-action"
 shopt -s nullglob
 copies=("$actions"/*/)
-if [ "${#copies[@]}" -ne 1 ]; then
+if [[ ${#copies[@]} -ne 1 ]]; then
   echo "::error::Expected one copy of docker/scout-action under $actions, found ${#copies[@]}."
   exit 1
 fi
