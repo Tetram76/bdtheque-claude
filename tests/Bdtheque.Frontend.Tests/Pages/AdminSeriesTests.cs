@@ -242,6 +242,7 @@ public sealed class AdminSeriesTests : BunitContext, IDisposable
 
         Assert.Equal(("Supprimer cette série ?", "Le Bureau des prolongations"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La suppression est définitive.", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Contains("2 contributions", Text(dialog.QuerySelector(".deletion-impact")!));
         var form = dialog.QuerySelector("form[method='post']")!;
         Assert.Equal(

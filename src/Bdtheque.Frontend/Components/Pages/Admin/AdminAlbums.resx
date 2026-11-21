@@ -171,9 +171,6 @@
   <data name="Deletion.Title" xml:space="preserve">
     <value>Supprimer cet album ?</value>
   </data>
-  <data name="Deletion.Lead" xml:space="preserve">
-    <value>La suppression est définitive et emporte avec l'album :</value>
-  </data>
   <data name="Refusal.Lead" xml:space="preserve">
     <value>L'album est encore désigné par :</value>
   </data>

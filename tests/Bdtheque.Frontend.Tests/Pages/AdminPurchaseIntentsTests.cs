@@ -196,18 +196,20 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Removal_ADialogThatAnnouncesTheEditionTargetedRemovedWithTheIntent_AndConfirmsWithTheVersionOfTheAlbum()
+    public void Removal_ADialogThatAnnouncesTheVisualsOfTheEditionTargeted_AndConfirmsWithTheVersionOfTheAlbum()
     {
         var id = OnOnlyEdition.Id;
         _api.Answers[$"/admin/albums/{Longway.Id}/purchase-intents/{id}/deletion-impact"] = new DeletionImpact(
-            [], [], [new ImpactCount(EntityKind.Edition, 1)], [], "f1");
+            [], [], [new ImpactCount(EntityKind.EditionVisual, 1)], [], "f1");
 
         var dialog = Open($"delete={id}").Find("dialog");
 
         Assert.Equal(("Retirer cette intention d'acquisition ?", "Buddy Longway - T. 2 · Dupuis [1974]"),
             (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
-        // An edition not owned goes with its intent (fonctionnel/regles-metier/suppression-des-entites.md).
-        Assert.Equal(["Suppression aussi de 1 édition"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
+        Assert.Equal("Le retrait est définitif.", Text(dialog.QuerySelector(".dialog-body > p")!));
+        // The edition targeted goes with its intent without being counted, the intent removed standing for it: only its visuals
+        // are (fonctionnel/regles-metier/suppression-des-entites.md).
+        Assert.Equal(["Suppression aussi de 1 visuel"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
         var form = dialog.QuerySelector("form[method='post']")!;
         Assert.Equal(
             [("Version", "43"), ("Fingerprint", "f1")],

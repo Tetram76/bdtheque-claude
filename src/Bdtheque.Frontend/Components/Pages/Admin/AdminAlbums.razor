@@ -149,7 +149,7 @@
             else
             {
                 <DeletionDialog Id="album-deletion" FormName="@DeletionFormName" Title="@L["Deletion.Title"]" Subject="@subject"
-                                CloseHref="@ListOnly.Href()" Lead="@L["Deletion.Lead"]" RefusalLead="@L["Refusal.Lead"]"
+                                CloseHref="@ListOnly.Href()" RefusalLead="@L["Refusal.Lead"]"
                                 RefusalHint="@(key => L[$"Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_deletionProblem"
                                 Version="_dialogAlbum.Version" OnConfirm="DeleteAsync" />
             }

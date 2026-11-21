@@ -12,5 +12,5 @@
 * [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.
 * [Validation de l'ISBN](validation-de-l-isbn.md) - ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l'enregistrement.
 * [Séquence théorique de tomes d'une série](sequence-theorique-de-tomes-d-une-serie.md) - Séquence des tomes attendus d'une série, référence des manquants et des rythmes de parution.
-* [Suppression des entités](suppression-des-entites.md) - Confirmation, impact par type d'entité (édition visée comptée comme intention d'acquisition), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.
+* [Suppression des entités](suppression-des-entites.md) - Confirmation et sa phrase d'introduction unique, impact par type d'entité (édition visée comptée comme intention d'acquisition), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.
 * [Intention d'acquisition](intention-d-acquisition.md) - Intention sur un album ou une édition, exclusions, conversion, édition non possédée indissociable, réalisation d'une intention.
