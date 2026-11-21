@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu commun'
 description: 'Rubriques communes à toutes les alternatives du dashboard.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T15:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T14:00:00Z }
 ---
 
 # Contenu commun
@@ -18,6 +18,7 @@ Toutes les alternatives présentent les rubriques suivantes ; la présentation d
     - « Attention, ça déborde des étagères ! »
   - les **compteurs** : albums, séries, éditions.
 - **À la une** : l'édition mise à la une du jour ([Page d'accueil](../../fonctionnel/page-accueil.md)), avec sa couverture, le libellé de son album, le sien et le résumé de l'album. L'album mène à sa fiche, et l'éditeur du libellé de l'édition à son site, comme tout éditeur (ci-dessous, [Libellé d'une édition](../../fonctionnel/presentation/libelle-d-une-edition.md)).
+  - **Sans la date du navigateur** (cookie refusé, aucun script : [Internationalisation](../../choix-implementation/socle/transverse/internationalisation.md)), aucune édition n'est mise à la une, et la rubrique le dit, sans promettre d'attente, puisque ce navigateur ne la donnera pas : « Pas d'édition à la une sans la date de votre navigateur : elle apparaît dès qu'il accepte les cookies et les scripts de BDthèque. » (décision de l'utilisateur, #481).
 - **Tout juste arrivés !** : les dernières éditions entrées dans la collection (ordre : [Page d'accueil](../../fonctionnel/page-accueil.md)), et un lien vers la liste des albums.
 - **Ça vaut combien, tout ça ?** :
   - la valeur totale estimée et la valeur totale connue, puis les prix moyen, médian, minimum et maximum ;

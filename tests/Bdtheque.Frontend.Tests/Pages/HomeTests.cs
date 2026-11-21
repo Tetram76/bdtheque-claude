@@ -119,9 +119,11 @@ public sealed class HomeTests : BunitContext, IDisposable
     }
 
     // The block stays, without any edition (fonctionnel/page-accueil.md, Bloc sans donnée), for a browser that does not give
-    // its time zone.
+    // its time zone. Since the welcome screen gives it before the first page, such a browser never will: the text says what
+    // the block does without it, and what would make the edition appear, never that it is coming
+    // (visuel/dashboard/contenu-commun.md, À la une).
     [Fact]
-    public void Spotlight_WithoutTheDayOfTheBrowser_PresentsNoEdition()
+    public void Spotlight_WithoutTheDayOfTheBrowser_PresentsNoEdition_AndSaysWhatWouldShowIt()
     {
         Services.AddScoped(_ => new BrowserTimeZone());
         _catalog.Dashboard = Collection() with { Content = Collection().Content! with { Spotlight = null } };
@@ -131,7 +133,9 @@ public sealed class HomeTests : BunitContext, IDisposable
         var spotlight = BlockOf(page, "À la une aujourd'hui !");
         Assert.Null(spotlight.QuerySelector("a"));
         Assert.Null(spotlight.QuerySelector("img"));
-        Assert.Contains("L'édition du jour attend la date de votre navigateur.", spotlight.TextContent);
+        Assert.Equal(
+            "Pas d'édition à la une sans la date de votre navigateur : elle apparaît dès qu'il accepte les cookies et les scripts de BDthèque.",
+            spotlight.QuerySelector("p.dashboard-muted")!.TextContent);
         Assert.Equal(3, page.FindAll("[data-counter]").Count);
     }
 
