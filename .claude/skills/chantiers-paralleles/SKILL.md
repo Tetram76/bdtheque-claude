@@ -214,11 +214,8 @@ never taking one of the places of the chantiers run at once.
 ## 3. Launch
 
 One session per chantier: `start_session`, `initiation: "user_asked"`,
-`context: "fresh"`, `use_worktree: true`, title `#<n> <ticket title>`, and a
-`model` **suited to the task** given to that session (nature, difficulty,
-volume of the chantier or of the harness): sufficient to carry it end to end,
-never oversized — chosen session by session, never one model by default for
-the whole batch. The brief (`prompt`) says:
+`context: "fresh"`, `use_worktree: true`, title `#<n> <ticket title>`. The
+brief (`prompt`) says:
 
 - the ticket, its milestone, and that the chantier is carried out end to end
   — up to the merge, the closing comment and the lock of the ticket, the

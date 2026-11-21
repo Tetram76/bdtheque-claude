@@ -2,6 +2,7 @@
 
 ## 2026-11-21
 
+* **Exigence de l'utilisateur** : la règle qui adaptait à sa tâche le modèle de chaque session d'un lot de chantiers est retirée de [Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md) et du skill `chantiers-paralleles`.
 * **Exigence de l'utilisateur** : un lot de chantiers sert à compléter en priorité le jalon en cours, sans l'exclusivité : tous les tickets ouverts sont candidats, ceux du jalon en cours passant en priorité (le plan d'abord), les autres, plan compris, planifiés de la même façon après eux ; la stabilisation du CI reste en tête, et l'indépendance et les dépendances (toute condition préalable, calendrier compris) restent vérifiées pour chaque candidat. Le skill `chantiers-paralleles` la met en œuvre (#582).
 * **Exigence de l'utilisateur** : dans un lot de chantiers, le modèle appliqué à chaque session est adapté à la tâche qu'elle reçoit, suffisant sans être surdimensionné, choisi par l'orchestrateur au lancement ; le skill `chantiers-paralleles` la met en œuvre.
 
