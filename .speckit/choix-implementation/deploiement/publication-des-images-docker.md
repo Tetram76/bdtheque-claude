@@ -1,13 +1,15 @@
 ---
 type: Choix d'implémentation
 title: 'Publication des images Docker'
-description: 'Images publiées, tags, nightly unique, paire cohérente, analyse des vulnérabilités, architecture, workflow de publication.'
+description: 'Images publiées, tags, ghcr.io pour les versions, paquet de déploiement, nightly unique, paire cohérente, analyse des vulnérabilités, architecture, workflow de publication.'
 applies_to:
   - '.github/workflows/docker-publish.yml'
   - '.github/scripts/**'
+  - '.github/deployment/**'
   - '.github/workflows/ci.yml'
   - 'tests/Bdtheque.Infrastructure.Tests/DockerHubPullsTests.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T17:30:00Z }
+  - 'tests/Bdtheque.Infrastructure.Tests/DeploymentPackageTests.cs'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T17:00:00Z }
 ---
 
 # Publication des images Docker
@@ -18,6 +20,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T17:30:00Z }
   - **Tag immuable** : il n'est posé que si aucune des deux images ne le porte encore, ce que lit la sonde du registre avant toute construction ; une version ou un commit déjà publiés ne sont pas réécrits, et une version déjà entièrement publiée ne publie rien.
   - **Seul un tag de version est accepté** : `v<majeur>.<mineur>.<correctif>`, sans numéro de pré-version, que le projet n'emploie pas ; une version `0.0.x`, qui n'a pas d'images, est refusée comme tout autre tag, et le workflow échoue plutôt que de publier sous un numéro inattendu.
   - **Alternative écartée (`type=semver` de `docker/metadata-action`)** : sa documentation ne le décrit que pour le push d'un tag, mais son code ne lit que la référence lancée, si bien qu'il fonctionne aussi à la demande sur un tag. Il ignore toutefois un tag qui n'est pas semver par un simple avertissement, publiant sans numéro, accepte un numéro de pré-version, et la sonde a de toute façon besoin du numéro avant le calcul des tags : le numéro est établi une seule fois, par l'étape qui vérifie le tag, et posé tel quel.
+- **`ghcr.io` reçoit le seul numéro d'une version** (`ghcr.io/tetram76/bdtheque-<conteneur>:<version>`, [Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)), poussé par la même étape que les tags Docker Hub de la même image, avec le jeton du workflow : les paquets, rattachés au dépôt par le label de leur source avant leur premier push, sont créés et écrits par lui sans secret de plus. Qu'il soit nouveau se décide par la sonde de Docker Hub : `ghcr.io` refuse de dire si un paquet absent existe, comme pour un paquet privé, si bien qu'il ne peut être sondé avant son premier push.
+  - **Visibilité publique** : un paquet est créé privé (documentation GitHub, *Working with the Container registry*), et la documentation ne décrit, pour le rendre public, sans retour possible, que sa page de réglages sur GitHub, que l'agent n'emploie pas ([Repository](../../gestion-projet/depot/repository.md)). Elle est donc vérifiée à la première publication de chaque paquet, et réglée alors par l'utilisateur s'il le faut.
+  - **Alternative écartée (sonde de `ghcr.io` avant la publication)** : impossible avant le premier push, qui est le cas à traiter ; et le push conjoint à Docker Hub rend la sonde inutile ensuite.
+- **Paquet de déploiement joint à la release** ([Versions et releases](../../gestion-projet/depot/versions-et-releases.md)) par la publication sur le tag d'une version, et non par un workflow de plus : seule elle connaît les images de la version. Le script `.github/scripts/New-DeploymentPackage.ps1` le tire des fichiers du dépôt au tag : `docker-compose.yml`, dont les images visent `ghcr.io` au numéro de la version et dont les sections `build` sont retirées, faute de sources ; `.env.example`, sans le tag des images ; la procédure `.github/deployment/DEPLOIEMENT.md`. Chaque transformation doit s'appliquer exactement comme attendu, ce que vérifient ses tests, sinon le script échoue : un fichier du dépôt qui change de forme ne produit jamais un paquet qui déploierait autre chose. Le paquet est remplacé à chaque publication sur le tag, qui le joint même aux images déjà publiées.
+  - **Alternative écartée (fichiers du paquet tenus à part dans le dépôt)** : un second `docker-compose.yml` à tenir aligné sur le premier, ce qu'évite déjà le fichier unique du déploiement et du développement.
 - **Une seule image `nightly`** ([Déploiement](../../contraintes-techniques/architecture-deploiement/deploiement.md)) : republier un tag ne supprime pas l'ancienne image, qui resterait stockée sans tag ; la publication supprime donc la précédente par l'API du registre, et échoue si elle n'y parvient pas, pour qu'une image en trop ne passe pas inaperçue. L'image est publiée **sans attestations**, pour tenir en un seul manifeste, supprimé en un appel, là où un index laisserait ses manifestes enfants orphelins.
 - **Paire d'images cohérente** : les deux images, déployées sous le même tag, sont **toutes deux construites avant qu'aucune soit publiée**, et un tag immuable (`sha-<commit>`, numéro de version) présent pour une seule fait échouer la publication : l'échec d'une construction n'expose jamais une API et un frontend de commits différents sous un même tag.
   - **Alternative écartée (publication par empreinte, puis promotion des tags avec retour arrière)** : elle ne couvre de plus que la panne du registre entre deux téléversements successifs, que l'échec du workflow signale déjà ; le gain ne justifie pas la mécanique.

@@ -200,6 +200,45 @@ Les images construites restent sur le poste, pour accélérer la validation suiv
 
 Les images de l'application sont publiées sur Docker Hub par le workflow [`docker-publish.yml`](.github/workflows/docker-publish.yml) de deux façons : chaque nuit, sous le tag `nightly`, si `main` a changé depuis la publication précédente ; ou à la demande, sous les tags décrits dans le [`README.md`](README.md#images-publiées). Une publication à la demande se lance depuis l'onglet **Actions** du dépôt GitHub : workflow **Docker publish**, **Run workflow**, en choisissant la branche à construire, ou le tag d'une version (`v<version>`, ex. `v0.1.0`) pour publier cette version : les images reçoivent alors son numéro (`0.1.0`) au lieu d'un tag de branche. Comme `sha-<commit>`, ce numéro est immuable : une nouvelle publication de la même version le laisse tel quel. Le workflow refuse tout autre tag, de même que le tag d'une version `0.0.x`, qui n'a pas d'images.
 
+Publiée sur le tag d'une version, la paire d'images est aussi poussée sur GitHub Container Registry (`ghcr.io/tetram76/bdtheque-api`, `ghcr.io/tetram76/bdtheque-frontend`), sous le seul numéro de la version, et le paquet de déploiement `bdtheque-<version>.zip` est joint à la release de la version, qui doit donc exister avant cette publication. Le paquet est construit par [`New-DeploymentPackage.ps1`](.github/scripts/New-DeploymentPackage.ps1), qui peut se lancer sur le poste pour l'examiner : `pwsh .github/scripts/New-DeploymentPackage.ps1 -Version 0.1.0 -OutputDirectory ./paquet`. Un paquet ghcr.io est créé privé à sa première publication : il est rendu public une fois pour toutes, sur sa page de réglages (*Package settings*, *Change visibility*).
+
+## Publication d'une version
+
+Une version est publiable quand tous les tickets de son jalon sont fermés ; elle n'est publiée que sur la décision du propriétaire du dépôt. Les règles qui suivent sont celles de [Versions et releases](.speckit/gestion-projet/depot/versions-et-releases.md). Les étapes se suivent dans cet ordre, chacune ne commençant qu'une fois la précédente réussie. Les exemples publient `v0.1.0`, dont la version précédente est `v0.0.3`.
+
+1. **Vérifier que la version est publiable**, et que le CI de `main` est vert sur le commit à publier :
+
+   ```powershell
+   gh issue list --milestone v0.1.0 --state open
+   gh run list --branch main --limit 3
+   ```
+
+2. **Poser le tag**, annoté et signé avec la clé du dépôt ([Signature des commits](.speckit/gestion-projet/depot/signature-des-commits.md)), sur le commit de `main` qui complète la version, puis le pousser :
+
+   ```powershell
+   git fetch origin
+   git tag -s v0.1.0 -m "v0.1.0 — Phase 3, partie 1 : éléments de base du frontend" origin/main
+   git push origin v0.1.0
+   ```
+
+   Sur GitHub, le tag doit apparaître « Verified ».
+
+3. **Créer la release**, d'abord en brouillon, avec les notes que GitHub génère à partir des Pull Requests fusionnées depuis la version précédente. Une version `0.0.x` est une pré-release (`--prerelease`). Une version `0.x` à partir de `0.1.0` n'en est pas une, mais ses notes s'ouvrent sur un paragraphe qui annonce une version 0, écrit dans un fichier et repris en tête des notes générées :
+
+   ```powershell
+   gh release create v0.1.0 --draft --verify-tag --title "v0.1.0 — Phase 3, partie 1" --notes-file version-0.md --generate-notes --notes-start-tag v0.0.3
+   ```
+
+   Relire les notes du brouillon, qui ne doivent mentionner Codex nulle part ([Budget IA](.speckit/gestion-projet/gouvernance/budget-ia.md)), puis publier la release : `gh release edit v0.1.0 --draft=false`.
+
+4. **Relancer l'analyse SonarQube Cloud de `main`**, pour que la période du nouveau code commence au commit publié : `gh workflow run ci.yml --ref main`.
+
+5. **Publier les images de la version** sur Docker Hub et sur `ghcr.io`, ce qui joint aussi le paquet de déploiement à la release : `gh workflow run docker-publish.yml --ref v0.1.0`. À la toute première publication sur `ghcr.io`, chaque paquet (`bdtheque-api`, `bdtheque-frontend`) est créé privé : le rendre public sur sa page de réglages GitHub (*Package settings*, *Change visibility*), une fois pour toutes. La release doit alors proposer `bdtheque-0.1.0.zip`.
+
+6. **Fermer le jalon** de la version : `gh api -X PATCH repos/Tetram76/bdtheque-claude/milestones/<numéro> -f state=closed`.
+
+Le déploiement de la version reste ensuite une décision distincte.
+
 ## Plusieurs versions sur le NAS
 
 Le NAS fait tourner jusqu'à trois versions en même temps : la production, la version candidate (RC) et une version de développement (alpha ou bêta). Chacune est un **projet distinct**, déployé selon la procédure du [`README.md`](README.md#procédure-synology-container-manager) dans **son propre dossier** (ex. `/volume1/docker/bdtheque`, `/volume1/docker/bdtheque-rc`, `/volume1/docker/bdtheque-dev`), avec le `docker-compose.yml` de **sa** version (celui du dépôt au tag de la version, ou au commit de `sha-<commit>`), qui peut différer d'une version à l'autre, et son propre `.env` :
