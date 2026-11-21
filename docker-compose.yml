@@ -24,8 +24,9 @@ services:
       context: .
       dockerfile: docker/api/Dockerfile
     restart: unless-stopped
-    # Optional: the owner of the visuals folder (`uid:gid`), so that a folder created from the NAS needs no change of
-    # owner. Empty, `api` runs as the user of its image (see choix-implementation/deploiement/images-de-base-des-conteneurs.md).
+    # Optional: a user (`uid:gid`) that can write to the visuals folder, e.g. the NAS user who created it, so that
+    # nothing has to be changed on the folder. Empty, `api` runs as the user of its image
+    # (see choix-implementation/deploiement/images-de-base-des-conteneurs.md).
     user: ${API_USER:-}
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}

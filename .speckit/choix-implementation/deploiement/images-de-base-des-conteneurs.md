@@ -9,7 +9,7 @@ applies_to:
   - 'docker/validation-docs/Dockerfile'
   - 'src/Bdtheque.HealthProbe/**'
   - 'docker-compose.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T20:15:00Z }
 ---
 
 # Images de base des conteneurs
@@ -25,7 +25,7 @@ Les conteneurs sont imposés ([Architecture des tiers](../../contraintes-techniq
   - **Étapes de construction sur l'image du SDK par défaut** (`sdk:<version>`, Ubuntu 24.04 pour .NET 10, documentation .NET, *Default .NET images use Ubuntu*) : la sortie publiée ne dépend pas de la distribution qui la construit (code intermédiaire, et bibliothèques natives tirées des packages pour l'architecture de l'image), et l'étape de construction n'entre pas dans l'image produite.
     - **Alternative écartée (`sdk:<version>-resolute`)** : une variante de plus à tenir alignée, sans rien changer à l'image produite.
   - **Alternative écartée (`aspnet` sur Ubuntu complet)** : plus lourde, avec un shell et un gestionnaire de paquets sans usage, et `curl` à installer pour le bilan de santé.
-- **Utilisateur d'`api` réglable, facultativement** (`API_USER`, `uid:gid`) : `api` est le seul conteneur qui écrit dans un dossier de l'hôte, celui des visuels ([Stockage des visuels](../../contraintes-techniques/architecture-deploiement/stockage-des-visuels.md)). Le faire tourner sous le propriétaire de ce dossier, créé depuis l'interface du NAS, évite d'en changer le propriétaire en SSH (exigence de l'utilisateur : déployer sans SSH). Sans valeur, Compose omet l'utilisateur, et `api` garde celui de son image. Au refus d'écrire dans le dossier, `api` nomme l'utilisateur sous lequel il tourne réellement, et non celui que déclare son image.
+- **Utilisateur d'`api` réglable, facultativement** (`API_USER`, `uid:gid`) : `api` est le seul conteneur qui écrit dans un dossier de l'hôte, celui des visuels ([Stockage des visuels](../../contraintes-techniques/architecture-deploiement/stockage-des-visuels.md)). Le faire tourner sous un utilisateur qui peut écrire dans ce dossier, sans qu'il en soit forcément le propriétaire (ex. l'utilisateur du NAS qui l'a créé depuis son interface), évite d'en changer le propriétaire en SSH (exigence de l'utilisateur : déployer sans SSH). Sans valeur, Compose omet l'utilisateur, et `api` garde celui de son image. Au refus d'écrire dans le dossier, `api` nomme l'utilisateur sous lequel il tourne réellement, et non celui que déclare son image.
   - **Alternative écartée (utilisateur réglable pour `frontend`)** : il n'écrit dans aucun dossier de l'hôte, et sous un utilisateur inconnu de son image, sans dossier personnel, ses clés de protection des données, dont celles du cookie d'administration, ne sont plus que gardées en mémoire, avec un avertissement à chaque démarrage (constaté).
   - **Alternative écartée (utilisateur réglable pour `db`)** : ses données sont dans un volume nommé, que Docker gère sans intervention sur l'hôte ; et un utilisateur changé après la création de la base la rendrait illisible pour PostgreSQL, qui exige que son dossier de données appartienne à l'utilisateur qui l'exécute.
 - **Bilan de santé par une sonde .NET** ([Organisation du code](../organisation-du-code.md)), exécutée sur le runtime de l'image, faute de shell et de `curl` : l'équipe .NET n'a pas de recommandation officielle pour ces images, et propose cette approche (dépôt `dotnet/dotnet-docker`, demande n° 4300).

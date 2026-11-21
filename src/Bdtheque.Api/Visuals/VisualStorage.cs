@@ -74,7 +74,7 @@ internal sealed class VisualStorage(IOptions<VisualStorageOptions> options, ILog
                 throw new InvalidOperationException(
                     $"The visuals volume cannot be written at '{path}'. Give write access to the user the 'api' "
                     + $"container runs as ({ProcessIdentity.Describe() ?? "the user of the process"}) on the folder "
-                    + "mounted there (VISUELS_HOST_PATH), or run it as the owner of that folder (API_USER).",
+                    + "mounted there (VISUELS_HOST_PATH), or run it as a user that can write to it (API_USER).",
                     exception);
             }
         }
