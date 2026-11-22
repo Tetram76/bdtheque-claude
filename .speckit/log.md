@@ -2,6 +2,7 @@
 
 ## 2026-11-22
 
+* **Décisions de l'utilisateur** : la partie 2 de la Phase 3 (`v0.2.0`) comprend, outre les fonctions de la consultation, les écrans de l'administration qui restent à réaliser, fusion de deux fiches comprise ; la recherche d'une édition par son ISBN dans les sources externes est reportée à la partie 5. **Plan** : découpage de la partie 2 en douze chantiers, #603 à #614 ([Phase 3 — Frontend Blazor](suivi-implementation/phase-3-frontend-blazor.md)) (#615).
 * **Exigence de l'utilisateur** : un ticket ou une Pull Request de pure documentation technique n'a pas de jalon **par défaut** ; l'utilisateur peut l'y rattacher, et l'agent ne le lui retire jamais ([Versions et releases](gestion-projet/depot/versions-et-releases.md)) (#602).
 
 ## 2026-11-21
