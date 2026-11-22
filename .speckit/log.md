@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-22
+
+* **Exigence de l'utilisateur** : un ticket ou une Pull Request de pure documentation technique n'a pas de jalon **par défaut** ; l'utilisateur peut l'y rattacher, et l'agent ne le lui retire jamais ([Versions et releases](gestion-projet/depot/versions-et-releases.md)) (#602).
+
 ## 2026-11-21
 
 * **Choix** : l'action de Docker Scout téléchargeant son outil sans le jeton du workflow, sous la limite anonyme de l'adresse partagée de l'exécuteur, chaque job qui l'emploie dépose d'abord l'outil, téléchargé avec le jeton ; un quota ne s'écarte qu'une fois établi, dans le code de l'outil, celui sous lequel l'appel a été fait ([Intégration continue (CI)](gestion-projet/depot/integration-continue-ci.md)) (#600).
