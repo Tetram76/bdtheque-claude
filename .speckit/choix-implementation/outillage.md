@@ -9,7 +9,7 @@ applies_to:
   - '.github/workflows/ci.yml'
   - 'global.json'
   - 'dotnet-tools.json'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T20:25:33Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T10:00:00Z }
 ---
 
 # Outillage de développement
@@ -51,6 +51,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T20:25:33Z }
   - **Alternative écartée (heure du système, comme en production)** : le rendu d'une capture et le résultat d'un test changeaient selon l'heure de l'exécution (échecs chaque soir entre 23 h et minuit en temps universel, #318, #327, #340).
   - **Alternative écartée (horloge figée)** : des écritures successives auraient la même date, leur ordre retombant sur des identifiants que `Guid.CreateVersion7` n'ordonne qu'à la milliseconde du temps réel.
   - **Alternative écartée (heure fixe qui suit ensuite le temps réel)** : un test plus long que prévu, ou interrompu au débogueur, franchirait minuit et changerait de date.
+- **Tâches de fond de l'application jamais exécutées par l'hôte des tests** : démarrée avec l'hôte, la première exécution d'une tâche périodique se déroule pendant le premier test de la classe, sur l'heure qu'elle a lue avant que le test ne fixe la sienne, et agit sur ses données (une réconciliation qui supprime un visuel en attente tout juste téléversé sur une heure passée, #597). L'hôte des tests remplace donc tout service hébergé que définit l'application, quelle que soit la façon de l'enregistrer, par un service qui ne l'exécute pas ; ceux du framework, le serveur web en tête, restent. Le test d'une tâche l'exécute lui-même, sur son heure.
+  - **Alternative écartée (première exécution attendue avant le premier test)** : elle s'exécuterait encore sur une autre heure que celle des tests, et consommerait des lectures de l'horloge des tests de bout en bout, qui datent leurs écritures.
+  - **Alternative écartée (réglage de l'application qui désactive ses tâches)** : un mécanisme propre aux tests dans l'application, quand l'hôte des tests peut remplacer ses services, comme le prévoit la documentation d'ASP.NET Core (*Integration tests*).
+  - **Alternative écartée (retrait de tout service hébergé)** : il retirerait aussi le serveur web de l'hôte.
 - **Navigateur des tests en mouvement réduit**, sauf test qui demande le mouvement : lécran daccueil de la première requête de chaque contexte laisse ainsi place à la page aussitôt, au lieu dattendre la fin de son animation ([Internationalisation](socle/transverse/internationalisation.md)), ce qui retiendrait chaque test un peu plus dune seconde ; un test propre à lécran vérifie cette attente, en mouvement.
 - **Thème imposé par chaque test de bout en bout, exécuté dans chaque thème proposé** ([Qualité du code](../gestion-projet/gouvernance/qualite-du-code.md)) : le thème est un paramètre du test, dont les lignes viennent du catalogue des thèmes, si bien qu'un thème ajouté ou retiré est couvert sans retoucher les tests ; chaque contexte du navigateur est ouvert dans le thème de son test, qu'impose aux requêtes un sélecteur de l'hôte des tests, absent de l'application. Le compilateur refuse toute autre ouverture d'un contexte (analyseur des API interdites), sauf aux tests du tirage lui-même, seuls laissés au thème tiré. Un test de ce qu'un thème a en propre (son script, ses couleurs du jour, ses polices) s'exécute dans ce seul thème, qu'il impose ; un comportement qui diffère d'un thème à l'autre (ex. une page de « La couverture du jour » rendue de nouveau quand le navigateur a changé de fuseau) est attendu selon le thème du test.
   - **Alternative écartée (boucle sur les thèmes dans le test)** : le premier thème en échec masque les suivants, et un test qui les parcourt tous ne se répartit pas entre les jobs du CI.
