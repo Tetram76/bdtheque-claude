@@ -43,7 +43,7 @@
     <value>Utilisateurs</value>
   </data>
   <data name="Users.All" xml:space="preserve">
-    <value>Visiteurs et administrateur</value>
+    <value>Tous les utilisateurs</value>
   </data>
   <data name="Users.Visitors" xml:space="preserve">
     <value>Visiteurs</value>

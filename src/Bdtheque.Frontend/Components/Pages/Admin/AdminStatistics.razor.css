@@ -70,13 +70,14 @@
 }
 
 /* A bar per month of the period, its height that of its usages among the busiest month of the page, so that two functions
-   compare; a month without usage keeps a thin line, the period reading whole. */
+   compare; a month without usage has no bar, the line under the chart giving the whole period. */
 .frequency {
     display: flex;
     align-items: flex-end;
     gap: 1px;
     block-size: 1.25rem;
     max-inline-size: 12rem;
+    border-block-end: 1px solid var(--color-rule);
 }
 
 .frequency-month {
@@ -88,22 +89,21 @@
 }
 
 .frequency-month[data-empty] {
-    block-size: 2px;
-    background: var(--color-rule);
+    background: transparent;
 }
 
 /* On two lines, the row has no columns: a zero, which its dash stands for in a table, says nothing and is withdrawn, and a
    function never used says so in words (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
 @container audience-rows (width < 56rem) {
+    .audience-meta [role="cell"] {
+        display: inline-flex;
+        gap: 0.25em;
+    }
+
     .audience-meta [data-zero],
     .audience-row[data-unused] .audience-meta [role="cell"],
     .audience-row[data-unused] .audience-frequency {
         display: none;
-    }
-
-    .audience-meta [role="cell"] {
-        display: inline-flex;
-        gap: 0.25em;
     }
 }
 
@@ -122,6 +122,11 @@
         display: contents;
         color: inherit;
         font-size: inherit;
+    }
+
+    /* Apart from the figures right-aligned before it. */
+    .audience-frequency {
+        padding-inline-start: var(--space-m);
     }
 
     .audience-usages { grid-area: usages; }

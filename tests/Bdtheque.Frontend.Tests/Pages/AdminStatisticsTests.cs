@@ -92,7 +92,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
             ["Mois en cours", "3 derniers mois", "12 derniers mois", "Depuis le début"],
             form.QuerySelectorAll("select[name='period'] option").Select(option => Text(option)));
         Assert.Equal(
-            ["Visiteurs et administrateur", "Visiteurs", "Administrateur"],
+            ["Tous les utilisateurs", "Visiteurs", "Administrateur"],
             form.QuerySelectorAll("select[name='users'] option").Select(option => Text(option)));
         Assert.Equal(
             ["Tous les appareils", "Ordinateur", "Tablette", "Smartphone"],
