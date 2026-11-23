@@ -1,0 +1,191 @@
+@attribute [Route(AppPaths.AdminSettings)]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<AdminSettingsForm> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> RuleTexts
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+@inject RecordLabels Labels
+@inject ValueLabels Values
+
+@* The entry form of the setting of the application (modele-metier/parametrage-de-l-application.md), on the model of the entry
+   forms (visuel/saisie-album/contenu.md): its frame, its errors and its bar. A single record, always present, which is modified
+   but neither created nor deleted: its title names it whole, without a label of its own, and it is reached from the home of the
+   administration and from the entry « Paramétrage » of its menu (visuel/administration/contenu.md,
+   visuel/administration/en-tete-et-menu.md). Saved or cancelled, it leads back to the home, where its values are presented. It
+   applies no rule of the setting, which the domain alone holds. Its styles read the contracts of the base theme only. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminSettings" />
+
+@if (Entry is null)
+{
+    @if (_loadProblem is not null)
+    {
+        <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Breadcrumb"])])" />
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Breadcrumb"])])"
+               Title="@L["Title"]" State="State" Saving="_saving" SaveLabel="@L["Save"]" CancelHref="@AppPaths.AdminHome"
+               OnSave="SaveAsync" Problem="@SaveProblem" Dates="@Dates">
+        <Block Title="@L["Block.Display"]" Kicker="@L["Kicker.Display"]">
+            <div class="settings-fields">
+                <Field Id="settings-album-label-format" Label="@L["AlbumLabelFormat"]" Required Help="@L["AlbumLabelFormat.Help"]"
+                       Error="@Errors.For("/albumLabelFormat")" Context="control">
+                    <select id="@control.Id" class="settings-list" aria-describedby="@DescribedBy(control, ExampleId)"
+                            aria-invalid="@control.Invalid" @bind="Entry.AlbumLabelFormat">
+                        @foreach (var format in Enum.GetValues<AlbumLabelFormat>())
+                        {
+                            <option value="@format">@Values.Of(format)</option>
+                        }
+                    </select>
+                    @* The same album, labelled in the format chosen, by the service of the labels that every page employs: what
+                       the choice changes, read before saving it. *@
+                    <p class="settings-example" id="@ExampleId">
+                        @L["AlbumLabelFormat.Example"] <LabelText Text="@Labels.Record(Example, Entry.AlbumLabelFormat)" />
+                    </p>
+                </Field>
+                <Field Id="settings-display-culture" Label="@L["DisplayCulture"]" Required Help="@L["DisplayCulture.Help"]"
+                       Error="@Errors.For("/displayCulture")" Context="control">
+                    <select id="@control.Id" class="settings-list" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
+                            @bind="Entry.DisplayCulture">
+                        @foreach (var culture in Enum.GetValues<Bdtheque.Contracts.Enums.DisplayCulture>())
+                        {
+                            <option value="@culture">@Values.Of(culture)</option>
+                        }
+                    </select>
+                </Field>
+            </div>
+        </Block>
+    </EntryForm>
+
+    @if (_changesShown)
+    {
+        <ChangesDialog Id="settings-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
+    }
+}
+
+@code {
+    private const string ExampleId = "settings-album-label-format-example";
+
+    // The album of the example: a title, its series and a volume, all three that each format places in its own order
+    // (fonctionnel/presentation/libelle-d-un-album.md, examples).
+    private static readonly AlbumLabel Example = new("Le Lotus bleu", "Tintin", AlbumType.Regular, false, 5, null, null);
+
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _saveProblem;
+    private EntryForm? _form;
+    private bool _revealProblem;
+    private bool _saving;
+    private string? _savedFingerprint;
+    private bool _changesShown;
+
+    /// <summary>The setting as the form holds it, read once, by the prerendering.</summary>
+    [PersistentState]
+    public SettingsEntry? Entry { get; set; }
+
+    /// <summary>The setting as it was read: what the user changed since.</summary>
+    [PersistentState]
+    public SettingsEntry? ReadEntry { get; set; }
+
+    // The setting as the change log names it, whose label has no component: it is single.
+    private string Subject => Labels.Record(new ApplicationSettingsLabel(), Entry!.AlbumLabelFormat);
+
+    // Whether the form still holds what was read: the setting is never new.
+    private SaveBarState State => Entry!.Fingerprint() == _savedFingerprint ? SaveBarState.Unchanged : SaveBarState.Unsaved;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Entry is null)
+        {
+            try
+            {
+                Entry = SettingsEntry.Of(await Api.GetAsync<ApplicationSettingsForm>("/admin/settings"));
+                ReadEntry = Entry.Copy();
+            }
+            catch (ApiProblemException exception)
+            {
+                _loadProblem = exception.Problem;
+                return;
+            }
+        }
+
+        _savedFingerprint = ReadEntry!.Fingerprint();
+    }
+
+    private static string DescribedBy(FieldContext control, string id) => control.DescribedBy is { } describedBy ? $"{id} {describedBy}" : id;
+
+    private async Task SaveAsync()
+    {
+        if (_saving)
+            return;
+        _saving = true;
+        _saveProblem = null;
+        try
+        {
+            await Api.PutAsync<UpdateApplicationSettingsRequest, ApplicationSettingsForm>("/admin/settings", Entry!.ToRequest());
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminSettingsSaved);
+
+            // Saved, it leads back to the home of the administration, which presents the setting: the place of a list for the
+            // other records (visuel/saisie-album/contenu.md, decision of the user).
+            Navigation.NavigateTo(AppPaths.AdminHome);
+        }
+        catch (ApiProblemException exception)
+        {
+            _saveProblem = exception.Problem;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // Once the error of a saving is rendered, what is to correct is brought into view.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    private async Task ShowChangesAsync()
+    {
+        _changesShown = true;
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminSettingsChanges);
+    }
+
+    // The setting as it is now, the changes of the form left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(AppPaths.AdminSettings, forceLoad: true);
+
+    // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
+    private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
+
+    // The three categories told apart at first glance, each with what the user can do about it. The setting is never deleted.
+    private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.Conflict"]"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      OnRetry="SaveAsync" />;
+
+    private RenderFragment Dates => @<text>@L["Dates.Created"] <LocalDateTime Value="Entry!.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="Entry.ModifiedAt" />.</text>;
+
+    // Each field the user changed since the setting was read, with what they entered, to enter it again once it is reloaded.
+    private List<EntryChange> Changes() => [.. ChangedFields()];
+
+    private IEnumerable<EntryChange> ChangedFields()
+    {
+        var (read, entry) = (ReadEntry!, Entry!);
+        if (read.AlbumLabelFormat != entry.AlbumLabelFormat)
+            yield return new(L["AlbumLabelFormat"], Values.Of(entry.AlbumLabelFormat));
+        if (read.DisplayCulture != entry.DisplayCulture)
+            yield return new(L["DisplayCulture"], Values.Of(entry.DisplayCulture));
+    }
+}

@@ -225,17 +225,8 @@
   <data name="Settings.AlbumLabelFormat" xml:space="preserve">
     <value>Libellé des albums</value>
   </data>
-  <data name="Settings.AlbumLabelFormat.TitleSeriesVolume" xml:space="preserve">
-    <value>Album (Série - Tome)</value>
-  </data>
-  <data name="Settings.AlbumLabelFormat.VolumeTitleSeries" xml:space="preserve">
-    <value>Tome - Album (Série)</value>
-  </data>
   <data name="Settings.DisplayCulture" xml:space="preserve">
     <value>Culture d&apos;affichage</value>
-  </data>
-  <data name="Settings.DisplayCulture.FrenchFrance" xml:space="preserve">
-    <value>Français (France)</value>
   </data>
   <data name="Statistics.Title" xml:space="preserve">
     <value>Statistiques privées</value>

@@ -9,6 +9,7 @@
 @inject AdminRecordCounts RecordCounts
 @inject RecordLabels Labels
 @inject DisplayFormatter Format
+@inject ValueLabels Values
 
 @* The home page of the administration (visuel/administration/contenu.md): the most useful functions, from top to bottom. Its
    blocks are those of every theme (visuel/administration/declinaison-par-theme.md): what varies from one theme to another
@@ -127,12 +128,12 @@
                 <dl class="admin-rows">
                     <div class="admin-setting">
                         <dt>@L["Settings.AlbumLabelFormat"]</dt>
-                        <dd>@L[$"Settings.AlbumLabelFormat.{_settings!.AlbumLabelFormat}"]</dd>
+                        <dd>@Values.Of(_settings!.AlbumLabelFormat)</dd>
                         <dd><a href="@AppPaths.AdminSettings">@L["Edit"]</a></dd>
                     </div>
                     <div class="admin-setting">
                         <dt>@L["Settings.DisplayCulture"]</dt>
-                        <dd>@L[$"Settings.DisplayCulture.{_settings.DisplayCulture}"]</dd>
+                        <dd>@Values.Of(_settings.DisplayCulture)</dd>
                         <dd><a href="@AppPaths.AdminSettings">@L["Edit"]</a></dd>
                     </div>
                 </dl>

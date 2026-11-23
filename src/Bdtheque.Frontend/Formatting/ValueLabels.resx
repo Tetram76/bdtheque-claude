@@ -135,4 +135,13 @@
   <data name="SeriesStatus.Abandoned" xml:space="preserve">
     <value>Abandonnée</value>
   </data>
+  <data name="AlbumLabelFormat.TitleSeriesVolume" xml:space="preserve">
+    <value>Album (Série - Tome)</value>
+  </data>
+  <data name="AlbumLabelFormat.VolumeTitleSeries" xml:space="preserve">
+    <value>Tome - Album (Série)</value>
+  </data>
+  <data name="DisplayCulture.FrenchFrance" xml:space="preserve">
+    <value>Français (France)</value>
+  </data>
 </root>
