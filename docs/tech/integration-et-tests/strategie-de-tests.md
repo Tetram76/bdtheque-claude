@@ -6,6 +6,7 @@ code:
   - 'tests/*/BannedSymbols.txt'
   - 'tests/Bdtheque.Testing/TestClock.cs'
   - 'tests/Bdtheque.Testing/ApiHostFactory.cs'
+  - 'tests/Bdtheque.Testing/ApplicationBackgroundTasks.cs'
   - 'tests/Bdtheque.Infrastructure.Tests/RepositoryFiles.cs'
   - 'tests/Bdtheque.EndToEnd.Tests/TestThemes*.cs'
   - 'tests/Bdtheque.EndToEnd.Tests/RequestThemeSelector.cs'
@@ -79,6 +80,8 @@ Les tests du dépôt confrontent les fichiers du dépôt à leurs règles, sans 
 
 L'application lit l'heure par une horloge qu'on peut remplacer, et aucun test ne lit l'heure de la machine. Dans les tests, cette horloge est [`TestClock`](../../../tests/Bdtheque.Testing/TestClock.cs), qui fonctionne de deux façons. Un test qui fournit lui-même chaque date dont il dépend utilise l'heure du système. Un test qui a besoin d'une heure reproductible utilise `StartingAt`, qui part d'un instant fixe et avance d'une milliseconde à chaque lecture, de sorte que deux lectures successives ne donnent jamais le même instant. Un test peut aussi fixer `UtcNow`, qui garde alors cette valeur jusqu'à ce qu'il la change.
 
+L'hôte de l'API des tests n'exécute jamais les tâches de fond de l'application, comme la réconciliation des visuels ou la conservation de la mesure d'audience. Démarrées avec l'hôte, elles s'exécuteraient pendant le premier test de la classe, sur une heure lue avant que ce test ne fixe la sienne, et pourraient supprimer les données qu'il vient d'écrire sur une heure passée. [`ApplicationBackgroundTasks`](../../../tests/Bdtheque.Testing/ApplicationBackgroundTasks.cs) remplace donc, dans l'hôte, chaque service hébergé que définit l'application par un service qui ne fait rien, en laissant ceux du framework, dont le serveur web. Un test qui vérifie une tâche l'exécute lui-même, sur son heure, en appelant sa méthode d'exécution.
+
 Les tests de bout en bout vont plus loin. [`ApplicationHost`](../../../tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs) démarre `api` et `frontend` sur la même horloge, à partir de l'instant `Origin`, le 15 janvier 2026 à 23 h 20 en temps universel. Il ouvre le navigateur dans le fuseau `Europe/Paris`, où l'on est déjà le 16 janvier : une date devinée en temps universel au lieu de celle du navigateur s'y voit donc dans tous les tests. Il ouvre aussi chaque contexte du navigateur en mouvement réduit, sauf si un test demande un autre réglage : l'écran d'accueil de la première requête laisse alors place à la page aussitôt, au lieu de retenir chaque test le temps de son animation.
 
 Enfin, un écran qui dépend de toute la collection, comme la page d'accueil, est testé sur une application de test démarrée pour l'état qu'il présente. Sur la base partagée par les autres tests, son rendu changerait selon l'ordre dans lequel ceux-ci s'exécutent.
@@ -135,6 +138,7 @@ Les tests de bout en bout installent eux-mêmes Chromium sans interface s'il man
 ## Invariants à préserver
 
 - Aucun test ne lit l'heure de la machine : il lit celle de l'application.
+- L'hôte des tests n'exécute aucune tâche de fond de l'application : un test exécute lui-même celle qu'il vérifie.
 - Aucun test de bout en bout ne laisse le thème au tirage, sauf les tests du tirage lui-même. Une théorie exécutée dans chaque thème porte le trait qui la répartit entre les jobs du CI.
 - Les références des captures ne changent qu'après la validation fonctionnelle du rendu ([Thèmes](../../../.speckit/choix-implementation/socle/themes.md), captures de référence).
 - Toute ressource qu'ouvre un test, qu'il s'agisse d'un contexte de navigateur, d'une connexion ou d'un conteneur, est libérée par ce test.

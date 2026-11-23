@@ -116,7 +116,8 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         },
         authenticated: true);
 
-    // The clock of the form, the system's unless a test needs the time a visual added is kept to elapse.
+    // The clock of the form, the system's unless a test needs the time a visual added is kept to elapse: a fake one then, advanced
+    // by the test, never a timer of the system, which runs off the dispatcher whenever the thread pool gets to it.
     private TimeProvider _clock = TimeProvider.System;
 
     public AdminEditionFormTests()
@@ -1028,13 +1029,18 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     [Fact]
     public async Task Visuals_AddedLongAgo_AreRemovedFromTheForm_WhichADialogTells()
     {
-        // A form left open past the time a visual added is kept: removed from it, as a saving would refuse it.
+        // A form left open past the time a visual added is kept: removed from it, as a saving would refuse it. The time elapses on
+        // the clock of the form, on the dispatcher of the rendering: the expiry runs within, with no timer of the system to wait for.
+        var clock = new FakeTimeProvider(new DateTimeOffset(2026, 11, 20, 12, 0, 0, TimeSpan.Zero));
+        _clock = clock;
         var page = OpenOwned();
-        _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, DateTimeOffset.UtcNow.AddSeconds(30)), HttpStatusCode.Created);
-
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PendingVisualForm(AddedId, clock.GetUtcNow().AddHours(24)), HttpStatusCode.Created);
         await SendAsync(page, new TestBrowserFile("planche-oubliee.png", new byte[16]));
+        Assert.Equal("4 visuels", page.Find(".edition-visuals-count").TextContent);
 
-        var dialog = page.WaitForElement("dialog");
+        await page.InvokeAsync(() => clock.Advance(TimeSpan.FromHours(24)));
+
+        var dialog = page.Find("dialog");
         Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
         Assert.Equal("3 visuels", page.Find(".edition-visuals-count").TextContent);
@@ -1056,8 +1062,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         await page.InvokeAsync(() => clock.Advance(TimeSpan.FromHours(24)));
 
-        var dialog = page.WaitForElement("dialog");
-        Assert.Single(page.FindAll("dialog"));
+        var dialog = Assert.Single(page.FindAll("dialog"));
         Assert.Equal("Visuels retirés de la fiche", dialog.QuerySelector(".dialog-title")!.TextContent);
         Assert.Equal(["planche-oubliee.png"], dialog.QuerySelectorAll(".edition-visuals-expired li").Select(item => item.TextContent));
         Assert.Equal("Aucun visuel", page.Find(".edition-visuals-count").TextContent);

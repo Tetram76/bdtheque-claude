@@ -13,7 +13,8 @@ namespace Bdtheque.Testing;
 /// <summary>
 /// Hosts the API exactly as the <c>api</c> container runs it, against an empty PostgreSQL
 /// database of its own: startup therefore goes through the same migration step as a first
-/// deployment (see <see cref="PostgreSqlTestServer"/>). Shared by the API tests and the end-to-end tests,
+/// deployment (see <see cref="PostgreSqlTestServer"/>). Only its background tasks never run, a test running a task itself
+/// (see <see cref="ApplicationBackgroundTasks"/>). Shared by the API tests and the end-to-end tests,
 /// which drive its lifetime from their own test framework.
 /// </summary>
 public class ApiHostFactory(TestClock clock) : WebApplicationFactory<Program>
@@ -68,6 +69,8 @@ public class ApiHostFactory(TestClock clock) : WebApplicationFactory<Program>
         {
             services.ConfigureDbContext<BdthequeDbContext>(options => StrictQueryWarnings.Apply(options));
             services.AddSingleton<TimeProvider>(Clock);
+            // Run at startup, they would act on the data of the first test on another time than its own.
+            ApplicationBackgroundTasks.DoNotRun(services, typeof(Program).Assembly);
         });
     }
 
