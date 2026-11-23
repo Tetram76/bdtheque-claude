@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Search;
@@ -219,6 +220,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.True(album.Contributions.Select(contribution => contribution.Author.Id).Distinct().Count() >= 6);
         // More names in a role than the line of a smartphone holds (visuel/fiche-album/contenu.md).
         Assert.Contains(album.Contributions.GroupBy(contribution => contribution.Role), role => role.Count() > 6);
+    }
+
+    [Fact]
+    public async Task Possession_EveryStateIsCovered_AndACoverChangesWithIt()
+    {
+        foreach (var state in Enum.GetValues<AlbumCollectionState>())
+            Assert.NotEmpty((await _client.GetFromJsonAsync<Page<AlbumListItem>>($"/catalog/albums?state={state}"))!.Items);
+        // Among all the albums, the cover of the first edition, still wished for; under « Possédé », that of the reissue owned
+        // (fonctionnel/regles-metier/couverture-d-un-album.md).
+        var title = Uri.EscapeDataString(ValidationDataLoader.CoverByPossessionTitle);
+        var all = Assert.Single((await _client.GetFromJsonAsync<Page<AlbumListItem>>($"/catalog/albums?q={title}"))!.Items).Cover;
+        var owned = Assert.Single((await _client.GetFromJsonAsync<Page<AlbumListItem>>($"/catalog/albums?q={title}&state=InCollection"))!.Items).Cover;
+        Assert.NotNull(all);
+        Assert.NotNull(owned);
+        Assert.NotEqual(all.VisualId, owned.VisualId);
     }
 
     [Theory]

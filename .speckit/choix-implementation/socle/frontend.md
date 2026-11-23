@@ -1,10 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend'
-description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
+description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, listes de la consultation, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T15:00:00Z }
 ---
 
 # Frontend
@@ -147,6 +147,16 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T12:00:00Z }
   - **Alternative écartée (page de saisie dédiée)** : écartée par la présentation elle-même, qui saisit un genre dans sa ligne, un univers et un auteur par-dessus leur liste.
 - **Site extérieur ouvert dans un nouvel onglet** (site web d'un éditeur, depuis sa ligne ou son menu), sans accès à la page d'origine ni adresse de provenance (`noopener noreferrer`) : la liste reste telle qu'elle était, avec ses critères. Son adresse, dans la liste des éditeurs, tient sur une ligne, coupée par des points de suspension de la feuille de style, l'adresse complète en infobulle (attribut `title`) et dans le lien ([Liste par liste](../../visuel/listes/liste-par-liste.md)).
   - **Alternative écartée (même onglet)** : l'administrateur quitterait l'application pour un site qui n'en fait pas partie, et n'y reviendrait que par l'historique du navigateur.
+
+## Listes de la consultation
+
+- **Critères portés par l'adresse, comme ceux des listes de l'administration**, en rendu statique : leur part commune (critères, adresse, lecture de l'API, cas d'une liste vide, action relevée par la mesure d'audience) est écrite une fois pour les deux familles de listes ; une liste de la consultation n'a ni recherche propre, ni panneau des filtres, ni dialogue, et chacune n'ajoute que ses filtres, ses chemins, ses fonctions suivies et ses textes. Son filtre n'est conservé que par son adresse, ce qui le garde le temps de la liste et le perd à l'entrée du menu ([Périmètre de la consultation](../../fonctionnel/regles-metier/perimetre-de-la-consultation.md)).
+- **Filtre de quelques valeurs choisi par des liens** (la possession), la valeur courante marquée : un clic choisit, sans formulaire ni script.
+  - **Alternative écartée (liste du navigateur dans un formulaire `GET`)** : elle exige un bouton pour soumettre le choix, ou un script qui le soumet à chaque changement, pour un filtre dont toutes les valeurs tiennent sur une ligne.
+  - **Alternative écartée (panneau des filtres de l'administration)** : replié, il demande trois actions pour un seul filtre.
+- **Entrée d'une ligne, lien vers la fiche** : une liste de la consultation n'a pas d'action de ligne, l'entrée est la seule voie vers la fiche.
+- **Nombre de tous les albums dans le titre**, celui de la liste elle-même sans critère, lu une seconde fois sinon (une page d'un seul album, dont la réponse donne le total).
+  - **Alternative écartée (total de la base ajouté à la réponse de la liste)** : un contrat propre à une liste pour un nombre que sa lecture sans critère donne déjà.
 
 ## Fiches de la consultation
 

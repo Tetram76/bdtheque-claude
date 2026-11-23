@@ -3212,7 +3212,7 @@
             }
           },
           {
-            "name": "state",
+            "name": "State",
             "in": "query",
             "schema": {
               "$ref": "#/components/schemas/AlbumCollectionState"
@@ -7223,6 +7223,13 @@
             }
           },
           {
+            "name": "State",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AlbumCollectionState"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -7275,7 +7282,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfAlbumSummary"
+                  "$ref": "#/components/schemas/PageOfAlbumListItem"
                 }
               }
             }
@@ -10551,6 +10558,63 @@
           }
         },
         "description": "The records the list is filtered on, as the list names them; each `null` when the list is not filtered on\nits type, or on a record that does not exist (a filtered list does not address its record: the list is then\nempty, choix-implementation/api/recherche.md)."
+      },
+      "AlbumListItem": {
+        "required": [
+          "album",
+          "cover",
+          "authors",
+          "firstPublicationYear",
+          "firstPublicationMonth",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "album": {
+            "$ref": "#/components/schemas/AlbumSummary"
+          },
+          "cover": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Its cover among the editions the filter on the possession shows, all of them without that filter\n(fonctionnel/regles-metier/couverture-d-un-album.md); `null` for the generic visual.",
+                "$ref": "#/components/schemas/AlbumCover"
+              }
+            ]
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorListItem"
+            },
+            "description": "The authors credited on the album, each once, by role then by sort key."
+          },
+          "firstPublicationYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "firstPublicationMonth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Set only with FirstPublicationYear.",
+            "format": "int32"
+          },
+          "state": {
+            "$ref": "#/components/schemas/AlbumCollectionState"
+          }
+        },
+        "description": "An album as a row of the list of the albums of the consultation presents it."
       },
       "AlbumPurchaseIntentItem": {
         "required": [
@@ -13869,6 +13933,51 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlbumAdminListItem"
+            }
+          },
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of the page, from 1.",
+            "format": "int32"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of items of the whole list.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+      },
+      "PageOfAlbumListItem": {
+        "required": [
+          "items",
+          "number",
+          "size",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlbumListItem"
             }
           },
           "number": {

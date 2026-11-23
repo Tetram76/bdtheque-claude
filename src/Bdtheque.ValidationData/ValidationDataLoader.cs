@@ -27,6 +27,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     public const string CollectiveTitle = "...Et après ?";
     public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
     public const string PaleCoverTitle = "Soleil pâle";
+
+    /// <summary>An owned album whose cover in the list of the albums of the consultation changes with the filter on the possession.</summary>
+    public const string CoverByPossessionTitle = "Les Marées d'automne";
     public const string WishedForOnlyTitle = "La Marée des phares";
 
     public const string UncreditedAuthorLastName = "Delorme";
@@ -271,6 +274,18 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         // Wished for as a whole, with no edition known yet.
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
+
+        // Owned in a reissue, and wished for in its first edition, older, each with its own cover: the list of the albums of the
+        // consultation shows the cover of the first edition among all the albums, that of the reissue under « Possédé »
+        // (fonctionnel/regles-metier/couverture-d-un-album.md).
+        var autumnTides = await data.AlbumAsync(OneShot(CoverByPossessionTitle, 2001, 10, [adventure], [], [Credit(etienne, ContributionRole.Illustrator)]));
+        var autumnTidesReissue = await data.EditionAsync(autumnTides, Owned(lagoon.Id, null, 2016, AcquisitionMode.Purchase, new DateOnly(2016, 11, 19)) with
+        {
+            Category = EditionCategory.SpecialEdition, AcquisitionAmount = 16.50m, AcquisitionCurrency = "EUR",
+        });
+        await data.VisualAsync(autumnTides, autumnTidesReissue, VisualType.Cover, Images.Portrait(0.62));
+        var autumnTidesIntents = await data.IntentOnEditionAsync(autumnTides, new PurchaseIntentEditionContent(horizon.Id, null, 2001, null, null, null, null, null, null, null, true));
+        await data.VisualAsync(autumnTides, autumnTidesIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.33));
 
         // The cases of the entry form of an album (visuel/saisie-album/contenu.md): a sort key entered by hand, a universe
         // two levels down, shown with its ancestors, and no author nor series yet, so that attaching it to a series with
