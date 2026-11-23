@@ -26,7 +26,7 @@ Les versions publiées, leurs notes et leur paquet de déploiement sont sur la [
 
 Disponibles :
 
-- Consultation publique : tableau de bord de la collection avec l'édition « À la une », fiches d'un album, d'une série et d'un auteur, avec navigation de l'une à l'autre
+- Consultation publique : tableau de bord de la collection avec l'édition « À la une », liste de tous les albums, limitable à ceux de la collection, fiches d'un album, d'une série et d'un auteur, avec navigation de l'une à l'autre
 - Administration, réservée à un compte unique : listes, recherche et saisie des albums, séries, éditions et visuels, intentions d'acquisition, auteurs, éditeurs et collections, genres et univers
 - Trois thèmes, tirés au hasard à chaque visite, sur smartphone, tablette et grand écran
 - Mesure d'audience respectueuse de la vie privée, avec droit d'opposition des visiteurs
