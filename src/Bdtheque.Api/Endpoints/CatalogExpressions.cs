@@ -46,6 +46,16 @@ internal static class CatalogExpressions
     /// <summary>Marker of contributions as presented, by role then by author, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static IEnumerable<ContributionItem> ToItems(this IEnumerable<Contribution> contributions) => throw NotExpanded();
 
+    /// <summary>
+    /// Marker of the authors of an album as a row of a list presents them, for <see cref="Expand{TSource, TResult}"/> only: in
+    /// the order of its contributions, by role then by sort key, an author credited with several roles once per role, which
+    /// <see cref="EachAuthorOnce"/> makes distinct once read.
+    /// </summary>
+    public static List<AuthorListItem> RowAuthors(this Album album) => throw NotExpanded();
+
+    /// <summary>The authors of a row (<see cref="RowAuthors"/>), each once, at the place of their first role.</summary>
+    public static IReadOnlyList<AuthorListItem> EachAuthorOnce(IEnumerable<AuthorListItem> authors) => [.. authors.DistinctBy(a => a.Id)];
+
     /// <summary>Marker of the roles an author holds among contributions, in role order, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static List<ContractEnums.ContributionRole> RolesOf(this IEnumerable<Contribution> contributions, Guid authorId) =>
         throw NotExpanded();
@@ -183,6 +193,11 @@ internal static class CatalogExpressions
                 c.CreatedAt,
                 c.ModifiedAt));
 
+    private static readonly Expression<Func<Album, List<AuthorListItem>>> RowAuthorsOf = a => a.Contributions
+        .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
+        .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))
+        .ToList();
+
     private static readonly Expression<Func<IEnumerable<Contribution>, Guid, List<ContractEnums.ContributionRole>>> RolesOfAuthor =
         (contributions, authorId) => contributions
             .Where(c => c.AuthorId == authorId)
@@ -285,6 +300,7 @@ internal static class CatalogExpressions
                 nameof(IsOfGenre) => SeriesOfGenre,
                 nameof(ToItems) => ContributionItemsOf,
                 nameof(RolesOf) => RolesOfAuthor,
+                nameof(RowAuthors) => RowAuthorsOf,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
                 nameof(ToCard) => AlbumCardOf,

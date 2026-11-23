@@ -118,18 +118,13 @@ internal static class AlbumEndpoints
         var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
         var rows = await albums.OrderByAlbum(a => a)
             .ToPageAsync(page, pageSize, CatalogExpressions.WithCover(CatalogListItem, CatalogExpressions.CoverVisualAmong(filters.EditionsShown)), cancellationToken);
-        return rows with { Items = [.. rows.Items.Select(row => row with { Authors = [.. row.Authors.DistinctBy(a => a.Id)] })] };
+        return rows with { Items = [.. rows.Items.Select(row => row with { Authors = CatalogExpressions.EachAuthorOnce(row.Authors) })] };
     }
 
-    // Its authors in the order of its contributions, an author credited with several roles once per role, made distinct once
-    // read, at the place of their first role, as in the list of the administration.
     private static readonly Expression<Func<Album, CatalogExpressions.CoverVisual?, AlbumListItem>> CatalogListItem = (a, cover) => new AlbumListItem(
         a.ToSummary(),
         CatalogExpressions.ToCover(cover),
-        a.Contributions
-            .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
-            .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))
-            .ToList(),
+        a.RowAuthors(),
         a.FirstPublicationYear,
         a.FirstPublicationMonth,
         a.CollectionState());
@@ -207,19 +202,13 @@ internal static class AlbumEndpoints
                 p.IsConvertible, p.CreatedAt))]);
     }
 
-    // An author credited with several roles is one of the authors once, at the place of their first role.
     private static AlbumAdminListItem WithEachAuthorOnce(AlbumAdminListItem item) =>
-        item with { Authors = [.. item.Authors.DistinctBy(a => a.Id)] };
+        item with { Authors = CatalogExpressions.EachAuthorOnce(item.Authors) };
 
-    // Its authors in the order of its contributions, an author credited with several roles once per role: the list
-    // tells them apart once read.
     private static readonly Expression<Func<Album, AlbumAdminListItem>> AdminListItem = CatalogExpressions.Expand((Album a) => new AlbumAdminListItem(
         a.ToSummary(),
         CatalogExpressions.ToCover(a.CoverVisualOf()),
-        a.Contributions
-            .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
-            .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))
-            .ToList(),
+        a.RowAuthors(),
         a.FirstPublicationYear,
         a.FirstPublicationMonth,
         a.Editions.Count(e => e.IsOwned()),
