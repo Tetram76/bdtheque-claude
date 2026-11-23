@@ -451,6 +451,21 @@ public static class AudienceFunctions
     public static readonly AudienceFunction AdminPurchaseIntentVisualDeleted =
         new("admin.purchase-intent-form.visual-deleted", AudienceFunctionKind.Action);
 
+    /// <summary>
+    /// The entry form of the setting of the application (modele-metier/parametrage-de-l-application.md), a single record, which
+    /// it presents without designating it.
+    /// </summary>
+    public static readonly AudienceFunction AdminSettings = new("admin.settings", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page, without parameter: the
+    // setting is a single record.
+
+    /// <summary>The saving of the modification of the setting.</summary>
+    public static readonly AudienceFunction AdminSettingsSaved = new("admin.settings.saved", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the setting having been modified in the meantime.</summary>
+    public static readonly AudienceFunction AdminSettingsChanges = new("admin.settings.changes", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -478,5 +493,6 @@ public static class AudienceFunctions
         AdminEditionVisualAdded, AdminEditionVisualsArranged, AdminEditionVisualTypeChanged, AdminEditionVisualDeletion, AdminEditionVisualDeleted,
         AdminPurchaseIntentVisualAdded, AdminPurchaseIntentVisualsArranged, AdminPurchaseIntentVisualTypeChanged, AdminPurchaseIntentVisualDeletion,
         AdminPurchaseIntentVisualDeleted,
+        AdminSettings, AdminSettingsSaved, AdminSettingsChanges,
     ];
 }

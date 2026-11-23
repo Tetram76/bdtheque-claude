@@ -1,0 +1,21 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md; visuel/saisie-album/declinaison-par-theme.md). */
+.settings-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+}
+
+/* A list as wide as its longest value, never stretched over the whole width (visuel/saisie-album/contenu.md). */
+.settings-list {
+    inline-size: auto;
+    max-inline-size: 100%;
+    align-self: flex-start;
+}
+
+/* The album labelled in the format chosen, under the list: a label, kept whole on a line as long as it fits. */
+.settings-example {
+    margin: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}

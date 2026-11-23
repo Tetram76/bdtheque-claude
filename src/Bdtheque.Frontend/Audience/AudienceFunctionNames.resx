@@ -417,4 +417,13 @@
   <data name="admin.universe.parent-created" xml:space="preserve">
     <value>Liste des univers · parent créé sur place</value>
   </data>
+  <data name="admin.settings" xml:space="preserve">
+    <value>Saisie du paramétrage</value>
+  </data>
+  <data name="admin.settings.saved" xml:space="preserve">
+    <value>Saisie du paramétrage · enregistrement</value>
+  </data>
+  <data name="admin.settings.changes" xml:space="preserve">
+    <value>Saisie du paramétrage · « Voir mes changements »</value>
+  </data>
 </root>

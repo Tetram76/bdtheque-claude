@@ -40,6 +40,9 @@ public sealed class ApplicationSettingsEndpointsTests : IClassFixture<ApiWebAppl
         var updated = (await response.Content.ReadFromJsonAsync<ApplicationSettingsForm>())!;
         Assert.Equal(AlbumLabelFormat.VolumeTitleSeries, updated.AlbumLabelFormat);
         Assert.NotEqual(form.Version, updated.Version);
+        // The dates of the record, which its form presents: created once, at the provisioning, modified by the saving.
+        Assert.Equal(form.CreatedAt, updated.CreatedAt);
+        Assert.True(updated.ModifiedAt > form.ModifiedAt, $"{updated.ModifiedAt:O} after {form.ModifiedAt:O}");
         Assert.Equal(updated, await ReadFormAsync());
         Assert.Equal(
             new ApplicationSettings(AlbumLabelFormat.VolumeTitleSeries, DisplayCulture.FrenchFrance),

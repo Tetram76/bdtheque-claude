@@ -12,7 +12,10 @@
         <Breadcrumb Items="Breadcrumb" />
         <h1 class="entry-form-title">@Title</h1>
         @* An ISBN, which ends the label of an edition, kept on one line (fonctionnel/presentation/libelle-d-une-edition.md). *@
-        <p class="entry-form-subject"><LabelText Text="@Subject" /></p>
+        @if (Subject is not null)
+        {
+            <p class="entry-form-subject"><LabelText Text="@Subject" /></p>
+        }
         @Status
     </div>
 
@@ -43,9 +46,12 @@
     [Parameter, EditorRequired]
     public string Title { get; set; } = null!;
 
-    /// <summary>The label of the record, computed again as it is entered.</summary>
-    [Parameter, EditorRequired]
-    public string Subject { get; set; } = null!;
+    /// <summary>
+    /// The label of the record, computed again as it is entered; none for a single record, which the title names whole (the
+    /// setting of the application).
+    /// </summary>
+    [Parameter]
+    public string? Subject { get; set; }
 
     /// <summary>What the page tells of the record at first glance, under its title (e.g. an album not in the collection).</summary>
     [Parameter]

@@ -87,7 +87,7 @@ public static class AppPaths
     /// <summary>The record of an author (visuel/fiche-auteur/).</summary>
     public static string AuthorRecord(Guid id) => $"{AuthorsSection}/{id}";
 
-    // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
+    // Administration (#200 to #209, the settings #610; the private statistics, a later part of the Phase 3).
 
     /// <summary>
     /// Search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the records
@@ -234,7 +234,11 @@ public static class AppPaths
     /// <summary>The saved searches of the administration (fonctionnel/recherche-avancee/recherches-enregistrees.md).</summary>
     public const string AdminSavedSearches = NotYetImplemented;
 
-    public const string AdminSettings = NotYetImplemented;
+    /// <summary>
+    /// The entry form of the setting of the application (modele-metier/parametrage-de-l-application.md), a single record
+    /// addressed without identifier.
+    /// </summary>
+    public const string AdminSettings = "/admin/settings";
 
     /// <summary>The private statistics of the administration: the indicators of the audience measurement (fonctionnel/mesure-audience.md).</summary>
     public const string AdminStatistics = "/admin/statistics";

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Breadcrumb" xml:space="preserve">
+    <value>Paramétrage</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Modifier le paramétrage</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Block.Display" xml:space="preserve">
+    <value>L&apos;affichage</value>
+  </data>
+  <data name="Kicker.Display" xml:space="preserve">
+    <value>Présentation</value>
+  </data>
+  <data name="AlbumLabelFormat" xml:space="preserve">
+    <value>Libellé des albums</value>
+  </data>
+  <data name="AlbumLabelFormat.Help" xml:space="preserve">
+    <value>Le nom d&apos;un album partout où sa série ne va pas de soi : listes, recherche, dashboard, journal des modifications.</value>
+  </data>
+  <data name="AlbumLabelFormat.Example" xml:space="preserve">
+    <value>Exemple : {0}</value>
+  </data>
+  <data name="DisplayCulture" xml:space="preserve">
+    <value>Culture d&apos;affichage</value>
+  </data>
+  <data name="DisplayCulture.Help" xml:space="preserve">
+    <value>La langue des textes, le format des dates, des nombres et des montants, et l&apos;ordre de tri des listes.</value>
+  </data>
+  <data name="Dates.Modified" xml:space="preserve">
+    <value>Paramétrage modifié le</value>
+  </data>
+  <data name="Problem.Functional.Conflict" xml:space="preserve">
+    <value>Le paramétrage a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>
+  </data>
+  <data name="Problem.Technical.Text" xml:space="preserve">
+    <value>L&apos;application n&apos;a pas pu enregistrer le paramétrage. Vos changements sont toujours là, dans le formulaire : réessayez dans quelques instants.</value>
+  </data>
+</root>
