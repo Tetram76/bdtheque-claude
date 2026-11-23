@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la page des éditions et intentions d''acquisition d''un album.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T18:07:53Z }
 ---
 
 # Contenu
@@ -26,7 +26,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T10:00:00Z }
     - une intention sur une **édition** a pour action principale **Modifier**, qui ouvre sa fiche de saisie ([`saisie-edition/`](../saisie-edition/index.md)) ; son menu propose **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée, puis, séparée par un filet, **Retirer l'intention…** ;
     - une intention sur l'**album**, qui n'a rien à modifier, n'a pas de **Modifier** : son action principale est **Viser une édition…**, qui la convertit en intention sur une édition, et son menu ne propose que **Retirer l'intention…** ;
     - **Retirer l'intention…** supprime avec elle l'édition visée ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) ;
-    - la confirmation de l'acquisition ne se fait pas depuis cette page, mais depuis la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) et le lien « Confirmer les acquisitions » de l'accueil de l'administration ([Réalisation d'une intention](../../fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention)) ;
+    - la confirmation de l'acquisition ne se fait pas depuis cette page, mais depuis la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) et le lien « Confirmer les acquisitions » de l'accueil de l'administration ([Réalisation d'une intention](../../fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention)). L'action principale d'une intention suit ainsi ce pour quoi on vient sur la page : sur cette page, qui présente les éditions d'un album, on modifie, d'où **Modifier**, comme pour une édition ; dans la liste des intentions d'acquisition, où mène le lien « Confirmer les acquisitions », on confirme, d'où **Confirmer** (décision de l'utilisateur, [Saisie selon l'entité](../listes/saisie-selon-l-entite.md)) ;
     - un clic en dehors d'un menu ouvert le referme ;
   - sans intention, « Aucune intention d'acquisition » ;
   - l'aide rappelle qu'une intention ne vise l'album entier que tant qu'il n'a aucune édition, possédée ou visée.

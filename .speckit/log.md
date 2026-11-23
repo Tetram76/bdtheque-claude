@@ -3,6 +3,7 @@
 ## 2026-11-23
 
 * **Choix** : l'hôte des tests n'exécute jamais les tâches de fond de l'application, présentes ou à venir, dont la première exécution agissait sur les données du premier test sur une autre heure que la sienne ; le test d'une tâche l'exécute lui-même ([Outillage de développement](choix-implementation/outillage.md)) (#618).
+* **Décision de l'utilisateur** : l'action principale d'une intention suit ce pour quoi on vient sur la page : « Modifier » sur la page des éditions et intentions d'acquisition d'un album, « Confirmer » dans la liste des intentions d'acquisition, où mène le lien « Confirmer les acquisitions » ([Contenu](visuel/editions-album/contenu.md), [Saisie selon l'entité](visuel/listes/saisie-selon-l-entite.md)) (#619).
 
 ## 2026-11-22
 
