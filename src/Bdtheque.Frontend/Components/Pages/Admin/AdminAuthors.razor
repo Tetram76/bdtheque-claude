@@ -452,8 +452,7 @@
     private static string Name(AuthorAdminListItem row) => RecordSearch.AuthorName(row.LastName, row.FirstName, row.Pseudonym);
 
     // Under a pseudonym, the first name and the last name, if any, below it (visuel/listes/liste-par-liste.md).
-    private static string? Identity(AuthorAdminListItem row) =>
-        row.Pseudonym is null || RecordSearch.AuthorName(row.LastName, row.FirstName, null) is not { Length: > 0 } identity ? null : identity;
+    private static string? Identity(AuthorAdminListItem row) => RecordSearch.AuthorIdentity(row.LastName, row.FirstName, row.Pseudonym);
 
     private string AlbumsText(AuthorAdminListItem row) => row.CreditedAlbumCount switch
     {
