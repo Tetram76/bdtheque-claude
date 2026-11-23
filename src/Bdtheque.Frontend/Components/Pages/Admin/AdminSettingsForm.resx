@@ -37,7 +37,7 @@
     <value>Le nom d&apos;un album partout où sa série ne va pas de soi : listes, recherche, dashboard, journal des modifications.</value>
   </data>
   <data name="AlbumLabelFormat.Example" xml:space="preserve">
-    <value>Exemple :</value>
+    <value>Exemple : {0}</value>
   </data>
   <data name="DisplayCulture" xml:space="preserve">
     <value>Culture d&apos;affichage</value>

@@ -46,10 +46,10 @@ else
                         }
                     </select>
                     @* The same album, labelled in the format chosen, by the service of the labels that every page employs: what
-                       the choice changes, read before saving it. *@
-                    <p class="settings-example" id="@ExampleId">
-                        @L["AlbumLabelFormat.Example"] <LabelText Text="@Labels.Record(Example, Entry.AlbumLabelFormat)" />
-                    </p>
+                       the choice changes, read before saving it. A single text: the prerendering arrives as one text node,
+                       which the interactive rendering would otherwise replace by several, laid out a fraction of a pixel apart
+                       (the label of an album has no ISBN to keep on a line, LabelText's only purpose). *@
+                    <p class="settings-example" id="@ExampleId">@L["AlbumLabelFormat.Example", Labels.Record(Example, Entry.AlbumLabelFormat)]</p>
                 </Field>
                 <Field Id="settings-display-culture" Label="@L["DisplayCulture"]" Required Help="@L["DisplayCulture.Help"]"
                        Error="@Errors.For("/displayCulture")" Context="control">
