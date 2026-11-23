@@ -78,9 +78,9 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     [Fact]
     public void Criteria_AFormThatLeadsToThePage_WithTheCriteriaOfTheAddress()
     {
-        var page = Open("period=All&users=Visitors&device=Smartphone&engine=WebKit&screen=Liste%20des%20albums");
+        var page = Open("period=All&users=Visitors&device=Smartphone&engine=WebKit&screen=Liste%20des%20albums&filters=open");
 
-        var form = page.Find("form.audience-criteria");
+        var form = page.Find("form.list-search");
         Assert.Equal(("get", AppPaths.AdminStatistics), (form.GetAttribute("method"), form.GetAttribute("action")));
         Assert.Equal(
             [("Période", "period", "Depuis le début"), ("Utilisateurs", "users", "Visiteurs"), ("Appareil", "device", "Smartphone"),
@@ -104,6 +104,53 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Filters_FoldedByDefault_CountedOnTheirButton_KeptWhileFolded()
+    {
+        var page = Open("users=Visitors&screen=Liste%20des%20albums");
+
+        var form = page.Find("form.list-search");
+        Assert.Empty(form.QuerySelectorAll("select"));
+        Assert.Equal("2", Text(form.QuerySelector(".list-search-count")!));
+        Assert.Equal(
+            [("users", "Visitors"), ("screen", "Liste des albums")],
+            form.QuerySelectorAll("input[type='hidden']").Select(field => (field.GetAttribute("name")!, field.GetAttribute("value")!)));
+    }
+
+    [Fact]
+    public void ActiveFilters_EachATagLeadingToThePageWithoutIt_ThenEverythingCleared()
+    {
+        var page = Open("q=album&period=ThreeMonths&engine=Gecko&page=2");
+
+        var tags = page.FindAll(".active-filters li");
+        Assert.Equal(["Période : 3 derniers mois", "Moteur de rendu : Gecko"], tags.Select(tag => Text(tag.QuerySelector(".tag > span")!)));
+        Assert.Equal(
+            ["/admin/statistics?q=album&engine=Gecko", "/admin/statistics?q=album&period=ThreeMonths"],
+            tags.Select(tag => tag.QuerySelector("a")!.GetAttribute("href")));
+        Assert.Equal("/admin/statistics?q=album", page.Find(".active-filters > a").GetAttribute("href"));
+    }
+
+    [Fact]
+    public void Search_TheFunctionsWhoseNameContainsTheText_WithoutCaseNorAccents()
+    {
+        var page = Open("q=FICHE%20D%27UN%20ALBUM");
+
+        Assert.Equal(
+            ["Fiche d'un album", "Fiche d'un album · visuel montré"],
+            page.FindAll(".audience-row:not(.audience-row-head) .row-entry").Select(entry => Text(entry)));
+        Assert.Equal(("q", "FICHE D'UN ALBUM"), (page.Find("input[type='search']").GetAttribute("name")!, page.Find("input[type='search']").GetAttribute("value")!));
+    }
+
+    [Fact]
+    public void Search_ThatFindsNothing_SaysSo_AndOffersToClearIt()
+    {
+        var page = Open("q=nulle%20part&users=Visitors");
+
+        Assert.Equal("Aucune fonction ne correspond à « nulle part ».", Text(page.Find(".empty-list strong")));
+        Assert.Empty(page.FindAll(".audience-rows"));
+        Assert.Contains(page.FindAll(".empty-list a"), link => link.GetAttribute("href") == "/admin/statistics?users=Visitors");
+    }
+
+    [Fact]
     public void Screen_ItsOwnFunctionsOnly_ItAndItsActions()
     {
         var page = Open("screen=Liste%20des%20albums");
@@ -118,7 +165,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     [Fact]
     public void Screens_EveryScreen_OnceByName_TheirsAndThoseOfTheActionsWithoutAScreen()
     {
-        var page = Open("");
+        var page = Open("filters=open");
 
         var screens = page.FindAll("select[name='screen'] option").Skip(1).Select(option => Text(option)).ToList();
         Assert.Equal(screens.Distinct(), screens);
@@ -130,7 +177,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     [Fact]
     public void ScreenItDoesNotKnow_EveryScreen()
     {
-        var page = Open("screen=Nulle%20part");
+        var page = Open("screen=Nulle%20part&filters=open");
 
         Assert.Equal(AudienceIndicatorsQuery.PageSize, page.FindAll(".audience-row:not(.audience-row-head)").Count);
         Assert.Equal("Tous les écrans", Text(page.Find("select[name='screen'] option[selected]")));
@@ -308,7 +355,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
 
         Assert.Equal("technical", page.Find("[data-error-category]").GetAttribute("data-error-category"));
         Assert.Empty(page.FindAll(".audience-rows"));
-        Assert.NotNull(page.Find("form.audience-criteria"));
+        Assert.NotNull(page.Find("form.list-search"));
     }
 
     // The measurement does not measure itself (fonctionnel/mesure-audience.md, Fonctions suivies): neither the display of the

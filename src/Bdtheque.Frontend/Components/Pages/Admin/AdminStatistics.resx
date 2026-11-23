@@ -153,6 +153,21 @@
   <data name="Frequency.Text" xml:space="preserve">
     <value>Utilisée {0} mois sur {1}</value>
   </data>
+  <data name="Search.Label" xml:space="preserve">
+    <value>Rechercher une fonction</value>
+  </data>
+  <data name="Search.Placeholder" xml:space="preserve">
+    <value>Nom de la fonction…</value>
+  </data>
+  <data name="Empty.Text" xml:space="preserve">
+    <value>Aucune fonction ne correspond à « {0} ».</value>
+  </data>
+  <data name="Empty.SearchedIn" xml:space="preserve">
+    <value>le nom de la fonction</value>
+  </data>
+  <data name="Empty.Clear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
   <data name="Criteria.Screen" xml:space="preserve">
     <value>Écran</value>
   </data>

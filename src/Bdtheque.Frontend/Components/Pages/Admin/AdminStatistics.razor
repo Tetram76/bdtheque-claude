@@ -22,57 +22,25 @@
     <ListHeading Title="@L["Title"]" />
 
     <Block Title="@L["Audience.Title"]" Kicker="@L["Audience.Kicker"]">
-        <form class="audience-criteria" method="get" action="@AppPaths.AdminStatistics">
-            <ListFilters Note="@L["Criteria.Note"]">
-                <Field Id="audience-period" Label="@L["Criteria.Period"]" Context="control">
-                    <select id="@control.Id" name="@AudienceIndicatorsQuery.PeriodName">
-                        @foreach (var period in Enum.GetValues<AudiencePeriod>())
-                        {
-                            <option value="@period" selected="@(_query.Period == period)">@L[$"Period.{period}"]</option>
-                        }
-                    </select>
-                </Field>
-                <Field Id="audience-users" Label="@L["Criteria.Users"]" Context="control">
-                    <select id="@control.Id" name="@AudienceIndicatorsQuery.UsersName">
-                        @foreach (var users in Enum.GetValues<AudienceUsers>())
-                        {
-                            <option value="@users" selected="@(_query.Users == users)">@L[$"Users.{users}"]</option>
-                        }
-                    </select>
-                </Field>
-                <Field Id="audience-device" Label="@L["Criteria.Device"]" Context="control">
-                    <select id="@control.Id" name="@AudienceIndicatorsQuery.DeviceName">
-                        <option value="" selected="@(_query.Device is null)">@L["Device.All"]</option>
-                        @foreach (var device in Enum.GetValues<DeviceType>())
-                        {
-                            <option value="@device" selected="@(_query.Device == device)">@Values.Of(device)</option>
-                        }
-                    </select>
-                </Field>
-                <Field Id="audience-engine" Label="@L["Criteria.Engine"]" Context="control">
-                    <select id="@control.Id" name="@AudienceIndicatorsQuery.EngineName">
-                        <option value="" selected="@(_query.Engine is null)">@L["Engine.All"]</option>
-                        @foreach (var engine in Enum.GetValues<RenderingEngine>())
-                        {
-                            <option value="@engine" selected="@(_query.Engine == engine)">@Values.Of(engine)</option>
-                        }
-                    </select>
-                </Field>
-                <Field Id="audience-screen" Label="@L["Criteria.Screen"]" Context="control">
-                    <select id="@control.Id" name="@AudienceIndicatorsQuery.ScreenName">
-                        <option value="" selected="@(_query.Screen is null)">@L["Screen.All"]</option>
-                        @foreach (var screen in _screens)
-                        {
-                            <option value="@screen" selected="@(_query.Screen == screen)">@screen</option>
-                        }
-                    </select>
-                </Field>
-            </ListFilters>
-        </form>
+        <ListSearch Action="@AppPaths.AdminStatistics" FieldId="audience-search" TextName="@AudienceIndicatorsQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@_query.WithoutSearchHref()"
+                    PanelId="audience-filters" FiltersName="@AudienceIndicatorsQuery.FiltersName"
+                    FiltersOpenValue="@AudienceIndicatorsQuery.FiltersOpenValue" FiltersOpen="_query.FiltersOpen"
+                    FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel" HiddenFilters="KeptFilters" />
+
+        <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
 
         @if (_problem is not null)
         {
             <ErrorMessage Problem="_problem" />
+        }
+        else if (_rows is { Count: 0 } && _query.Text is { } searched)
+        {
+            <EmptyList Message="@L["Empty.Text", searched]" SearchedIn="@L["Empty.SearchedIn"]">
+                <Actions>
+                    <Button Href="@_query.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
+                </Actions>
+            </EmptyList>
         }
         else if (_rows is not null)
         {
@@ -255,6 +223,75 @@
 
     private string FrequencyText(IReadOnlyDictionary<DateOnly, int> monthly) =>
         L["Frequency.Text", Format.Number(_months.Count(monthly.ContainsKey)), Format.Number(_months.Count)];
+
+    // The filters chosen, each a tag that leads to the page without it, as those of the lists (visuel/liste-albums/contenu.md).
+    private IReadOnlyList<ActiveFilters.ActiveFilter> ActiveFilterTags()
+    {
+        var tags = new List<ActiveFilters.ActiveFilter>();
+        void Add(bool active, string name, string value, AudienceIndicatorsQuery without)
+        {
+            if (active)
+                tags.Add(new(L[name], value, (without with { Page = 1 }).Href()));
+        }
+
+        Add(_query.Period != AudiencePeriod.TwelveMonths, "Criteria.Period", L[$"Period.{_query.Period}"],
+            _query with { Period = AudiencePeriod.TwelveMonths });
+        Add(_query.Users != AudienceUsers.All, "Criteria.Users", L[$"Users.{_query.Users}"], _query with { Users = AudienceUsers.All });
+        Add(_query.Device is not null, "Criteria.Device", _query.Device is { } device ? Values.Of(device) : "", _query with { Device = null });
+        Add(_query.Engine is not null, "Criteria.Engine", _query.Engine is { } engine ? Values.Of(engine) : "", _query with { Engine = null });
+        Add(_query.Screen is not null, "Criteria.Screen", _query.Screen ?? "", _query with { Screen = null });
+        return tags;
+    }
+
+    // The fields of the filters, in their panel, applied by its button.
+    private RenderFragment FiltersPanel => @<ListFilters Note="@L["Criteria.Note"]">
+            <Field Id="audience-period" Label="@L["Criteria.Period"]" Context="control">
+                <select id="@control.Id" name="@AudienceIndicatorsQuery.PeriodName">
+                    @foreach (var period in Enum.GetValues<AudiencePeriod>())
+                    {
+                        <option value="@period" selected="@(_query.Period == period)">@L[$"Period.{period}"]</option>
+                    }
+                </select>
+            </Field>
+            <Field Id="audience-users" Label="@L["Criteria.Users"]" Context="control">
+                <select id="@control.Id" name="@AudienceIndicatorsQuery.UsersName">
+                    @foreach (var users in Enum.GetValues<AudienceUsers>())
+                    {
+                        <option value="@users" selected="@(_query.Users == users)">@L[$"Users.{users}"]</option>
+                    }
+                </select>
+            </Field>
+            <Field Id="audience-device" Label="@L["Criteria.Device"]" Context="control">
+                <select id="@control.Id" name="@AudienceIndicatorsQuery.DeviceName">
+                    <option value="" selected="@(_query.Device is null)">@L["Device.All"]</option>
+                    @foreach (var device in Enum.GetValues<DeviceType>())
+                    {
+                        <option value="@device" selected="@(_query.Device == device)">@Values.Of(device)</option>
+                    }
+                </select>
+            </Field>
+            <Field Id="audience-engine" Label="@L["Criteria.Engine"]" Context="control">
+                <select id="@control.Id" name="@AudienceIndicatorsQuery.EngineName">
+                    <option value="" selected="@(_query.Engine is null)">@L["Engine.All"]</option>
+                    @foreach (var engine in Enum.GetValues<RenderingEngine>())
+                    {
+                        <option value="@engine" selected="@(_query.Engine == engine)">@Values.Of(engine)</option>
+                    }
+                </select>
+            </Field>
+            <Field Id="audience-screen" Label="@L["Criteria.Screen"]" Context="control">
+                <select id="@control.Id" name="@AudienceIndicatorsQuery.ScreenName">
+                    <option value="" selected="@(_query.Screen is null)">@L["Screen.All"]</option>
+                    @foreach (var screen in _screens)
+                    {
+                        <option value="@screen" selected="@(_query.Screen == screen)">@screen</option>
+                    }
+                </select>
+            </Field>
+        </ListFilters>;
+
+    // The filters chosen, kept by the search while their panel is folded.
+    private RenderFragment KeptFilters => @<QueryFields Parameters="@((_query with { Text = null, Page = 1, FiltersOpen = false }).Parameters())" />;
 
     /// <param name="Name">How the administration names it (<see cref="AudienceFunctionNames"/>).</param>
     /// <param name="Indicators">Its indicators; none for a function never used over the period and the compartment read.</param>

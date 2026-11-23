@@ -6,10 +6,6 @@
     gap: var(--admin-gap);
 }
 
-.audience-criteria {
-    margin-block-end: var(--space-m);
-}
-
 .audience-summary {
     margin: 0 0 var(--space-s);
     padding-inline: var(--space-xs);
