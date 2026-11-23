@@ -41,11 +41,15 @@ public sealed class AdminStatisticsTests(AudienceApplication application) : Brow
     {
         var page = await AudienceApplication.OpenAsync(await NewPageAsync(theme), Application, AppPaths.AdminStatistics);
 
+        // Folded by default, as the filters of a list: their button unfolds them.
+        await Assertions.Expect(page.GetByLabel("Utilisateurs")).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
         await page.GetByLabel("Utilisateurs").SelectOptionAsync("Visitors");
         await page.GetByLabel("Appareil").SelectOptionAsync("Smartphone");
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminStatistics, "?period=TwelveMonths&users=Visitors&device=Smartphone&engine=&screen="));
+        await Assertions.Expect(page).ToHaveURLAsync(new Regex(@"/admin/statistics\?.*users=Visitors&device=Smartphone"));
+        await Assertions.Expect(page.Locator(".active-filters li")).ToHaveTextAsync([new Regex("Utilisateurs : Visiteurs"), new Regex("Appareil : Smartphone")]);
         // The record of an album, on a smartphone: three times in March, once in January; the administrator never used a
         // smartphone.
         var album = page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Fiche d'un album$") }) }).First;

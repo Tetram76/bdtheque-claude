@@ -7,7 +7,7 @@
 }
 
 .audience-summary {
-    margin: 0 0 var(--space-s);
+    margin: var(--space-m) 0 var(--space-s);
     padding-inline: var(--space-xs);
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
