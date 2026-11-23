@@ -105,31 +105,42 @@ internal static class AlbumEndpoints
     }
 
     /// <summary>
-    /// The albums found by their title or that of their series, part of their label
-    /// (fonctionnel/presentation/libelle-d-un-album.md), narrowed by the cross filters
-    /// (choix-implementation/api/recherche.md). An album
-    /// without a title of its own is filed under the current sort key and entry of its series.
+    /// The list of the albums of the consultation: the albums found by their title or that of their series, part of their label
+    /// (fonctionnel/presentation/libelle-d-un-album.md), narrowed by the cross filters (choix-implementation/api/recherche.md)
+    /// and the possession. An album without a title of its own is filed under the current sort key and entry of its series.
     /// </summary>
-    private static async Task<Page<AlbumSummary>> ListAsync(
+    private static async Task<AlbumCatalogList> ListAsync(
         BdthequeDbContext context, [AsParameters] AlbumFilters filters, CancellationToken cancellationToken, int page = 1,
         int pageSize = Paging.DefaultSize)
     {
         var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
-        return await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, ListItem, cancellationToken);
+        var row = filters.PresentsOwnedEditionsOnly ? CatalogListItemOfOwnedEditions : CatalogListItem;
+        var rows = await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, row, cancellationToken);
+        return new AlbumCatalogList(
+            new Page<AlbumCatalogListItem>([.. rows.Items.Select(r => r with { Authors = EachOnce(r.Authors) })], rows.Number, rows.Size, rows.TotalCount),
+            await filters.NameAsync(context, cancellationToken));
     }
 
+    // An album as a row of the list of the consultation, with its cover among all its editions, or among its owned ones only.
+    private static readonly Expression<Func<Album, AlbumCatalogListItem>> CatalogListItem =
+        CatalogExpressions.Expand((Album a) => new AlbumCatalogListItem(
+            a.ToSummary(), CatalogExpressions.ToCover(a.CoverVisualOf()), a.CreditedAuthors(), a.FirstPublicationYear, a.FirstPublicationMonth,
+            EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating), a.CollectionState()));
+
+    private static readonly Expression<Func<Album, AlbumCatalogListItem>> CatalogListItemOfOwnedEditions =
+        CatalogExpressions.Expand((Album a) => new AlbumCatalogListItem(
+            a.ToSummary(), CatalogExpressions.ToCover(a.Editions.Where(e => e.IsOwned()).CoverVisualAmong()), a.CreditedAuthors(),
+            a.FirstPublicationYear, a.FirstPublicationMonth, EnumMapping.Map<ContractEnums.AlbumRating>(a.Rating), a.CollectionState()));
+
     /// <summary>
-    /// The list of the albums of the administration (visuel/liste-albums/contenu.md): the search, navigation and cross
-    /// filters of the consultation, and where each album stands with regard to the collection, in the same order.
+    /// The list of the albums of the administration (visuel/liste-albums/contenu.md): the search, navigation and filters of
+    /// the consultation, and where each album stands with regard to the collection, in the same order.
     /// </summary>
     private static async Task<AlbumAdminList> ListForAdministrationAsync(
         BdthequeDbContext context, [AsParameters] AlbumFilters filters, CancellationToken cancellationToken,
-        AlbumCollectionState? state = null, int page = 1, int pageSize = Paging.DefaultSize)
+        int page = 1, int pageSize = Paging.DefaultSize)
     {
         var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
-        if (state is { } kept)
-            albums = albums.Where(CatalogExpressions.Expand((Album a) => a.CollectionState() == kept));
-
         var rows = await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, AdminListItem, cancellationToken);
         return new AlbumAdminList(
             new Page<AlbumAdminListItem>([.. rows.Items.Select(WithEachAuthorOnce)], rows.Number, rows.Size, rows.TotalCount),
@@ -194,19 +205,16 @@ internal static class AlbumEndpoints
                 p.IsConvertible, p.CreatedAt))]);
     }
 
-    // An author credited with several roles is one of the authors once, at the place of their first role.
-    private static AlbumAdminListItem WithEachAuthorOnce(AlbumAdminListItem item) =>
-        item with { Authors = [.. item.Authors.DistinctBy(a => a.Id)] };
+    private static AlbumAdminListItem WithEachAuthorOnce(AlbumAdminListItem item) => item with { Authors = EachOnce(item.Authors) };
 
-    // Its authors in the order of its contributions, an author credited with several roles once per role: the list
-    // tells them apart once read.
+    // An author credited with several roles is one of the authors once, at the place of their first role: told apart once
+    // read, the query crediting them once per role.
+    private static IReadOnlyList<AuthorListItem> EachOnce(IReadOnlyList<AuthorListItem> authors) => [.. authors.DistinctBy(a => a.Id)];
+
     private static readonly Expression<Func<Album, AlbumAdminListItem>> AdminListItem = CatalogExpressions.Expand((Album a) => new AlbumAdminListItem(
         a.ToSummary(),
         CatalogExpressions.ToCover(a.CoverVisualOf()),
-        a.Contributions
-            .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
-            .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))
-            .ToList(),
+        a.CreditedAuthors(),
         a.FirstPublicationYear,
         a.FirstPublicationMonth,
         a.Editions.Count(e => e.IsOwned()),

@@ -3212,7 +3212,7 @@
             }
           },
           {
-            "name": "state",
+            "name": "State",
             "in": "query",
             "schema": {
               "$ref": "#/components/schemas/AlbumCollectionState"
@@ -7223,6 +7223,13 @@
             }
           },
           {
+            "name": "State",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AlbumCollectionState"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -7275,7 +7282,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfAlbumSummary"
+                  "$ref": "#/components/schemas/AlbumCatalogList"
                 }
               }
             }
@@ -9883,6 +9890,90 @@
           }
         },
         "description": "An album as a card, illustrated by its cover: in the record of a series, the bibliography of an author\nand the works of a genre or of a universe."
+      },
+      "AlbumCatalogList": {
+        "required": [
+          "albums",
+          "filters"
+        ],
+        "type": "object",
+        "properties": {
+          "albums": {
+            "$ref": "#/components/schemas/PageOfAlbumCatalogListItem"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AlbumListFilters"
+          }
+        },
+        "description": "A page of the list of the albums of the consultation, and the records its filters designate, named as the lists name them,\nfor the screen to present them without another request."
+      },
+      "AlbumCatalogListItem": {
+        "required": [
+          "album",
+          "cover",
+          "authors",
+          "firstPublicationYear",
+          "firstPublicationMonth",
+          "rating",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "album": {
+            "$ref": "#/components/schemas/AlbumSummary"
+          },
+          "cover": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Its cover among the editions the list presents (fonctionnel/regles-metier/couverture-d-un-album.md): its owned editions only\nin the list limited to them, all its editions otherwise; `null` for the generic visual.",
+                "$ref": "#/components/schemas/AlbumCover"
+              }
+            ]
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorListItem"
+            },
+            "description": "The authors credited on the album, each once, by role then by sort key."
+          },
+          "firstPublicationYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "firstPublicationMonth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "Set only with FirstPublicationYear.",
+            "format": "int32"
+          },
+          "rating": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AlbumRating"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/AlbumCollectionState"
+          }
+        },
+        "description": "An album as a row of the list of the consultation presents it."
       },
       "AlbumCollectionState": {
         "enum": [
@@ -13879,6 +13970,51 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlbumAdminListItem"
+            }
+          },
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of the page, from 1.",
+            "format": "int32"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of items of the whole list.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+      },
+      "PageOfAlbumCatalogListItem": {
+        "required": [
+          "items",
+          "number",
+          "size",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlbumCatalogListItem"
             }
           },
           "number": {

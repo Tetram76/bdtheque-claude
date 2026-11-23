@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Structure de l''application'
-description: 'Consultation publique (fiches, navigation, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+description: 'Consultation publique (fiches, navigation, retour à une liste, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T21:52:33Z }
 ---
 
 # Structure de l'application
@@ -20,6 +20,7 @@ L'application se compose de trois parties distinctes :
      - Une **série** y figure dès que l'auteur est crédité sur la série ou sur l'un de ses albums ; elle regroupe les albums de la série auxquels il a participé, dans l'ordre de la série (cf. [Ordre des albums dans une série](regles-metier/ordre-des-albums-dans-une-serie.md)).
      - **Albums sans série** : ils forment, avec les séries, le **premier niveau** de la liste, triés ensemble par **ordre alphabétique** (cf. [Tri et navigation par initiale](presentation/tri-et-navigation-par-initiale.md)) ; une série y est visuellement distinguée d'un album.
    - **Navigation inter-entités** : depuis une fiche, il est possible de naviguer vers les fiches des entités associées, ou vers la liste d'un genre ou d'un univers (ex. album → série, album → auteur, auteur → bibliographie, album → liste d'un genre, etc.).
+   - **Retour à une liste** (décision de l'utilisateur, #603) : une liste de la consultation garde ce que l'utilisateur y a choisi quand il y revient. Retrouvée depuis une fiche par son fil d'Ariane, elle est présentée telle qu'il l'a laissée, recherche, filtres, entrée de la navigation par initiale et page compris : il revient où il était. Ouverte par l'entrée du menu, elle garde ses seuls filtres et se présente depuis le début, sans recherche, sous « Toutes », à sa première page : il y vient pour parcourir la liste, dans le périmètre qu'il s'était donné. Les filtres qu'elle retrouve sont présentés comme tout filtre appliqué, pour qu'il voie au premier coup d'œil que la liste est filtrée : une étiquette par filtre, son nom et sa valeur (« Genre : Western spaghetti »), qu'une croix retire, et « Tout effacer » qui les retire tous (décision de l'utilisateur). Ce que la liste garde ne vaut que pour la **visite** ([Mesure d'audience de l'interface web](mesure-audience.md), Visites) : une visite suivante la présente de nouveau sans rien de choisi.
    - **Recherche facilement accessible** à tout moment depuis n'importe quelle page de la partie consultation.
    - **Recherche simple** : par type d'entité (ex. rechercher des albums, des auteurs, des séries, etc.).
    - **Recherche avancée** : recherche de n'importe quelle entité sur n'importe quelle combinaison de critères, portant sur les données du modèle métier et sur les liens entre entités, et rejeu des recherches enregistrées par l'administrateur (cf. [Recherche avancée](recherche-avancee/recherche-avancee.md)).

@@ -1,11 +1,16 @@
 @inject IStringLocalizer<ListHeading> L
 @inject DisplayFormatter Format
 
-@* The heading of a list of the administration (visuel/liste-albums/contenu.md): its fil d'Ariane, its title followed by the
-   number of its records, and the creation of a new record, put forward and reduced to its icon on a smartphone; for records
-   entered from another one, a mention of where they are entered in its place (visuel/listes/principes-communs.md). *@
+@* The heading of a list (visuel/liste-albums/contenu.md): in the administration, its fil d'Ariane, which leads back to it; its
+   title followed by the number of its records, and the creation of a new record, put forward and reduced to its icon on a
+   smartphone; for records entered from another one, a mention of where they are entered in its place
+   (visuel/listes/principes-communs.md). A list of the consultation, an entry of its menu, has no fil d'Ariane, which would
+   name the list alone. *@
 <div class="list-heading">
-    <Breadcrumb Items="@([new BreadcrumbItem(L["Administration"], AppPaths.AdminHome), new BreadcrumbItem(Title)])" />
+    @if (InAdministration)
+    {
+        <Breadcrumb Items="@([new BreadcrumbItem(L["Administration"], AppPaths.AdminHome), new BreadcrumbItem(Title)])" />
+    }
     <div class="list-heading-title">
         <h1>@Title @if (TotalCount is { } count)
             {
@@ -26,6 +31,10 @@
 @code {
     [Parameter, EditorRequired]
     public string Title { get; set; } = null!;
+
+    /// <summary>Whether the list is one of the administration, to which its fil d'Ariane leads back; not for the consultation.</summary>
+    [Parameter]
+    public bool InAdministration { get; set; } = true;
 
     /// <summary>The number of records of the type, the whole list; none when the API did not give it.</summary>
     [Parameter]

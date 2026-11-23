@@ -33,15 +33,6 @@ public sealed class RecordSearchTests
             RecordKind.Author, "/catalog/authors",
             $$"""{"id":"{{Id}}","lastName":"Van Hamme","firstName":"Jean","pseudonym":null}""", "Jean Van Hamme", null
         },
-        {
-            // Named by its label in the format of the settings, its series beside it (fonctionnel/presentation/libelle-d-un-album.md).
-            RecordKind.Album, "/catalog/albums",
-            $$"""
-              {"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
-               "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true}
-              """,
-            "T. 5 - Le Lotus bleu (Tintin)", null
-        },
     };
 
     [Theory]
@@ -88,22 +79,27 @@ public sealed class RecordSearchTests
     }
 
     [Fact]
-    public async Task Find_AlbumsOfASeries_OnlyThose_EachWithItsSeries_NoneForAnAlbumWithout()
+    public async Task Find_AlbumsOfASeries_OnlyThose_EachByItsLabelWithItsSeries_NoneForAnAlbumWithout()
     {
         var alone = Guid.Parse("0199b6a4-0000-7000-8000-000000000003");
         string? requested = null;
         var search = new RecordSearch(new ApiClient(new HttpClient(new StubHandler(request =>
         {
+            // Named by its label in the format of the settings (fonctionnel/presentation/libelle-d-un-album.md).
             if (request.RequestUri!.AbsolutePath == "/catalog/settings")
                 return Json("""{"albumLabelFormat":"TitleSeriesVolume","displayCulture":"FrenchFrance"}""");
             requested = request.RequestUri!.PathAndQuery;
             return Json($$"""
-                {"items":[
-                  {"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
+                {"albums":{"items":[
+                  {"album":{"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
                    "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},
-                  {"id":"{{alone}}","title":"Silence","seriesId":null,"seriesTitle":null,"type":"Regular","isSpecialIssue":false,
-                   "volumeNumber":null,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true}],
-                 "number":1,"size":10,"totalCount":2}
+                   "cover":null,"authors":[],"firstPublicationYear":null,"firstPublicationMonth":null,"rating":null,"state":"InCollection"},
+                  {"album":{"id":"{{alone}}","title":"Silence","seriesId":null,"seriesTitle":null,"type":"Regular","isSpecialIssue":false,
+                   "volumeNumber":null,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},
+                   "cover":null,"authors":[],"firstPublicationYear":null,"firstPublicationMonth":null,"rating":null,"state":"InCollection"}],
+                 "number":1,"size":10,"totalCount":2},
+                 "filters":{"series":null,"author":null,"publisher":null,"publisherCollection":null,"genre":null,"universe":null}
+                }
                 """);
         }))
         {

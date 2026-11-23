@@ -42,6 +42,7 @@ internal sealed class FakeAudienceApi : HttpMessageHandler
         services.AddSingleton(client ?? Client());
         services.AddSingleton<ILogger<AudienceRecorder>>(NullLogger<AudienceRecorder>.Instance);
         services.AddScoped<VisitCookie>();
+        services.AddScoped<Bdtheque.Frontend.Lists.ListMemory>();
         services.AddScoped<AudienceOpposition>();
         services.AddScoped<CircuitAudienceVisit>();
         services.AddScoped<AudienceRecorder>();

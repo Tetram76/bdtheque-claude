@@ -5,7 +5,7 @@
 * [Contexte](contexte.md) - L'application réécrit une BDthèque, gestionnaire de collection de bandes dessinées.
 * [Nom de l'application](nom-de-l-application.md) - Nom affiché BDthèque, nom de travail du dépôt.
 * [Design et charte graphique](design-et-charte-graphique.md) - Rendu soigné et personnel, thème tiré au hasard par visite, visuel/ référence visuelle et non contenu ; à lire pour tout écran.
-* [Structure de l'application](structure-de-l-application.md) - Consultation publique (fiches, navigation, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.
+* [Structure de l'application](structure-de-l-application.md) - Consultation publique (fiches, navigation, retour à une liste, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.
 * [Règles d'accès](regles-d-acces.md) - Recherche et consultation publiques, statistiques publiques ou privées, écriture réservée à l'administrateur, mêmes règles pour l'outil pour agents IA.
 * [Présentation des erreurs](presentation-des-erreurs.md) - Erreurs métier, fonctionnelles et techniques distinguées au premier coup d'œil ; titre d'une erreur, qui nomme la situation rencontrée, le même partout pour une même situation.
 * [Mesure d'audience de l'interface web](mesure-audience.md) - Mesure d'audience de l'interface web conforme à la CNIL : fonctions suivies, visites, minimisation, indicateurs, information et opposition, conservation.

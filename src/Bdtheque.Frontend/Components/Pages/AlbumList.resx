@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve"><value>Albums</value></data>
+  <data name="ListTitle" xml:space="preserve"><value>Liste des albums</value></data>
+  <data name="Search.Label" xml:space="preserve"><value>Rechercher un album</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Titre de l'album ou de sa série…</value></data>
+  <data name="Filter.Series" xml:space="preserve"><value>Série</value></data>
+  <data name="Filter.Author" xml:space="preserve"><value>Auteur</value></data>
+  <data name="Filter.Publisher" xml:space="preserve"><value>Éditeur</value></data>
+  <data name="Filter.PublisherCollection" xml:space="preserve"><value>Collection</value></data>
+  <data name="Filter.Genre" xml:space="preserve"><value>Genre</value></data>
+  <data name="Filter.Universe" xml:space="preserve"><value>Univers</value></data>
+  <data name="Filter.State" xml:space="preserve"><value>Possession</value></data>
+  <data name="State.InCollection" xml:space="preserve"><value>Possédé</value></data>
+  <data name="State.PurchaseIntent" xml:space="preserve"><value>Intention</value></data>
+  <data name="State.OutsideCollection" xml:space="preserve"><value>Non possédé</value></data>
+  <data name="Count.None" xml:space="preserve"><value>Aucun album</value></data>
+  <data name="Count.One" xml:space="preserve"><value>1 album</value></data>
+  <data name="Count.Other" xml:space="preserve"><value>{0} albums</value></data>
+  <data name="Order" xml:space="preserve"><value>Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas</value></data>
+  <data name="Column.Cover" xml:space="preserve"><value>Couverture</value></data>
+  <data name="Column.Album" xml:space="preserve"><value>Album</value></data>
+  <data name="Column.Date" xml:space="preserve"><value>Parution</value></data>
+  <data name="Column.Rating" xml:space="preserve"><value>Appréciation</value></data>
+  <data name="Column.State" xml:space="preserve"><value>Possession</value></data>
+  <data name="Empty.Text" xml:space="preserve"><value>Aucun album ne correspond à « {0} ».</value></data>
+  <data name="Empty.SearchedIn" xml:space="preserve"><value>le titre de l'album et sur celui de sa série</value></data>
+  <data name="Empty.Clear" xml:space="preserve"><value>Effacer la recherche</value></data>
+  <data name="Empty.Criteria" xml:space="preserve"><value>Aucun album ne correspond à ces critères.</value></data>
+  <data name="Empty.ClearFilters" xml:space="preserve"><value>Effacer les filtres</value></data>
+  <data name="Empty.Entry" xml:space="preserve"><value>Aucun album sous cette entrée.</value></data>
+  <data name="Empty.All" xml:space="preserve"><value>Tous les albums</value></data>
+  <data name="Empty.None" xml:space="preserve"><value>Aucun album n'est encore enregistré.</value></data>
+</root>

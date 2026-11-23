@@ -30,7 +30,7 @@ public sealed class EmptyCollectionHomeTests(EmptyCollectionApplication applicat
         await Assertions.Expect(page.Locator("header form[role='search']")).ToHaveCountAsync(0);
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Albums →" }).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.NotYetImplemented));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.OfPath(AppPaths.Albums));
     }
 
     // The link to the administration of the foot stays with an empty collection (visuel/dashboard/collection-vide.md).
