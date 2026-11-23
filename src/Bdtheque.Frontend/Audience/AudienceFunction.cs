@@ -44,6 +44,15 @@ public static class AudienceFunctions
 
     public static readonly AudienceFunction AdminHome = new("admin.home", AudienceFunctionKind.Screen);
 
+    /// <summary>
+    /// The search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the
+    /// page of its results.
+    /// </summary>
+    public static readonly AudienceFunction AdminSearch = new("admin.search", AudienceFunctionKind.Screen);
+
+    /// <summary>A search launched, from the header or from the page of its results, with its text.</summary>
+    public static readonly AudienceFunction AdminSearchQuery = new("admin.search.query", AudienceFunctionKind.Action);
+
     /// <summary>The information of the visitor on the audience measurement, and their choice.</summary>
     public static readonly AudienceFunction AudienceInformation = new("audience", AudienceFunctionKind.Screen);
 
@@ -450,7 +459,7 @@ public static class AudienceFunctions
     [
         AlbumRecord, AlbumRecordVisual,
         SeriesRecord, AuthorRecord,
-        Home, AdminHome, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
+        Home, AdminHome, AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated, AdminAlbumSeriesCreated,
         AdminAlbumChanges,

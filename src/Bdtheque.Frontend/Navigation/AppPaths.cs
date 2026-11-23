@@ -89,8 +89,11 @@ public static class AppPaths
 
     // Administration (#200 to #209; the settings and the private statistics, a later part of the Phase 3).
 
-    /// <summary>Search of a record to modify, from the header of the administration.</summary>
-    public const string AdminSearch = NotYetImplemented;
+    /// <summary>
+    /// Search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the records
+    /// found, whatever their type, each leading to its page of modification.
+    /// </summary>
+    public const string AdminSearch = "/admin/search";
 
     /// <summary>The list of the albums of the administration (visuel/liste-albums/).</summary>
     public const string AdminAlbums = "/admin/albums";

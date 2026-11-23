@@ -111,11 +111,17 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
     protected virtual (AudienceFunction Function, string? Parameters)? EntryAction => null;
 
     /// <summary>The page of the list of the API with these criteria.</summary>
-    public string ApiPath()
+    public string ApiPath() => ApiPath(PageSize);
+
+    /// <summary>
+    /// The page of the list of the API with these criteria, of <paramref name="pageSize"/> records: the first records a search
+    /// of the administration presents of the list (Components/Pages/Admin/AdminSearch.razor), found as the list finds them.
+    /// </summary>
+    public string ApiPath(int pageSize)
     {
         var parameters = Criteria(includePage: false);
         parameters.Add((PageName, Page.ToString(CultureInfo.InvariantCulture)));
-        parameters.Add(("pageSize", PageSize.ToString(CultureInfo.InvariantCulture)));
+        parameters.Add(("pageSize", pageSize.ToString(CultureInfo.InvariantCulture)));
         return $"{ApiRoute}?{Join(parameters)}";
     }
 

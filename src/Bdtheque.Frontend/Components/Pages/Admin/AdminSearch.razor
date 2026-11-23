@@ -1,0 +1,230 @@
+@attribute [Route(AppPaths.AdminSearch)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Contracts.Search
+@using Microsoft.AspNetCore.WebUtilities
+@inject IStringLocalizer<AdminSearch> L
+@inject IStringLocalizer<EntityNames> Entities
+@inject IStringLocalizer<RecordSet> Sets
+@inject ApiClient Api
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the
+   records found, whatever their type, each with « Modifier », which leads to its page of modification. Each type is found by
+   the search of its own list, read as the list reads it, so that the search finds here what its list finds, in the same order
+   (choix-implementation/api/recherche.md, texte recherché); the types come in their single order
+   (fonctionnel/presentation/ordre-des-types-de-fiche.md), a type without any record found being left out. A type presents its
+   first records only, then leads to its list searched on the same text for the others. Rendered statically, its text carried
+   by its address, as the lists (choix-implementation/socle/frontend.md). *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminSearch" />
+
+<div class="admin-search-page">
+    <ListHeading Title="@L["Title"]" />
+
+    <Block Title="@L["Search.Label"]" TitleHidden="true">
+        <ListSearch Action="@AppPaths.AdminSearch" FieldId="admin-search-text" TextName="@TextName" Text="@_text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@AppPaths.AdminSearch" />
+        @if (_problem is null && _text is null)
+        {
+            <EmptyList Message="@L["Prompt"]" SearchedIn="@L["SearchedIn"]" />
+        }
+        else if (_problem is null && _groups is { Count: 0 })
+        {
+            <EmptyList Message="@L["None", _text!]" SearchedIn="@L["SearchedIn"]" />
+        }
+    </Block>
+
+    @if (_problem is not null)
+    {
+        <ErrorMessage Problem="_problem" />
+    }
+    else if (_groups is not null)
+    {
+        foreach (var group in _groups)
+        {
+            var title = L[$"Group.{group.Kind}"];
+            <Block Title="@title" Kicker="@Sets[group.Set.ToString()]" class="search-group">
+                <ul class="search-hits" aria-label="@title">
+                    @foreach (var hit in group.Hits)
+                    {
+                        <li class="search-hit">
+                            <span class="search-hit-main"><RowEntry Detail="@hit.Detail"><LabelText Text="@hit.Entry" /></RowEntry></span>
+                            <span class="search-hit-actions">
+                                <Button Href="@hit.EditHref" Icon="IconName.Edit" Label="@L["Edit"]" IconOnlyOnSmartphone="true"
+                                        aria-label="@L["Edit.Label", hit.Entry]" />
+                            </span>
+                        </li>
+                    }
+                </ul>
+                @if (group.TotalCount > group.Hits.Count)
+                {
+                    @if (group.ListHref is { } list)
+                    {
+                        <p class="search-more"><a href="@list">@L["More", Counted(group.Kind, group.TotalCount)]</a></p>
+                    }
+                    else
+                    {
+                        <p class="search-more">@L["Rest", Counted(group.Kind, group.TotalCount - group.Hits.Count)]</p>
+                    }
+                }
+            </Block>
+        }
+    }
+</div>
+
+@code {
+    /// <summary>The name of the text searched in the address: that of the field of the header, and of the lists.</summary>
+    internal const string TextName = "q";
+
+    /// <summary>
+    /// How many records the search presents of each type: enough to recognize the one looked for among close names, few
+    /// enough for every type to show at a glance; its list presents the others.
+    /// </summary>
+    public const int HitCount = 5;
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? _text;
+    private IReadOnlyList<HitGroup>? _groups;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _text = QueryHelpers.ParseQuery(new Uri(Navigation.Uri).Query).TryGetValue(TextName, out var value) && !string.IsNullOrWhiteSpace(value)
+            ? value.ToString().Trim()
+            : null;
+        if (_text is not { } text)
+            return;
+
+        try
+        {
+            var format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+            // Each type read on its own, all at once: independent, they need no common snapshot, a record being presented
+            // as its list presents it.
+            var groups = await Task.WhenAll(
+                SeriesAsync(text), AlbumsAsync(text, format), PublishersAsync(text), CollectionsAsync(text),
+                EditionsAsync(text, format), PurchaseIntentsAsync(text, format), AuthorsAsync(text), GenresAsync(text),
+                UniversesAsync(text), SavedSearchesAsync(text));
+            _groups = [.. groups.Where(group => group.TotalCount > 0).OrderBy(group => EntityKindOrder.Of(group.Kind))];
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method))
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminSearchQuery, $"{TextName}={Uri.EscapeDataString(text)}", context.RequestAborted);
+    }
+
+    private async Task<HitGroup> SeriesAsync(string text)
+    {
+        var query = new SeriesListQuery(Text: text);
+        var page = (await Api.GetAsync<SeriesAdminList>(query.ApiPath(HitCount))).Series;
+        return Group(EntityKind.Series, RecordSet.Records, page, query.Href(), series => new(
+            series.Title, null, AppPaths.AdminEdit(RecordType.Series, series.Id, null)));
+    }
+
+    private async Task<HitGroup> AlbumsAsync(string text, AlbumLabelFormat format)
+    {
+        var query = AlbumListQuery.All with { Text = text };
+        var page = (await Api.GetAsync<AlbumAdminList>(query.ApiPath(HitCount))).Albums;
+        return Group(EntityKind.Album, RecordSet.Records, page, query.Href(), row => new(
+            Labels.Album(row.Album, format), RecordSearch.AuthorNames(row.Authors), AppPaths.AdminEdit(RecordType.Album, row.Album.Id, null)));
+    }
+
+    private async Task<HitGroup> PublishersAsync(string text)
+    {
+        var query = new PublisherListQuery(Text: text);
+        var page = await Api.GetAsync<Page<PublisherAdminListItem>>(query.ApiPath(HitCount));
+        return Group(EntityKind.Publisher, RecordSet.Records, page, query.Href(), row => new(
+            row.Name, string.Join(", ", row.Collections), AppPaths.AdminEdit(RecordType.Publisher, row.Id, null)));
+    }
+
+    // A collection has no list of its own, entered with its publisher (visuel/saisie-editeur/contenu.md): it is found by the
+    // search of the collections, which the choice of a collection uses, and says the others it found without leading to them.
+    private async Task<HitGroup> CollectionsAsync(string text)
+    {
+        var page = await Api.GetAsync<Page<PublisherCollectionListItem>>(
+            $"/catalog/publisher-collections?{TextName}={Uri.EscapeDataString(text)}&pageSize={HitCount}");
+        return Group(EntityKind.PublisherCollection, RecordSet.Records, page, null, collection => new(
+            collection.Name, collection.PublisherName,
+            AppPaths.AdminEdit(RecordType.PublisherCollection, collection.Id, collection.PublisherId)));
+    }
+
+    private async Task<HitGroup> EditionsAsync(string text, AlbumLabelFormat format)
+    {
+        var query = new EditionListQuery(Text: text);
+        var page = (await Api.GetAsync<EditionAdminList>(query.ApiPath(HitCount))).Editions;
+        return Group(EntityKind.Edition, RecordSet.Records, page, query.Href(), row => new(
+            Labels.Edition(row.Edition), Labels.Album(row.Album, format),
+            AppPaths.AdminEdit(RecordType.Edition, row.Edition.Id, row.Album.Id)));
+    }
+
+    private async Task<HitGroup> PurchaseIntentsAsync(string text, AlbumLabelFormat format)
+    {
+        var query = new PurchaseIntentListQuery(Text: text);
+        var page = await Api.GetAsync<Page<PurchaseIntentAdminListItem>>(query.ApiPath(HitCount));
+        return Group(EntityKind.PurchaseIntent, RecordSet.Acquisitions, page, query.Href(), row => new(
+            Labels.PurchaseIntent(row.Album, row.Edition, format), null,
+            AppPaths.AdminEdit(RecordType.PurchaseIntent, row.Id, row.Album.Id)));
+    }
+
+    private async Task<HitGroup> AuthorsAsync(string text)
+    {
+        var query = new AuthorListQuery(Text: text);
+        var page = await Api.GetAsync<Page<AuthorAdminListItem>>(query.ApiPath(HitCount));
+        return Group(EntityKind.Author, RecordSet.Records, page, query.Href(), row => new(
+            RecordSearch.AuthorName(row.LastName, row.FirstName, row.Pseudonym),
+            RecordSearch.AuthorIdentity(row.LastName, row.FirstName, row.Pseudonym),
+            AppPaths.AdminEdit(RecordType.Author, row.Id, null)));
+    }
+
+    private async Task<HitGroup> GenresAsync(string text)
+    {
+        var query = new GenreListQuery(Text: text);
+        var page = await Api.GetAsync<Page<GenreAdminListItem>>(query.ApiPath(HitCount));
+        return Group(EntityKind.Genre, RecordSet.Reference, page, query.Href(), row => new(
+            row.Label, null, AppPaths.AdminEdit(RecordType.Genre, row.Id, null)));
+    }
+
+    // A universe found without its parent is named with its ancestors, as its list names it under a search.
+    private async Task<HitGroup> UniversesAsync(string text)
+    {
+        var query = new UniverseListQuery(Text: text);
+        var page = await Api.GetAsync<Page<UniverseAdminListItem>>(query.ApiPath(HitCount));
+        return Group(EntityKind.Universe, RecordSet.Reference, page, query.Href(), row => new(
+            row.Name, row.Ancestors.Count == 0 ? null : string.Join(" › ", row.Ancestors.Select(ancestor => ancestor.Name)),
+            AppPaths.AdminEdit(RecordType.Universe, row.Id, null)));
+    }
+
+    // The saved searches have no page of their own yet, which their record leads to once implemented (AppPaths.AdminEdit).
+    private async Task<HitGroup> SavedSearchesAsync(string text)
+    {
+        var page = await Api.GetAsync<Page<SavedSearchListItem>>(
+            $"/catalog/saved-searches?{TextName}={Uri.EscapeDataString(text)}&pageSize={HitCount}");
+        return Group(EntityKind.SavedSearch, RecordSet.Records, page, null, search => new(
+            search.Name, null, AppPaths.AdminEdit(RecordType.SavedSearch, search.Id, null)));
+    }
+
+    private static HitGroup Group<T>(EntityKind kind, RecordSet set, Page<T> page, string? listHref, Func<T, Hit> hit) =>
+        new(kind, set, page.TotalCount, [.. page.Items.Take(HitCount).Select(hit)], listHref);
+
+    // « 12 albums », « 1 collection »: the names of the entity types, that the impact of a deletion counts with too.
+    private string Counted(EntityKind kind, int count) =>
+        Entities[count == 1 ? $"{kind}.One" : $"{kind}.Other", Format.Number(count)];
+
+    /// <param name="Entry">Its name or its label, as its list names it.</param>
+    /// <param name="Detail">What tells it apart under its name, if anything does.</param>
+    /// <param name="EditHref">Its page of modification.</param>
+    private sealed record Hit(string Entry, string? Detail, string EditHref);
+
+    /// <param name="TotalCount">The records of the type the search finds, those presented and the others.</param>
+    /// <param name="ListHref">The list of the type searched on the same text; none for a type without a list.</param>
+    private sealed record HitGroup(EntityKind Kind, RecordSet Set, int TotalCount, IReadOnlyList<Hit> Hits, string? ListHref);
+}
