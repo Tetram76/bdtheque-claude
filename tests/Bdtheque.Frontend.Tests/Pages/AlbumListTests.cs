@@ -95,6 +95,19 @@ public sealed class AlbumListTests : BunitContext, IDisposable
 
         Assert.Equal("Le Bleu est une couleur chaude", Text(bleu.QuerySelector(".album-main")!));
         Assert.Equal("—", bleu.QuerySelector(".album-date [aria-hidden]")!.TextContent.Trim());
+        // A rating not given: marked, for the row on two lines to withdraw it, as a zero of a list.
+        Assert.True(bleu.QuerySelector(".album-rating")!.HasAttribute("data-none"));
+        Assert.False(Open("").FindAll(".album-row:not(.album-row-head)")[0].QuerySelector(".album-rating")!.HasAttribute("data-none"));
+    }
+
+    [Fact]
+    public void Heading_OfAListOfTheConsultation_LeadsNeitherToTheAdministration_NorNamesASetOfRecords()
+    {
+        var page = Open("");
+
+        Assert.Empty(page.FindAll(".list-heading nav"));
+        Assert.DoesNotContain(page.FindAll("a"), a => a.GetAttribute("href") == AppPaths.AdminHome);
+        Assert.Empty(page.FindAll(".block-kicker"));
     }
 
     [Fact]

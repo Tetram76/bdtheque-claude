@@ -96,7 +96,7 @@
 /* On two lines, the row has no columns any more: a rating not given, which its dash stands for in a table, says nothing and is
    withdrawn, as a data absent from a list of cards (visuel/charte-graphique/convivialite-et-efficacite.md). */
 @container album-rows (width < 40rem) {
-    .album-meta [data-none="True"] {
+    .album-meta [data-none] {
         display: none;
     }
 }

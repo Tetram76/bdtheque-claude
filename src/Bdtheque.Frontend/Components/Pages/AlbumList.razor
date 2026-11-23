@@ -16,9 +16,9 @@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.Albums" />
 
-<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Records" Problem="_problem" Loaded="@(_list is not null)">
+<ListLayout Title="@L["ListTitle"]" Problem="_problem" Loaded="@(_list is not null)">
     <Heading>
-        <ListHeading Title="@L["Title"]" TotalCount="_wholeCount" />
+        <ListHeading Title="@L["Title"]" TotalCount="_wholeCount" InAdministration="false" />
     </Heading>
     <ChildContent>
         <ListSearch Action="@AppPaths.Albums" FieldId="albums-search" TextName="@ListQuery.TextName" Text="@_query.Text"
