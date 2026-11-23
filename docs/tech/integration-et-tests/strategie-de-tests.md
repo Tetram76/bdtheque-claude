@@ -84,7 +84,7 @@ L'hôte de l'API des tests n'exécute jamais les tâches de fond de l'applicatio
 
 Les tests de bout en bout vont plus loin. [`ApplicationHost`](../../../tests/Bdtheque.EndToEnd.Tests/ApplicationHost.cs) démarre `api` et `frontend` sur la même horloge, à partir de l'instant `Origin`, le 15 janvier 2026 à 23 h 20 en temps universel. Il ouvre le navigateur dans le fuseau `Europe/Paris`, où l'on est déjà le 16 janvier : une date devinée en temps universel au lieu de celle du navigateur s'y voit donc dans tous les tests. Il ouvre aussi chaque contexte du navigateur en mouvement réduit, sauf si un test demande un autre réglage : l'écran d'accueil de la première requête laisse alors place à la page aussitôt, au lieu de retenir chaque test le temps de son animation.
 
-Enfin, un écran qui dépend de toute la collection, comme la page d'accueil, est testé sur une application de test démarrée pour l'état qu'il présente. Sur la base partagée par les autres tests, son rendu changerait selon l'ordre dans lequel ceux-ci s'exécutent.
+Enfin, un écran qui dépend de toute la collection, comme la page d'accueil, est testé sur une application de test démarrée pour l'état qu'il présente. Sur la base partagée par les autres tests, son rendu changerait selon l'ordre dans lequel ceux-ci s'exécutent. Les indicateurs de la mesure d'audience en sont un cas particulier, puisque chaque page affichée par un test ajoute une utilisation à ce qu'ils présentent : leur application de test charge des visites réparties sur un an, et ses tests ouvrent un navigateur qui s'oppose à la mesure, si bien que leurs propres pages ne changent rien à ce que les suivants comptent.
 
 ## Thème imposé
 
