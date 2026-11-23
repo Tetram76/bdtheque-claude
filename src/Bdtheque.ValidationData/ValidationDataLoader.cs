@@ -305,16 +305,20 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     // search repeated at once; most functions never used. The API dates each usage itself, at the load, so that they all fall
     // in its month: the months before it are left to the tests of the screen. The keys are those the frontend follows
     // (src/Bdtheque.Frontend/Audience/AudienceFunction.cs), which the validation data cannot reference.
+    // The screens of the records of the consultation, under their keys.
+    private const string SeriesScreen = "series";
+    private const string AlbumScreen = "album";
+
     private static async Task LoadAudienceAsync(Loading data, Guid fog, Guid tide, Guid moons, Guid brume)
     {
         await data.VisitAsync(false, DeviceType.Smartphone, RenderingEngine.WebKit, "18.2",
-            Screen("series", RecordType.Series, moons), Screen("album", RecordType.Album, fog), Screen("album", RecordType.Album, fog),
-            Screen("album", RecordType.Album, tide), Screen("series", RecordType.Series, moons), Screen("author", RecordType.Author, brume));
+            Screen(SeriesScreen, RecordType.Series, moons), Screen(AlbumScreen, RecordType.Album, fog), Screen(AlbumScreen, RecordType.Album, fog),
+            Screen(AlbumScreen, RecordType.Album, tide), Screen(SeriesScreen, RecordType.Series, moons), Screen("author", RecordType.Author, brume));
         await data.VisitAsync(false, DeviceType.Computer, RenderingEngine.Gecko, "133",
-            Screen("series", RecordType.Series, moons), Screen("album", RecordType.Album, fog), Action("album.visual", $"edition={fog}&visual=1"));
-        await data.VisitAsync(false, DeviceType.Tablet, RenderingEngine.WebKit, "17.6", Screen("series", RecordType.Series, moons));
+            Screen(SeriesScreen, RecordType.Series, moons), Screen(AlbumScreen, RecordType.Album, fog), Action("album.visual", $"edition={fog}&visual=1"));
+        await data.VisitAsync(false, DeviceType.Tablet, RenderingEngine.WebKit, "17.6", Screen(SeriesScreen, RecordType.Series, moons));
         await data.VisitAsync(false, DeviceType.Computer, RenderingEngine.Blink, "131",
-            Screen("series", RecordType.Series, moons));
+            Screen(SeriesScreen, RecordType.Series, moons));
         await data.VisitAsync(true, DeviceType.Computer, RenderingEngine.Blink, "131",
             Screen("admin.albums"), Action("admin.albums.search", "q=phare"), Action("admin.albums.search", "q=phare"),
             Screen("admin.album", RecordType.Album, fog));
