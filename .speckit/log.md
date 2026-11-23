@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-23
+
+* **Décision de l'utilisateur** : l'action principale d'une intention suit ce pour quoi on vient sur la page : « Modifier » sur la page des éditions et intentions d'acquisition d'un album, « Confirmer » dans la liste des intentions d'acquisition, où mène le lien « Confirmer les acquisitions » ([Contenu](visuel/editions-album/contenu.md), [Saisie selon l'entité](visuel/listes/saisie-selon-l-entite.md)) (#619).
+
 ## 2026-11-22
 
 * **Décisions de l'utilisateur** : la partie 2 de la Phase 3 (`v0.2.0`) comprend, outre les fonctions de la consultation, les écrans de l'administration qui restent à réaliser, fusion de deux fiches comprise ; la recherche d'une édition par son ISBN dans les sources externes est reportée à la partie 5. **Plan** : découpage de la partie 2 en douze chantiers, #603 à #614 ([Phase 3 — Frontend Blazor](suivi-implementation/phase-3-frontend-blazor.md)) (#615).
