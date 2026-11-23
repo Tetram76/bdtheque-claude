@@ -175,7 +175,12 @@ else
                       Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="Reload" OnShowChanges="ShowChangesAsync"
                       OnRetry="SaveAsync" />;
 
-    private RenderFragment Dates => @<text>@L["Dates.Created"] <LocalDateTime Value="Entry!.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="Entry.ModifiedAt" />.</text>;
+    // Its modification only: the setting is provisioned with the deployment, never created by anyone, so that a date of creation
+    // would say nothing (decision of the user). Never modified yet, it has no date to present: that of the provisioning is no
+    // modification either.
+    private RenderFragment? Dates => Entry!.ModifiedAt > Entry.CreatedAt
+        ? @<text>@L["Dates.Modified"] <LocalDateTime Value="Entry.ModifiedAt" />.</text>
+        : null;
 
     // Each field the user changed since the setting was read, with what they entered, to enter it again once it is reloaded.
     private List<EntryChange> Changes() => [.. ChangedFields()];

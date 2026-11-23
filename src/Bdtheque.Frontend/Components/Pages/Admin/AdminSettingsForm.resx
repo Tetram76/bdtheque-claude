@@ -45,11 +45,8 @@
   <data name="DisplayCulture.Help" xml:space="preserve">
     <value>La langue des textes, le format des dates, des nombres et des montants, et l&apos;ordre de tri des listes.</value>
   </data>
-  <data name="Dates.Created" xml:space="preserve">
-    <value>Paramétrage créé le</value>
-  </data>
   <data name="Dates.Modified" xml:space="preserve">
-    <value>, modifié le</value>
+    <value>Paramétrage modifié le</value>
   </data>
   <data name="Problem.Functional.Conflict" xml:space="preserve">
     <value>Le paramétrage a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n&apos;a été écrasé. Rechargez la fiche pour partir de son état actuel ; vos changements restent consultables avant de recharger.</value>

@@ -79,8 +79,19 @@ public sealed class AdminSettingsFormTests : BunitContext, IDisposable
 
         Assert.Equal(["L'affichage"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(["Présentation"], page.FindAll(".block-kicker").Select(kicker => kicker.TextContent.Trim()));
-        Assert.Equal("Paramétrage créé le 12/01/2026 11:00, modifié le 09/11/2026 18:40.",
-            page.Find(".entry-form-dates").TextContent.Trim());
+        // Its modification only: provisioned with the deployment, the setting is never created by anyone (decision of the user).
+        Assert.Equal("Paramétrage modifié le 09/11/2026 18:40.", Normalized(page.Find(".entry-form-dates").TextContent));
+    }
+
+    [Fact]
+    public void Dates_NoneBeforeAnyModification_ThatOfTheProvisioningBeingNoModification()
+    {
+        _api.Answers["/admin/settings"] = Settings with { ModifiedAt = Settings.CreatedAt };
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".entry-form-dates"));
+        Assert.Equal(["L'affichage"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
     }
 
     [Fact]
