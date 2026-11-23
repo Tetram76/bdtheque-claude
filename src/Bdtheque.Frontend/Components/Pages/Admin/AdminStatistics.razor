@@ -1,0 +1,241 @@
+@attribute [Route(AppPaths.AdminStatistics)]
+@using Bdtheque.Contracts.Audience
+@using Bdtheque.Contracts.Enums
+@inject IStringLocalizer<AdminStatistics> L
+@inject ApiClient Api
+@inject AudienceFunctionNames Names
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+@inject TimeProvider Clock
+
+@* The private statistics of the administration: the indicators of the audience measurement of the web interface
+   (fonctionnel/mesure-audience.md, Indicateurs), function by function, for a period and a compartment of the users, of the
+   devices and of the rendering engines. Every function followed is presented, a function never used with null indicators: the
+   API knows only the functions used (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md). Rendered
+   statically, its criteria carried by its address, as the lists (choix-implementation/socle/frontend.md). The statistics on
+   the collection, of the Phase 4, are not part of it. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminStatistics" />
+
+<div class="admin-statistics-page">
+    <ListHeading Title="@L["Title"]" />
+
+    <Block Title="@L["Audience.Title"]" Kicker="@L["Audience.Kicker"]">
+        <form class="audience-criteria" method="get" action="@AppPaths.AdminStatistics">
+            <ListFilters Note="@L["Criteria.Note"]">
+                <Field Id="audience-period" Label="@L["Criteria.Period"]" Context="control">
+                    <select id="@control.Id" name="@AudienceIndicatorsQuery.PeriodName">
+                        @foreach (var period in Enum.GetValues<AudiencePeriod>())
+                        {
+                            <option value="@period" selected="@(_query.Period == period)">@L[$"Period.{period}"]</option>
+                        }
+                    </select>
+                </Field>
+                <Field Id="audience-users" Label="@L["Criteria.Users"]" Context="control">
+                    <select id="@control.Id" name="@AudienceIndicatorsQuery.UsersName">
+                        @foreach (var users in Enum.GetValues<AudienceUsers>())
+                        {
+                            <option value="@users" selected="@(_query.Users == users)">@L[$"Users.{users}"]</option>
+                        }
+                    </select>
+                </Field>
+                <Field Id="audience-device" Label="@L["Criteria.Device"]" Context="control">
+                    <select id="@control.Id" name="@AudienceIndicatorsQuery.DeviceName">
+                        <option value="" selected="@(_query.Device is null)">@L["Device.All"]</option>
+                        @foreach (var device in Enum.GetValues<DeviceType>())
+                        {
+                            <option value="@device" selected="@(_query.Device == device)">@Values.Of(device)</option>
+                        }
+                    </select>
+                </Field>
+                <Field Id="audience-engine" Label="@L["Criteria.Engine"]" Context="control">
+                    <select id="@control.Id" name="@AudienceIndicatorsQuery.EngineName">
+                        <option value="" selected="@(_query.Engine is null)">@L["Engine.All"]</option>
+                        @foreach (var engine in Enum.GetValues<RenderingEngine>())
+                        {
+                            <option value="@engine" selected="@(_query.Engine == engine)">@Values.Of(engine)</option>
+                        }
+                    </select>
+                </Field>
+            </ListFilters>
+        </form>
+
+        @if (_problem is not null)
+        {
+            <ErrorMessage Problem="_problem" />
+        }
+        else if (_rows is not null)
+        {
+            <p class="audience-summary">@SummaryText()</p>
+
+            <div class="audience-rows" role="table" aria-label="@L["Audience.Title"]">
+                <div class="audience-row audience-row-head" role="row">
+                    <span class="audience-function" role="columnheader">@L["Column.Function"]</span>
+                    <span class="audience-usages" role="columnheader">@L["Column.Usages"]</span>
+                    <span class="audience-visits" role="columnheader">@L["Column.Visits"]</span>
+                    <span class="audience-objects" role="columnheader">@L["Column.Objects"]</span>
+                    <span class="audience-repeats" role="columnheader">@L["Column.Repeats"]</span>
+                    <span class="audience-frequency" role="columnheader">@L["Column.Frequency"]</span>
+                    <span class="audience-last" role="columnheader">@L["Column.Last"]</span>
+                </div>
+                @foreach (var row in _rows)
+                {
+                    var used = row.Indicators is not null;
+                    <div class="audience-row" role="row" data-unused="@(!used)">
+                        <span class="audience-function" role="cell">
+                            <RowEntry>@row.Name</RowEntry>
+                        </span>
+                        @if (row.Indicators is { } indicators)
+                        {
+                            <span class="audience-meta">
+                                <span class="audience-usages" role="cell">
+                                    <span class="audience-number">@Format.Number(indicators.UsageCount)</span>
+                                    <span class="audience-unit">@Counted("Usages", indicators.UsageCount)</span>
+                                </span>
+                                <span class="audience-visits" role="cell">
+                                    <span class="audience-number">@Format.Number(indicators.VisitCount)</span>
+                                    <span class="audience-unit">@Counted("Visits", indicators.VisitCount)</span>
+                                </span>
+                                <span class="audience-objects" role="cell" data-zero="@(indicators.DistinctObjectCount == 0)">
+                                    <ListCount Value="indicators.DistinctObjectCount" None="@L[$"Objects.None.{row.Function.Kind}"]">
+                                        <span class="audience-number">@Format.Number(indicators.DistinctObjectCount)</span>
+                                        <span class="audience-unit">@Counted($"Objects.{row.Function.Kind}", indicators.DistinctObjectCount)</span>
+                                    </ListCount>
+                                </span>
+                                <span class="audience-repeats" role="cell" data-zero="@(indicators.RepeatedUsageCount == 0)">
+                                    <ListCount Value="indicators.RepeatedUsageCount" None="@L["Repeats.None"]">
+                                        <span class="audience-number">@Share(indicators.RepeatedUsageCount, indicators.UsageCount)</span>
+                                        <span class="audience-unit">@L["Repeats.Unit"]</span>
+                                    </ListCount>
+                                </span>
+                                <span class="audience-last" role="cell">
+                                    <span class="audience-unit">@L["Last.Unit"]</span>
+                                    <LocalDateTime Value="indicators.LastUsage" DateOnly="true" />
+                                </span>
+                            </span>
+                            <span class="audience-frequency" role="cell">
+                                @{ var monthly = indicators.Months.ToDictionary(month => month.Month, month => month.UsageCount); }
+                                <span class="frequency" role="img" aria-label="@FrequencyText(monthly)">
+                                    @foreach (var month in _months)
+                                    {
+                                        var count = monthly.GetValueOrDefault(month);
+                                        <span class="frequency-month" data-empty="@(count == 0)" style="--frequency-level: @Level(count)"
+                                              title="@MonthText(month, count)"></span>
+                                    }
+                                </span>
+                            </span>
+                        }
+                        else
+                        {
+                            @* Never used: every indicator null, which its dash stands for in a table, and which a row on two
+                               lines says in words, having no columns (visuel/charte-graphique/convivialite-et-efficacite.md). *@
+                            <span class="audience-meta">
+                                <span class="audience-never">@L["Never"]</span>
+                                <span class="audience-usages" role="cell"><NotSet Brief="true" Mention="@L["Usages.None"]" /></span>
+                                <span class="audience-visits" role="cell"><NotSet Brief="true" Mention="@L["Visits.None"]" /></span>
+                                <span class="audience-objects" role="cell"><NotSet Brief="true" Mention="@L[$"Objects.None.{row.Function.Kind}"]" /></span>
+                                <span class="audience-repeats" role="cell"><NotSet Brief="true" Mention="@L["Repeats.None"]" /></span>
+                                <span class="audience-last" role="cell"><NotSet Brief="true" Mention="@L["Never"]" /></span>
+                            </span>
+                            <span class="audience-frequency" role="cell"><NotSet Brief="true" Mention="@L["Never"]" /></span>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </Block>
+</div>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private AudienceIndicatorsQuery _query = new();
+    private IReadOnlyList<Row>? _rows;
+    private IReadOnlyList<DateOnly> _months = [];
+    private int _highest;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = AudienceIndicatorsQuery.Parse(new Uri(Navigation.Uri).Query);
+        // The months of the measurement are those of the beginnings of the visits in universal time
+        // (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md): the current one is that of the clock.
+        var currentMonth = AudienceIndicatorsQuery.MonthOf(Clock.GetUtcNow());
+        try
+        {
+            var indicators = (await Api.GetAsync<List<FunctionIndicators>>(_query.ApiPath(currentMonth)))
+                .ToDictionary(function => function.Function, StringComparer.Ordinal);
+            _rows = Rows(indicators);
+            var from = _query.From(currentMonth)
+                       ?? indicators.Values.SelectMany(function => function.Months).Select(month => (DateOnly?)month.Month).Min()
+                       ?? currentMonth;
+            _months = [.. MonthsBetween(from, currentMonth)];
+            _highest = indicators.Values.SelectMany(function => function.Months).Select(month => month.UsageCount).DefaultIfEmpty(0).Max();
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+        }
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // Every function followed, a function never used included; a function the API counts that is no longer followed keeps its
+    // usages, under its key. The most used first, so that the functions used less, and those never used, come last.
+    private List<Row> Rows(IReadOnlyDictionary<string, FunctionIndicators> indicators)
+    {
+        var followed = AudienceFunctions.Followed.Select(function => new Row(function, Names.Of(function.Key), indicators.GetValueOrDefault(function.Key)));
+        var former = indicators.Values
+            .Where(used => AudienceFunctions.Followed.All(function => function.Key != used.Function))
+            .Select(used => new Row(new AudienceFunction(used.Function, AudienceFunctionKind.Action), Names.Of(used.Function), used));
+        return
+        [
+            .. followed.Concat(former)
+                .OrderByDescending(row => row.Indicators?.UsageCount ?? 0)
+                .ThenByDescending(row => row.Indicators?.VisitCount ?? 0)
+                .ThenBy(row => row.Name, StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, ignoreCase: true)),
+        ];
+    }
+
+    private static IEnumerable<DateOnly> MonthsBetween(DateOnly from, DateOnly to)
+    {
+        for (var month = from; month <= to; month = month.AddMonths(1))
+            yield return month;
+    }
+
+    // « 38 fonctions utilisées sur 140 suivies · 102 jamais utilisées »: a zero says nothing and is left out.
+    private string SummaryText()
+    {
+        var used = _rows!.Count(row => row.Indicators is not null);
+        var never = _rows!.Count - used;
+        var text = L[used <= 1 ? "Summary.One" : "Summary.Other", Format.Number(used), Format.Number(_rows!.Count)].Value;
+        return never == 0 ? text : $"{text} · {L[never <= 1 ? "Summary.Never.One" : "Summary.Never.Other", Format.Number(never)]}";
+    }
+
+    private string Counted(string name, int count) => L[count == 1 ? $"{name}.One" : $"{name}.Other"];
+
+    // The share of the usages that repeat the one before them, rounded to the unit: « 25 % », never « 0 % » for a repeat.
+    private string Share(int repeated, int usages)
+    {
+        var percent = Math.Max(1, (int)Math.Round(100.0 * repeated / usages, MidpointRounding.AwayFromZero));
+        return L["Repeats.Share", Format.Number(percent)];
+    }
+
+    // The height of the month among those of the page, from the busiest month of any function, so that two rows compare.
+    private string Level(int count) =>
+        (_highest == 0 ? 0 : (double)count / _highest).ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+
+    private string MonthText(DateOnly month, int count) =>
+        L["Frequency.Month", Format.PartialDate(month.Year, month.Month), count == 0 ? L["Frequency.None"].Value : $"{Format.Number(count)} {Counted("Usages", count)}"];
+
+    private string FrequencyText(IReadOnlyDictionary<DateOnly, int> monthly) =>
+        L["Frequency.Text", Format.Number(_months.Count(monthly.ContainsKey)), Format.Number(_months.Count)];
+
+    /// <param name="Name">How the administration names it (<see cref="AudienceFunctionNames"/>).</param>
+    /// <param name="Indicators">Its indicators; none for a function never used over the period and the compartment read.</param>
+    private sealed record Row(AudienceFunction Function, string Name, FunctionIndicators? Indicators);
+}

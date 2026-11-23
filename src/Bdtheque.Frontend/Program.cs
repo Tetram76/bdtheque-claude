@@ -46,6 +46,7 @@ builder.Services.AddOptions<IsbnRangesOptions>().Bind(builder.Configuration.GetS
 builder.Services.AddHttpClient(IsbnRangesRefresher.HttpClientName, client => client.Timeout = TimeSpan.FromSeconds(30));
 builder.Services.AddHostedService<IsbnRangesRefresher>();
 builder.Services.AddSingleton<ValueLabels>();
+builder.Services.AddSingleton<AudienceFunctionNames>();
 // What the pages draw at random at each display (e.g. the greeting of the dashboard), which the tests fix.
 builder.Services.AddSingleton(Random.Shared);
 builder.Services.AddScoped<RecordSearch>();

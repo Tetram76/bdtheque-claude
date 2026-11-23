@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Statistiques privées</value>
+  </data>
+  <data name="Audience.Title" xml:space="preserve">
+    <value>Mesure d&apos;audience</value>
+  </data>
+  <data name="Audience.Kicker" xml:space="preserve">
+    <value>Interface web</value>
+  </data>
+  <data name="Criteria.Note" xml:space="preserve">
+    <value>Écrans affichés et actions déclenchées au cours des visites relevées, comptés au mois du début de chaque visite, en temps universel.</value>
+  </data>
+  <data name="Criteria.Period" xml:space="preserve">
+    <value>Période</value>
+  </data>
+  <data name="Period.CurrentMonth" xml:space="preserve">
+    <value>Mois en cours</value>
+  </data>
+  <data name="Period.ThreeMonths" xml:space="preserve">
+    <value>3 derniers mois</value>
+  </data>
+  <data name="Period.TwelveMonths" xml:space="preserve">
+    <value>12 derniers mois</value>
+  </data>
+  <data name="Period.All" xml:space="preserve">
+    <value>Depuis le début</value>
+  </data>
+  <data name="Criteria.Users" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="Users.All" xml:space="preserve">
+    <value>Visiteurs et administrateur</value>
+  </data>
+  <data name="Users.Visitors" xml:space="preserve">
+    <value>Visiteurs</value>
+  </data>
+  <data name="Users.Administrator" xml:space="preserve">
+    <value>Administrateur</value>
+  </data>
+  <data name="Criteria.Device" xml:space="preserve">
+    <value>Appareil</value>
+  </data>
+  <data name="Device.All" xml:space="preserve">
+    <value>Tous les appareils</value>
+  </data>
+  <data name="Criteria.Engine" xml:space="preserve">
+    <value>Moteur de rendu</value>
+  </data>
+  <data name="Engine.All" xml:space="preserve">
+    <value>Tous les moteurs</value>
+  </data>
+  <data name="Column.Function" xml:space="preserve">
+    <value>Fonction</value>
+  </data>
+  <data name="Column.Usages" xml:space="preserve">
+    <value>Utilisations</value>
+  </data>
+  <data name="Column.Visits" xml:space="preserve">
+    <value>Visites</value>
+  </data>
+  <data name="Column.Objects" xml:space="preserve">
+    <value>Fiches ou paramètres</value>
+  </data>
+  <data name="Column.Repeats" xml:space="preserve">
+    <value>Répétitions</value>
+  </data>
+  <data name="Column.Frequency" xml:space="preserve">
+    <value>Fréquence</value>
+  </data>
+  <data name="Column.Last" xml:space="preserve">
+    <value>Dernière utilisation</value>
+  </data>
+  <data name="Usages.One" xml:space="preserve">
+    <value>utilisation</value>
+  </data>
+  <data name="Usages.Other" xml:space="preserve">
+    <value>utilisations</value>
+  </data>
+  <data name="Usages.None" xml:space="preserve">
+    <value>Aucune utilisation</value>
+  </data>
+  <data name="Visits.One" xml:space="preserve">
+    <value>visite</value>
+  </data>
+  <data name="Visits.Other" xml:space="preserve">
+    <value>visites</value>
+  </data>
+  <data name="Visits.None" xml:space="preserve">
+    <value>Aucune visite</value>
+  </data>
+  <data name="Objects.Screen.One" xml:space="preserve">
+    <value>fiche différente</value>
+  </data>
+  <data name="Objects.Screen.Other" xml:space="preserve">
+    <value>fiches différentes</value>
+  </data>
+  <data name="Objects.Action.One" xml:space="preserve">
+    <value>paramètre différent</value>
+  </data>
+  <data name="Objects.Action.Other" xml:space="preserve">
+    <value>paramètres différents</value>
+  </data>
+  <data name="Objects.None.Screen" xml:space="preserve">
+    <value>Aucune fiche présentée</value>
+  </data>
+  <data name="Objects.None.Action" xml:space="preserve">
+    <value>Aucun paramètre</value>
+  </data>
+  <data name="Repeats.Share" xml:space="preserve">
+    <value>{0} %</value>
+  </data>
+  <data name="Repeats.Unit" xml:space="preserve">
+    <value>de répétitions</value>
+  </data>
+  <data name="Repeats.None" xml:space="preserve">
+    <value>Aucune répétition</value>
+  </data>
+  <data name="Last.Unit" xml:space="preserve">
+    <value>dernière le</value>
+  </data>
+  <data name="Never" xml:space="preserve">
+    <value>Jamais utilisée</value>
+  </data>
+  <data name="Summary.One" xml:space="preserve">
+    <value>{0} fonction utilisée sur {1} suivies</value>
+  </data>
+  <data name="Summary.Other" xml:space="preserve">
+    <value>{0} fonctions utilisées sur {1} suivies</value>
+  </data>
+  <data name="Summary.Never.One" xml:space="preserve">
+    <value>{0} jamais utilisée</value>
+  </data>
+  <data name="Summary.Never.Other" xml:space="preserve">
+    <value>{0} jamais utilisées</value>
+  </data>
+  <data name="Frequency.Month" xml:space="preserve">
+    <value>{0} : {1}</value>
+  </data>
+  <data name="Frequency.Text" xml:space="preserve">
+    <value>Utilisée {0} mois sur {1}</value>
+  </data>
+  <data name="Frequency.None" xml:space="preserve">
+    <value>aucune utilisation</value>
+  </data>
+</root>

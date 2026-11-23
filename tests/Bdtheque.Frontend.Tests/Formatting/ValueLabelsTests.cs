@@ -24,6 +24,8 @@ public sealed class ValueLabelsTests
         .. Enum.GetValues<ReadingDirection>().Cast<Enum>(),
         .. Enum.GetValues<AlbumRating>().Cast<Enum>(),
         .. Enum.GetValues<SeriesStatus>().Cast<Enum>(),
+        .. Enum.GetValues<DeviceType>().Cast<Enum>(),
+        .. Enum.GetValues<RenderingEngine>().Cast<Enum>(),
     ];
 
     [Theory]

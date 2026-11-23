@@ -1,0 +1,154 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the heading, then the block of the audience
+   measurement, its criteria, its summary and a row per function, as the rows of a list of the administration
+   (visuel/listes/principes-communs.md). */
+.admin-statistics-page {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+.audience-criteria {
+    margin-block-end: var(--space-m);
+}
+
+.audience-summary {
+    margin: 0 0 var(--space-s);
+    padding-inline: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the lists of the administration:
+   mobile-first, each row on two lines, the function then its indicators in words, its frequency under them; a list wide enough
+   for every column is a table, the indicators then in figures under the heads of their columns. */
+.audience-rows {
+    container: audience-rows / inline-size;
+}
+
+.audience-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "function" "meta" "frequency";
+    align-items: center;
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.audience-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.audience-function {
+    grid-area: function;
+    min-inline-size: 0;
+}
+
+.audience-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-s);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.audience-never {
+    color: var(--color-text-muted);
+}
+
+.audience-frequency {
+    grid-area: frequency;
+}
+
+/* A bar per month of the period, its height that of its usages among the busiest month of the page, so that two functions
+   compare; a month without usage keeps a thin line, the period reading whole. */
+.frequency {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    block-size: 1.25rem;
+    max-inline-size: 12rem;
+}
+
+.frequency-month {
+    flex: 1 1 0;
+    min-inline-size: 2px;
+    max-inline-size: 0.75rem;
+    block-size: max(2px, calc(var(--frequency-level) * 100%));
+    background: var(--color-accent-text);
+}
+
+.frequency-month[data-empty] {
+    block-size: 2px;
+    background: var(--color-rule);
+}
+
+/* On two lines, the row has no columns: a zero, which its dash stands for in a table, says nothing and is withdrawn, and a
+   function never used says so in words (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container audience-rows (width < 56rem) {
+    .audience-meta [data-zero],
+    .audience-row[data-unused] .audience-meta [role="cell"],
+    .audience-row[data-unused] .audience-frequency {
+        display: none;
+    }
+
+    .audience-meta [role="cell"] {
+        display: inline-flex;
+        gap: 0.25em;
+    }
+}
+
+@container audience-rows (min-width: 56rem) {
+    .audience-row {
+        grid-template-columns: minmax(12rem, 1fr) 6rem 5rem 7.5rem 6.5rem 10rem 7.5rem;
+        grid-template-areas: "function usages visits objects repeats frequency last";
+        column-gap: var(--space-m);
+    }
+
+    .audience-row-head {
+        display: grid;
+    }
+
+    .audience-meta {
+        display: contents;
+        color: inherit;
+        font-size: inherit;
+    }
+
+    .audience-usages { grid-area: usages; }
+    .audience-visits { grid-area: visits; }
+    .audience-objects { grid-area: objects; }
+    .audience-repeats { grid-area: repeats; }
+    .audience-last { grid-area: last; }
+
+    /* The figures under the heads of their columns, aligned on their units; the head of a column keeps the style of the
+       other heads. */
+    .audience-row:not(.audience-row-head) :is(.audience-usages, .audience-visits, .audience-objects, .audience-repeats) {
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .audience-row-head :is(.audience-usages, .audience-visits, .audience-objects, .audience-repeats) {
+        text-align: end;
+    }
+
+    .audience-row:not(.audience-row-head) .audience-last {
+        color: var(--color-text-muted);
+        font-size: var(--font-size-small);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .audience-unit,
+    .audience-never {
+        display: none;
+    }
+}

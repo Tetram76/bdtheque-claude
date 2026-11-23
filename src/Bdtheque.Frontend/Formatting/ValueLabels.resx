@@ -135,4 +135,25 @@
   <data name="SeriesStatus.Abandoned" xml:space="preserve">
     <value>Abandonnée</value>
   </data>
+  <data name="DeviceType.Computer" xml:space="preserve">
+    <value>Ordinateur</value>
+  </data>
+  <data name="DeviceType.Tablet" xml:space="preserve">
+    <value>Tablette</value>
+  </data>
+  <data name="DeviceType.Smartphone" xml:space="preserve">
+    <value>Smartphone</value>
+  </data>
+  <data name="RenderingEngine.Blink" xml:space="preserve">
+    <value>Blink</value>
+  </data>
+  <data name="RenderingEngine.Gecko" xml:space="preserve">
+    <value>Gecko</value>
+  </data>
+  <data name="RenderingEngine.WebKit" xml:space="preserve">
+    <value>WebKit</value>
+  </data>
+  <data name="RenderingEngine.Other" xml:space="preserve">
+    <value>Autre moteur</value>
+  </data>
 </root>

@@ -236,7 +236,8 @@ public static class AppPaths
 
     public const string AdminSettings = NotYetImplemented;
 
-    public const string AdminStatistics = NotYetImplemented;
+    /// <summary>The private statistics of the administration: the indicators of the audience measurement (fonctionnel/mesure-audience.md).</summary>
+    public const string AdminStatistics = "/admin/statistics";
 
     /// <summary>The search of an edition in the external sources, from its ISBN (visuel/administration/contenu.md).</summary>
     public const string AdminIsbnLookup = NotYetImplemented;

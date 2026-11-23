@@ -455,6 +455,15 @@ public static class AudienceFunctions
     public static readonly AudienceFunction AdminPurchaseIntentVisualDeleted =
         new("admin.purchase-intent-form.visual-deleted", AudienceFunctionKind.Action);
 
+    /// <summary>The private statistics of the administration: the indicators of the audience measurement (fonctionnel/mesure-audience.md).</summary>
+    public static readonly AudienceFunction AdminStatistics = new("admin.statistics", AudienceFunctionKind.Screen);
+
+    /// <summary>
+    /// The indicators read over another period or compartment (users, device, engine), a request of the page whose parameters
+    /// are its criteria (<see cref="AudienceIndicatorsQuery"/>).
+    /// </summary>
+    public static readonly AudienceFunction AdminStatisticsFilter = new("admin.statistics.filter", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -482,5 +491,6 @@ public static class AudienceFunctions
         AdminEditionVisualAdded, AdminEditionVisualsArranged, AdminEditionVisualTypeChanged, AdminEditionVisualDeletion, AdminEditionVisualDeleted,
         AdminPurchaseIntentVisualAdded, AdminPurchaseIntentVisualsArranged, AdminPurchaseIntentVisualTypeChanged, AdminPurchaseIntentVisualDeletion,
         AdminPurchaseIntentVisualDeleted,
+        AdminStatistics, AdminStatisticsFilter,
     ];
 }
