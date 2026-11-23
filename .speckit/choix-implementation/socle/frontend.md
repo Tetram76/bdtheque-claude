@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T12:00:00Z }
 ---
 
 # Frontend
@@ -115,6 +115,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T19:00:00Z }
 
 - **La recherche de l'en-tête est une section Blazor**, qu'une page peut vider (écran d'une collection vide, [Collection vide](../../visuel/dashboard/collection-vide.md)) : la dernière section rendue l'emporte (documentation d'ASP.NET Core, *Blazor sections*).
   - **Alternative écartée (paramètre de la mise en page)** : une page ne passe rien à sa mise en page, rendue avant elle, et ne sait qu'à l'exécution si la collection est vide.
+- **Recherche d'une fiche à modifier, depuis l'en-tête de l'administration, composée des recherches des listes** ([En-tête et menu](../../visuel/administration/en-tete-et-menu.md)) : sa page, statique, lit en même temps, pour chaque type de fiche, la première page de la liste de l'administration de ce type, recherchée sur le même texte ; la collection d'un éditeur et la recherche enregistrée, sans liste dans l'administration, par la liste de la consultation qui sert au choix d'une fiche. Une fiche y est trouvée, nommée et rangée comme sa liste la trouve, la nomme et la range ([Recherche](../api/recherche.md), texte recherché), le nombre d'un type est celui de sa liste, vers laquelle la page mène pour les fiches qu'elle ne présente pas, et chaque fiche mène à sa page de modification par le même choix de chemin que les dernières modifications de l'accueil (§ Structure). Les types n'ont pas besoin d'un instantané commun : chacun est présenté comme sa liste le présenterait.
+  - **Alternative écartée (point d'accès de l'API propre à la recherche, qui réunit les types)** : une seconde écriture du texte recherché, de l'ordre et du nom de chaque type, qui divergerait de celle des listes au premier changement de l'une d'elles, pour épargner quelques requêtes internes à `frontend` et `api`, sans effet sensible sur quelques milliers de fiches.
 - **Nombres de fiches du menu de l'administration lus une fois par requête** ; sans eux, le menu mène partout de même.
 - **Ordre des types de fiche de l'administration écrit une fois**, par le plan de l'administration, que présente son menu et que suivent les cartes de son accueil ([En-tête et menu](../../visuel/administration/en-tete-et-menu.md), décision de l'utilisateur, #477) : une carte dont la liste n'est pas au plan n'y aurait pas de place, ce que le plan refuse.
   - **Alternative écartée (ordre écrit dans chaque composant)** : c'est ainsi que l'accueil et le menu avaient divergé, les éditions avant les séries sur l'un, après elles sur l'autre (contrôle de cohérence, #477).

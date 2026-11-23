@@ -68,6 +68,17 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
             ? pseudonym
             : string.Join(' ', new[] { firstName, lastName }.Where(part => !string.IsNullOrWhiteSpace(part)));
 
+    /// <summary>
+    /// What tells an author apart under their pseudonym: their first name and last name, if any; nothing without a pseudonym,
+    /// the name being already their main identifier (visuel/listes/liste-par-liste.md).
+    /// </summary>
+    public static string? AuthorIdentity(string? lastName, string? firstName, string? pseudonym) =>
+        pseudonym is null || AuthorName(lastName, firstName, null) is not { Length: > 0 } identity ? null : identity;
+
+    /// <summary>The authors of an album, each by their main identifier, as the rows of the albums present them.</summary>
+    public static string AuthorNames(IEnumerable<AuthorListItem> authors) =>
+        string.Join(" · ", authors.Select(a => AuthorName(a.LastName, a.FirstName, a.Pseudonym)));
+
     private async Task<IReadOnlyList<RecordOption>> FindAsync<T>(
         string list, string query, Func<T, RecordOption> option, CancellationToken cancellationToken) =>
         [.. (await api.GetAsync<Page<T>>($"/catalog/{list}?{query}", cancellationToken)).Items.Select(option)];

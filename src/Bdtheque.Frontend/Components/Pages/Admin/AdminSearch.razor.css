@@ -1,0 +1,42 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the heading, the search, then a block per
+   type of record found, each record a row of a list of the administration, its entry and its action
+   (visuel/listes/principes-communs.md). */
+.admin-search-page {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+.search-hits {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Mobile-first as every row: the entry, centred on the height of its action, at the right to stay close to it. */
+.search-hit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--space-m);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.search-hit-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
+.search-hit-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.search-more {
+    margin: var(--space-s) 0 0;
+    padding-inline: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
