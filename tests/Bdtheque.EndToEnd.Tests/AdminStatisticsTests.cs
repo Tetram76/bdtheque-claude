@@ -43,7 +43,7 @@ public sealed class AdminStatisticsTests(AudienceApplication application) : Brow
 
         await page.GetByLabel("Utilisateurs").SelectOptionAsync("Visitors");
         await page.GetByLabel("Appareil").SelectOptionAsync("Smartphone");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Appliquer" }).ClickAsync();
+        await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminStatistics, "?period=TwelveMonths&users=Visitors&device=Smartphone&engine="));
         // The record of an album, on a smartphone: three times in March, once in January; the administrator never used a
