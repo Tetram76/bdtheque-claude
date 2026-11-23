@@ -1,9 +1,24 @@
+using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Catalog;
 
-// Entries of the lists of the consultation (/catalog/…), each leading to the record of its item. The
-// albums are listed as their AlbumSummary.
+// Entries of the lists of the consultation (/catalog/…), each leading to the record of its item.
+
+/// <summary>An album as a row of the list of the albums of the consultation presents it.</summary>
+/// <param name="Cover">
+/// Its cover among the editions the filter on the possession shows, all of them without that filter
+/// (fonctionnel/regles-metier/couverture-d-un-album.md); <c>null</c> for the generic visual.
+/// </param>
+/// <param name="Authors">The authors credited on the album, each once, by role then by sort key.</param>
+/// <param name="FirstPublicationMonth">Set only with <paramref name="FirstPublicationYear"/>.</param>
+public sealed record AlbumListItem(
+    AlbumSummary Album,
+    AlbumCover? Cover,
+    IReadOnlyList<AuthorListItem> Authors,
+    int? FirstPublicationYear,
+    int? FirstPublicationMonth,
+    AlbumCollectionState State);
 
 public sealed record SeriesListItem(Guid Id, string Title);
 

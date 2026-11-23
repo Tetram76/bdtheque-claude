@@ -1,0 +1,25 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the title and its number, then the list in a
+   single block. */
+.catalog-list {
+    display: grid;
+    gap: var(--space-m);
+}
+
+.catalog-list-title {
+    margin: 0;
+    min-inline-size: 0;
+}
+
+.catalog-list-count {
+    margin-inline-start: var(--space-s);
+    color: var(--color-text-muted);
+    font-family: var(--font-figures);
+    font-size: var(--font-size-title);
+    font-variant-numeric: tabular-nums;
+}
+
+.catalog-list-body {
+    display: grid;
+    gap: var(--space-m);
+    min-inline-size: 0;
+}

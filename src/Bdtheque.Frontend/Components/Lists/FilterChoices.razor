@@ -1,0 +1,26 @@
+@* A filter of a list of the consultation whose few values are each a link, the current one marked: one click chooses, without a
+   form, in a page rendered statically, and the address keeps the choice as long as the list (e.g. the possession,
+   fonctionnel/regles-metier/perimetre-de-la-consultation.md). The list builds the address of each choice, which keeps its other
+   criteria. *@
+<nav class="filter-choices" aria-label="@Label">
+    <span class="filter-choices-label" aria-hidden="true">@Label</span>
+    <span class="filter-choices-links">
+        @foreach (var choice in Choices)
+        {
+            <a href="@choice.Href" aria-current="@(choice.Current ? "true" : null)">@choice.Text</a>
+        }
+    </span>
+</nav>
+
+@code {
+    /// <summary>The name of the filter (e.g. « Possession »), which names its navigation too.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>The values of the filter, the absence of filter included, in their order.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<FilterChoice> Choices { get; set; } = null!;
+
+    /// <summary>A value of the filter, and the address of the list filtered on it.</summary>
+    public sealed record FilterChoice(string Text, string Href, bool Current);
+}

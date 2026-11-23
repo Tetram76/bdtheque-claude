@@ -25,6 +25,20 @@ public static class AudienceFunctions
 {
     public static readonly AudienceFunction Home = new("home", AudienceFunctionKind.Screen);
 
+    /// <summary>The list of the albums of the consultation.</summary>
+    public static readonly AudienceFunction Albums = new("albums", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogAlbumListQuery.cs).
+
+    /// <summary>A possession chosen, all the albums included, with the criteria of the list.</summary>
+    public static readonly AudienceFunction AlbumsFilter = new("albums.filter", AudienceFunctionKind.Action);
+
+    /// <summary>An entry of the navigation by initial, with the criteria of the list.</summary>
+    public static readonly AudienceFunction AlbumsInitial = new("albums.initial", AudienceFunctionKind.Action);
+
+    /// <summary>Another page of the list, with the criteria of the list.</summary>
+    public static readonly AudienceFunction AlbumsPage = new("albums.page", AudienceFunctionKind.Action);
+
     /// <summary>The record of an album (visuel/fiche-album/), with the album it presents.</summary>
     public static readonly AudienceFunction AlbumRecord = new("album", AudienceFunctionKind.Screen);
 
@@ -457,6 +471,7 @@ public static class AudienceFunctions
 
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
+        Albums, AlbumsFilter, AlbumsInitial, AlbumsPage,
         AlbumRecord, AlbumRecordVisual,
         SeriesRecord, AuthorRecord,
         Home, AdminHome, AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,

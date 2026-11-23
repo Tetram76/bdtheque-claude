@@ -37,8 +37,9 @@ public sealed class RecordSearchTests
             // Named by its label in the format of the settings, its series beside it (fonctionnel/presentation/libelle-d-un-album.md).
             RecordKind.Album, "/catalog/albums",
             $$"""
-              {"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
-               "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true}
+              {"album":{"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
+               "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},
+               "cover":null,"authors":[],"firstPublicationYear":null,"firstPublicationMonth":null,"state":"InCollection"}
               """,
             "T. 5 - Le Lotus bleu (Tintin)", null
         },
@@ -99,10 +100,10 @@ public sealed class RecordSearchTests
             requested = request.RequestUri!.PathAndQuery;
             return Json($$"""
                 {"items":[
-                  {"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
-                   "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},
-                  {"id":"{{alone}}","title":"Silence","seriesId":null,"seriesTitle":null,"type":"Regular","isSpecialIssue":false,
-                   "volumeNumber":null,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true}],
+                  {"album":{"id":"{{Id}}","title":"Le Lotus bleu","seriesId":"{{ParentId}}","seriesTitle":"Tintin","type":"Regular","isSpecialIssue":false,
+                   "volumeNumber":5,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},"authors":[],"state":"InCollection"},
+                  {"album":{"id":"{{alone}}","title":"Silence","seriesId":null,"seriesTitle":null,"type":"Regular","isSpecialIssue":false,
+                   "volumeNumber":null,"startVolumeNumber":null,"endVolumeNumber":null,"isInCollection":true},"authors":[],"state":"InCollection"}],
                  "number":1,"size":10,"totalCount":2}
                 """);
         }))

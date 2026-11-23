@@ -71,7 +71,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
 
         var query = $"q={_marker}";
         Assert.Equal(ranged.Select(name => series[name]), Ids(await ListAsync<SeriesListItem>("series", query)));
-        Assert.Equal(ranged.Select(name => albums[name]), Ids(await ListAsync<AlbumSummary>("albums", query)));
+        Assert.Equal(ranged.Select(name => albums[name]), AlbumIds(await ListAsync<AlbumListItem>("albums", query)));
         Assert.Equal(ranged.Select(name => authors[name]), Ids(await ListAsync<AuthorListItem>("authors", query)));
         Assert.Equal(ranged.Select(name => publishers[name]), Ids(await ListAsync<PublisherListItem>("publishers", query)));
         Assert.Equal(ranged.Select(name => genres[name]), Ids(await ListAsync<GenreListItem>("genres", query)));
@@ -121,7 +121,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
                 new AlbumSummary(lotus.Id, $"Le Lotus bleu {_marker}", series.Id, $"Les Aventures de Tintin {_marker}", AlbumType.Regular, false, 5, null, null, true),
                 new AlbumSummary(zorglub.Id, $"Zorglub {_marker}", null, null, AlbumType.Regular, false, null, null, null, false),
             ],
-            await ListAsync<AlbumSummary>("albums", $"q={_marker}"));
+            (await ListAsync<AlbumListItem>("albums", $"q={_marker}")).Select(a => a.Album));
     }
 
     [Fact]
@@ -131,13 +131,13 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         var untitled = await CreateAlbumAsync(null, series.Id, 1);
         var asterix = await CreateAlbumAsync($"Astérix {_marker}");
 
-        Assert.Equal([untitled.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&entry=Z")));
+        Assert.Equal([untitled.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&entry=Z")));
 
         await PutAsync($"/admin/series/{series.Id}", new UpdateSeriesRequest(SeriesContentOf($"Alix {_marker}"), series.Version));
 
-        Assert.Empty(await ListAsync<AlbumSummary>("albums", $"q={_marker}&entry=Z"));
+        Assert.Empty(await ListAsync<AlbumListItem>("albums", $"q={_marker}&entry=Z"));
         // "Alix …" < "Astérix …".
-        Assert.Equal([untitled.Id, asterix.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&entry=A")));
+        Assert.Equal([untitled.Id, asterix.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&entry=A")));
     }
 
     [Fact]
@@ -161,17 +161,17 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         var ofSubSubUniverse = await CreateAlbumAsync($"Echo {_marker}", universeIds: [subSubUniverse.Id]);
         await CreateAlbumAsync($"Foxtrot {_marker}");
 
-        Assert.Equal([inSeries.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&seriesId={series.Id}")));
-        Assert.Equal([credited.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&authorId={author.Id}")));
-        Assert.Equal([published.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&publisherId={publisher.Id}")));
-        Assert.Equal([published.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&publisherCollectionId={collection.Id}")));
-        Assert.Equal([inSeries.Id, ofGenre.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&genreId={genre.Id}")));
+        Assert.Equal([inSeries.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&seriesId={series.Id}")));
+        Assert.Equal([credited.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&authorId={author.Id}")));
+        Assert.Equal([published.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&publisherId={publisher.Id}")));
+        Assert.Equal([published.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&publisherCollectionId={collection.Id}")));
+        Assert.Equal([inSeries.Id, ofGenre.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&genreId={genre.Id}")));
         // A record attached to a universe is attached to its parents (fonctionnel/regles-metier/hierarchie-des-univers.md).
-        Assert.Equal([inSeries.Id, ofSubSubUniverse.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&universeId={universe.Id}")));
-        Assert.Equal([ofSubSubUniverse.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&universeId={subSubUniverse.Id}")));
-        Assert.Equal([inSeries.Id], Ids(await ListAsync<AlbumSummary>("albums", $"q={_marker}&genreId={genre.Id}&universeId={universe.Id}&entry=A")));
-        Assert.Empty(await ListAsync<AlbumSummary>("albums", $"q={_marker}&genreId={Guid.NewGuid()}"));
-        Assert.Empty(await ListAsync<AlbumSummary>("albums", $"q={_marker}&universeId={Guid.NewGuid()}"));
+        Assert.Equal([inSeries.Id, ofSubSubUniverse.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&universeId={universe.Id}")));
+        Assert.Equal([ofSubSubUniverse.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&universeId={subSubUniverse.Id}")));
+        Assert.Equal([inSeries.Id], AlbumIds(await ListAsync<AlbumListItem>("albums", $"q={_marker}&genreId={genre.Id}&universeId={universe.Id}&entry=A")));
+        Assert.Empty(await ListAsync<AlbumListItem>("albums", $"q={_marker}&genreId={Guid.NewGuid()}"));
+        Assert.Empty(await ListAsync<AlbumListItem>("albums", $"q={_marker}&universeId={Guid.NewGuid()}"));
     }
 
     [Fact]
@@ -337,6 +337,8 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
 
     private static IEnumerable<Guid> Ids<T>(IEnumerable<T> items) =>
         items.Select(item => (Guid)typeof(T).GetProperty("Id")!.GetValue(item)!);
+
+    private static IEnumerable<Guid> AlbumIds(IEnumerable<AlbumListItem> items) => items.Select(a => a.Album.Id);
 
     private static IEnumerable<Guid> EditionIds(IEnumerable<EditionListItem> items) => items.Select(e => e.Edition.Id);
 

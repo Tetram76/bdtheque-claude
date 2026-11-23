@@ -50,7 +50,9 @@ public sealed class LayoutTests : BunitContext, IDisposable
         Assert.Equal(["Accueil", "Albums", "Séries", "Auteurs", "Intentions d'acquisition"],
             menu.QuerySelectorAll("a").Select(link => link.TextContent.Trim()));
         Assert.Equal(AppPaths.Home, menu.QuerySelector("a")?.GetAttribute("href"));
-        Assert.All(menu.QuerySelectorAll("a").Skip(1), link => Assert.Equal(AppPaths.NotYetImplemented, link.GetAttribute("href")));
+        Assert.Equal(
+            [AppPaths.Home, AppPaths.Albums, AppPaths.NotYetImplemented, AppPaths.NotYetImplemented, AppPaths.NotYetImplemented],
+            menu.QuerySelectorAll("a").Select(link => link.GetAttribute("href")));
     }
 
     [Fact]

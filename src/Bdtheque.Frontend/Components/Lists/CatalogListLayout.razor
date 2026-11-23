@@ -1,0 +1,55 @@
+@inject DisplayFormatter Format
+
+@* The page of a list of the consultation, model of its other lists: its title followed by the number of all its records, then
+   the list in a single block without a visible title; the error of the API instead of the list, under the same title. Nothing
+   creates a record from the consultation, which only reads (fonctionnel/regles-d-acces.md). *@
+<div class="catalog-list">
+    <h1 class="catalog-list-title">@Title @if (Problem is null && TotalCount is { } count)
+        {
+            <span class="catalog-list-count">@Format.Number(count)</span>
+        }
+    </h1>
+
+    @if (Problem is not null)
+    {
+        <ErrorMessage Problem="Problem" />
+    }
+    else if (Loaded)
+    {
+        <Block Title="@ListTitle" Kicker="@Kicker" TitleHidden="true">
+            <div class="catalog-list-body">
+                @ChildContent
+            </div>
+        </Block>
+    }
+</div>
+
+@code {
+    /// <summary>The title of the page (e.g. « Albums »).</summary>
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = null!;
+
+    /// <summary>The number of all the records of the list, whatever its criteria; none when the API did not give it.</summary>
+    [Parameter]
+    public int? TotalCount { get; set; }
+
+    /// <summary>The name of the list, its block having no visible title (e.g. « Liste des albums »).</summary>
+    [Parameter, EditorRequired]
+    public string ListTitle { get; set; } = null!;
+
+    /// <summary>The mention of the block, which only some themes show (<c>--block-kicker-display</c>).</summary>
+    [Parameter, EditorRequired]
+    public string Kicker { get; set; } = null!;
+
+    /// <summary>The error of the API that prevented the list from being read, presented instead of it.</summary>
+    [Parameter]
+    public ApiProblem? Problem { get; set; }
+
+    /// <summary>Whether the list is read, and presented.</summary>
+    [Parameter]
+    public bool Loaded { get; set; }
+
+    /// <summary>The filters, navigation, summary, rows and pagination of the list.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -31,11 +31,13 @@ public static class AppPaths
     /// <summary>Contextual help (a later part of the Phase 3).</summary>
     public const string Help = NotYetImplemented;
 
-    // Consultation (#210 to #212 for the records; the lists and the search, a later part of the Phase 3).
+    // Consultation (#210 to #212 for the records, #603 for the list of the albums; the other lists and the search, the part 2 of
+    // the Phase 3).
 
     public const string Search = NotYetImplemented;
 
-    public const string Albums = NotYetImplemented;
+    /// <summary>The list of the albums of the consultation, under which the record of an album is.</summary>
+    public const string Albums = AlbumsSection;
 
     public const string Series = NotYetImplemented;
 
@@ -45,10 +47,7 @@ public static class AppPaths
 
     public const string AdvancedSearch = NotYetImplemented;
 
-    /// <summary>
-    /// The path of the list of the albums once implemented, under which the record of an album is: where the entry
-    /// « Albums » of the menu is current.
-    /// </summary>
+    /// <summary>The section of the list of the albums, its record included: where the entry « Albums » of the menu is current.</summary>
     public const string AlbumsSection = "/albums";
 
     /// <summary>The route of the record of an album.</summary>

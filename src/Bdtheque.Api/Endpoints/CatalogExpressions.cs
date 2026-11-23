@@ -106,11 +106,33 @@ internal static class CatalogExpressions
         ToCover(a.CoverVisualOf()),
         a.CollectionState());
 
-    // fonctionnel/regles-metier/couverture-d-un-album.md, among all the editions: the oldest edition with a cover, by
+    /// <summary>
+    /// The visual of the cover of an album among those of its editions <paramref name="kept"/> keeps, the editions a filter
+    /// of a list shows (fonctionnel/regles-metier/couverture-d-un-album.md), by the rule of every cover of an album.
+    /// </summary>
+    public static Expression<Func<Album, CoverVisual?>> CoverVisualAmong(Expression<Func<Edition, bool>> kept) =>
+        Expression.Lambda<Func<Album, CoverVisual?>>(
+            ReplacingExpressionVisitor.Replace(CoverVisualAmongEditions.Parameters[1], Expand(kept), CoverVisualAmongEditions.Body),
+            CoverVisualAmongEditions.Parameters[0]);
+
+    /// <summary>
+    /// <paramref name="shape"/> given the cover visual of each album: the projection of a list whose cover depends on its
+    /// filter (<see cref="CoverVisualAmong"/>), whose shared expressions are expanded.
+    /// </summary>
+    public static Expression<Func<Album, TResult>> WithCover<TResult>(
+        Expression<Func<Album, CoverVisual?, TResult>> shape, Expression<Func<Album, CoverVisual?>> cover) =>
+        Expand(Expression.Lambda<Func<Album, TResult>>(
+            ReplacingExpressionVisitor.Replace(
+                shape.Parameters[1], ReplacingExpressionVisitor.Replace(cover.Parameters[0], shape.Parameters[0], cover.Body), shape.Body),
+            shape.Parameters[0]));
+
+    // fonctionnel/regles-metier/couverture-d-un-album.md, among the editions kept: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
-    // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
-    // the first created.
-    private static readonly Expression<Func<Album, CoverVisual?>> AlbumCoverVisualOf = a => a.Editions
+    // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered: the first created.
+    // The editions kept are a delegate here, which CoverVisualAmong replaces by the lambda of an expression: the call of
+    // Enumerable.Where then reads as written inline.
+    private static readonly Expression<Func<Album, Func<Edition, bool>, CoverVisual?>> CoverVisualAmongEditions = (a, kept) => a.Editions
+        .Where(kept)
         .SelectMany(e => e.Visuals
             .Where(v => v.Type == DomainEnums.VisualType.Cover)
             .Select(v => new { e.PublicationYear, EditionId = e.Id, Visual = v }))
@@ -120,6 +142,10 @@ internal static class CatalogExpressions
         .ThenBy(c => c.Visual.Id)
         .Select(c => new CoverVisual(c.Visual.Id, c.Visual.Palette.Dominant, c.Visual.Palette.Deep, c.Visual.Palette.Accent))
         .FirstOrDefault();
+
+    // Among all the editions (a context of documentary base), after the template it is built from: static fields are
+    // initialized in the order of the text.
+    private static readonly Expression<Func<Album, CoverVisual?>> AlbumCoverVisualOf = CoverVisualAmong(_ => true);
 
     // The first cover of an edition in the order of its visuals (that of Edition.GetOrderedVisuals): an edition
     // represented by its own cover, e.g. in the spotlight of the dashboard.

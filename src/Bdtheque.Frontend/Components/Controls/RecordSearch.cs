@@ -56,7 +56,7 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
     private async Task<IReadOnlyList<RecordOption>> FindAlbumsAsync(string query, CancellationToken cancellationToken)
     {
         var format = (await api.GetAsync<ApplicationSettings>("/catalog/settings", cancellationToken)).AlbumLabelFormat;
-        return await FindAsync<AlbumSummary>("albums", query, a => AlbumOption(a, format), cancellationToken);
+        return await FindAsync<AlbumListItem>("albums", query, a => AlbumOption(a.Album, format), cancellationToken);
     }
 
     /// <summary>
