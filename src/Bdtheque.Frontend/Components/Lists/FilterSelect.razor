@@ -1,0 +1,29 @@
+@* A filter chosen in a list of values, in the panel of the filters (visuel/liste-albums/contenu.md): its options in their order,
+   the one of the address selected. The page gives the options only, so that none writes its own loop and selection. *@
+<select id="@Id" name="@Name">
+    @foreach (var option in Options)
+    {
+        <option value="@option.Value" selected="@(option.Value == Selected)">@option.Label</option>
+    }
+</select>
+
+@code {
+    /// <summary>The identifier of the control, which its field gives it.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name of the filter in the address.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    /// <summary>The values and their labels, in their order; an empty value for « every value », when the filter has one.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<FilterOption> Options { get; set; } = [];
+
+    /// <summary>The value of the address, or the empty value when the filter is not chosen.</summary>
+    [Parameter, EditorRequired]
+    public string Selected { get; set; } = null!;
+
+    /// <summary>A value of the filter, as the address carries it, and its label.</summary>
+    public sealed record FilterOption(string Value, string Label);
+}
