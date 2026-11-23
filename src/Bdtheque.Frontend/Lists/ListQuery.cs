@@ -72,6 +72,15 @@ public abstract record ListQuery(string? Text, string? Entry, int Page, bool Fil
     /// </summary>
     public string WithoutSearchHref() => (this with { Text = null, Page = 1 }).Href();
 
+    /// <summary>The path of the list, under which <see cref="ListMemory"/> keeps it.</summary>
+    public string ListPath => Path;
+
+    /// <summary>
+    /// The address of the list as the user leaves it: its criteria, without the panel of the filters, which is no choice of the
+    /// list (fonctionnel/structure-de-l-application.md, Retour à une liste).
+    /// </summary>
+    public string LeftHref() => (this with { FiltersOpen = false }).Href();
+
     /// <summary>The address of a list from its path and the parameters of its address (<see cref="Parameters"/>).</summary>
     public static string HrefOf(string path, IReadOnlyList<(string Name, string Value)> parameters) =>
         parameters.Count == 0 ? path : $"{path}?{Join(parameters)}";

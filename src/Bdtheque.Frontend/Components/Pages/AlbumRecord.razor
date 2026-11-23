@@ -8,6 +8,7 @@
 @inject RecordLabels Labels
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
+@inject ListMemory Memory
 @inject NavigationManager Navigation
 
 @* The record of an album in the consultation (visuel/fiche-album/contenu.md): the cover and the identity of the album, its
@@ -180,7 +181,8 @@ else if (_album is { } album)
 
     private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
     [
-        new(L["Breadcrumb.Albums"], AppPaths.Albums),
+        // The list as the user left it (fonctionnel/structure-de-l-application.md, Retour à une liste).
+        new(L["Breadcrumb.Albums"], Memory.BackHref(AppPaths.Albums)),
         .. _album!.Album.SeriesId is { } series ? [new BreadcrumbItem(_album.Album.SeriesTitle!, AppPaths.SeriesRecord(series))] : Array.Empty<BreadcrumbItem>(),
         new(Heading),
     ];

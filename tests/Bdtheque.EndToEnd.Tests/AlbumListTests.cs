@@ -59,6 +59,24 @@ public sealed class AlbumListTests(ApplicationHost application) : BrowserTest<Ap
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Album(album.Id)));
     }
 
+    [Theory, InEachTheme]
+    public async Task ReturnFromARecord_ByItsFilDAriane_FindsTheListAsLeft_AndTheMenu_ItsFiltersOnly(string theme)
+    {
+        var album = await CreateAlbumAsync($"Retour {_marker}");
+        var page = await NewPageAsync(theme);
+        await PageReadiness.GotoAsync(page, $"{AppPaths.Albums}?q={_marker}&entry=R&state=OutsideCollection");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Retour {_marker}" }).ClickAsync();
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Album(album.Id)));
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Albums" }).ClickAsync();
+
+        // Back where the user was (fonctionnel/structure-de-l-application.md, Retour à une liste).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Albums, $"?q={_marker}&entry=R&state=OutsideCollection"));
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Menu de la consultation" }).GetByRole(AriaRole.Link, new() { Name = "Albums" }).ClickAsync();
+        // To browse the list, from its start, within the filters chosen.
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Albums, "?state=OutsideCollection"));
+    }
+
     [Theory]
     [InEachTheme(414)]
     [InEachTheme(768)]

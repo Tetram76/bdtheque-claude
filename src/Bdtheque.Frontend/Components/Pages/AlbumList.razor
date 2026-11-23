@@ -6,6 +6,7 @@
 @inject RecordLabels Labels
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
+@inject ListMemory Memory
 @inject NavigationManager Navigation
 
 @* The list of the albums of the consultation, model of its other lists: every album of the base, owned or not, its possession
@@ -151,6 +152,10 @@
             _list = null;
             return;
         }
+
+        // The list as it presents itself, which a record and the menu lead back to (fonctionnel/structure-de-l-application.md,
+        // Retour à une liste).
+        Memory.Keep(_query);
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
