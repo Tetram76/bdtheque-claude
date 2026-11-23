@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Couverture d''un album'
-description: 'Couverture d''un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+description: 'Couverture d''un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire, parmi celles qu''affiche le filtre de possession d''une liste de la consultation.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T12:00:00Z }
 ---
 
 # Couverture d'un album
@@ -13,5 +13,7 @@ Les éditions prises en compte dépendent du contexte (décision de l'utilisateu
 
 - **contexte de collection** (ex. statistiques, consultation limitée à la collection, cf. [Périmètre de la consultation](perimetre-de-la-consultation.md)) : seules les éditions **possédées** ;
 - **contexte de base documentaire**, où tout est consultable, l'appartenance à la collection y étant signalée ([Périmètre de la consultation](perimetre-de-la-consultation.md)) — ex. fiche d'un album, fiches de série et d'auteur, et les cartes d'album qu'elles présentent : toutes les éditions de l'album, possédées ou visées par une intention d'acquisition.
+
+Dans une liste de la consultation filtrée sur la possession ([Périmètre de la consultation](perimetre-de-la-consultation.md)), la couverture vient des éditions que le filtre affiche (décision de l'utilisateur, #603) : les éditions possédées pour « Possédé », celles visées par une intention d'acquisition sur une édition pour « Intention », une intention sur l'album ne visant aucune édition, toutes les éditions pour « Tous les albums » ; un album « Non possédé » n'a aucune édition.
 
 Un album dont aucune des éditions prises en compte n'a de couverture (y compris un album sans édition) est représenté par le visuel générique (cf. [Visuel par défaut](visuel-par-defaut.md)).

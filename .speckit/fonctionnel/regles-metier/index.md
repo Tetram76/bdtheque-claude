@@ -1,7 +1,7 @@
 # Règles métier
 
 * [Appartenance à la collection](appartenance-a-la-collection.md) - Un album fait partie de la collection s'il a une édition possédée ; seules les éditions d'intention ne sont pas possédées ; trois états (Possédé, Intention, Non possédé), de même nom et de même sens partout où la possession d'un album est présentée, comptée ou filtrée.
-* [Périmètre de la consultation](perimetre-de-la-consultation.md) - Base documentaire et inventaire : tout est consultable, l'appartenance est signalée, les statistiques ne portent que sur la collection.
+* [Périmètre de la consultation](perimetre-de-la-consultation.md) - Base documentaire et inventaire : tout est consultable, l'appartenance est signalée, les statistiques ne portent que sur la collection, filtre de possession propre à chaque liste, conservé le temps de la liste.
 * [Initialisation d'une nouvelle édition depuis la série](initialisation-d-une-nouvelle-edition-depuis-la-serie.md) - Pré-remplissage d'une nouvelle édition par le template de la série, ou les valeurs par défaut.
 * [Initialisation des contributions depuis la série](initialisation-des-contributions-depuis-la-serie.md) - Contributions de la série recopiées sur un album rattaché qui n'en a pas, ou, à sa création, qui n'a que celles de la série choisie précédemment.
 * [Genres et univers d'un album](genres-et-univers-d-un-album.md) - Genres et univers affichés d'un album : union avec ceux de sa série.
@@ -9,7 +9,7 @@
 * [Ordre des albums dans une série](ordre-des-albums-dans-une-serie.md) - Hors-séries en dernier, tome puis date de première publication.
 * [Ordre des visuels d'une édition](ordre-des-visuels-d-une-edition.md) - Visuels par type dans un ordre fixe, puis par ordre d'affichage.
 * [Visuel par défaut](visuel-par-defaut.md) - Visuel générique pour toute édition sans couverture.
-* [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.
+* [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire, parmi celles qu'affiche le filtre de possession d'une liste de la consultation.
 * [Validation de l'ISBN](validation-de-l-isbn.md) - ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l'enregistrement.
 * [Séquence théorique de tomes d'une série](sequence-theorique-de-tomes-d-une-serie.md) - Séquence des tomes attendus d'une série, référence des manquants et des rythmes de parution.
 * [Suppression des entités](suppression-des-entites.md) - Confirmation et sa phrase d'introduction unique, impact par type d'entité (édition visée comptée comme intention d'acquisition), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.
