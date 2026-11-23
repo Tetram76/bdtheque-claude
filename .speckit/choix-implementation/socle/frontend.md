@@ -1,10 +1,10 @@
 ---
 type: Choix d'implémentation
 title: 'Frontend'
-description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
+description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de la consultation et de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:05:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:25:09Z }
 ---
 
 # Frontend
@@ -125,6 +125,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:05:00Z }
 - **Lignes défilantes** (menu de la consultation, navigation par initiale), sans retour à la ligne : un script ne montre un chevron que s'il reste des entrées hors de vue, d'après les largeurs qu'il observe, et centre la ligne sur son entrée courante, de nouveau à la **fin du premier chargement de polices**, qui change la largeur des entrées, jamais sur la promesse des polices, parfois déjà résolue avant que la police du texte soit demandée (CSS Font Loading). Les chevrons sont réservés à la souris, le clavier atteignant chaque entrée.
 - **Pagination de largeur à peu près constante** : toutes les pages jusqu'à sept, sinon les extrémités et le voisinage de la page courante.
 - **Entrée du menu courante sur les pages de sa section** avant que sa propre page existe (la fiche d'un album sous « Albums », dont la liste reste à réaliser) : l'entrée garde le lien « Pas encore implémenté » et connaît le chemin que sa page aura.
+
+## Listes de la consultation
+
+- **Sur le modèle des listes de l'administration** (ci-dessous) : rendu statique, critères et panneau des filtres portés par l'adresse, cas d'une liste vide, rappel d'une recherche et mesure d'audience écrits une fois pour toutes les listes. Seuls leur sont propres l'absence d'action et de création, et l'entrée de chaque ligne, lien vers la fiche qu'elle désigne : la consultation n'a d'autre action que la navigation inter-entités ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)). Le panneau des filtres d'une liste qui a son pendant dans l'administration (les albums) est écrit une fois pour les deux.
+  - **Alternative écartée (liste de la consultation écrite à part, ou interactive)** : une seconde écriture des critères, de leur adresse et des listes vides, qui divergerait de celle de l'administration ; une connexion par visiteur pour une page de lecture, ce que le rendu statique par défaut évite.
 
 ## Listes de l'administration
 
