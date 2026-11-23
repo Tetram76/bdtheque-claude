@@ -48,7 +48,7 @@ internal static class ApplicationSettingsEndpoints
     }
 
     private static ApplicationSettingsForm ToForm(BdthequeDbContext context, ApplicationSettings settings) =>
-        new(FormatOf(settings), CultureOf(settings), context.VersionOf(settings));
+        new(FormatOf(settings), CultureOf(settings), settings.CreatedAt, settings.ModifiedAt, context.VersionOf(settings));
 
     private static ContractEnums.AlbumLabelFormat FormatOf(ApplicationSettings settings) =>
         EnumMapping.Map<ContractEnums.AlbumLabelFormat>(settings.AlbumLabelFormat)!.Value;

@@ -7,7 +7,7 @@
 
 ## Attributs des entités
 
-* [Attributs communs à toutes les entités](attributs-communs-a-toutes-les-entites.md) - Dates de création et de dernière modification, renseignées automatiquement.
+* [Attributs communs à toutes les entités](attributs-communs-a-toutes-les-entites.md) - Dates de création et de dernière modification, renseignées automatiquement ; celles d'une fiche provisionnée au déploiement.
 * [Album](album.md) - Attributs d'un album : titre, clé de tri, type, hors-série, tomes, date de première publication, résumé, notes, appréciation.
 * [Série](serie.md) - Attributs d'une série : titre, clé de tri, statut, tomes prévus, indicateurs, valeurs template.
 * [Édition](edition.md) - Attributs d'une édition : publication, fabrication, acquisition, montants, gratuité, valeurs proposées, contraintes d'intégrité.

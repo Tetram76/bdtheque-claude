@@ -10728,6 +10728,8 @@
         "required": [
           "albumLabelFormat",
           "displayCulture",
+          "createdAt",
+          "modifiedAt",
           "version"
         ],
         "type": "object",
@@ -10737,6 +10739,14 @@
           },
           "displayCulture": {
             "$ref": "#/components/schemas/DisplayCulture"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "version": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -10748,7 +10758,7 @@
             "format": "uint32"
           }
         },
-        "description": "The setting of the application as its administration form edits it."
+        "description": "The setting of the application as its administration form edits it, with the dates of the record, which the form presents\n(visuel/saisie-album/contenu.md, model of the entry forms)."
       },
       "ArrangeVisualsRequest": {
         "required": [

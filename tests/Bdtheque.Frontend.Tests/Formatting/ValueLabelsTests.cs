@@ -1,5 +1,6 @@
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Formatting;
+using DisplayCulture = Bdtheque.Contracts.Enums.DisplayCulture;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Frontend.Tests.Formatting;
@@ -24,6 +25,8 @@ public sealed class ValueLabelsTests
         .. Enum.GetValues<ReadingDirection>().Cast<Enum>(),
         .. Enum.GetValues<AlbumRating>().Cast<Enum>(),
         .. Enum.GetValues<SeriesStatus>().Cast<Enum>(),
+        .. Enum.GetValues<AlbumLabelFormat>().Cast<Enum>(),
+        .. Enum.GetValues<DisplayCulture>().Cast<Enum>(),
     ];
 
     [Theory]
@@ -39,5 +42,7 @@ public sealed class ValueLabelsTests
         Assert.Equal("Cartonnée", _labels.Of(BindingType.Hardcover));
         Assert.Equal("Excellent (état neuf)", _labels.Of(EditionCondition.Excellent));
         Assert.Equal("Grand (> A4)", _labels.Of(EditionFormat.Large));
+        Assert.Equal("Tome - Album (Série)", _labels.Of(AlbumLabelFormat.VolumeTitleSeries));
+        Assert.Equal("Français (France)", _labels.Of(DisplayCulture.FrenchFrance));
     }
 }
