@@ -47,7 +47,9 @@ browser of the agent, no reference captures shown as a validation.
    between: the capture failures of the CI on the draft are expected, and are
    not fixed until step 5.
 5. **Explicit validation of the head commit** → only then the reference
-   captures are updated (`scripts/Test-Captures.ps1 -Update`), the SonarQube
+   captures of the screens the chantier changes are updated, in the themes
+   that matter (`scripts/Test-Captures.ps1 -Update -Filter <screens>`; the
+   CI compares all the others), the SonarQube
    Cloud analysis is handled, and the PR is marked « ready for review »
    (`codex-review-loop`).
 

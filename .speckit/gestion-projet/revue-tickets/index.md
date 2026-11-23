@@ -1,6 +1,6 @@
 # Revue et tickets
 
-* [Règle de merge : non-régression, porte de qualité et revue Codex obligatoires](regle-de-merge-non-regression-porte-de-qualite-et-revue-codex-obligatoires.md) - Conditions de fusion d'une PR : non-régression, porte de qualité, approbation de Codex, validation fonctionnelle s'il y a lieu ; contrôles locaux avant push.
+* [Règle de merge : non-régression, porte de qualité et revue Codex obligatoires](regle-de-merge-non-regression-porte-de-qualite-et-revue-codex-obligatoires.md) - Conditions de fusion d'une PR : non-régression, porte de qualité, approbation de Codex, validation fonctionnelle s'il y a lieu ; contrôles locaux avant push, ciblés sur la modification, suites complètes laissées au CI.
 * [Validation fonctionnelle](validation-fonctionnelle.md) - Quand un chantier est validé par l'utilisateur, avec quel environnement, à quel moment et comment la demander.
 * [Verrouillage des Pull Requests fusionnées](verrouillage-des-pull-requests-fusionnees.md) - Verrouillage « Resolved » des commentaires d'une PR fusionnée.
 * [Revue de code](revue-de-code.md) - Règles générales d'application des retours des agents de revue : contre-vérification, application ou rejet, robustesse à l'épreuve de l'utilisateur.
