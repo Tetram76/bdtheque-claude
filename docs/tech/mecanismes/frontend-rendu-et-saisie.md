@@ -8,6 +8,10 @@ code:
   - 'src/Bdtheque.Frontend/Components/Controls/EntryForm.razor'
   - 'src/Bdtheque.Frontend/Entries/**'
   - 'src/Bdtheque.Frontend/Navigation/AppPaths.cs'
+  - 'src/Bdtheque.Frontend/Lists/ListQuery.cs'
+  - 'src/Bdtheque.Frontend/Lists/AdminListQuery.cs'
+  - 'src/Bdtheque.Frontend/Lists/CatalogListQuery.cs'
+  - 'src/Bdtheque.Frontend/Components/Lists/FilterChoices.razor'
   - 'src/Bdtheque.Frontend/wwwroot/*.js'
 ---
 
@@ -60,7 +64,7 @@ Quand l'utilisateur suit un lien interne, le navigateur ne charge pas une nouvel
 
 ## Pages statiques et îlots interactifs
 
-Une page est **statique par défaut** : le serveur la rend une fois, et elle ne réagit ensuite qu'aux liens et aux formulaires, comme une page web classique. C'est le cas de la consultation, des listes de l'administration, de l'accueil et de la connexion. Un formulaire d'une liste est soit un `GET`, pour la recherche et les filtres, soit un `POST` protégé, pour une suppression confirmée ou une saisie dans une ligne ou un panneau. Le `POST` redirige vers la liste en cas de succès, ou présente de nouveau la liste avec l'erreur. Les critères de recherche, les dialogues ouverts et les panneaux sont portés par l'adresse de la page, ce qui permet de les retrouver en rechargeant la page.
+Une page est **statique par défaut** : le serveur la rend une fois, et elle ne réagit ensuite qu'aux liens et aux formulaires, comme une page web classique. C'est le cas de la consultation, des listes de l'administration, de l'accueil et de la connexion. Un formulaire d'une liste est soit un `GET`, pour la recherche et les filtres, soit un `POST` protégé, pour une suppression confirmée ou une saisie dans une ligne ou un panneau. Le `POST` redirige vers la liste en cas de succès, ou présente de nouveau la liste avec l'erreur. Les critères de recherche, les dialogues ouverts et les panneaux sont portés par l'adresse de la page, ce qui permet de les retrouver en rechargeant la page. Les listes de l'administration et celles de la consultation lisent et écrivent ces critères de la même façon, par [`ListQuery`](../../../src/Bdtheque.Frontend/Lists/ListQuery.cs), que spécialisent [`AdminListQuery`](../../../src/Bdtheque.Frontend/Lists/AdminListQuery.cs), qui y ajoute le panneau des filtres et les dialogues, et [`CatalogListQuery`](../../../src/Bdtheque.Frontend/Lists/CatalogListQuery.cs). Une liste de la consultation, comme celle des albums, n'a que sa navigation par initiale, sa page et ses propres filtres, dont les quelques valeurs sont de simples liens ([`FilterChoices`](../../../src/Bdtheque.Frontend/Components/Lists/FilterChoices.razor)) : son filtre ne vit que dans son adresse, si bien que l'entrée du menu, qui n'en porte aucun, rouvre la liste sur toute la base.
 
 La recherche de l'en-tête de l'administration mène à une page statique de plus, [`AdminSearch`](../../../src/Bdtheque.Frontend/Components/Pages/Admin/AdminSearch.razor), dont le texte cherché est lui aussi porté par l'adresse. Cette page n'a pas de recherche propre : pour chaque type de fiche, elle interroge en même temps la liste de l'API que lit la liste de l'administration de ce type, avec le même texte, en ne demandant que ses premières fiches. Elle obtient ainsi les mêmes fiches que la liste, dans le même ordre, et ses nombres sont ceux de la liste, vers laquelle elle mène quand une liste en trouve davantage. Les types sont ensuite rangés dans l'ordre unique des types de fiche, et chaque fiche mène à sa page de modification par le même choix de chemin que les dernières modifications de l'accueil (`AppPaths.AdminEdit`). La collection d'un éditeur et la recherche enregistrée, qui n'ont pas de liste dans l'administration, sont cherchées par les listes de la consultation qui servent au choix d'une fiche.
 
