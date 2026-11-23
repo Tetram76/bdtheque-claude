@@ -78,7 +78,9 @@ public sealed class HomeTests : BunitContext, IDisposable
         var page = Render<Home>();
 
         Assert.Equal(["Albums", "Séries", "Auteurs", "Recherche avancée"], LinksOf(page, "On jette un œil quand même ?").Select(l => l.Text));
-        Assert.All(LinksOf(page, "On jette un œil quand même ?"), link => Assert.Equal(AppPaths.NotYetImplemented, link.Href));
+        Assert.Equal(
+            [AppPaths.Albums, AppPaths.Series, AppPaths.Authors, AppPaths.AdvancedSearch],
+            LinksOf(page, "On jette un œil quand même ?").Select(link => link.Href));
         Assert.Equal([("Ouvrir l'administration", AppPaths.AdminHome)], LinksOf(page, "C'est votre collection ?").Select(l => (l.Text, l.Href)));
     }
 

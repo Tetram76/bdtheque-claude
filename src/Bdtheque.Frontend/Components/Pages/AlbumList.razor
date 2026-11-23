@@ -1,0 +1,192 @@
+@attribute [Route(AppPaths.Albums)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<AlbumList> L
+@inject ApiClient Api
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The list of the albums of the consultation, model of its other lists: every album of the base, owned or not, its possession
+   shown, and limited to the collection by its own filter of the possession (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+   Rendered statically, like the lists of the administration, whose search, filters, navigation and empty lists it shares: its
+   criteria and the panel of its filters are carried by its address (Lists/CatalogAlbumListQuery.cs). Each row leads to the record
+   of its album, the consultation having neither entry nor action. Its styles read the contracts of the base theme only. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.Albums" />
+
+<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Records" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_wholeCount" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.Albums" FieldId="albums-search" TextName="@ListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@_query.WithoutSearchHref()" PanelId="albums-filters"
+                    FiltersName="@ListQuery.FiltersName" FiltersOpenValue="@ListQuery.FiltersOpenValue"
+                    FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel"
+                    HiddenFilters="KeptFilters" />
+
+        <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
+
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (_query with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@_query.IsNarrowed" WholeCount="_wholeCount" Order="@L["Order"]" />
+
+        @if (_list!.Albums.Items.Count == 0)
+        {
+            switch (_query.EmptyReason)
+            {
+                case EmptyListReason.Search:
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" SearchedIn="@L["Empty.SearchedIn"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Filters:
+                    <EmptyList Message="@L["Empty.Criteria"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Entry:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.Albums" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]" />
+                    break;
+            }
+        }
+        else
+        {
+            <div class="album-rows" role="table" aria-label="@L["Title"]">
+                <div class="album-row album-row-head" role="row">
+                    <span class="album-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
+                    <span class="album-main" role="columnheader">@L["Column.Album"]</span>
+                    <span class="album-date" role="columnheader">@L["Column.Date"]</span>
+                    <span class="album-rating" role="columnheader">@L["Column.Rating"]</span>
+                    <span class="album-state" role="columnheader">@L["Column.State"]</span>
+                </div>
+                @foreach (var row in _list.Albums.Items)
+                {
+                    <div class="album-row" role="row">
+                        <span class="album-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
+                        <span class="album-main" role="cell">
+                            <RowEntry Detail="@RecordSearch.AuthorNames(row.Authors)">
+                                <a href="@AppPaths.Album(row.Album.Id)">@Labels.Album(row.Album, _settings!.AlbumLabelFormat)</a>
+                            </RowEntry>
+                        </span>
+                        <span class="album-meta">
+                            <span class="album-date" role="cell">
+                                @if (row.FirstPublicationYear is { } year)
+                                {
+                                    @Format.PartialDate(year, row.FirstPublicationMonth)
+                                }
+                                else
+                                {
+                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
+                                }
+                            </span>
+                            <span class="album-rating" role="cell" data-none="@(row.Rating is null)">
+                                @if (row.Rating is not null)
+                                {
+                                    <RatingStars Rating="row.Rating" />
+                                }
+                                else
+                                {
+                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
+                                }
+                            </span>
+                            <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Albums.Number" Size="_list.Albums.Size" TotalCount="_list.Albums.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (_query with { Page = page }).Href())" />
+        }
+    </ChildContent>
+</ListLayout>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private CatalogAlbumListQuery _query = CatalogAlbumListQuery.All;
+    private ApplicationSettings? _settings;
+    private AlbumCatalogList? _list;
+    private int? _wholeCount;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = CatalogAlbumListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
+            _list = await Api.GetAsync<AlbumCatalogList>(_query.ApiPath());
+            // A page beyond the last one (an old address) is no empty list: its albums are on the pages before it, the last of
+            // which it leads to, with the same criteria.
+            if (_list.Albums is { Items.Count: 0, TotalCount: > 0 } albums && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (albums.TotalCount + albums.Size - 1) / albums.Size }).Href());
+                return;
+            }
+
+            // The number of all the albums, which the heading gives: that of the list itself, unless its criteria narrow it.
+            _wholeCount = _query.IsNarrowed || _query.Entry is not null
+                ? (await Api.GetAsync<AlbumCatalogList>(CatalogAlbumListQuery.All.ApiPath(1))).Albums.TotalCount
+                : _list.Albums.TotalCount;
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    private string CountText() => _list!.Albums.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // The filters chosen, each with the list without it; a record that no longer exists is no filter of the list.
+    private IReadOnlyList<ActiveFilters.ActiveFilter> ActiveFilterTags()
+    {
+        var filters = _list!.Filters;
+        var tags = new List<ActiveFilters.ActiveFilter>();
+        void Add(string name, string? value, CatalogAlbumListQuery without)
+        {
+            if (value is not null)
+                tags.Add(new(L[$"Filter.{name}"].Value, value, (without with { Page = 1 }).Href()));
+        }
+
+        Add("Series", filters.Series?.Title, _query with { SeriesId = null });
+        Add("Author", filters.Author is { } author ? RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym) : null,
+            _query with { AuthorId = null });
+        Add("Publisher", filters.Publisher?.Name, _query with { PublisherId = null });
+        Add("PublisherCollection", filters.PublisherCollection?.Name, _query with { PublisherCollectionId = null });
+        Add("Genre", filters.Genre?.Label, _query with { GenreId = null });
+        Add("Universe", filters.Universe?.Name, _query with { UniverseId = null });
+        Add("State", _query.State is { } state ? L[$"State.{state}"].Value : null, _query with { State = null });
+        return tags;
+    }
+
+    private RenderFragment FiltersPanel => @<AlbumFilterFields Filters="_list!.Filters" State="_query.State" />;
+
+    // The filters chosen, kept by the search while their panel is folded.
+    private RenderFragment KeptFilters => @<QueryFields Parameters="@((_query with { Text = null, Entry = null, Page = 1 }).Parameters())" />;
+}
