@@ -417,6 +417,21 @@
   <data name="admin.universe.parent-created" xml:space="preserve">
     <value>Liste des univers · parent créé sur place</value>
   </data>
+  <data name="albums" xml:space="preserve">
+    <value>Liste des albums de la consultation</value>
+  </data>
+  <data name="albums.search" xml:space="preserve">
+    <value>Liste des albums de la consultation · recherche</value>
+  </data>
+  <data name="albums.filter" xml:space="preserve">
+    <value>Liste des albums de la consultation · filtres</value>
+  </data>
+  <data name="albums.initial" xml:space="preserve">
+    <value>Liste des albums de la consultation · navigation par initiale</value>
+  </data>
+  <data name="albums.page" xml:space="preserve">
+    <value>Liste des albums de la consultation · changement de page</value>
+  </data>
   <data name="admin.settings" xml:space="preserve">
     <value>Saisie du paramétrage</value>
   </data>
