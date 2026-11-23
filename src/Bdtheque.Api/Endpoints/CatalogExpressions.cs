@@ -68,6 +68,9 @@ internal static class CatalogExpressions
     /// </summary>
     public static CoverVisual? CoverVisualOf(this Album album) => throw NotExpanded();
 
+    /// <summary>Marker of the visual of the first cover of an edition, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    public static CoverVisual? CoverVisualOf(this Edition edition) => throw NotExpanded();
+
     /// <summary>
     /// Marker of the visual of the cover of an album among <paramref name="editions"/>, those the context presents
     /// (fonctionnel/regles-metier/couverture-d-un-album.md), if any, for <see cref="Expand{TSource, TResult}"/> only.
@@ -79,9 +82,6 @@ internal static class CatalogExpressions
     /// role, for <see cref="Expand{TSource, TResult}"/> only: the rows of the lists of the albums.
     /// </summary>
     public static List<AuthorListItem> CreditedAuthors(this Album album) => throw NotExpanded();
-
-    /// <summary>Marker of the visual of the first cover of an edition, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
-    public static CoverVisual? CoverVisualOf(this Edition edition) => throw NotExpanded();
 
     /// <summary>The cover of an album, from its visual.</summary>
     /// <remarks>Built once read: the database stores the colours as numbers, which it does not write in CSS.</remarks>
