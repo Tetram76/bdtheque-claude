@@ -15,6 +15,22 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     private readonly HttpClient _client = api.CreateApiClient();
 
     [Fact]
+    public async Task AudienceIndicators_OfVisitorsOnEachDevice_AndOfTheAdministrator_WithRepeats()
+    {
+        async Task<List<Bdtheque.Contracts.Audience.FunctionIndicators>> ReadAsync(string criteria) =>
+            (await _client.GetFromJsonAsync<List<Bdtheque.Contracts.Audience.FunctionIndicators>>($"/admin/audience/indicators{criteria}"))!;
+
+        var album = Assert.Single(await ReadAsync(""), function => function.Function == "album");
+        // Three records of an album, one of them presented twice at once, over two visits.
+        Assert.Equal((4, 2, 1, 2), (album.UsageCount, album.VisitCount, album.RepeatedUsageCount, album.DistinctObjectCount));
+        Assert.Contains(await ReadAsync("?administrator=true"), function => function is { Function: "admin.albums.search", RepeatedUsageCount: 1 });
+        foreach (var device in Enum.GetValues<DeviceType>())
+            Assert.Contains(await ReadAsync($"?administrator=false&deviceType={device}"), function => function.Function == "home");
+        foreach (var engine in new[] { RenderingEngine.Blink, RenderingEngine.Gecko, RenderingEngine.WebKit })
+            Assert.NotEmpty(await ReadAsync($"?renderingEngine={engine}"));
+    }
+
+    [Fact]
     public async Task EditionList_PresentsEveryCategory_OnAtLeastHalfOfTheEditions()
     {
         var list = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.EditionAdminList>("/admin/editions?pageSize=100");
