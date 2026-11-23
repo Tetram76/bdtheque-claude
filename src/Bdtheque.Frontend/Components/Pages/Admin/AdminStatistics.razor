@@ -6,7 +6,6 @@
 @inject AudienceFunctionNames Names
 @inject ValueLabels Values
 @inject DisplayFormatter Format
-@inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 @inject TimeProvider Clock
 
@@ -15,9 +14,9 @@
    devices and of the rendering engines. Every function followed is presented, a function never used with null indicators: the
    API knows only the functions used (choix-implementation/mesure-audience/mesure-d-audience-mise-en-oeuvre.md). Rendered
    statically, its criteria carried by its address, as the lists (choix-implementation/socle/frontend.md). The statistics on
-   the collection, of the Phase 4, are not part of it. *@
+   the collection, of the Phase 4, are not part of it. The measurement does not measure itself: neither the display of the page
+   nor its criteria are recorded (fonctionnel/mesure-audience.md, Fonctions suivies). *@
 <PageTitle>@L["Title"]</PageTitle>
-<AudienceScreen Function="AudienceFunctions.AdminStatistics" />
 
 <div class="admin-statistics-page">
     <ListHeading Title="@L["Title"]" />
@@ -152,9 +151,6 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
     private AudienceIndicatorsQuery _query = new();
     private IReadOnlyList<Row>? _rows;
     private IReadOnlyList<DateOnly> _months = [];
@@ -190,9 +186,6 @@
         {
             _problem = exception.Problem;
         }
-
-        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
-            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
 
     // Every function followed, a function never used included; a function the API counts that is no longer followed keeps its

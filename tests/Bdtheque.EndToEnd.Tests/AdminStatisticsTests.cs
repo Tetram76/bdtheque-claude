@@ -88,8 +88,8 @@ public sealed class AudienceApplication : ApplicationHost
             Screen(AudienceFunctions.Home), Screen(AudienceFunctions.AlbumRecord, AlbumA),
             Action(AudienceFunctions.AlbumRecordVisual, "edition=01940000-0000-7000-8000-000000000005&visual=1"));
         await VisitAsync(api, new(2026, 1, 12, 8, 0, 0, TimeSpan.Zero), true, DeviceType.Computer, RenderingEngine.Blink, "131",
-            Screen(AudienceFunctions.AdminHome), Screen(AudienceFunctions.AdminStatistics),
-            Action(AudienceFunctions.AdminStatisticsFilter, "users=Visitors"));
+            Screen(AudienceFunctions.AdminHome), Screen(AudienceFunctions.AdminSearch),
+            Action(AudienceFunctions.AdminSearchQuery, "q=ast"));
         // Back to the time of the application, which every test reads from.
         Clock.UtcNow = null;
     }

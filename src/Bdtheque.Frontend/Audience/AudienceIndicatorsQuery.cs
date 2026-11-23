@@ -130,18 +130,6 @@ public sealed record AudienceIndicatorsQuery(
         return parameters.Count == 0 ? "/admin/audience/indicators" : $"/admin/audience/indicators?{Join(parameters)}";
     }
 
-    /// <summary>
-    /// The action the request of this address records for the audience measurement (fonctionnel/mesure-audience.md, Fonctions
-    /// suivies), with its criteria as its parameters, as each control sets them: a page keeps the criteria, the form of the
-    /// criteria returns to the first page. None for the default criteria at the first page, reached from the menu.
-    /// </summary>
-    public (AudienceFunction Function, string Parameters)? Action => this switch
-    {
-        { Page: > 1 } => (AudienceFunctions.AdminStatisticsPage, Join(Parameters())),
-        _ when Criteria() is { Count: > 0 } criteria => (AudienceFunctions.AdminStatisticsFilter, Join(criteria)),
-        _ => null,
-    };
-
     /// <summary>The address of the page <paramref name="page"/> of the functions, with the same criteria.</summary>
     public string PageHref(int page) => (this with { Page = page }).Href();
 

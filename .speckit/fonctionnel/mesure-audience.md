@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Mesure d''audience de l''interface web'
 description: 'Mesure d''audience de l''interface web conforme à la CNIL : fonctions suivies, visites, minimisation, indicateurs, information et opposition, conservation.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T14:50:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T21:30:00Z }
 ---
 
 # Mesure d'audience de l'interface web
@@ -20,7 +20,7 @@ Comme celle de l'outil pour agents IA (cf. [Interface pour agents IA](agents-ia/
 - ses traceurs et ses données respectent les **durées maximales** de la CNIL (ci-dessous).
 
 - **Périmètre** : toute l'interface web, consultation, administration et aide contextuelle (cf. [Structure de l'application](structure-de-l-application.md)).
-- **Fonctions suivies** : chaque **écran** affiché (ex. fiche d'un album, liste des séries, dashboard, formulaire d'une édition) et chaque **action** déclenchée (ex. recherche lancée, rejeu d'une recherche enregistrée, navigation par initiale, page suivante d'une liste, enregistrement, suppression, import depuis une source externe, ouverture de l'aide). Montrer ou masquer ce que la page présente déjà (ex. déplier les auteurs d'un rôle, les séries d'une bibliographie, le reste d'une série) n'est pas une fonction de l'application : ce n'est pas une action suivie.
+- **Fonctions suivies** : chaque **écran** affiché (ex. fiche d'un album, liste des séries, dashboard, formulaire d'une édition) et chaque **action** déclenchée (ex. recherche lancée, rejeu d'une recherche enregistrée, navigation par initiale, page suivante d'une liste, enregistrement, suppression, import depuis une source externe, ouverture de l'aide). Montrer ou masquer ce que la page présente déjà (ex. déplier les auteurs d'un rôle, les séries d'une bibliographie, le reste d'une série) n'est pas une fonction de l'application : ce n'est pas une action suivie. La consultation des indicateurs eux-mêmes, dans l'administration, n'est pas non plus suivie, ni son écran ni ses actions : la mesure d'audience ne se mesure pas elle-même (décision de l'utilisateur).
 - **Fiche présentée et paramètres** : une même fonction utilisée plusieurs fois sur le même objet n'a pas la même signification que sur des objets différents. Chaque utilisation porte donc ce sur quoi elle porte :
   - un **écran** qui présente une fiche précise (ex. la fiche d'un album) désigne cette fiche : trois affichages successifs de la fiche d'un même album se distinguent de trois fiches d'album différentes ;
   - une **action** porte ses **paramètres** (ex. texte ou critères d'une recherche, variables du rejeu d'une recherche enregistrée, entrée de navigation, numéro de page, fiche enregistrée ou supprimée) : la même recherche relancée trois fois se distingue de trois recherches différentes. Les paramètres ne portent jamais de secret (mot de passe, valeur d'un jeton d'accès).

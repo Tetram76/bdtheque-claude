@@ -278,30 +278,17 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
         Assert.NotNull(page.Find("form.audience-criteria"));
     }
 
-    [Fact]
-    public void Display_RecordsTheScreen()
+    // The measurement does not measure itself (fonctionnel/mesure-audience.md, Fonctions suivies): neither the display of the
+    // page, nor its criteria, nor its pages.
+    [Theory]
+    [InlineData("")]
+    [InlineData("period=ThreeMonths&engine=Blink")]
+    [InlineData("users=Visitors&page=2")]
+    public void Display_RecordsNothing(string criteria)
     {
-        Open("", recorded: true);
+        Open(criteria, recorded: true);
 
-        Assert.Equal(["admin.statistics"], _audience.Functions);
-    }
-
-    [Fact]
-    public void OtherPage_RecordsThePage_WithTheCriteriaAndThePage()
-    {
-        Open("users=Visitors&page=2", recorded: true);
-
-        Assert.Equal(["admin.statistics.page", "admin.statistics"], _audience.Functions);
-        Assert.Contains(_audience.Sent, sent => sent.Content.GetRawText().Contains("users=Visitors\\u0026page=2", StringComparison.Ordinal));
-    }
-
-    [Fact]
-    public void OtherCriteria_RecordTheFilter_WithItsCriteria_BeforeTheScreen()
-    {
-        Open("period=ThreeMonths&engine=Blink", recorded: true);
-
-        Assert.Equal(["admin.statistics.filter", "admin.statistics"], _audience.Functions);
-        Assert.Contains(_audience.Sent, sent => sent.Content.GetRawText().Contains("period=ThreeMonths\\u0026engine=Blink", StringComparison.Ordinal));
+        Assert.Empty(_audience.Sent);
     }
 
     private IRenderedComponent<AdminStatistics> Open(string criteria, bool recorded = false)

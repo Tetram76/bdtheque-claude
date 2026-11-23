@@ -6,8 +6,7 @@ namespace Bdtheque.Frontend.Tests.Audience;
 
 /// <summary>
 /// The criteria of the indicators of the audience measurement, carried by the address of their page: read back as written, an
-/// address written by hand taking the default for what it cannot read; the indicators of the API they read; the action they
-/// record.
+/// address written by hand taking the default for what it cannot read; the indicators of the API they read.
 /// </summary>
 public sealed class AudienceIndicatorsQueryTests
 {
@@ -20,7 +19,6 @@ public sealed class AudienceIndicatorsQueryTests
 
         Assert.Equal(new AudienceIndicatorsQuery(AudiencePeriod.TwelveMonths, AudienceUsers.All, null, null), query);
         Assert.Equal(AppPaths.AdminStatistics, query.Href());
-        Assert.Null(query.Action);
     }
 
     [Fact]
@@ -62,22 +60,13 @@ public sealed class AudienceIndicatorsQueryTests
     }
 
     [Fact]
-    public void OtherCriteria_RecordTheActionOfTheFilter_WithTheCriteria()
-    {
-        var query = new AudienceIndicatorsQuery(AudiencePeriod.ThreeMonths, AudienceUsers.Administrator);
-
-        Assert.Equal((AudienceFunctions.AdminStatisticsFilter, "period=ThreeMonths&users=Administrator"), query.Action);
-    }
-
-    [Fact]
-    public void Page_KeptWithTheCriteria_AndRecordedAsAPage()
+    public void Page_KeptWithTheCriteria()
     {
         var query = AudienceIndicatorsQuery.Parse("?users=Visitors&page=3");
 
         Assert.Equal(new AudienceIndicatorsQuery(Users: AudienceUsers.Visitors, Page: 3), query);
         Assert.Equal("/admin/statistics?users=Visitors&page=3", query.Href());
         Assert.Equal("/admin/statistics?users=Visitors", query.PageHref(1));
-        Assert.Equal((AudienceFunctions.AdminStatisticsPage, "users=Visitors&page=3"), query.Action);
         // The page is no criterion of the API, which gives every function.
         Assert.Equal("/admin/audience/indicators?from=2025-12-01&administrator=false", query.ApiPath(November));
     }

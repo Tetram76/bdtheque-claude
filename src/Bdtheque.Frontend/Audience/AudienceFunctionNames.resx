@@ -423,13 +423,4 @@
   <data name="admin.universe.parent-created" xml:space="preserve">
     <value>Liste des univers · parent créé sur place</value>
   </data>
-  <data name="admin.statistics" xml:space="preserve">
-    <value>Statistiques privées</value>
-  </data>
-  <data name="admin.statistics.filter" xml:space="preserve">
-    <value>Statistiques privées · autres critères</value>
-  </data>
-  <data name="admin.statistics.page" xml:space="preserve">
-    <value>Statistiques privées · changement de page</value>
-  </data>
 </root>
