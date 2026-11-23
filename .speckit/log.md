@@ -2,7 +2,7 @@
 
 ## 2026-11-23
 
-* **Choix** : l'hôte des tests n'exécute jamais les tâches de fond de l'application, présentes ou à venir, dont la première exécution agissait sur les données du premier test sur une autre heure que la sienne ; le test d'une tâche l'exécute lui-même ([Outillage de développement](choix-implementation/outillage.md)) (#PR).
+* **Choix** : l'hôte des tests n'exécute jamais les tâches de fond de l'application, présentes ou à venir, dont la première exécution agissait sur les données du premier test sur une autre heure que la sienne ; le test d'une tâche l'exécute lui-même ([Outillage de développement](choix-implementation/outillage.md)) (#618).
 
 ## 2026-11-22
 
