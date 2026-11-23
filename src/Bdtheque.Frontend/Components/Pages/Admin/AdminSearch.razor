@@ -26,22 +26,19 @@
 <div class="admin-search-page">
     <ListHeading Title="@L["Title"]" />
 
-    <Block Title="@L["Search.Label"]" TitleHidden="true">
-        <ListSearch Action="@AppPaths.AdminSearch" FieldId="admin-search-text" TextName="@TextName" Text="@_text"
-                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@AppPaths.AdminSearch" />
-        @if (_problem is null && _text is null)
-        {
-            <EmptyList Message="@L["Prompt"]" SearchedIn="@L["SearchedIn"]" />
-        }
-        else if (_problem is null && _groups is { Count: 0 })
-        {
-            <EmptyList Message="@L["None", _text!]" SearchedIn="@L["SearchedIn"]" />
-        }
-    </Block>
+    @* Under the heading, as the search of a list over its rows; the page has no block of its own to put it in. *@
+    <ListSearch Action="@AppPaths.AdminSearch" FieldId="admin-search-text" TextName="@TextName" Text="@_text"
+                SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@AppPaths.AdminSearch" />
 
     @if (_problem is not null)
     {
         <ErrorMessage Problem="_problem" />
+    }
+    else if (_text is null || _groups is { Count: 0 })
+    {
+        <Block Title="@L["Title"]" TitleHidden="true">
+            <EmptyList Message="@(_text is null ? L["Prompt"] : L["None", _text])" SearchedIn="@L["SearchedIn"]" />
+        </Block>
     }
     else if (_groups is not null)
     {
