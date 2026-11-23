@@ -153,6 +153,12 @@
   <data name="Frequency.Text" xml:space="preserve">
     <value>Utilisée {0} mois sur {1}</value>
   </data>
+  <data name="Criteria.Screen" xml:space="preserve">
+    <value>Écran</value>
+  </data>
+  <data name="Screen.All" xml:space="preserve">
+    <value>Tous les écrans</value>
+  </data>
   <data name="Pagination.Items" xml:space="preserve">
     <value>Fonctions</value>
   </data>

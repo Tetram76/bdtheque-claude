@@ -78,13 +78,13 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     [Fact]
     public void Criteria_AFormThatLeadsToThePage_WithTheCriteriaOfTheAddress()
     {
-        var page = Open("period=All&users=Visitors&device=Smartphone&engine=WebKit");
+        var page = Open("period=All&users=Visitors&device=Smartphone&engine=WebKit&screen=Liste%20des%20albums");
 
         var form = page.Find("form.audience-criteria");
         Assert.Equal(("get", AppPaths.AdminStatistics), (form.GetAttribute("method"), form.GetAttribute("action")));
         Assert.Equal(
             [("Période", "period", "Depuis le début"), ("Utilisateurs", "users", "Visiteurs"), ("Appareil", "device", "Smartphone"),
-                ("Moteur de rendu", "engine", "WebKit")],
+                ("Moteur de rendu", "engine", "WebKit"), ("Écran", "screen", "Liste des albums")],
             form.QuerySelectorAll("select").Select(select => (
                 Text(form.QuerySelector($"label[for='{select.Id}']")!), select.GetAttribute("name")!,
                 Text(select.QuerySelector("option[selected]")!))));
@@ -101,6 +101,39 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
             ["Tous les moteurs", "Blink", "Gecko", "WebKit", "Autre"],
             form.QuerySelectorAll("select[name='engine'] option").Select(option => Text(option)));
         Assert.NotNull(form.QuerySelector("button[type='submit']"));
+    }
+
+    [Fact]
+    public void Screen_ItsOwnFunctionsOnly_ItAndItsActions()
+    {
+        var page = Open("screen=Liste%20des%20albums");
+
+        var names = page.FindAll(".audience-row:not(.audience-row-head) .row-entry").Select(entry => Text(entry)).ToList();
+        Assert.Equal(["Liste des albums", "Liste des albums · recherche"], names.Take(2));
+        Assert.All(names, name => Assert.True(name == "Liste des albums" || name.StartsWith("Liste des albums · ", StringComparison.Ordinal), name));
+        Assert.Equal(AudienceFunctions.Followed.Count(f => f.Key.StartsWith("admin.albums", StringComparison.Ordinal)), names.Count);
+        Assert.StartsWith("2 fonctions utilisées sur 8 suivies", Text(page.Find(".audience-summary")));
+    }
+
+    [Fact]
+    public void Screens_EveryScreen_OnceByName_TheirsAndThoseOfTheActionsWithoutAScreen()
+    {
+        var page = Open("");
+
+        var screens = page.FindAll("select[name='screen'] option").Skip(1).Select(option => Text(option)).ToList();
+        Assert.Equal(screens.Distinct(), screens);
+        Assert.Contains("Liste des albums", screens);
+        Assert.Contains("Administration", screens);
+        Assert.DoesNotContain(screens, screen => screen.Contains(" · ", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ScreenItDoesNotKnow_EveryScreen()
+    {
+        var page = Open("screen=Nulle%20part");
+
+        Assert.Equal(AudienceIndicatorsQuery.PageSize, page.FindAll(".audience-row:not(.audience-row-head)").Count);
+        Assert.Equal("Tous les écrans", Text(page.Find("select[name='screen'] option[selected]")));
     }
 
     [Fact]
@@ -205,7 +238,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
         Assert.Equal("—Aucune répétition", Text(albums.QuerySelector(".audience-repeats .not-set")!));
         Assert.NotNull(albums.QuerySelector(".audience-objects[data-zero]"));
         Assert.Null(RowOf(page, "Fiche d'un album").QuerySelector("[data-zero]"));
-        Assert.Equal("—Aucun paramètre", Text(RowOf(page, "Connexion à l'administration · connexion").QuerySelector(".audience-objects")!));
+        Assert.Equal("—Aucun paramètre", Text(RowOf(page, "Connexion à l'administration · connexion réussie").QuerySelector(".audience-objects")!));
     }
 
     [Fact]

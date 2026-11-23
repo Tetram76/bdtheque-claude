@@ -15,6 +15,15 @@ public sealed class AudienceFunctionNames(IStringLocalizer<AudienceFunctionNames
     /// </summary>
     public string Of(string key) => texts[key] is { ResourceNotFound: false } name ? name.Value : key;
 
+    /// <summary>
+    /// The screen a function belongs to, by its name: an action is named after its screen, followed by what it does there
+    /// (« Liste des albums · recherche »), a screen by itself alone. An action that no screen has, done from any page
+    /// (« Administration · déconnexion »), gives its own group.
+    /// </summary>
+    public static string ScreenOf(string name) => name.Split(Separator, 2)[0];
+
+    private const string Separator = " · ";
+
     /// <summary>Whether a function has no name: what the tests check of every function followed.</summary>
     public bool ResourceNotFound(AudienceFunction function) => texts[function.Key].ResourceNotFound;
 }

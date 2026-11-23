@@ -12,9 +12,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="home" xml:space="preserve">
-    <value>Accueil de la consultation</value>
-  </data>
   <data name="album" xml:space="preserve">
     <value>Fiche d&apos;un album</value>
   </data>
@@ -37,13 +34,10 @@
     <value>Connexion à l&apos;administration</value>
   </data>
   <data name="admin.signed-in" xml:space="preserve">
-    <value>Connexion à l&apos;administration · connexion</value>
+    <value>Connexion à l&apos;administration · connexion réussie</value>
   </data>
   <data name="admin.signed-out" xml:space="preserve">
     <value>Administration · déconnexion</value>
-  </data>
-  <data name="admin.home" xml:space="preserve">
-    <value>Accueil de l&apos;administration</value>
   </data>
   <data name="admin.search" xml:space="preserve">
     <value>Recherche d&apos;une fiche à modifier</value>
@@ -67,13 +61,13 @@
     <value>Liste des albums · changement de page</value>
   </data>
   <data name="admin.albums.deletion" xml:space="preserve">
-    <value>Liste des albums · suppression demandée</value>
+    <value>Liste des albums · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.albums.deleted" xml:space="preserve">
-    <value>Liste des albums · suppression</value>
+    <value>Liste des albums · suppression confirmée</value>
   </data>
   <data name="admin.albums.merge" xml:space="preserve">
-    <value>Liste des albums · fusion demandée</value>
+    <value>Liste des albums · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.album" xml:space="preserve">
     <value>Saisie d&apos;un album</value>
@@ -118,13 +112,13 @@
     <value>Liste des séries · changement de page</value>
   </data>
   <data name="admin.series.deletion" xml:space="preserve">
-    <value>Liste des séries · suppression demandée</value>
+    <value>Liste des séries · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.series.deleted" xml:space="preserve">
-    <value>Liste des séries · suppression</value>
+    <value>Liste des séries · suppression confirmée</value>
   </data>
   <data name="admin.series.merge" xml:space="preserve">
-    <value>Liste des séries · fusion demandée</value>
+    <value>Liste des séries · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.series-form" xml:space="preserve">
     <value>Saisie d&apos;une série</value>
@@ -172,28 +166,28 @@
     <value>Liste des éditions · changement de page</value>
   </data>
   <data name="admin.editions.deletion" xml:space="preserve">
-    <value>Liste des éditions · suppression demandée</value>
+    <value>Liste des éditions · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.editions.deleted" xml:space="preserve">
-    <value>Liste des éditions · suppression</value>
+    <value>Liste des éditions · suppression confirmée</value>
   </data>
   <data name="admin.editions.merge" xml:space="preserve">
-    <value>Liste des éditions · fusion demandée</value>
+    <value>Liste des éditions · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.album-editions" xml:space="preserve">
     <value>Éditions et intentions d&apos;un album</value>
   </data>
   <data name="admin.album-editions.edition-deletion" xml:space="preserve">
-    <value>Éditions et intentions d&apos;un album · suppression d&apos;une édition demandée</value>
+    <value>Éditions et intentions d&apos;un album · dialogue de suppression d&apos;une édition ouvert</value>
   </data>
   <data name="admin.album-editions.edition-deleted" xml:space="preserve">
-    <value>Éditions et intentions d&apos;un album · suppression d&apos;une édition</value>
+    <value>Éditions et intentions d&apos;un album · suppression d&apos;une édition confirmée</value>
   </data>
   <data name="admin.album-editions.intent-removal" xml:space="preserve">
-    <value>Éditions et intentions d&apos;un album · retrait d&apos;une intention demandé</value>
+    <value>Éditions et intentions d&apos;un album · dialogue de retrait d&apos;une intention ouvert</value>
   </data>
   <data name="admin.album-editions.intent-removed" xml:space="preserve">
-    <value>Éditions et intentions d&apos;un album · retrait d&apos;une intention</value>
+    <value>Éditions et intentions d&apos;un album · retrait d&apos;une intention confirmé</value>
   </data>
   <data name="admin.album-editions.album-intent-set" xml:space="preserve">
     <value>Éditions et intentions d&apos;un album · intention posée sur l&apos;album</value>
@@ -229,10 +223,10 @@
     <value>Saisie d&apos;une édition · type d&apos;un visuel changé</value>
   </data>
   <data name="admin.edition-form.visual-deletion" xml:space="preserve">
-    <value>Saisie d&apos;une édition · suppression d&apos;un visuel demandée</value>
+    <value>Saisie d&apos;une édition · dialogue de suppression d&apos;un visuel ouvert</value>
   </data>
   <data name="admin.edition-form.visual-deleted" xml:space="preserve">
-    <value>Saisie d&apos;une édition · suppression d&apos;un visuel</value>
+    <value>Saisie d&apos;une édition · suppression d&apos;un visuel confirmée</value>
   </data>
   <data name="admin.purchase-intents" xml:space="preserve">
     <value>Liste des intentions d&apos;acquisition</value>
@@ -247,10 +241,10 @@
     <value>Liste des intentions d&apos;acquisition · changement de page</value>
   </data>
   <data name="admin.purchase-intents.removal" xml:space="preserve">
-    <value>Liste des intentions d&apos;acquisition · retrait demandé</value>
+    <value>Liste des intentions d&apos;acquisition · dialogue de retrait ouvert</value>
   </data>
   <data name="admin.purchase-intents.removed" xml:space="preserve">
-    <value>Liste des intentions d&apos;acquisition · retrait</value>
+    <value>Liste des intentions d&apos;acquisition · retrait confirmé</value>
   </data>
   <data name="admin.purchase-intent-form" xml:space="preserve">
     <value>Saisie d&apos;une intention d&apos;acquisition</value>
@@ -283,10 +277,10 @@
     <value>Saisie d&apos;une intention d&apos;acquisition · type d&apos;un visuel changé</value>
   </data>
   <data name="admin.purchase-intent-form.visual-deletion" xml:space="preserve">
-    <value>Saisie d&apos;une intention d&apos;acquisition · suppression d&apos;un visuel demandée</value>
+    <value>Saisie d&apos;une intention d&apos;acquisition · dialogue de suppression d&apos;un visuel ouvert</value>
   </data>
   <data name="admin.purchase-intent-form.visual-deleted" xml:space="preserve">
-    <value>Saisie d&apos;une intention d&apos;acquisition · suppression d&apos;un visuel</value>
+    <value>Saisie d&apos;une intention d&apos;acquisition · suppression d&apos;un visuel confirmée</value>
   </data>
   <data name="admin.authors" xml:space="preserve">
     <value>Liste des auteurs</value>
@@ -301,13 +295,13 @@
     <value>Liste des auteurs · changement de page</value>
   </data>
   <data name="admin.authors.deletion" xml:space="preserve">
-    <value>Liste des auteurs · suppression demandée</value>
+    <value>Liste des auteurs · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.authors.deleted" xml:space="preserve">
-    <value>Liste des auteurs · suppression</value>
+    <value>Liste des auteurs · suppression confirmée</value>
   </data>
   <data name="admin.authors.merge" xml:space="preserve">
-    <value>Liste des auteurs · fusion demandée</value>
+    <value>Liste des auteurs · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.authors.edit" xml:space="preserve">
     <value>Liste des auteurs · panneau d&apos;un auteur ouvert</value>
@@ -334,13 +328,13 @@
     <value>Liste des éditeurs · changement de page</value>
   </data>
   <data name="admin.publishers.deletion" xml:space="preserve">
-    <value>Liste des éditeurs · suppression demandée</value>
+    <value>Liste des éditeurs · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.publishers.deleted" xml:space="preserve">
-    <value>Liste des éditeurs · suppression</value>
+    <value>Liste des éditeurs · suppression confirmée</value>
   </data>
   <data name="admin.publishers.merge" xml:space="preserve">
-    <value>Liste des éditeurs · fusion demandée</value>
+    <value>Liste des éditeurs · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.publisher-form" xml:space="preserve">
     <value>Saisie d&apos;un éditeur</value>
@@ -370,13 +364,13 @@
     <value>Liste des genres · changement de page</value>
   </data>
   <data name="admin.genres.deletion" xml:space="preserve">
-    <value>Liste des genres · suppression demandée</value>
+    <value>Liste des genres · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.genres.deleted" xml:space="preserve">
-    <value>Liste des genres · suppression</value>
+    <value>Liste des genres · suppression confirmée</value>
   </data>
   <data name="admin.genres.merge" xml:space="preserve">
-    <value>Liste des genres · fusion demandée</value>
+    <value>Liste des genres · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.genres.edit" xml:space="preserve">
     <value>Liste des genres · modification d&apos;un genre ouverte</value>
@@ -400,13 +394,13 @@
     <value>Liste des univers · changement de page</value>
   </data>
   <data name="admin.universes.deletion" xml:space="preserve">
-    <value>Liste des univers · suppression demandée</value>
+    <value>Liste des univers · dialogue de suppression ouvert</value>
   </data>
   <data name="admin.universes.deleted" xml:space="preserve">
-    <value>Liste des univers · suppression</value>
+    <value>Liste des univers · suppression confirmée</value>
   </data>
   <data name="admin.universes.merge" xml:space="preserve">
-    <value>Liste des univers · fusion demandée</value>
+    <value>Liste des univers · dialogue de fusion ouvert</value>
   </data>
   <data name="admin.universes.edit" xml:space="preserve">
     <value>Liste des univers · panneau d&apos;un univers ouvert</value>

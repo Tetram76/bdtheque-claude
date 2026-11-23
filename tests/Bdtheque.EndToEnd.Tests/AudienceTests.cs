@@ -26,7 +26,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
     {
         var page = await NewPageAsync(theme);
 
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(AppPaths.AudienceInformation);
 
         var visit = await AudienceVisitAsync(page);
         Assert.Equal(
@@ -34,14 +34,14 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
             (visit.Visit.IsAdministrator, visit.Visit.DeviceType, visit.Visit.RenderingEngine));
         // The major version of Chromium, that of its Blink.
         Assert.Equal(Application.Browser.Version.Split('.')[0], visit.Visit.EngineVersion);
-        Assert.Equal([AudienceFunctions.Home.Key], visit.Usages.Select(u => u.Function));
+        Assert.Equal([AudienceFunctions.AudienceInformation.Key], visit.Usages.Select(u => u.Function));
     }
 
     [Theory, InEachTheme]
     public async Task Visit_GathersThePagesOfEveryTabOfTheBrowser_InTheirOrder(string theme)
     {
         var page = await NewPageAsync(theme);
-        await page.GotoAsync(AppPaths.Home);
+        await page.GotoAsync(AppPaths.AdminLogin);
         await page.GotoAsync(AppPaths.AudienceInformation);
         var tab = await page.Context.NewPageAsync();
 
@@ -49,8 +49,22 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
 
         var visit = await AudienceVisitAsync(page);
         Assert.Equal(
-            [(AudienceFunctions.Home.Key, false), (AudienceFunctions.AudienceInformation.Key, false), (AudienceFunctions.AudienceInformation.Key, true)],
+            [(AudienceFunctions.AdminLogin.Key, false), (AudienceFunctions.AudienceInformation.Key, false), (AudienceFunctions.AudienceInformation.Key, true)],
             visit.Usages.Select(u => (u.Function, u.IsRepeat)));
+    }
+
+    // Every visitor goes through the home pages, whose use tells nothing (fonctionnel/mesure-audience.md, Fonctions suivies).
+    [Theory, InEachTheme]
+    public async Task HomePages_AreNotRecorded(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync(AppPaths.AudienceInformation);
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
+        await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
+        await PageReadiness.WaitAsync(page);
+
+        var administrator = await AudienceVisitAsync(page);
+        Assert.Equal([AudienceFunctions.AdminSignedIn.Key], administrator.Usages.Select(u => u.Function));
     }
 
     [Theory, InEachTheme]
@@ -110,6 +124,8 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
         await page.GetByRole(AriaRole.Button, new() { Name = "Menu" }).ClickAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Se déconnecter" }).ClickAsync();
         await Assertions.Expect(page.GetByRole(AriaRole.Contentinfo)).ToContainTextAsync("active");
+        // The logout leads to the home page, which is not recorded: the next page opens the visit of the visitor.
+        await page.GotoAsync(AppPaths.AudienceInformation);
         var visitorAgain = await AudienceVisitAsync(page);
 
         var before = await AudienceVisitByIdAsync(visitor);
@@ -118,11 +134,11 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
         var signedIn = await AudienceVisitByIdAsync(administrator);
         Assert.True(signedIn.Visit.IsAdministrator);
         Assert.Equal(
-            [AudienceFunctions.AdminSignedIn.Key, AudienceFunctions.AdminHome.Key, AudienceFunctions.AdminSignedOut.Key],
+            [AudienceFunctions.AdminSignedIn.Key, AudienceFunctions.AdminSignedOut.Key],
             signedIn.Usages.Select(u => u.Function));
         Assert.False(visitorAgain.Visit.IsAdministrator);
         Assert.NotEqual(visitor, visitorAgain.Visit.Id);
-        Assert.Equal([AudienceFunctions.Home.Key], visitorAgain.Usages.Select(u => u.Function));
+        Assert.Equal([AudienceFunctions.AudienceInformation.Key], visitorAgain.Usages.Select(u => u.Function));
     }
 
     [Theory, InEachTheme]
@@ -146,7 +162,7 @@ public sealed class AudienceTests(ApplicationHost application) : BrowserTest<App
         // The touch screen, which only the browser tells, is told by the welcome screen, before the first page.
         var page = await TouchScreenMacAsync(theme);
 
-        await PageReadiness.GotoAsync(page, AppPaths.Home);
+        await PageReadiness.GotoAsync(page, AppPaths.AudienceInformation);
 
         Assert.Contains(await page.Context.CookiesAsync(), c => c.Name == AudienceDevice.TouchScreenCookieName);
         var visit = await AudienceVisitAsync(page);

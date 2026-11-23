@@ -241,15 +241,14 @@ public sealed class HomeTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Display_IsRecordedAsTheHomeScreen_WithoutRecord()
+    // Every visitor goes through it, its use tells nothing (fonctionnel/mesure-audience.md, Fonctions suivies).
+    public void Display_IsNotRecorded()
     {
         _catalog.Dashboard = Collection();
 
         var page = Render<Home>();
 
-        var screen = page.FindComponent<Bdtheque.Frontend.Components.Audience.AudienceScreen>().Instance;
-        Assert.Equal(AudienceFunctions.Home, screen.Function);
-        Assert.Null(screen.Record);
+        Assert.Empty(page.FindComponents<Bdtheque.Frontend.Components.Audience.AudienceScreen>());
     }
 
     private static readonly Guid AlbumId = Guid.CreateVersion7();

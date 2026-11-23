@@ -58,6 +58,15 @@
                         }
                     </select>
                 </Field>
+                <Field Id="audience-screen" Label="@L["Criteria.Screen"]" Context="control">
+                    <select id="@control.Id" name="@AudienceIndicatorsQuery.ScreenName">
+                        <option value="" selected="@(_query.Screen is null)">@L["Screen.All"]</option>
+                        @foreach (var screen in _screens)
+                        {
+                            <option value="@screen" selected="@(_query.Screen == screen)">@screen</option>
+                        }
+                    </select>
+                </Field>
             </ListFilters>
         </form>
 
@@ -153,6 +162,7 @@
 @code {
     private AudienceIndicatorsQuery _query = new();
     private IReadOnlyList<Row>? _rows;
+    private IReadOnlyList<string> _screens = [];
     private IReadOnlyList<DateOnly> _months = [];
     private int _highest;
     private ApiProblem? _problem;
@@ -167,7 +177,14 @@
         {
             var indicators = (await Api.GetAsync<List<FunctionIndicators>>(_query.ApiPath(currentMonth)))
                 .ToDictionary(function => function.Function, StringComparer.Ordinal);
-            _rows = Rows(indicators);
+            var rows = Rows(indicators);
+            // The screens the functions belong to, by name; an address that names another one (written by hand, or of a screen
+            // no longer followed) presents every screen.
+            _screens = [.. rows.Select(row => AudienceFunctionNames.ScreenOf(row.Name)).Distinct()
+                .Order(StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, ignoreCase: true))];
+            if (_query.Screen is { } screen && !_screens.Contains(screen))
+                _query = _query with { Screen = null };
+            _rows = [.. rows.Where(row => _query.Presents(row.Name))];
             // A page beyond the last one (an old address, another period with fewer functions) leads to the last one, with the
             // same criteria.
             var last = Math.Max(1, (_rows.Count + AudienceIndicatorsQuery.PageSize - 1) / AudienceIndicatorsQuery.PageSize);

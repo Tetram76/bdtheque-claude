@@ -305,15 +305,15 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     private static async Task LoadAudienceAsync(Loading data, Guid fog, Guid tide, Guid moons, Guid brume)
     {
         await data.VisitAsync(false, DeviceType.Smartphone, RenderingEngine.WebKit, "18.2",
-            Screen("home"), Screen("album", RecordType.Album, fog), Screen("album", RecordType.Album, fog),
+            Screen("series", RecordType.Series, moons), Screen("album", RecordType.Album, fog), Screen("album", RecordType.Album, fog),
             Screen("album", RecordType.Album, tide), Screen("series", RecordType.Series, moons), Screen("author", RecordType.Author, brume));
         await data.VisitAsync(false, DeviceType.Computer, RenderingEngine.Gecko, "133",
-            Screen("home"), Screen("album", RecordType.Album, fog), Action("album.visual", $"edition={fog}&visual=1"));
-        await data.VisitAsync(false, DeviceType.Tablet, RenderingEngine.WebKit, "17.6", Screen("home"));
+            Screen("series", RecordType.Series, moons), Screen("album", RecordType.Album, fog), Action("album.visual", $"edition={fog}&visual=1"));
+        await data.VisitAsync(false, DeviceType.Tablet, RenderingEngine.WebKit, "17.6", Screen("series", RecordType.Series, moons));
         await data.VisitAsync(false, DeviceType.Computer, RenderingEngine.Blink, "131",
-            Screen("home"), Screen("series", RecordType.Series, moons));
+            Screen("series", RecordType.Series, moons));
         await data.VisitAsync(true, DeviceType.Computer, RenderingEngine.Blink, "131",
-            Screen("admin.home"), Screen("admin.albums"), Action("admin.albums.search", "q=phare"), Action("admin.albums.search", "q=phare"),
+            Screen("admin.albums"), Action("admin.albums.search", "q=phare"), Action("admin.albums.search", "q=phare"),
             Screen("admin.album", RecordType.Album, fog));
     }
 

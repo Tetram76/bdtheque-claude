@@ -45,7 +45,7 @@ public sealed class AdminStatisticsTests(AudienceApplication application) : Brow
         await page.GetByLabel("Appareil").SelectOptionAsync("Smartphone");
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminStatistics, "?period=TwelveMonths&users=Visitors&device=Smartphone&engine="));
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminStatistics, "?period=TwelveMonths&users=Visitors&device=Smartphone&engine=&screen="));
         // The record of an album, on a smartphone: three times in March, once in January; the administrator never used a
         // smartphone.
         var album = page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Fiche d'un album$") }) }).First;
@@ -74,21 +74,21 @@ public sealed class AudienceApplication : ApplicationHost
     {
         using var api = CreateApiClient();
         await VisitAsync(api, new(2025, 3, 10, 9, 0, 0, TimeSpan.Zero), false, DeviceType.Smartphone, RenderingEngine.WebKit, "18.2",
-            Screen(AudienceFunctions.Home), Screen(AudienceFunctions.AlbumRecord, AlbumA), Screen(AudienceFunctions.AlbumRecord, AlbumA),
+            Screen(AudienceFunctions.AudienceInformation), Screen(AudienceFunctions.AlbumRecord, AlbumA), Screen(AudienceFunctions.AlbumRecord, AlbumA),
             Screen(AudienceFunctions.AlbumRecord, AlbumB), Screen(AudienceFunctions.SeriesRecord, SeriesS));
         await VisitAsync(api, new(2025, 6, 12, 18, 0, 0, TimeSpan.Zero), false, DeviceType.Computer, RenderingEngine.Gecko, "133",
-            Screen(AudienceFunctions.Home), Screen(AudienceFunctions.AlbumRecord, AlbumA));
+            Screen(AudienceFunctions.AudienceInformation), Screen(AudienceFunctions.AlbumRecord, AlbumA));
         await VisitAsync(api, new(2025, 9, 20, 7, 0, 0, TimeSpan.Zero), false, DeviceType.Tablet, RenderingEngine.WebKit, "17.6",
-            Screen(AudienceFunctions.Home), Screen(AudienceFunctions.AuthorRecord, AuthorX));
+            Screen(AudienceFunctions.AudienceInformation), Screen(AudienceFunctions.AuthorRecord, AuthorX));
         await VisitAsync(api, new(2025, 12, 5, 20, 0, 0, TimeSpan.Zero), true, DeviceType.Computer, RenderingEngine.Blink, "131",
-            Screen(AudienceFunctions.AdminHome), Screen(AudienceFunctions.AdminAlbums),
+            Screen(AudienceFunctions.AdminAlbums),
             Action(AudienceFunctions.AdminAlbumsSearch, "q=ast"), Action(AudienceFunctions.AdminAlbumsSearch, "q=ast"),
             Screen(AudienceFunctions.AdminAlbums), Screen(AudienceFunctions.AdminAlbum, AlbumA));
         await VisitAsync(api, new(2026, 1, 10, 12, 0, 0, TimeSpan.Zero), false, DeviceType.Smartphone, RenderingEngine.WebKit, "18.2",
-            Screen(AudienceFunctions.Home), Screen(AudienceFunctions.AlbumRecord, AlbumA),
+            Screen(AudienceFunctions.AudienceInformation), Screen(AudienceFunctions.AlbumRecord, AlbumA),
             Action(AudienceFunctions.AlbumRecordVisual, "edition=01940000-0000-7000-8000-000000000005&visual=1"));
         await VisitAsync(api, new(2026, 1, 12, 8, 0, 0, TimeSpan.Zero), true, DeviceType.Computer, RenderingEngine.Blink, "131",
-            Screen(AudienceFunctions.AdminHome), Screen(AudienceFunctions.AdminSearch),
+            Screen(AudienceFunctions.AdminSearch),
             Action(AudienceFunctions.AdminSearchQuery, "q=ast"));
         // Back to the time of the application, which every test reads from.
         Clock.UtcNow = null;

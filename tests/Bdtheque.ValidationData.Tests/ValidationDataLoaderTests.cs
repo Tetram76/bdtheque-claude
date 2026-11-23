@@ -25,7 +25,7 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Equal((4, 2, 1, 2), (album.UsageCount, album.VisitCount, album.RepeatedUsageCount, album.DistinctObjectCount));
         Assert.Contains(await ReadAsync("?administrator=true"), function => function is { Function: "admin.albums.search", RepeatedUsageCount: 1 });
         foreach (var device in Enum.GetValues<DeviceType>())
-            Assert.Contains(await ReadAsync($"?administrator=false&deviceType={device}"), function => function.Function == "home");
+            Assert.Contains(await ReadAsync($"?administrator=false&deviceType={device}"), function => function.Function == "series");
         foreach (var engine in new[] { RenderingEngine.Blink, RenderingEngine.Gecko, RenderingEngine.WebKit })
             Assert.NotEmpty(await ReadAsync($"?renderingEngine={engine}"));
     }

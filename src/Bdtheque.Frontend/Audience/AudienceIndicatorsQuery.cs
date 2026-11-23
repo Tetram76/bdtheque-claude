@@ -32,13 +32,15 @@ public enum AudienceUsers
 /// <summary>
 /// The criteria of the indicators of the audience measurement in the administration (fonctionnel/mesure-audience.md,
 /// Indicateurs), which the address of the page carries, the page being rendered statically as the lists: a period, and the
-/// compartment of the users, the type of device and the rendering engine, each left out taking in every value.
+/// compartment of the users, the type of device and the rendering engine, each left out taking in every value; the screen whose
+/// functions are presented, it and its actions (<see cref="AudienceFunctionNames.ScreenOf"/>), every screen when left out.
 /// </summary>
 public sealed record AudienceIndicatorsQuery(
     AudiencePeriod Period = AudiencePeriod.TwelveMonths,
     AudienceUsers Users = AudienceUsers.All,
     DeviceType? Device = null,
     RenderingEngine? Engine = null,
+    string? Screen = null,
     int Page = 1)
 {
     /// <summary>
@@ -52,6 +54,7 @@ public sealed record AudienceIndicatorsQuery(
     internal const string UsersName = "users";
     internal const string DeviceName = "device";
     internal const string EngineName = "engine";
+    internal const string ScreenName = "screen";
     internal const string PageName = "page";
 
     /// <summary>
@@ -68,9 +71,10 @@ public sealed record AudienceIndicatorsQuery(
                 : null;
 
         var page = values.TryGetValue(PageName, out var number) && int.TryParse(number, out var parsed) && parsed >= 1 ? parsed : 1;
+        var screen = values.TryGetValue(ScreenName, out var named) && !string.IsNullOrWhiteSpace(named) ? named.ToString().Trim() : null;
         return new AudienceIndicatorsQuery(
             Read<AudiencePeriod>(PeriodName) ?? AudiencePeriod.TwelveMonths, Read<AudienceUsers>(UsersName) ?? AudienceUsers.All,
-            Read<DeviceType>(DeviceName), Read<RenderingEngine>(EngineName), page);
+            Read<DeviceType>(DeviceName), Read<RenderingEngine>(EngineName), screen, page);
     }
 
     /// <summary>The criteria and the page that differ from the default, in their fixed order: the parameters of the address.</summary>
@@ -94,8 +98,13 @@ public sealed record AudienceIndicatorsQuery(
             parameters.Add((DeviceName, device.ToString()));
         if (Engine is { } engine)
             parameters.Add((EngineName, engine.ToString()));
+        if (Screen is { } screen)
+            parameters.Add((ScreenName, screen));
         return parameters;
     }
+
+    /// <summary>Whether the function named <paramref name="name"/> is presented: every one, or those of the screen chosen.</summary>
+    public bool Presents(string name) => Screen is null || AudienceFunctionNames.ScreenOf(name) == Screen;
 
     /// <summary>The address of the page with these criteria.</summary>
     public string Href() => Parameters() is { Count: > 0 } parameters ? $"{AppPaths.AdminStatistics}?{Join(parameters)}" : AppPaths.AdminStatistics;

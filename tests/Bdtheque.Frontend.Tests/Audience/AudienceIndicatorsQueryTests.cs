@@ -71,6 +71,20 @@ public sealed class AudienceIndicatorsQueryTests
         Assert.Equal("/admin/audience/indicators?from=2025-12-01&administrator=false", query.ApiPath(November));
     }
 
+    [Fact]
+    public void Screen_KeptInTheAddress_ButNoCriterionOfTheApi()
+    {
+        var query = AudienceIndicatorsQuery.Parse("?screen=Liste%20des%20albums");
+
+        Assert.Equal("Liste des albums", query.Screen);
+        Assert.Equal("/admin/statistics?screen=Liste%20des%20albums", query.Href());
+        Assert.Equal("/admin/audience/indicators?from=2025-12-01", query.ApiPath(November));
+        Assert.True(query.Presents("Liste des albums"));
+        Assert.True(query.Presents("Liste des albums · recherche"));
+        Assert.False(query.Presents("Liste des albums de la consultation"));
+        Assert.True(new AudienceIndicatorsQuery().Presents("Fiche d'un album"));
+    }
+
     [Theory]
     [InlineData("?page=0")]
     [InlineData("?page=-2")]

@@ -224,11 +224,12 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Display_IsRecordedAsTheHomeOfTheAdministration()
+    // The administrator goes through it, its use tells nothing (fonctionnel/mesure-audience.md, Fonctions suivies).
+    public void Display_IsNotRecorded()
     {
         var page = Render<AdminHome>();
 
-        Assert.Equal(AudienceFunctions.AdminHome, page.FindComponent<Components.Audience.AudienceScreen>().Instance.Function);
+        Assert.Empty(page.FindComponents<Components.Audience.AudienceScreen>());
     }
 
     private static IElement BlockOf(IRenderedComponent<AdminHome> page, string title) =>
