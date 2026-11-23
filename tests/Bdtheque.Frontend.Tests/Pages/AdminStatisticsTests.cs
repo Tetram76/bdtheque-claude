@@ -98,7 +98,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
             ["Tous les appareils", "Ordinateur", "Tablette", "Smartphone"],
             form.QuerySelectorAll("select[name='device'] option").Select(option => Text(option)));
         Assert.Equal(
-            ["Tous les moteurs", "Blink", "Gecko", "WebKit", "Autre moteur"],
+            ["Tous les moteurs", "Blink", "Gecko", "WebKit", "Autre"],
             form.QuerySelectorAll("select[name='engine'] option").Select(option => Text(option)));
         Assert.NotNull(form.QuerySelector("button[type='submit']"));
     }

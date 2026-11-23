@@ -154,6 +154,6 @@
     <value>WebKit</value>
   </data>
   <data name="RenderingEngine.Other" xml:space="preserve">
-    <value>Autre moteur</value>
+    <value>Autre</value>
   </data>
 </root>
