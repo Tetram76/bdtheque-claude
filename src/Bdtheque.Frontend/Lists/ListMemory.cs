@@ -51,8 +51,7 @@ public sealed class ListMemory(IHttpContextAccessor httpContextAccessor, VisitCo
     /// </summary>
     public string MenuHref(string path)
     {
-        var request = httpContextAccessor.HttpContext?.Request;
-        var query = request?.Path.Value == path ? request.QueryString.Value : Left(path) is { } left ? left[path.Length..] : null;
+        var query = PresentedQuery(path);
         if (string.IsNullOrEmpty(query))
             return path;
 
@@ -61,6 +60,15 @@ public sealed class ListMemory(IHttpContextAccessor httpContextAccessor, VisitCo
             .SelectMany(parameter => parameter.Value.Select(value => (parameter.Key, Value: value ?? "")))
             .ToList();
         return filters.Count == 0 ? path : $"{path}?{string.Join('&', filters.Select(f => $"{f.Key}={Uri.EscapeDataString(f.Value)}"))}";
+    }
+
+    // The query of the list at path as last presented: that of the request on the list itself, whose cookie is only written
+    // once its response starts; otherwise that of the address the visit left it at, if any.
+    private string? PresentedQuery(string path)
+    {
+        if (httpContextAccessor.HttpContext?.Request is { } request && request.Path.Value == path)
+            return request.QueryString.Value;
+        return Left(path)?[path.Length..];
     }
 
     // The address the visit left the list at, if any: only one of the list itself, kept in this very visit.
