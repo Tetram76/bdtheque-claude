@@ -45,4 +45,9 @@ html:has(#admin-menu:popover-open) {
    page rendered on the server comes whole, its covers in a room of their own: nothing above the visitor grows later. */
 html {
     overflow-anchor: none;
+    /* The room of the vertical scrollbar always kept, the page scrolling or not: the menu of the administration, which
+       stops the page from scrolling while open (above), would otherwise give the page the width of the scrollbar, and
+       every layout that follows the width (the table of the indicators of the audience, the columns of a list) would
+       change as the menu opens and closes. */
+    scrollbar-gutter: stable;
 }
