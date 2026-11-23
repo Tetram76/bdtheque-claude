@@ -1,6 +1,6 @@
 ---
 title: 'Frontend : visite, thème, culture et mesure d''audience'
-description: 'Cette page explique ce qui, dans `frontend`, dépend du navigateur plutôt que des données : écran d''accueil de la première requête, cookies, visite et tirage de son thème, thèmes et couleurs du jour, culture et fuseau horaire, relevé de la mesure d''audience ; à lire pour toucher à un thème, à la présentation d''une date ou d''un nombre, ou à ce que relève la mesure d''audience.'
+description: 'Cette page explique ce qui, dans `frontend`, dépend du navigateur plutôt que des données : écran d''accueil de la première requête, cookies, visite et tirage de son thème, thèmes et couleurs du jour, culture et fuseau horaire, relevé de la mesure d''audience et ses indicateurs dans l''administration ; à lire pour toucher à un thème, à la présentation d''une date ou d''un nombre, ou à ce que relève la mesure d''audience.'
 code:
   - 'src/Bdtheque.Frontend/Visits/**'
   - 'src/Bdtheque.Frontend/Theming/**'
@@ -10,6 +10,7 @@ code:
   - 'src/Bdtheque.Frontend/Formatting/DisplayFormatter.cs'
   - 'src/Bdtheque.Frontend/Components/WelcomeScreen.razor'
   - 'src/Bdtheque.Frontend/Components/Audience/**'
+  - 'src/Bdtheque.Frontend/Components/Pages/Admin/AdminStatistics.razor'
   - 'src/Bdtheque.Frontend/wwwroot/themes/**'
 ---
 
@@ -107,11 +108,17 @@ Une action est relevée par la méthode `RecordActionAsync` d'[`AudienceRecorder
 
 La mesure d'audience ne doit jamais gêner l'utilisateur. Une utilisation que l'API n'enregistre pas est journalisée en avertissement, sans faire échouer la page. Lorsqu'un visiteur s'oppose à la mesure, plus rien n'est relevé et toute trace de la mesure est supprimée du navigateur ; sa visite continue néanmoins, puisqu'elle porte aussi son thème.
 
+## Les indicateurs dans l'administration
+
+Les statistiques privées de l'administration, la page [`AdminStatistics`](../../../src/Bdtheque.Frontend/Components/Pages/Admin/AdminStatistics.razor), présentent les indicateurs de chaque fonction suivie. C'est une page statique, dont les critères sont portés par l'adresse, comme ceux d'une liste : une période, comptée en mois jusqu'au mois en cours, et le genre d'utilisateur, le type d'appareil et le moteur de rendu dont les visites sont comptées. [`AudienceIndicatorsQuery`](../../../src/Bdtheque.Frontend/Audience/AudienceIndicatorsQuery.cs) lit ces critères dans l'adresse, en déduit la lecture des indicateurs de l'API et l'action qu'enregistre la mesure quand ils diffèrent de ceux par défaut. Le mois en cours est celui de l'horloge de l'application en temps universel, puisque l'API compte chaque visite au mois de son début dans ce temps.
+
+L'API ne connaît que les fonctions utilisées. La page part donc de la liste des fonctions suivies, `AudienceFunctions.Followed`, et présente sans indicateur celles que l'API ne cite pas : elles n'ont jamais été utilisées sur la période et pour les visites choisies. Elle présente aussi une fonction que l'API cite sans qu'elle soit encore suivie, sous sa clé, ses utilisations restant comptées. Chaque fonction est nommée par [`AudienceFunctionNames`](../../../src/Bdtheque.Frontend/Audience/AudienceFunctionNames.cs), dont les textes sont rangés sous la clé de la fonction ; un test exige un nom pour chaque fonction suivie. La fréquence d'une fonction est dessinée par une barre par mois de la période, dont la hauteur rapporte ses utilisations du mois à celles du mois le plus chargé de la page, toutes fonctions confondues, pour que deux lignes se comparent.
+
 ## Tests
 
 Les règles sont vérifiées par des tests unitaires et des tests bUnit, rangés dans les dossiers [`Theming/`](../../../tests/Bdtheque.Frontend.Tests/Theming/), [`Visits/`](../../../tests/Bdtheque.Frontend.Tests/Visits/), [`Audience/`](../../../tests/Bdtheque.Frontend.Tests/Audience/) et [`Formatting/`](../../../tests/Bdtheque.Frontend.Tests/Formatting/) de `Bdtheque.Frontend.Tests`.
 
-Le comportement dans un vrai navigateur est vérifié par [`WelcomeScreenTests`](../../../tests/Bdtheque.EndToEnd.Tests/WelcomeScreenTests.cs), [`BrowserTimeZoneTests`](../../../tests/Bdtheque.EndToEnd.Tests/BrowserTimeZoneTests.cs), [`ThemeTests`](../../../tests/Bdtheque.EndToEnd.Tests/ThemeTests.cs), [`AudienceTests`](../../../tests/Bdtheque.EndToEnd.Tests/AudienceTests.cs) et [`LocalizationTests`](../../../tests/Bdtheque.EndToEnd.Tests/LocalizationTests.cs). Ce qui est propre à un thème, comme les contrastes, les couleurs du jour ou les scripts, est vérifié dans le dossier [`Theming/`](../../../tests/Bdtheque.EndToEnd.Tests/Theming/).
+Le comportement dans un vrai navigateur est vérifié par [`WelcomeScreenTests`](../../../tests/Bdtheque.EndToEnd.Tests/WelcomeScreenTests.cs), [`BrowserTimeZoneTests`](../../../tests/Bdtheque.EndToEnd.Tests/BrowserTimeZoneTests.cs), [`ThemeTests`](../../../tests/Bdtheque.EndToEnd.Tests/ThemeTests.cs), [`AudienceTests`](../../../tests/Bdtheque.EndToEnd.Tests/AudienceTests.cs), [`AdminStatisticsTests`](../../../tests/Bdtheque.EndToEnd.Tests/AdminStatisticsTests.cs), qui lit les indicateurs d'une application dont la base porte ses propres visites, dans un navigateur qui s'oppose à la mesure pour que ses propres pages ne les changent pas, et [`LocalizationTests`](../../../tests/Bdtheque.EndToEnd.Tests/LocalizationTests.cs). Ce qui est propre à un thème, comme les contrastes, les couleurs du jour ou les scripts, est vérifié dans le dossier [`Theming/`](../../../tests/Bdtheque.EndToEnd.Tests/Theming/).
 
 ## Invariants à préserver
 
