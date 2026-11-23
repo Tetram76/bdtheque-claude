@@ -80,7 +80,7 @@
                     <span class="audience-frequency" role="columnheader">@L["Column.Frequency"]</span>
                     <span class="audience-last" role="columnheader">@L["Column.Last"]</span>
                 </div>
-                @foreach (var row in _rows)
+                @foreach (var row in _rows.Skip((_query.Page - 1) * AudienceIndicatorsQuery.PageSize).Take(AudienceIndicatorsQuery.PageSize))
                 {
                     var used = row.Indicators is not null;
                     <div class="audience-row" role="row" data-unused="@(!used)">
@@ -144,6 +144,9 @@
                     </div>
                 }
             </div>
+
+            <Pagination Number="_query.Page" Size="AudienceIndicatorsQuery.PageSize" TotalCount="_rows.Count"
+                        ItemsLabel="@L["Pagination.Items"]" PageHref="@_query.PageHref" />
         }
     </Block>
 </div>
@@ -169,6 +172,14 @@
             var indicators = (await Api.GetAsync<List<FunctionIndicators>>(_query.ApiPath(currentMonth)))
                 .ToDictionary(function => function.Function, StringComparer.Ordinal);
             _rows = Rows(indicators);
+            // A page beyond the last one (an old address, another period with fewer functions) leads to the last one, with the
+            // same criteria.
+            var last = Math.Max(1, (_rows.Count + AudienceIndicatorsQuery.PageSize - 1) / AudienceIndicatorsQuery.PageSize);
+            if (_query.Page > last)
+            {
+                Navigation.NavigateTo(_query.PageHref(last));
+                return;
+            }
             var from = _query.From(currentMonth)
                        ?? indicators.Values.SelectMany(function => function.Months).Select(month => (DateOnly?)month.Month).Min()
                        ?? currentMonth;

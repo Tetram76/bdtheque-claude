@@ -153,6 +153,9 @@
   <data name="Frequency.Text" xml:space="preserve">
     <value>Utilisée {0} mois sur {1}</value>
   </data>
+  <data name="Pagination.Items" xml:space="preserve">
+    <value>Fonctions</value>
+  </data>
   <data name="Frequency.None" xml:space="preserve">
     <value>aucune utilisation</value>
   </data>

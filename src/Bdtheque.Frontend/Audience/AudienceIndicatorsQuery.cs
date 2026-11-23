@@ -38,13 +38,21 @@ public sealed record AudienceIndicatorsQuery(
     AudiencePeriod Period = AudiencePeriod.TwelveMonths,
     AudienceUsers Users = AudienceUsers.All,
     DeviceType? Device = null,
-    RenderingEngine? Engine = null)
+    RenderingEngine? Engine = null,
+    int Page = 1)
 {
+    /// <summary>
+    /// The functions a page presents, each with the chart of its frequency: few enough charts to read at a glance, the most
+    /// used functions on the first page.
+    /// </summary>
+    public const int PageSize = 20;
+
     // The names of the criteria in the address.
     internal const string PeriodName = "period";
     internal const string UsersName = "users";
     internal const string DeviceName = "device";
     internal const string EngineName = "engine";
+    internal const string PageName = "page";
 
     /// <summary>
     /// The criteria of an address (its query, with or without its <c>?</c>); a value it cannot read, which only an address
@@ -59,13 +67,23 @@ public sealed record AudienceIndicatorsQuery(
                 ? parsed
                 : null;
 
+        var page = values.TryGetValue(PageName, out var number) && int.TryParse(number, out var parsed) && parsed >= 1 ? parsed : 1;
         return new AudienceIndicatorsQuery(
             Read<AudiencePeriod>(PeriodName) ?? AudiencePeriod.TwelveMonths, Read<AudienceUsers>(UsersName) ?? AudienceUsers.All,
-            Read<DeviceType>(DeviceName), Read<RenderingEngine>(EngineName));
+            Read<DeviceType>(DeviceName), Read<RenderingEngine>(EngineName), page);
     }
 
-    /// <summary>The criteria that differ from the default, in their fixed order: the parameters of the address.</summary>
+    /// <summary>The criteria and the page that differ from the default, in their fixed order: the parameters of the address.</summary>
     public IReadOnlyList<(string Name, string Value)> Parameters()
+    {
+        var parameters = Criteria();
+        if (Page > 1)
+            parameters.Add((PageName, Page.ToString(CultureInfo.InvariantCulture)));
+        return parameters;
+    }
+
+    // The period and the compartment that differ from the default, without the page.
+    private List<(string Name, string Value)> Criteria()
     {
         var parameters = new List<(string Name, string Value)>();
         if (Period != AudiencePeriod.TwelveMonths)
@@ -114,10 +132,18 @@ public sealed record AudienceIndicatorsQuery(
 
     /// <summary>
     /// The action the request of this address records for the audience measurement (fonctionnel/mesure-audience.md, Fonctions
-    /// suivies), with its criteria as its parameters: none for the default criteria, the page reached from the menu.
+    /// suivies), with its criteria as its parameters, as each control sets them: a page keeps the criteria, the form of the
+    /// criteria returns to the first page. None for the default criteria at the first page, reached from the menu.
     /// </summary>
-    public (AudienceFunction Function, string Parameters)? Action =>
-        Parameters() is { Count: > 0 } parameters ? (AudienceFunctions.AdminStatisticsFilter, Join(parameters)) : null;
+    public (AudienceFunction Function, string Parameters)? Action => this switch
+    {
+        { Page: > 1 } => (AudienceFunctions.AdminStatisticsPage, Join(Parameters())),
+        _ when Criteria() is { Count: > 0 } criteria => (AudienceFunctions.AdminStatisticsFilter, Join(criteria)),
+        _ => null,
+    };
+
+    /// <summary>The address of the page <paramref name="page"/> of the functions, with the same criteria.</summary>
+    public string PageHref(int page) => (this with { Page = page }).Href();
 
     /// <summary>The first day of the month of an instant, in universal time, the time the measurement counts its months in.</summary>
     public static DateOnly MonthOf(DateTimeOffset instant)

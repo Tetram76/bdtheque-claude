@@ -464,6 +464,9 @@ public static class AudienceFunctions
     /// </summary>
     public static readonly AudienceFunction AdminStatisticsFilter = new("admin.statistics.filter", AudienceFunctionKind.Action);
 
+    /// <summary>Another page of the functions, with the criteria and the page as its parameters.</summary>
+    public static readonly AudienceFunction AdminStatisticsPage = new("admin.statistics.page", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -491,6 +494,6 @@ public static class AudienceFunctions
         AdminEditionVisualAdded, AdminEditionVisualsArranged, AdminEditionVisualTypeChanged, AdminEditionVisualDeletion, AdminEditionVisualDeleted,
         AdminPurchaseIntentVisualAdded, AdminPurchaseIntentVisualsArranged, AdminPurchaseIntentVisualTypeChanged, AdminPurchaseIntentVisualDeletion,
         AdminPurchaseIntentVisualDeleted,
-        AdminStatistics, AdminStatisticsFilter,
+        AdminStatistics, AdminStatisticsFilter, AdminStatisticsPage,
     ];
 }

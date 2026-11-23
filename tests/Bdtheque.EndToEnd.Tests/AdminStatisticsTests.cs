@@ -30,10 +30,10 @@ public sealed class AdminStatisticsTests(AudienceApplication application) : Brow
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminStatistics));
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Statistiques privées");
         var rows = page.GetByRole(AriaRole.Table, new() { Name = "Mesure d'audience" }).Locator(".audience-row:not(.audience-row-head)");
-        await Assertions.Expect(rows).ToHaveCountAsync(AudienceFunctions.Followed.Count);
+        await Assertions.Expect(rows).ToHaveCountAsync(AudienceIndicatorsQuery.PageSize);
         await Assertions.Expect(rows.First.Locator(".row-entry")).ToHaveTextAsync("Fiche d'un album");
         await Assertions.Expect(rows.First.Locator(".audience-usages")).ToContainTextAsync("5");
-        await Assertions.Expect(rows.Filter(new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Liste des genres$") }) })).ToHaveAttributeAsync("data-unused", "");
+        await Assertions.Expect(rows.Filter(new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Administration · déconnexion$") }) })).ToHaveAttributeAsync("data-unused", "");
     }
 
     [Theory, InEachTheme]

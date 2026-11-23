@@ -69,6 +69,26 @@ public sealed class AudienceIndicatorsQueryTests
         Assert.Equal((AudienceFunctions.AdminStatisticsFilter, "period=ThreeMonths&users=Administrator"), query.Action);
     }
 
+    [Fact]
+    public void Page_KeptWithTheCriteria_AndRecordedAsAPage()
+    {
+        var query = AudienceIndicatorsQuery.Parse("?users=Visitors&page=3");
+
+        Assert.Equal(new AudienceIndicatorsQuery(Users: AudienceUsers.Visitors, Page: 3), query);
+        Assert.Equal("/admin/statistics?users=Visitors&page=3", query.Href());
+        Assert.Equal("/admin/statistics?users=Visitors", query.PageHref(1));
+        Assert.Equal((AudienceFunctions.AdminStatisticsPage, "users=Visitors&page=3"), query.Action);
+        // The page is no criterion of the API, which gives every function.
+        Assert.Equal("/admin/audience/indicators?from=2025-12-01&administrator=false", query.ApiPath(November));
+    }
+
+    [Theory]
+    [InlineData("?page=0")]
+    [InlineData("?page=-2")]
+    [InlineData("?page=two")]
+    public void PageItCannotRead_TheFirst(string address) =>
+        Assert.Equal(1, AudienceIndicatorsQuery.Parse(address).Page);
+
     [Theory]
     [InlineData("2026-11-30T23:59:59+00:00", "2026-11-01")]
     // The months are those of universal time, whatever the offset of the instant.

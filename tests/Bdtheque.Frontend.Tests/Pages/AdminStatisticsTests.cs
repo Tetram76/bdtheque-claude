@@ -112,16 +112,41 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void EveryFunctionFollowed_ThoseUsed_TheMostUsedFirst_ThenThoseNeverUsed_ByName()
+    public void EveryFunctionFollowed_ThoseUsed_TheMostUsedFirst_ThenThoseNeverUsed_ByName_PageByPage()
     {
-        var page = Open("");
+        var count = AudienceFunctions.Followed.Count + 1;
+        var pages = (count + AudienceIndicatorsQuery.PageSize - 1) / AudienceIndicatorsQuery.PageSize;
 
-        var names = page.FindAll(".audience-row:not(.audience-row-head) .row-entry").Select(entry => Text(entry)).ToList();
+        var names = Enumerable.Range(1, pages)
+            .SelectMany(number => Open($"page={number}").FindAll(".audience-row:not(.audience-row-head) .row-entry").Select(entry => Text(entry)).ToList())
+            .ToList();
+
         Assert.Equal(["Fiche d'un album", "Liste des albums", "Liste des albums · recherche", "admin.former"], names.Take(4));
-        // Every other function followed, never used, by its name.
+        // Every other function followed, never used, by its name, each on a single page.
         var never = names.Skip(4).ToList();
         Assert.Equal(AudienceFunctions.Followed.Count - 3, never.Count);
         Assert.Equal(never.Order(StringComparer.Create(CultureInfo.GetCultureInfo("fr-FR"), ignoreCase: true)), never);
+    }
+
+    [Fact]
+    public void Page_AFewFunctionsOnly_TheOthersOnTheNextPages_WithTheSameCriteria()
+    {
+        var page = Open("users=Visitors");
+
+        Assert.Equal(AudienceIndicatorsQuery.PageSize, page.FindAll(".audience-row:not(.audience-row-head)").Count);
+        var next = page.Find(".pagination a[rel='next']");
+        Assert.Equal("/admin/statistics?users=Visitors&page=2", next.GetAttribute("href"));
+        Assert.StartsWith("Fonctions 1 à 20 sur", Text(page.Find(".pagination-position")));
+    }
+
+    [Fact]
+    public void PageBeyondTheLast_LeadsToTheLast()
+    {
+        Open("period=All&page=99");
+
+        var count = AudienceFunctions.Followed.Count + 1;
+        var last = (count + AudienceIndicatorsQuery.PageSize - 1) / AudienceIndicatorsQuery.PageSize;
+        Assert.EndsWith($"/admin/statistics?period=All&page={last}", Services.GetRequiredService<NavigationManager>().Uri);
     }
 
     [Fact]
@@ -188,7 +213,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     {
         var page = Open("");
 
-        var never = RowOf(page, "Liste des genres");
+        var never = RowOf(page, "Administration · déconnexion");
         Assert.True(never.HasAttribute("data-unused"));
         Assert.False(RowOf(page, "Fiche d'un album").HasAttribute("data-unused"));
         Assert.Equal("Jamais utilisée", Text(never.QuerySelector(".audience-never")!));
@@ -259,6 +284,15 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
         Open("", recorded: true);
 
         Assert.Equal(["admin.statistics"], _audience.Functions);
+    }
+
+    [Fact]
+    public void OtherPage_RecordsThePage_WithTheCriteriaAndThePage()
+    {
+        Open("users=Visitors&page=2", recorded: true);
+
+        Assert.Equal(["admin.statistics.page", "admin.statistics"], _audience.Functions);
+        Assert.Contains(_audience.Sent, sent => sent.Content.GetRawText().Contains("users=Visitors\\u0026page=2", StringComparison.Ordinal));
     }
 
     [Fact]
