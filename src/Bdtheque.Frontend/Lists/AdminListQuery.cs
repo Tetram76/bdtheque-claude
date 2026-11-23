@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using Bdtheque.Frontend.Audience;
 
 namespace Bdtheque.Frontend.Lists;
@@ -70,7 +71,7 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
     /// them: one more than <paramref name="count"/>, so that <paramref name="count"/> others remain.
     /// </summary>
     public string MergeCandidatesApiPath(string text, int count) =>
-        $"{ApiRoute}?{Join([(TextName, text), ("pageSize", (count + 1).ToString(System.Globalization.CultureInfo.InvariantCulture))])}";
+        $"{ApiRoute}?{Join([(TextName, text), ("pageSize", (count + 1).ToString(CultureInfo.InvariantCulture))])}";
 
     /// <summary>
     /// The action of the list the request of this address records for the audience measurement
