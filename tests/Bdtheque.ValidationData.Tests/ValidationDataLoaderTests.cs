@@ -297,8 +297,8 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
 
     private async Task<AlbumDetail> AlbumAsync(string title)
     {
-        var found = await _client.GetFromJsonAsync<Page<AlbumSummary>>($"/catalog/albums?q={Uri.EscapeDataString(title)}");
-        return (await _client.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{Assert.Single(found!.Items).Id}"))!;
+        var found = await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?q={Uri.EscapeDataString(title)}");
+        return (await _client.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{Assert.Single(found!.Albums.Items).Album.Id}"))!;
     }
 
     /// <summary>The validation data as a start of the validation environment loads it, without the pale cover in the spotlight.</summary>

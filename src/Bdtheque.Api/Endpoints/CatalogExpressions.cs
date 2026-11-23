@@ -62,8 +62,23 @@ internal static class CatalogExpressions
     /// <summary>Marker of the card of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumCard ToCard(this Album album) => throw NotExpanded();
 
-    /// <summary>Marker of the visual of the cover of an album, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
+    /// <summary>
+    /// Marker of the visual of the cover of an album among all its editions, if any, for <see cref="Expand{TSource, TResult}"/>
+    /// only: the record of an album and its cards, which present all of them.
+    /// </summary>
     public static CoverVisual? CoverVisualOf(this Album album) => throw NotExpanded();
+
+    /// <summary>
+    /// Marker of the visual of the cover of an album among <paramref name="editions"/>, those the context presents
+    /// (fonctionnel/regles-metier/couverture-d-un-album.md), if any, for <see cref="Expand{TSource, TResult}"/> only.
+    /// </summary>
+    public static CoverVisual? CoverVisualAmong(this IEnumerable<Edition> editions) => throw NotExpanded();
+
+    /// <summary>
+    /// Marker of the authors credited on an album, by role then by sort key, an author credited with several roles once per
+    /// role, for <see cref="Expand{TSource, TResult}"/> only: the rows of the lists of the albums.
+    /// </summary>
+    public static List<AuthorListItem> CreditedAuthors(this Album album) => throw NotExpanded();
 
     /// <summary>Marker of the visual of the first cover of an edition, if any, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static CoverVisual? CoverVisualOf(this Edition edition) => throw NotExpanded();
@@ -106,11 +121,13 @@ internal static class CatalogExpressions
         ToCover(a.CoverVisualOf()),
         a.CollectionState());
 
-    // fonctionnel/regles-metier/couverture-d-un-album.md, among all the editions: the oldest edition with a cover, by
+    private static readonly Expression<Func<Album, CoverVisual?>> AlbumCoverVisualOf = a => a.Editions.CoverVisualAmong();
+
+    // fonctionnel/regles-metier/couverture-d-un-album.md, among the editions given: the oldest edition with a cover, by
     // year (PostgreSQL sorts nulls last), then its first cover in the order of its visuals (that of
     // Edition.GetOrderedVisuals). Editions of the same year are told apart by identifier, time-ordered:
     // the first created.
-    private static readonly Expression<Func<Album, CoverVisual?>> AlbumCoverVisualOf = a => a.Editions
+    private static readonly Expression<Func<IEnumerable<Edition>, CoverVisual?>> CoverVisualAmongEditions = editions => editions
         .SelectMany(e => e.Visuals
             .Where(v => v.Type == DomainEnums.VisualType.Cover)
             .Select(v => new { e.PublicationYear, EditionId = e.Id, Visual = v }))
@@ -163,6 +180,11 @@ internal static class CatalogExpressions
             .OrderBy(c => c.Role)
             .Select(c => EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value)
             .ToList();
+
+    private static readonly Expression<Func<Album, List<AuthorListItem>>> CreditedAuthorsOf = a => a.Contributions
+        .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
+        .Select(c => new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym))
+        .ToList();
 
     private static readonly Expression<Func<PurchaseIntent, PurchaseIntentItem>> PurchaseIntentItemOf =
         p => new PurchaseIntentItem(p.Id, p.CreatedAt, p.ModifiedAt);
@@ -265,6 +287,8 @@ internal static class CatalogExpressions
                 nameof(CollectionState) => CollectionStateOf,
                 nameof(CoverVisualOf) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => AlbumCoverVisualOf,
                 nameof(CoverVisualOf) => EditionCoverVisualOf,
+                nameof(CoverVisualAmong) => CoverVisualAmongEditions,
+                nameof(CreditedAuthors) => CreditedAuthorsOf,
                 _ => null,
             };
             if (expression is null)
