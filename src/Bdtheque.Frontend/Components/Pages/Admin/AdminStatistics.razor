@@ -202,7 +202,10 @@
         var used = _rows!.Count(row => row.Indicators is not null);
         var never = _rows!.Count - used;
         var text = L[used <= 1 ? "Summary.One" : "Summary.Other", Format.Number(used), Format.Number(_rows!.Count)].Value;
-        return never == 0 ? text : $"{text} · {L[never <= 1 ? "Summary.Never.One" : "Summary.Never.Other", Format.Number(never)]}";
+        if (never == 0)
+            return text;
+        var neverText = L[never == 1 ? "Summary.Never.One" : "Summary.Never.Other", Format.Number(never)].Value;
+        return $"{text} · {neverText}";
     }
 
     private string Counted(string name, int count) => L[count == 1 ? $"{name}.One" : $"{name}.Other"];
