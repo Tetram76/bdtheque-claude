@@ -296,7 +296,38 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.ModifyPublisherAsync(blackPlate.Id, "https://www.example.com/planche-noire/catalogue", "Nuit blanche");
         await data.RenameGenreAsync(western, "Western spaghetti");
         await data.DeleteGenreAsync(await data.GenreAsync(DeletedGenre));
+
+        await LoadAudienceAsync(data, fog.Id, tide.Id, moons, brume);
     }
+
+    // The cases of the indicators of the audience measurement (fonctionnel/mesure-audience.md, Indicateurs): visitors on each
+    // type of device, under three engines, and the administrator; a record presented again at once and one presented once, a
+    // search repeated at once; most functions never used. The API dates each usage itself, at the load, so that they all fall
+    // in its month: the months before it are left to the tests of the screen. The keys are those the frontend follows
+    // (src/Bdtheque.Frontend/Audience/AudienceFunction.cs), which the validation data cannot reference.
+    // The screens of the records of the consultation, under their keys.
+    private const string SeriesScreen = "series";
+    private const string AlbumScreen = "album";
+
+    private static async Task LoadAudienceAsync(Loading data, Guid fog, Guid tide, Guid moons, Guid brume)
+    {
+        await data.VisitAsync(false, DeviceType.Smartphone, RenderingEngine.WebKit, "18.2",
+            Screen(SeriesScreen, RecordType.Series, moons), Screen(AlbumScreen, RecordType.Album, fog), Screen(AlbumScreen, RecordType.Album, fog),
+            Screen(AlbumScreen, RecordType.Album, tide), Screen(SeriesScreen, RecordType.Series, moons), Screen("author", RecordType.Author, brume));
+        await data.VisitAsync(false, DeviceType.Computer, RenderingEngine.Gecko, "133",
+            Screen(SeriesScreen, RecordType.Series, moons), Screen(AlbumScreen, RecordType.Album, fog), Action("album.visual", $"edition={fog}&visual=1"));
+        await data.VisitAsync(false, DeviceType.Tablet, RenderingEngine.WebKit, "17.6", Screen(SeriesScreen, RecordType.Series, moons));
+        await data.VisitAsync(false, DeviceType.Computer, RenderingEngine.Blink, "131",
+            Screen(SeriesScreen, RecordType.Series, moons));
+        await data.VisitAsync(true, DeviceType.Computer, RenderingEngine.Blink, "131",
+            Screen("admin.albums"), Action("admin.albums.search", "q=phare"), Action("admin.albums.search", "q=phare"),
+            Screen("admin.album", RecordType.Album, fog));
+    }
+
+    private static Contracts.Audience.FunctionUse Screen(string function, RecordType? type = null, Guid? record = null) =>
+        new(function, type is { } presented ? new Contracts.Audience.PresentedRecord(presented, record!.Value) : null, null);
+
+    private static Contracts.Audience.FunctionUse Action(string function, string parameters) => new(function, null, parameters);
 
     /// <summary>A universe at the top of the hierarchy, without series nor album, to attach to a parent created on the spot.</summary>
     public const string UnattachedUniverse = "Îles du Couchant";
@@ -585,6 +616,20 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
                 $"/admin/albums/{album.Id}/purchase-intents", new(edition, album.Version));
             album.Version = intents.AlbumVersion;
             return intents;
+        }
+
+        /// <summary>A visit of the audience measurement and its usages, as the frontend records them (<c>/audience</c>).</summary>
+        public async Task VisitAsync(
+            bool administrator, DeviceType device, RenderingEngine engine, string version, params Contracts.Audience.FunctionUse[] uses)
+        {
+            var visit = await PostAsync<Contracts.Audience.OpenVisitRequest, Contracts.Audience.OpenedVisit>(
+                "/audience/visits", new(administrator, device, engine, version, uses[0]));
+            foreach (var use in uses.Skip(1))
+            {
+                using var response = await client.PostAsJsonAsync($"/audience/visits/{visit.VisitId}/usages", use, cancellationToken);
+                if (!response.IsSuccessStatusCode)
+                    await ReadAsync<object>(response);
+            }
         }
 
         private async Task<T> GetAsync<T>(string path)

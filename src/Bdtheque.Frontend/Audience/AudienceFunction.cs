@@ -23,8 +23,6 @@ public sealed record AudienceFunction(string Key, AudienceFunctionKind Kind);
 /// </summary>
 public static class AudienceFunctions
 {
-    public static readonly AudienceFunction Home = new("home", AudienceFunctionKind.Screen);
-
     /// <summary>The record of an album (visuel/fiche-album/), with the album it presents.</summary>
     public static readonly AudienceFunction AlbumRecord = new("album", AudienceFunctionKind.Screen);
 
@@ -55,8 +53,6 @@ public static class AudienceFunctions
     /// action: a disclosure of the page itself, showing what it already holds.
     /// </summary>
     public static readonly AudienceFunction AuthorRecord = new("author", AudienceFunctionKind.Screen);
-
-    public static readonly AudienceFunction AdminHome = new("admin.home", AudienceFunctionKind.Screen);
 
     /// <summary>
     /// The search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the
@@ -489,7 +485,7 @@ public static class AudienceFunctions
         AlbumRecord, AlbumRecordVisual,
         Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
         SeriesRecord, AuthorRecord,
-        Home, AdminHome, AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
+        AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated, AdminAlbumSeriesCreated,
         AdminAlbumChanges,

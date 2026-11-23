@@ -80,7 +80,7 @@ La liste des albums de la consultation (#603) est réalisée la première : elle
 | #608 | Recherche simple de la consultation |
 | ~~#609~~ | Recherche d'une fiche à modifier depuis l'en-tête de l'administration |
 | ~~#610~~ | Écran du paramétrage de l'application |
-| #611 | Indicateurs de la mesure d'audience dans l'administration |
+| ~~#611~~ | Indicateurs de la mesure d'audience dans l'administration |
 | #612 | Confirmation d'une acquisition et conversion d'une intention d'acquisition |
 | #613 | Éditions dont l'ISBN est à vérifier |
 | #614 | Fusion de deux fiches d'un même type |

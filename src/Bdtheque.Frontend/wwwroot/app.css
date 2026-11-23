@@ -34,9 +34,13 @@ h1:focus {
     }
 }
 
-/* While the menu of the administration is open, the page stays still: only the panel scrolls (visuel/administration/en-tete-et-menu.md). */
+/* While the menu of the administration is open, the page stays still: only the panel scrolls (visuel/administration/en-tete-et-menu.md).
+   Its scrollbar, which stopping it from scrolling withdraws, keeps its room: the page would otherwise gain its width, and every
+   layout that follows the width (the table of the indicators of the audience, the columns of a list) would change as the menu
+   opens and closes. Only then: reserved at all times, the room would narrow every page that does not scroll. */
 html:has(#admin-menu:popover-open) {
     overflow: hidden;
+    scrollbar-gutter: stable;
 }
 
 /* No scroll anchoring: an enhanced navigation of Blazor gives each element, for a moment, the attributes of the page it

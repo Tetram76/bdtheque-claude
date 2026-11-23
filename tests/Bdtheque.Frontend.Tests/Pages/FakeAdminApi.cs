@@ -94,6 +94,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         services.AddScoped<DisplayFormatter>();
         services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         services.AddSingleton<ValueLabels>();
+        services.AddSingleton<Bdtheque.Frontend.Audience.AudienceFunctionNames>();
     }
 
     private static async Task<JsonElement> BodyOfAsync(HttpRequestMessage request, CancellationToken cancellationToken)

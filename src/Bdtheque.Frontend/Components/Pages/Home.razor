@@ -8,9 +8,9 @@
 @inject IStringLocalizer<Home> L
 
 @* The home page of the consultation (fonctionnel/page-accueil.md): the dashboard, or, without any owned edition, the welcome
-   screen of an empty collection, which the API tells by a dashboard without content. *@
+   screen of an empty collection, which the API tells by a dashboard without content. Not recorded by the audience measurement:
+   every visitor goes through it, its use tells nothing (fonctionnel/mesure-audience.md, Fonctions suivies). *@
 <PageTitle>@L["Title"]</PageTitle>
-<AudienceScreen Function="AudienceFunctions.Home" />
 <FooterAdministrationLink />
 
 @if (_problem is not null)

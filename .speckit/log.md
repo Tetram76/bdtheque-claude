@@ -2,6 +2,7 @@
 
 ## 2026-11-23
 
+* **Décision de l'utilisateur** : la consultation des indicateurs de la mesure d'audience, dans l'administration, n'est pas une fonction suivie, ni son écran ni ses actions, non plus que les pages d'accueil de la consultation et de l'administration, où l'on passe forcément ([Mesure d'audience de l'interface web](fonctionnel/mesure-audience.md), [Relevé par le frontend](choix-implementation/mesure-audience/releve-par-le-frontend.md)) (#626).
 * **Exigence de l'utilisateur** : une question n'est jamais une injonction ; elle appelle une réponse, et le tour de la réponse ne comporte aucune action, même sur un choix de l'agent ([Prise de décision](gestion-projet/gouvernance/prise-de-decision.md)) (#623).
 * **Exigence de l'utilisateur** : une fiche provisionnée au déploiement ne présente jamais de date de création, et sa date de dernière modification seulement une fois modifiée ; les données chargées pour la validation n'en sont pas ([Attributs communs à toutes les entités](modele-metier/attributs-communs-a-toutes-les-entites.md)) (#623).
 * **Choix** : le paramétrage, fiche unique sans liste, revient après son enregistrement à l'accueil de l'administration, qui présente ses valeurs, et sa saisie le nomme par son titre seul ; un menu en *popover* se referme après une navigation améliorée, que Blazor laissait ouvert sur la page de l'entrée choisie ([Frontend](choix-implementation/socle/frontend.md)) (#623).
