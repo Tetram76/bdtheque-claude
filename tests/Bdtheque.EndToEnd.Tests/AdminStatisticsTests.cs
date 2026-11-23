@@ -16,7 +16,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// <see cref="Captures.AdminStatisticsCaptureTests"/>.
 /// </summary>
 [Collection(AudienceApplication.Name)]
-public sealed class AdminStatisticsTests(AudienceApplication application) : BrowserTest<AudienceApplication>(application)
+public sealed partial class AdminStatisticsTests(AudienceApplication application) : BrowserTest<AudienceApplication>(application)
 {
     [Theory, InEachTheme]
     public async Task Menu_LeadsToTheStatistics_EveryFunctionFollowed_TheMostUsedFirst(string theme)
@@ -33,7 +33,7 @@ public sealed class AdminStatisticsTests(AudienceApplication application) : Brow
         await Assertions.Expect(rows).ToHaveCountAsync(AudienceIndicatorsQuery.PageSize);
         await Assertions.Expect(rows.First.Locator(".row-entry")).ToHaveTextAsync("Fiche d'un album");
         await Assertions.Expect(rows.First.Locator(".audience-usages")).ToContainTextAsync("5");
-        await Assertions.Expect(rows.Filter(new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Administration · déconnexion$") }) })).ToHaveAttributeAsync("data-unused", "");
+        await Assertions.Expect(rows.Filter(new() { Has = page.Locator(".row-entry", new() { HasTextRegex = SignedOutName() }) })).ToHaveAttributeAsync("data-unused", "");
     }
 
     [Theory, InEachTheme]
@@ -48,15 +48,33 @@ public sealed class AdminStatisticsTests(AudienceApplication application) : Brow
         await page.GetByLabel("Appareil").SelectOptionAsync("Smartphone");
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(new Regex(@"/admin/statistics\?.*users=Visitors&device=Smartphone"));
-        await Assertions.Expect(page.Locator(".active-filters li")).ToHaveTextAsync([new Regex("Utilisateurs : Visiteurs"), new Regex("Appareil : Smartphone")]);
+        await Assertions.Expect(page).ToHaveURLAsync(VisitorsOnASmartphone());
+        await Assertions.Expect(page.Locator(".active-filters li")).ToHaveTextAsync([UsersTag(), DeviceTag()]);
         // The record of an album, on a smartphone: three times in March, once in January; the administrator never used a
         // smartphone.
-        var album = page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Fiche d'un album$") }) }).First;
+        var album = page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = AlbumRecordName() }) }).First;
         await Assertions.Expect(album.Locator(".audience-usages")).ToContainTextAsync("4");
-        await Assertions.Expect(page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = new Regex("^Liste des albums$") }) }).First)
+        await Assertions.Expect(page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = AlbumListName() }) }).First)
             .ToHaveAttributeAsync("data-unused", "");
     }
+
+    [GeneratedRegex("^Administration · déconnexion$")]
+    private static partial Regex SignedOutName();
+
+    [GeneratedRegex(@"/admin/statistics\?.*users=Visitors&device=Smartphone")]
+    private static partial Regex VisitorsOnASmartphone();
+
+    [GeneratedRegex("Utilisateurs : Visiteurs")]
+    private static partial Regex UsersTag();
+
+    [GeneratedRegex("Appareil : Smartphone")]
+    private static partial Regex DeviceTag();
+
+    [GeneratedRegex("^Fiche d'un album$")]
+    private static partial Regex AlbumRecordName();
+
+    [GeneratedRegex("^Liste des albums$")]
+    private static partial Regex AlbumListName();
 }
 
 /// <summary>
