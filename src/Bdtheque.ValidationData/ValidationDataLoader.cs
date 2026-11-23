@@ -265,8 +265,11 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         // A free gift, without cover.
         var fog = await data.AlbumAsync(OneShot("Brouillard sur Ombrelune", 2008, null, [fantasy], [ombrelune], [Credit(brume, ContributionRole.Scenarist), Credit(pinceau, ContributionRole.Illustrator)]));
         await data.EditionAsync(fog, Owned(lagoon.Id, null, 2008, AcquisitionMode.Gift, new DateOnly(2008, 12, 24)) with { IsFree = true });
-        // Owned, and wished for again from another publisher, which no owned edition names.
-        await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(horizon.Id, null, 2023, null, null, null, null, null, null, null, true));
+        // Owned, and wished for again from another publisher, which no owned edition names. The edition wished for has a cover:
+        // the cover of the album in the list of all the albums, the generic visual in the list of the owned ones, which presents
+        // its owned edition only (fonctionnel/regles-metier/couverture-d-un-album.md).
+        var fogIntents = await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(horizon.Id, null, 2023, null, null, null, null, null, null, null, true));
+        await data.VisualAsync(fog, fogIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.3));
 
         // Wished for as a whole, with no edition known yet.
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
