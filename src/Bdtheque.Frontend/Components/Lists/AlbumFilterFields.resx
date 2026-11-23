@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Series" xml:space="preserve"><value>Série</value></data>
+  <data name="Author" xml:space="preserve"><value>Auteur</value></data>
+  <data name="Publisher" xml:space="preserve"><value>Éditeur</value></data>
+  <data name="PublisherCollection" xml:space="preserve"><value>Collection</value></data>
+  <data name="Genre" xml:space="preserve"><value>Genre</value></data>
+  <data name="Universe" xml:space="preserve"><value>Univers</value></data>
+  <data name="State" xml:space="preserve"><value>Possession</value></data>
+  <data name="Any" xml:space="preserve"><value>Tous</value></data>
+  <data name="Note" xml:space="preserve"><value>Série, auteur, éditeur, collection, genre et univers se choisissent en tapant leur nom. Un univers retient aussi les albums de ses sous-univers ; genres et univers sont ceux qu'affiche l'album, les siens et ceux de sa série.</value></data>
+  <data name="State.All" xml:space="preserve"><value>Tous les albums</value></data>
+  <data name="State.InCollection" xml:space="preserve"><value>Possédé</value></data>
+  <data name="State.PurchaseIntent" xml:space="preserve"><value>Intention</value></data>
+  <data name="State.OutsideCollection" xml:space="preserve"><value>Non possédé</value></data>
+</root>

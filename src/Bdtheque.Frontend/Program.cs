@@ -4,6 +4,7 @@ using Bdtheque.Frontend.Components;
 using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Formatting;
 using Bdtheque.Frontend.Hosting;
+using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Security;
 using Bdtheque.Frontend.Theming;
@@ -52,6 +53,7 @@ builder.Services.AddSingleton(Random.Shared);
 builder.Services.AddScoped<RecordSearch>();
 builder.Services.AddSingleton(new PageAssemblies([]));
 builder.Services.AddScoped<VisitCookie>();
+builder.Services.AddScoped<ListMemory>();
 builder.Services.AddScoped<BrowserWelcome>();
 if (builder.Environment.IsEnvironment(FrontendEnvironments.Validation))
 {

@@ -48,15 +48,6 @@
   <data name="Filter.State" xml:space="preserve">
     <value>Possession</value>
   </data>
-  <data name="Filter.Any" xml:space="preserve">
-    <value>Tous</value>
-  </data>
-  <data name="Filters.Note" xml:space="preserve">
-    <value>Série, auteur, éditeur, collection, genre et univers se choisissent en tapant leur nom. Un univers retient aussi les albums de ses sous-univers ; genres et univers sont ceux qu'affiche l'album, les siens et ceux de sa série.</value>
-  </data>
-  <data name="State.All" xml:space="preserve">
-    <value>Tous les albums</value>
-  </data>
   <data name="State.InCollection" xml:space="preserve">
     <value>Possédé</value>
   </data>

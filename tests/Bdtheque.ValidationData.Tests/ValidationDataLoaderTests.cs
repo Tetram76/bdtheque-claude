@@ -46,6 +46,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task CatalogAlbumList_PresentsEachPossession_AndACoverThatTheFilterOfThePossessionChanges()
+    {
+        foreach (var state in Enum.GetValues<Bdtheque.Contracts.Admin.AlbumCollectionState>())
+            Assert.NotEmpty((await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?state={state}"))!.Albums.Items);
+
+        // Owned without cover, and wished for in an edition with one: its cover among all its editions, the generic visual
+        // among the owned ones (fonctionnel/regles-metier/couverture-d-un-album.md).
+        var search = $"q={Uri.EscapeDataString("Brouillard sur Ombrelune")}";
+        var all = Assert.Single((await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?{search}"))!.Albums.Items);
+        var owned = Assert.Single((await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?{search}&state=InCollection"))!.Albums.Items);
+        Assert.NotNull(all.Cover);
+        Assert.Null(owned.Cover);
+    }
+
+    [Fact]
     public async Task AlbumList_CountsMoreThanAPage_AndAnAlbumWhoseDeletionASavedSearchBlocks()
     {
         var list = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.AlbumAdminList>("/admin/albums");
@@ -244,9 +259,13 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     [InlineData("albums", "E")]
     public async Task NavigationEntries_OutsideTheLetters_AndUnderAnArticle_AreCovered(string list, string entry)
     {
-        var page = await _client.GetFromJsonAsync<Page<object>>($"/catalog/{list}?entry={Uri.EscapeDataString(entry)}");
+        var path = $"/catalog/{list}?entry={Uri.EscapeDataString(entry)}";
+        // The list of the albums carries its page with the records of its filters (AlbumCatalogList).
+        var items = list == "albums"
+            ? (await _client.GetFromJsonAsync<AlbumCatalogList>(path))!.Albums.Items.Cast<object>()
+            : (await _client.GetFromJsonAsync<Page<object>>(path))!.Items;
 
-        Assert.NotEmpty(page!.Items);
+        Assert.NotEmpty(items);
     }
 
     // The latest arrivals of the dashboard, with and without cover: « La couverture du jour » shows them as books in volume,
@@ -313,8 +332,8 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
 
     private async Task<AlbumDetail> AlbumAsync(string title)
     {
-        var found = await _client.GetFromJsonAsync<Page<AlbumSummary>>($"/catalog/albums?q={Uri.EscapeDataString(title)}");
-        return (await _client.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{Assert.Single(found!.Items).Id}"))!;
+        var found = await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?q={Uri.EscapeDataString(title)}");
+        return (await _client.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{Assert.Single(found!.Albums.Items).Album.Id}"))!;
     }
 
     /// <summary>The validation data as a start of the validation environment loads it, without the pale cover in the spotlight.</summary>

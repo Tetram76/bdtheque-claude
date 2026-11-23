@@ -31,6 +31,20 @@ public static class AudienceFunctions
     /// <summary>A visual shown in the viewer: the one of a thumbnail, the previous or the next.</summary>
     public static readonly AudienceFunction AlbumRecordVisual = new("album.visual", AudienceFunctionKind.Action);
 
+    /// <summary>The list of the albums of the consultation, entry « Albums » of its menu.</summary>
+    public static readonly AudienceFunction Albums = new("albums", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogAlbumListQuery.cs).
+
+    public static readonly AudienceFunction AlbumsSearch = new("albums.search", AudienceFunctionKind.Action);
+
+    /// <summary>The cross filters and the possession, which limits the list to the collection.</summary>
+    public static readonly AudienceFunction AlbumsFilter = new("albums.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AlbumsInitial = new("albums.initial", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AlbumsPage = new("albums.page", AudienceFunctionKind.Action);
+
     /// <summary>The record of a series (visuel/fiche-serie/), with the series it presents.</summary>
     public static readonly AudienceFunction SeriesRecord = new("series", AudienceFunctionKind.Screen);
 
@@ -469,6 +483,7 @@ public static class AudienceFunctions
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
+        Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
         SeriesRecord, AuthorRecord,
         AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,

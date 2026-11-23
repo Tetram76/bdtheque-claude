@@ -35,7 +35,8 @@ public static class AppPaths
 
     public const string Search = NotYetImplemented;
 
-    public const string Albums = NotYetImplemented;
+    /// <summary>The list of the albums of the consultation, under which the record of an album is.</summary>
+    public const string Albums = AlbumsSection;
 
     public const string Series = NotYetImplemented;
 
@@ -45,10 +46,7 @@ public static class AppPaths
 
     public const string AdvancedSearch = NotYetImplemented;
 
-    /// <summary>
-    /// The path of the list of the albums once implemented, under which the record of an album is: where the entry
-    /// « Albums » of the menu is current.
-    /// </summary>
+    /// <summary>The path of the list of the albums, under which the record of an album is: where the entry « Albums » of the menu is current.</summary>
     public const string AlbumsSection = "/albums";
 
     /// <summary>The route of the record of an album.</summary>
