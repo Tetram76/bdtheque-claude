@@ -44,6 +44,40 @@ public sealed class AudienceFunctionsTests
         Assert.Equal("Liste des albums · recherche", Names.Of(AudienceFunctions.AdminAlbumsSearch.Key));
     }
 
+    // The filter by screen presents a screen with its actions, by the group their names give
+    // (AudienceFunctionNames.ScreenOf): the group of every function is that of a screen followed, a variant of a screen
+    // included (« Saisie d'un album · nouvel album »), so that no action is left out of the screen it is done on. The only
+    // exception is the logout, done from any page of the administration.
+    [Theory]
+    [MemberData(nameof(Keys))]
+    public void EveryFunction_BelongsToAScreen_ByItsName(string key)
+    {
+        var screens = AudienceFunctions.Followed
+            .Where(function => function.Kind == AudienceFunctionKind.Screen)
+            .Select(function => AudienceFunctionNames.ScreenOf(Names.Of(function.Key)))
+            .ToHashSet(StringComparer.Ordinal);
+        string[] withoutScreen = [Names.Of(AudienceFunctions.AdminSignedOut.Key)];
+
+        var name = Names.Of(key);
+
+        Assert.True(screens.Contains(AudienceFunctionNames.ScreenOf(name)) || withoutScreen.Contains(name), name);
+    }
+
+    // The entry form of a new record is a variant of that of a record: the creation done on it is one of its actions.
+    public static TheoryData<string, string> EntryForms => new()
+    {
+        { AudienceFunctions.AdminAlbum.Key, AudienceFunctions.AdminNewAlbum.Key },
+        { AudienceFunctions.AdminSeriesForm.Key, AudienceFunctions.AdminNewSeriesForm.Key },
+        { AudienceFunctions.AdminPublisherForm.Key, AudienceFunctions.AdminNewPublisherForm.Key },
+        { AudienceFunctions.AdminEditionForm.Key, AudienceFunctions.AdminNewEditionForm.Key },
+        { AudienceFunctions.AdminPurchaseIntentForm.Key, AudienceFunctions.AdminNewPurchaseIntentForm.Key },
+    };
+
+    [Theory]
+    [MemberData(nameof(EntryForms))]
+    public void NewRecordForm_BelongsToTheScreenOfItsEntryForm(string form, string newForm) =>
+        Assert.Equal(AudienceFunctionNames.ScreenOf(Names.Of(form)), AudienceFunctionNames.ScreenOf(Names.Of(newForm)));
+
     [Fact]
     public void FunctionNoLongerFollowed_KeepsItsKey() =>
         Assert.Equal("admin.former", Names.Of("admin.former"));

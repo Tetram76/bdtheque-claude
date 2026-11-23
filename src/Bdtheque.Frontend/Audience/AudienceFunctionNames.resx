@@ -73,7 +73,7 @@
     <value>Saisie d&apos;un album</value>
   </data>
   <data name="admin.album.new" xml:space="preserve">
-    <value>Saisie d&apos;un nouvel album</value>
+    <value>Saisie d&apos;un album · nouvel album</value>
   </data>
   <data name="admin.album.created" xml:space="preserve">
     <value>Saisie d&apos;un album · création</value>
@@ -124,7 +124,7 @@
     <value>Saisie d&apos;une série</value>
   </data>
   <data name="admin.series-form.new" xml:space="preserve">
-    <value>Saisie d&apos;une nouvelle série</value>
+    <value>Saisie d&apos;une série · nouvelle série</value>
   </data>
   <data name="admin.series-form.created" xml:space="preserve">
     <value>Saisie d&apos;une série · création</value>
@@ -196,7 +196,7 @@
     <value>Saisie d&apos;une édition</value>
   </data>
   <data name="admin.edition-form.new" xml:space="preserve">
-    <value>Saisie d&apos;une nouvelle édition</value>
+    <value>Saisie d&apos;une édition · nouvelle édition</value>
   </data>
   <data name="admin.edition-form.created" xml:space="preserve">
     <value>Saisie d&apos;une édition · création</value>
@@ -250,7 +250,7 @@
     <value>Saisie d&apos;une intention d&apos;acquisition</value>
   </data>
   <data name="admin.purchase-intent-form.new" xml:space="preserve">
-    <value>Saisie d&apos;une nouvelle intention d&apos;acquisition</value>
+    <value>Saisie d&apos;une intention d&apos;acquisition · nouvelle intention</value>
   </data>
   <data name="admin.purchase-intent-form.created" xml:space="preserve">
     <value>Saisie d&apos;une intention d&apos;acquisition · création</value>
@@ -340,7 +340,7 @@
     <value>Saisie d&apos;un éditeur</value>
   </data>
   <data name="admin.publisher-form.new" xml:space="preserve">
-    <value>Saisie d&apos;un nouvel éditeur</value>
+    <value>Saisie d&apos;un éditeur · nouvel éditeur</value>
   </data>
   <data name="admin.publisher-form.created" xml:space="preserve">
     <value>Saisie d&apos;un éditeur · création</value>
