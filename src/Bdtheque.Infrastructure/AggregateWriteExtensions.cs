@@ -77,6 +77,54 @@ public static class AggregateWriteExtensions
     }
 
     /// <summary>
+    /// Locks the root rows of two aggregates of the same type that one write changes together (the merge of two records,
+    /// fonctionnel/regles-metier/fusion-des-fiches.md), checks that each is still at the version the client read, then loads
+    /// both and marks them modified, as <see cref="LoadAggregateForWriteAsync{TRoot}"/> does for one.
+    /// </summary>
+    /// <remarks>
+    /// The rows are locked in the order of their identifiers: two such writes on the same two aggregates, whichever comes first
+    /// in their request, take their locks in the same order, and can never wait for each other.
+    /// </remarks>
+    /// <returns>The two aggregates, in the order of the arguments.</returns>
+    /// <exception cref="ArgumentException">The same aggregate twice.</exception>
+    /// <exception cref="EntityNotFoundException">No aggregate has one of the identifiers.</exception>
+    /// <exception cref="DbUpdateConcurrencyException">An aggregate was modified since its version.</exception>
+    public static async Task<(TRoot First, TRoot Second)> LoadAggregatesForWriteAsync<TRoot>(
+        this BdthequeDbContext context,
+        (Guid Id, uint Version) first,
+        (Guid Id, uint Version) second,
+        Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape = null,
+        CancellationToken cancellationToken = default)
+        where TRoot : EntityBase, IAggregateRoot
+    {
+        if (first.Id == second.Id)
+            throw new ArgumentException($"The aggregate {first.Id} is given twice.", nameof(second));
+        if (context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("An aggregate can only be loaded for write within a transaction.");
+        if (context.ChangeTracker.Entries().Any())
+            throw new InvalidOperationException(
+                "An aggregate must be locked before anything is tracked: entities read earlier would not be refreshed.");
+
+        foreach (var (id, version) in new[] { first, second }.OrderBy(r => r.Id))
+        {
+            var lockedVersions = await context.Database
+                .SqlQueryRaw<long>(LockStatement<TRoot>(context, column => column + "::text::bigint", BdthequeDbContext.VersionProperty), id)
+                .ToListAsync(cancellationToken);
+            if (lockedVersions.Count == 0)
+                throw new EntityNotFoundException(typeof(TRoot), id);
+            if (lockedVersions[0] != version)
+                throw new DbUpdateConcurrencyException($"{typeof(TRoot).Name} {id} was modified since version {version} was read.");
+        }
+
+        var query = context.Set<TRoot>().AsQueryable();
+        var ids = new[] { first.Id, second.Id };
+        var roots = await (shape is null ? query : shape(query)).Where(r => ids.Contains(r.Id)).ToListAsync(cancellationToken);
+        foreach (var root in roots)
+            context.Entry(root).State = EntityState.Modified;
+        return (roots.Single(r => r.Id == first.Id), roots.Single(r => r.Id == second.Id));
+    }
+
+    /// <summary>
     /// Locks the root row of another aggregate than the one a form writes, a child of which the form adds (e.g. a publisher
     /// collection created on the spot from the form of a series), then loads the root and marks it modified: its version changes,
     /// so that a form of that aggregate read before fails as stale, as for any write on it. No version is checked, the form never

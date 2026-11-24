@@ -1,6 +1,7 @@
 using System.Data;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -32,7 +33,57 @@ internal static class GenreEndpoints
         genres.MapPost("/", CreateAsync);
         genres.MapPut("/{id:guid}", UpdateAsync);
         genres.MapDeletion<Genre>(DeletionLinks);
+        genres.MapGet("/merge", GetMergeAsync);
+        genres.MapPost("/merge", MergeAsync);
     }
+
+    // The series and albums a genre classes, as the lists filtered on it find them (visuel/fusion/fusion-de-deux-fiches.md).
+    private static readonly (EntityKind Kind, Func<BdthequeDbContext, Guid, IQueryable<Guid>> Records)[] MergeLinks =
+    [
+        (EntityKind.Series, (context, id) => context.Series.AsNoTracking().WhereGenre(id).Select(s => s.Id)),
+        (EntityKind.Album, (context, id) => context.Albums.AsNoTracking().WhereGenre(id).Select(a => a.Id)),
+    ];
+
+    /// <summary>Two genres to merge, and what they class (fonctionnel/regles-metier/fusion-des-fiches.md).</summary>
+    private static async Task<GenreMergePreview> GetMergeAsync(Guid first, Guid second, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot: the counts are those of the two genres read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        return new GenreMergePreview(
+            await MergeRecordAsync(context, first, cancellationToken),
+            await MergeRecordAsync(context, second, cancellationToken),
+            await RecordMerge.CountLinksAsync(context, first, second, MergeLinks, cancellationToken));
+    }
+
+    private static async Task<GenreMergeRecord> MergeRecordAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken) =>
+        await context.Genres.AsNoTracking()
+            .Where(g => g.Id == id)
+            .Select(g => new GenreMergeRecord(g.Id, g.Label, g.ModifiedAt, EF.Property<uint>(g, BdthequeDbContext.VersionProperty)))
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(Genre), id);
+
+    /// <summary>
+    /// Merges two genres: the genre that remains keeps the label chosen, and classes the series and albums of both, each once.
+    /// </summary>
+    private static Task<MergeResult> MergeAsync(GenreMergeRequest request, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        RecordMerge.MergeAsync<Genre>(context, request.First, request.Second, RecordMerge.KeepsFirst([request.Label]),
+            pair => pair.Kept.SetLabel(pair.Of(request.Label).Label),
+            async pair =>
+        {
+            foreach (var series in await RecordMerge.LoadLinkedForWriteAsync<Series>(
+                         context, context.Series.Where(s => s.Genres.Any(g => g.Id == pair.Merged.Id)).Select(s => s.Id), cancellationToken))
+            {
+                await context.Entry(series).Collection(s => s.Genres).LoadAsync(cancellationToken);
+                series.TransferGenre(pair.Merged, pair.Kept);
+            }
+
+            foreach (var album in await RecordMerge.LoadLinkedForWriteAsync<Album>(
+                         context, context.Albums.Where(a => a.Genres.Any(g => g.Id == pair.Merged.Id)).Select(a => a.Id), cancellationToken))
+            {
+                await context.Entry(album).Collection(a => a.Genres).LoadAsync(cancellationToken);
+                album.TransferGenre(pair.Merged, pair.Kept);
+            }
+        }, cancellationToken);
 
     public static void MapGenreCatalog(this RouteGroupBuilder catalog)
     {
