@@ -191,8 +191,10 @@ jobs:
             echo "<!-- end -->"
           } > body.md
           if [ -z "$issue" ]; then
-            # Only the initial title: the user may change it, the issue being found by its labels alone.
-            issue=$(basename "$(gh issue create --title "Harnais sécurité : Vulnérabilités connues" --label security-audit --label harness --label agent --body-file body.md)")
+            # Only the initial title: the user may change it, the issue being found by its labels alone. The type of
+            # a tracking issue is Task (gestion-projet/revue-tickets/issues.md), set at its creation through the REST API.
+            issue=$(gh api "repos/$GH_REPO/issues" -f title="Harnais sécurité : Vulnérabilités connues" -F body=@body.md \
+              -f type=Task -f 'labels[]=security-audit' -f 'labels[]=harness' -f 'labels[]=agent' --jq .number)
           else
             gh issue edit "$issue" --body-file body.md
           fi

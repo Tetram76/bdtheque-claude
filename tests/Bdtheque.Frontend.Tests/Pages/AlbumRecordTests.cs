@@ -40,7 +40,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     private readonly FakeCatalogApi _catalog;
     // A request of a visit of the browser, which the audience measurement records.
     private readonly TestRequest _request = new(
-        new Dictionary<string, string> { [BrowserVisit.CookieName] = new BrowserVisit(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3)).Format() });
+        new Dictionary<string, string> { [BrowserVisit.CookieName] = new BrowserVisit(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3)).Format() });
 
     public AlbumRecordTests()
     {

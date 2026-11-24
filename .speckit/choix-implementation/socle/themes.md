@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T08:57:05Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T16:00:00Z }
 ---
 
 # Thèmes
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T08:57:05Z }
 ## Contrats et thèmes
 
 - **Les contrats du thème de base sont des propriétés personnalisées CSS** ([Thème de base](../../visuel/charte-graphique/theme-de-base.md)), à valeur neutre, déclarées par sa feuille, chargée pour tout thème : couleurs, typographie, formes, espacements et tailles, points d'ancrage des touches propres à un thème, et présentation d'un écran quand les thèmes ne la partagent pas. Les espacements et tailles des contrôles sont des propriétés uniques, qui donnent à un bouton la même taille sur toutes les pages ([Convivialité et efficacité](../../visuel/charte-graphique/convivialite-et-efficacite.md)).
+- **Le thème de base n'est pas un thème proposé** ([Thème de base](../../visuel/charte-graphique/theme-de-base.md)) : jamais présenté seul, ni tiré, ni choisi dans l'environnement de validation, il n'a ni clé ni place au catalogue des thèmes, et tout thème proposé a sa propre feuille, chargée après la sienne. Une visite dont le cookie porte encore le thème de base reçoit un thème tiré de nouveau, comme une visite dont le thème n'est plus proposé (§ Thème de la visite). Tests, contrastes et captures s'exécutent dans chaque thème proposé, qui vérifie aussi ce qu'il hérite des contrats ; le thème de base ne garde en propre que deux vérifications : sa feuille donne une valeur à chaque couleur des paires du test des contrastes, et une page n'est jamais prête sans elle.
+  - **Alternative écartée (thème de base gardé dans les tests et les captures, hors du tirage)** : un rendu que personne ne voit, vérifié et capturé dans chaque écran, et un job du CI de plus, pour des contrats que chaque thème proposé exerce déjà.
 - **Un thème ne redéfinit que ces propriétés**, sous son sélecteur, et accroche ses touches aux points d'ancrage, jamais une règle propre à un composant ; les composants ne lisent que les contrats. Un besoin que les contrats ne couvrent pas les fait évoluer, dans le thème de base.
 - **Chantier d'un écran** : avant de l'écrire, il lit la présentation de l'écran dans chaque thème proposé (`visuel/` et maquettes), relève ce qui y varie d'un thème à l'autre et en fait des contrats du thème de base ; l'écran n'a qu'un balisage et des styles qui ne lisent que ces contrats.
 - **Un script de thème** dessine ce qu'une feuille ne peut pas (ex. bords tracés à la main, tirés au hasard) :

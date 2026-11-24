@@ -175,10 +175,12 @@ public sealed partial class ThemeContrastTests
         Assert.Empty(failures);
     }
 
+    // The base theme is never presented on its own (visuel/charte-graphique/theme-de-base.md): its contracts are checked for
+    // what each offered theme inherits from them, a value for every color it does not redefine.
     [Fact]
     public void BaseTheme_GivesAValueToEveryColorOfThePairs()
     {
-        var colors = ColorsOf(ThemeCatalog.Base);
+        var colors = ColorsOf(theme: null);
 
         Assert.All(Pairs.SelectMany(pair => new[] { pair.Foreground, pair.Background }), name => Assert.True(colors.ContainsKey(name), name));
     }
@@ -191,13 +193,13 @@ public sealed partial class ThemeContrastTests
     }
 
     // The colours of the day, set by the page on its root element, are read by the declarations of the theme: overlaid on
-    // them, they keep their own names (day-…).
-    private static Dictionary<string, string> ColorsOf(Theme theme, DayPalette? day = null)
+    // them, they keep their own names (day-…). Without a theme, the contracts of the base theme alone.
+    private static Dictionary<string, string> ColorsOf(Theme? theme, DayPalette? day = null)
     {
         var declarations = Declarations("base.css");
-        if (theme.Stylesheet is { } stylesheet)
+        if (theme is not null)
         {
-            foreach (var (name, value) in Declarations(Path.GetFileName(stylesheet)))
+            foreach (var (name, value) in Declarations(Path.GetFileName(theme.Stylesheet)))
                 declarations[name] = value;
         }
 

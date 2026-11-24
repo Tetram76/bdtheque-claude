@@ -11,7 +11,7 @@ namespace Bdtheque.Frontend.Tests.Lists;
 /// </summary>
 public sealed class ListMemoryTests
 {
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3));
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3));
 
     private const string Left = $"{AppPaths.Albums}?q=tintin&entry=T&state=InCollection&genreId=01900000-0000-7000-8000-0000000000a2&page=2";
 

@@ -14,11 +14,18 @@ public sealed class PageReadinessTests(ApplicationHost application) : BrowserTes
 {
     private static readonly ViewportSize Desktop = new() { Width = 1440, Height = 900 };
 
-    // The sheet of the theme itself, or, for the base theme, which has none, that of its contracts, loaded for every theme.
     [Theory, InEachTheme]
-    public async Task PageWhoseThemeStylesheetDidNotLoad_IsNeverReady_AndNamesTheStylesheet(string theme)
+    public Task PageWhoseThemeStylesheetDidNotLoad_IsNeverReady_AndNamesTheStylesheet(string theme) =>
+        NeverReadyWithoutAsync(theme, TestThemes.Of(theme).Stylesheet);
+
+    // The sheet of the contracts of the base theme, loaded under every theme: whichever theme, the page is not ready without it.
+    [Fact]
+    public Task PageWhoseBaseThemeStylesheetDidNotLoad_IsNeverReady_AndNamesTheStylesheet() =>
+        NeverReadyWithoutAsync(ThemeCatalog.Gazette.Key, "themes/base.css");
+
+    private async Task NeverReadyWithoutAsync(string theme, string sheet)
     {
-        var stylesheet = "/" + (TestThemes.Of(theme).Stylesheet ?? "themes/base.css");
+        var stylesheet = "/" + sheet;
         var name = stylesheet[..stylesheet.LastIndexOf('.')] + ".";
         var page = await NewPageInThemeAsync(theme, Desktop);
         await page.RouteAsync(url => new Uri(url).AbsolutePath.StartsWith(name, StringComparison.Ordinal)

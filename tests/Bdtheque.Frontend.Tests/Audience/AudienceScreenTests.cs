@@ -11,7 +11,7 @@ namespace Bdtheque.Frontend.Tests.Audience;
 /// <summary>The display of a screen, recorded once per display, by the request that renders it.</summary>
 public sealed class AudienceScreenTests : BunitContext
 {
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3));
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3));
     private static readonly AudienceFunction Screen = new("screen", AudienceFunctionKind.Screen);
 
     private readonly FakeAudienceApi _api = new();

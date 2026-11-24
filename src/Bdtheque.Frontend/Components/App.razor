@@ -31,10 +31,7 @@ else
         <link rel="preload" href="@Assets[Theme.PreloadedFont]" as="font" type="font/woff2" crossorigin />
         <link rel="stylesheet" href="@Assets["app.css"]" />
         <link rel="stylesheet" href="@Assets["themes/base.css"]" />
-        @if (Theme.Stylesheet is { } stylesheet)
-        {
-            <link rel="stylesheet" href="@Assets[stylesheet]" />
-        }
+        <link rel="stylesheet" href="@Assets[Theme.Stylesheet]" />
         <link rel="stylesheet" href="@Assets["Bdtheque.Frontend.styles.css"]" />
         <ImportMap />
         <HeadOutlet />

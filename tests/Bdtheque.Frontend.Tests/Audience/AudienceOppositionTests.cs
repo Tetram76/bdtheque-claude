@@ -9,7 +9,7 @@ namespace Bdtheque.Frontend.Tests.Audience;
 /// </summary>
 public sealed class AudienceOppositionTests
 {
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3), new MeasuredVisit(Guid.CreateVersion7(), false));
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3), new MeasuredVisit(Guid.CreateVersion7(), false));
 
     [Fact]
     public void Visitor_WithoutChoice_IsNotOpposed()
