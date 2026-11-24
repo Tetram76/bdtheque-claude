@@ -56,7 +56,7 @@ public sealed record ContributionItem(Guid Id, AuthorListItem Author, Contributi
 public sealed record PurchaseIntentItem(Guid Id, DateTimeOffset CreatedAt, DateTimeOffset ModifiedAt);
 
 /// <summary>
-/// A universe with the chain of its ancestors, each leading, like the universe itself, to its works
+/// A universe with the chain of its ancestors, each leading, like the universe itself, to its record
 /// (fonctionnel/structure-de-l-application.md).
 /// </summary>
 /// <param name="Ancestors">From the top of the hierarchy down to the parent; empty for a universe at the top.</param>
@@ -159,12 +159,20 @@ public sealed record AuthorDetail(
 /// </summary>
 public sealed record BibliographyEntry(SeriesBibliographyItem? Series, AlbumBibliographyItem? Album);
 
-/// <summary>A series of a bibliography, credited on the series itself or on one of its albums.</summary>
-/// <param name="Overview">The series as a whole, its albums the author took no part in included.</param>
-/// <param name="Roles">The roles credited on the series itself; empty for an author credited on its albums only.</param>
-/// <param name="Albums">The albums of the series the author took part in, in the order of the series.</param>
+/// <summary>
+/// A series of a bibliography, credited — or, in the record of a universe, attached — on the series itself or on one of its
+/// albums.
+/// </summary>
+/// <param name="Overview">The series as a whole, its albums the list does not present included.</param>
+/// <param name="OnSeries">
+/// Whether the series is credited, or attached, itself: the record of a universe then presents all its albums, and says how many
+/// of them are in the collection out of all of them (visuel/charte-graphique/convivialite-et-efficacite.md).
+/// </param>
+/// <param name="Roles">The roles credited on the series itself; empty for an author credited on its albums only, and in a universe.</param>
+/// <param name="Albums">The albums of the series the list presents, in the order of the series.</param>
 public sealed record SeriesBibliographyItem(
-    SeriesListItem Series, SeriesOverview Overview, IReadOnlyList<ContributionRole> Roles, IReadOnlyList<AlbumBibliographyItem> Albums);
+    SeriesListItem Series, SeriesOverview Overview, bool OnSeries, IReadOnlyList<ContributionRole> Roles,
+    IReadOnlyList<AlbumBibliographyItem> Albums);
 
 /// <summary>
 /// An album of a bibliography, with every role the author is credited with on it, and its date of first publication,

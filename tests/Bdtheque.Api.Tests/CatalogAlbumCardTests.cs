@@ -9,7 +9,7 @@ namespace Bdtheque.Api.Tests;
 /// <summary>
 /// The albums as cards — cover, rating, membership of the collection, purchase intent — and the series
 /// represented by their number of albums and the covers of their first ones, in the record of a series,
-/// the bibliography of an author and the works of a genre (visuel/fiche-serie/, visuel/fiche-auteur/).
+/// the bibliography of an author and the record of a universe (visuel/fiche-serie/, visuel/fiche-auteur/, visuel/fiche-univers/).
 /// </summary>
 public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFactory>
 {
@@ -189,26 +189,27 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
-    public async Task Works_PresentTheAlbumsAsCards_AndEachSeriesWithItsAlbumCountAndTheCoversOfItsFirstVolumes()
+    public async Task UniverseRecord_PresentsTheAlbumsAsCards_AndEachSeriesWithItsAlbumCountAndTheCoversOfItsFirstVolumes()
     {
         var publisher = await CreatePublisherAsync("Futuropolis");
-        var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Chronique {Guid.NewGuid():N}"));
-        // A series of which one album only is of the genre.
+        var universe = await PostAsync<UniverseForm>("/admin/universes", new CreateUniverseRequest($"Chronique {Guid.NewGuid():N}", null, null));
+        // A series of which one album only is attached to the universe.
         var series = await CreateSeriesAsync("Le Combat ordinaire");
         var first = await CreateAlbumAsync("Le Combat ordinaire", series.Id, volume: 1);
-        var second = await CreateAlbumAsync("Les Quantités négligeables", series.Id, volume: 2, genreIds: [genre.Id]);
+        var second = await CreateAlbumAsync("Les Quantités négligeables", series.Id, volume: 2, universeIds: [universe.Id]);
         var firstCover = await UploadAsync(first.Id, await CreateOwnedEditionAsync(first.Id, publisher.Id, 2003), VisualType.Cover);
         var secondCover = await UploadAsync(second.Id, await CreateOwnedEditionAsync(second.Id, publisher.Id, 2004), VisualType.Cover);
-        var oneShot = await CreateAlbumAsync("Une métamorphose iranienne", null, rating: AlbumRating.Average, genreIds: [genre.Id]);
+        var oneShot = await CreateAlbumAsync("Une métamorphose iranienne", null, rating: AlbumRating.Average, universeIds: [universe.Id]);
 
-        var works = (await GetAsync<GenreWorks>($"/catalog/genres/{genre.Id}/works")).Works.Items;
+        var works = (await GetAsync<UniverseDetail>($"/catalog/universes/{universe.Id}")).Works;
 
         // "Combat ordinaire [Le]" < "métamorphose iranienne [Une]".
         var seriesEntry = works[0].Series!;
         Assert.Equal(2, seriesEntry.Overview.AlbumCount);
         Assert.Equal([firstCover, secondCover], seriesEntry.Overview.FirstVolumeCovers);
-        Assert.Equal([(second.Id, (AlbumCover?)secondCover)], seriesEntry.Albums.Select(a => (a.Album.Id, a.Cover)));
-        Assert.Equal((oneShot.Id, (AlbumRating?)AlbumRating.Average, (AlbumCover?)null), (works[1].Album!.Album.Id, works[1].Album!.Rating, works[1].Album!.Cover));
+        Assert.Equal([(second.Id, (AlbumCover?)secondCover)], seriesEntry.Albums.Select(a => (a.Album.Album.Id, a.Album.Cover)));
+        var oneShotCard = works[1].Album!.Album;
+        Assert.Equal((oneShot.Id, (AlbumRating?)AlbumRating.Average, (AlbumCover?)null), (oneShotCard.Album.Id, oneShotCard.Rating, oneShotCard.Cover));
     }
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
@@ -225,9 +226,9 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
     private Task<AlbumForm> CreateAlbumAsync(
         string title, Guid? seriesId, int? volume = null, AlbumRating? rating = null, Guid[]? genreIds = null,
         ContributionContent[]? contributions = null, AlbumType type = AlbumType.Regular, bool specialIssue = false, int? start = null,
-        int? end = null) =>
+        int? end = null, Guid[]? universeIds = null) =>
         PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
-            title, null, seriesId, type, specialIssue, volume, start, end, null, null, null, null, rating, genreIds ?? [], [],
+            title, null, seriesId, type, specialIssue, volume, start, end, null, null, null, null, rating, genreIds ?? [], universeIds ?? [],
             contributions ?? []));
 
     private async Task<Guid> CreateOwnedEditionAsync(Guid albumId, Guid publisherId, int? publicationYear) =>

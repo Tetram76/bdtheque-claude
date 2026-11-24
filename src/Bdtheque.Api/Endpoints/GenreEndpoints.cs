@@ -37,28 +37,6 @@ internal static class GenreEndpoints
     public static void MapGenreCatalog(this RouteGroupBuilder catalog)
     {
         catalog.MapGet("/genres", ListAsync);
-        catalog.MapGet("/genres/{id:guid}/works", GetWorksAsync);
-    }
-
-    /// <summary>
-    /// The series and albums of a genre, which has no record (fonctionnel/structure-de-l-application.md):
-    /// a series of the genre with all its albums, the genres of an album in a series being those of the
-    /// album and of the series, and a series with those of its albums only that are of the genre.
-    /// </summary>
-    private static async Task<GenreWorks> GetWorksAsync(
-        Guid id, BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize)
-    {
-        // A single snapshot for the reads assembled into one another.
-        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
-        var genre = await context.Genres.AsNoTracking()
-                        .Where(g => g.Id == id)
-                        .Select(g => new GenreListItem(g.Id, g.Label))
-                        .SingleOrDefaultAsync(cancellationToken)
-                    ?? throw new EntityNotFoundException(typeof(Genre), id);
-
-        var albums = context.Albums.AsNoTracking().WhereGenre(id);
-        var series = context.Series.AsNoTracking().Where(s => s.Genres.Any(g => g.Id == id) || albums.Any(a => a.SeriesId == s.Id));
-        return new GenreWorks(genre, await CatalogWorks.ReadPageAsync(context, series, albums, page, pageSize, cancellationToken));
     }
 
     private static Task<Page<GenreListItem>> ListAsync(

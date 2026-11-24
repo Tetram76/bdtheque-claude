@@ -1,4 +1,5 @@
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Frontend.Lists;
 
 namespace Bdtheque.Frontend.Navigation;
 
@@ -62,11 +63,17 @@ public static class AppPaths
     /// <summary>The record of an album (visuel/fiche-album/).</summary>
     public static string Album(Guid id) => $"{AlbumsSection}/{id}";
 
-    /// <summary>The series and albums of a genre, presented as the bibliography of an author (fonctionnel/structure-de-l-application.md).</summary>
-    public static string GenreWorks(Guid id) => NotYetImplemented;
+    /// <summary>
+    /// Where a genre leads: the list of the albums of the consultation, filtered on that genre alone, from its first page
+    /// (fonctionnel/structure-de-l-application.md): the search, the filters and the entry the list kept are lost.
+    /// </summary>
+    public static string AlbumsOfGenre(Guid id) => new CatalogAlbumListQuery(GenreId: id).Href();
 
-    /// <summary>The series and albums of a universe, those of its sub-universes included.</summary>
-    public static string UniverseWorks(Guid id) => NotYetImplemented;
+    /// <summary>The route of the record of a universe, which has no list and no entry in the menu of the consultation.</summary>
+    public const string UniverseRoute = "/universes/{Id:guid}";
+
+    /// <summary>The record of a universe (visuel/fiche-univers/).</summary>
+    public static string UniverseRecord(Guid id) => $"/universes/{id}";
 
     /// <summary>The path of the list of the series, under which the record of a series is: where the entry « Séries » of the menu is current.</summary>
     public const string SeriesSection = "/series";

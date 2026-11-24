@@ -225,7 +225,8 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
 /// an album of a series with two editions in the collection, one with four visuals and one gift without any, wished for
 /// again in a third, and a collective drawing, attached to a universe within two others; an album targeted by an intent on
 /// itself, and one catalogued only; their series, and a series without any album; the whole bibliography of the author of
-/// the series, and an author credited on nothing. Its visuals are the only ones, so that the edition in the spotlight, and
+/// the series, and an author credited on nothing; a universe with its description, a sub-universe, and series and albums
+/// attached to it. Its visuals are the only ones, so that the edition in the spotlight, and
 /// the colours of the day, are the same at each capture.
 /// </summary>
 public sealed class RecordsApplication : ApplicationHost
@@ -263,6 +264,18 @@ public sealed class RecordsApplication : ApplicationHost
     /// <summary>The first of the seven albums of « Sergent Kirk », whose last three are far from it in the rest of its series.</summary>
     public Guid KirkFirstAlbumId { get; private set; }
 
+    /// <summary>
+    /// « Univers Hugo Pratt », with its description and a sub-universe (visuel/fiche-univers/): « Fort Wheeling », attached itself,
+    /// « Corto Maltese » through one of its albums, and « Carnet de croquis », an album without series.
+    /// </summary>
+    public Guid UniverseId { get; private set; }
+
+    /// <summary>« Corto Maltese », sub-universe of <see cref="UniverseId"/>, parent of the universe of <see cref="AlbumId"/>.</summary>
+    public Guid SubUniverseId { get; private set; }
+
+    /// <summary>« Aventure », the genre of the series, which leads to the list of the albums filtered on it.</summary>
+    public Guid GenreId { get; private set; }
+
     protected override async Task SeedAsync()
     {
         using var api = CreateApiClient();
@@ -271,8 +284,12 @@ public sealed class RecordsApplication : ApplicationHost
         var collection = await PostAsync<PublisherCollectionForm>(api,
             $"/admin/publishers/{casterman.Id}/collections", new CreatePublisherCollectionRequest("Univers d'auteurs", casterman.Version));
         var aventure = await PostAsync<GenreForm>(api, "/admin/genres", new CreateGenreRequest("Aventure"));
-        var pratt = await PostAsync<UniverseForm>(api, "/admin/universes", new CreateUniverseRequest("Univers Hugo Pratt", null, null));
+        GenreId = aventure.Id;
+        var pratt = await PostAsync<UniverseForm>(api, "/admin/universes", new CreateUniverseRequest(
+            "Univers Hugo Pratt", "Les mondes de Hugo Pratt, des mers du Sud aux plaines de l'Ouest.", null));
+        UniverseId = pratt.Id;
         var cortoUniverse = await PostAsync<UniverseForm>(api, "/admin/universes", new CreateUniverseRequest("Corto Maltese", null, pratt.Id));
+        SubUniverseId = cortoUniverse.Id;
         var antilles = await PostAsync<UniverseForm>(api, "/admin/universes", new CreateUniverseRequest("Les Antilles", null, cortoUniverse.Id));
         var hugo = await AuthorAsync(api, "Pratt", "Hugo");
         string[] drawers = ["Inès Vasseur", "Tom Arribas", "Clara Benmansour", "Yann Le Goff", "Nina Okafor"];
@@ -325,7 +342,7 @@ public sealed class RecordsApplication : ApplicationHost
         // edition in the spotlight stays the only one with a cover.
         AuthorId = hugo.Id;
         await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
-            "Carnet de croquis", null, null, AlbumType.Regular, false, null, null, null, 1990, null, null, null, AlbumRating.Good, [], [],
+            "Carnet de croquis", null, null, AlbumType.Regular, false, null, null, null, 1990, null, null, null, AlbumRating.Good, [], [pratt.Id],
             [new(hugo.Id, ContributionRole.Scenarist), new(hugo.Id, ContributionRole.Illustrator)]));
         await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
             "Les Scorpions du désert", null, null, null, false, false, false, null, null,
@@ -349,6 +366,18 @@ public sealed class RecordsApplication : ApplicationHost
         UncreditedAuthorId = (await PostAsync<AuthorForm>(api, "/admin/authors", new CreateAuthorRequest(
             "Giraud", "Jean", "Moebius", "Né à Nogent-sur-Marne en 1938, il signe Gir ses westerns et Moebius le reste de son œuvre.",
             "Française"))).Id;
+
+        // The record of « Univers Hugo Pratt » (visuel/fiche-univers/): besides « Corto Maltese », attached through one of its albums,
+        // and « Carnet de croquis », a series attached itself, of an album rated and one wished for, the ratings and the possessions
+        // in their columns. Last, credited to nobody and without edition, so that no other record, nor the spotlight, changes.
+        var wheeling = await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
+            "Fort Wheeling", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [pratt.Id], []));
+        await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
+            null, null, wheeling.Id, AlbumType.Regular, false, 1, null, null, 1962, null, null, null, AlbumRating.Good, [], [], []));
+        var wished = await PostAsync<AlbumForm>(api, "/admin/albums", new AlbumContent(
+            null, null, wheeling.Id, AlbumType.Regular, false, 2, null, null, 1963, null, null, null, null, [], [], []));
+        await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{wished.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, wished.Version));
     }
 
     private async Task<AuthorForm> AuthorAsync(HttpClient api, string lastName, string firstName) =>

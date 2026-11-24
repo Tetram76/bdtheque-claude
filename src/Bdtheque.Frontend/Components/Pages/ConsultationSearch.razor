@@ -165,7 +165,7 @@
     {
         var page = await Api.GetAsync<Page<GenreListItem>>(CatalogPath("genres", text));
         return new(EntityKind.Genre, page.TotalCount, page.Items.Count, null, Hits(page.Items, genre =>
-            @<RowEntry><a href="@AppPaths.GenreWorks(genre.Id)">@genre.Label</a></RowEntry>));
+            @<RowEntry><a href="@AppPaths.AlbumsOfGenre(genre.Id)">@genre.Label</a></RowEntry>));
     }
 
     // A sub-universe is named with its parent, which tells it apart from those of the same name under another one.
@@ -173,7 +173,7 @@
     {
         var page = await Api.GetAsync<Page<UniverseListItem>>(CatalogPath("universes", text));
         return new(EntityKind.Universe, page.TotalCount, page.Items.Count, null, Hits(page.Items, universe =>
-            @<RowEntry Detail="@universe.ParentName"><a href="@AppPaths.UniverseWorks(universe.Id)">@universe.Name</a></RowEntry>));
+            @<RowEntry Detail="@universe.ParentName"><a href="@AppPaths.UniverseRecord(universe.Id)">@universe.Name</a></RowEntry>));
     }
 
     private static string CatalogPath(string list, string text) =>

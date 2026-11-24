@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Fiche d&apos;un univers</value>
+  </data>
+  <data name="Breadcrumb.Universes" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="SubUniverses.Count" xml:space="preserve">
+    <value>{0} sous-univers</value>
+  </data>
+  <data name="Tree.Title" xml:space="preserve">
+    <value>Où se situe-t-il ?</value>
+  </data>
+  <data name="Tree.Kicker" xml:space="preserve">
+    <value>Arborescence</value>
+  </data>
+  <data name="Tree.Summary" xml:space="preserve">
+    <value>L'arborescence de son univers de premier niveau : {0}, sur {1}, chacun sous son parent, frères par ordre alphabétique.</value>
+  </data>
+  <data name="Universes.One" xml:space="preserve">
+    <value>{0} univers</value>
+  </data>
+  <data name="Universes.Other" xml:space="preserve">
+    <value>{0} univers</value>
+  </data>
+  <data name="Levels.One" xml:space="preserve">
+    <value>{0} niveau</value>
+  </data>
+  <data name="Levels.Other" xml:space="preserve">
+    <value>{0} niveaux</value>
+  </data>
+  <data name="Facts" xml:space="preserve">
+    <value>En bref</value>
+  </data>
+  <data name="Albums.None" xml:space="preserve">
+    <value>Aucun album rattaché</value>
+  </data>
+  <data name="Series.One" xml:space="preserve">
+    <value>{0} série</value>
+  </data>
+  <data name="Series.Other" xml:space="preserve">
+    <value>{0} séries</value>
+  </data>
+  <data name="Albums.One" xml:space="preserve">
+    <value>{0} album</value>
+  </data>
+  <data name="Albums.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Description.Title" xml:space="preserve">
+    <value>De quoi s&apos;agit-il ?</value>
+  </data>
+  <data name="Description.Kicker" xml:space="preserve">
+    <value>Présentation</value>
+  </data>
+  <data name="Dates" xml:space="preserve">
+    <value>Univers créé le {0}, modifié le {1}.</value>
+  </data>
+</root>

@@ -7865,82 +7865,6 @@
         }
       }
     },
-    "/catalog/genres/{id}/works": {
-      "get": {
-        "tags": [
-          "GenreEndpoints"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 1
-            }
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 50
-            }
-          }
-        ],
-        "responses": {
-          "404": {
-            "description": "Not Found",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetails"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenreWorks"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/catalog/universes": {
       "get": {
         "tags": [
@@ -8015,7 +7939,7 @@
         }
       }
     },
-    "/catalog/universes/{id}/works": {
+    "/catalog/universes/{id}": {
       "get": {
         "tags": [
           "UniverseEndpoints"
@@ -8028,32 +7952,6 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 1
-            }
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
-              "format": "int32",
-              "default": 50
             }
           }
         ],
@@ -8083,7 +7981,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UniverseWorks"
+                  "$ref": "#/components/schemas/UniverseDetail"
                 }
               }
             }
@@ -13687,22 +13585,6 @@
           }
         }
       },
-      "GenreWorks": {
-        "required": [
-          "genre",
-          "works"
-        ],
-        "type": "object",
-        "properties": {
-          "genre": {
-            "$ref": "#/components/schemas/GenreListItem"
-          },
-          "works": {
-            "description": "The series and the albums without series together, by sort key.",
-            "$ref": "#/components/schemas/PageOfWorksEntry"
-          }
-        }
-      },
       "IFormFile": {
         "type": "string",
         "format": "binary"
@@ -15238,51 +15120,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UniverseListItem"
-            }
-          },
-          "number": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Number of the page, from 1.",
-            "format": "int32"
-          },
-          "size": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Maximum number of items per page.",
-            "format": "int32"
-          },
-          "totalCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "description": "Number of items of the whole list.",
-            "format": "int32"
-          }
-        },
-        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
-      },
-      "PageOfWorksEntry": {
-        "required": [
-          "items",
-          "number",
-          "size",
-          "totalCount"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WorksEntry"
             }
           },
           "number": {
@@ -17151,6 +16988,7 @@
         "required": [
           "series",
           "overview",
+          "onSeries",
           "roles",
           "albums"
         ],
@@ -17160,25 +16998,29 @@
             "$ref": "#/components/schemas/SeriesListItem"
           },
           "overview": {
-            "description": "The series as a whole, its albums the author took no part in included.",
+            "description": "The series as a whole, its albums the list does not present included.",
             "$ref": "#/components/schemas/SeriesOverview"
+          },
+          "onSeries": {
+            "type": "boolean",
+            "description": "Whether the series is credited, or attached, itself: the record of a universe then presents all its albums, and says how many\nof them are in the collection out of all of them (visuel/charte-graphique/convivialite-et-efficacite.md)."
           },
           "roles": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ContributionRole"
             },
-            "description": "The roles credited on the series itself; empty for an author credited on its albums only."
+            "description": "The roles credited on the series itself; empty for an author credited on its albums only, and in a universe."
           },
           "albums": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AlbumBibliographyItem"
             },
-            "description": "The albums of the series the author took part in, in the order of the series."
+            "description": "The albums of the series the list presents, in the order of the series."
           }
         },
-        "description": "A series of a bibliography, credited on the series itself or on one of its albums."
+        "description": "A series of a bibliography, credited — or, in the record of a universe, attached — on the series itself or on one of its\nalbums."
       },
       "SeriesCatalogList": {
         "required": [
@@ -17773,31 +17615,6 @@
           null
         ]
       },
-      "SeriesWorksItem": {
-        "required": [
-          "series",
-          "overview",
-          "albums"
-        ],
-        "type": "object",
-        "properties": {
-          "series": {
-            "$ref": "#/components/schemas/SeriesListItem"
-          },
-          "overview": {
-            "description": "The series as a whole, its albums not attached included.",
-            "$ref": "#/components/schemas/SeriesOverview"
-          },
-          "albums": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AlbumCard"
-            },
-            "description": "The albums of the series attached, all of them for a series attached itself, in the order of the series."
-          }
-        },
-        "description": "A series of the works, attached itself or through one of its albums, the genres and universes of an\nalbum in a series being those of the album and of the series\n(fonctionnel/regles-metier/genres-et-univers-d-un-album.md)."
-      },
       "SpotlightColors": {
         "required": [
           "palette"
@@ -17956,6 +17773,64 @@
         },
         "description": "A universe as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md), the list following\nthe hierarchy: each universe followed by its sub-universes."
       },
+      "UniverseDetail": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "ancestors",
+          "tree",
+          "works",
+          "createdAt",
+          "modifiedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ancestors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniverseListItem"
+            },
+            "description": "From the top of the hierarchy down to its parent; empty for a universe at the top."
+          },
+          "tree": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniverseInTree"
+            },
+            "description": "The whole tree of its universe at the top of the hierarchy, itself included, in the order of the hierarchy: each universe\nfollowed by its sub-universes, siblings by name; each says its parent, which places it in the tree, and what is attached\nto it as its own record presents it."
+          },
+          "works": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BibliographyEntry"
+            },
+            "description": "Its series and albums, those of its sub-universes included (fonctionnel/regles-metier/hierarchie-des-univers.md), presented\nas the bibliography of an author: the series and the albums without series together, by sort key; a series attached itself\nwith all its albums, a series attached through some of its albums only with those. Nobody being credited on a universe, no\nentry has roles."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "description": "The record of a universe in the consultation (fonctionnel/structure-de-l-application.md, visuel/fiche-univers/): whole,\nwithout filter, like every record."
+      },
       "UniverseForm": {
         "required": [
           "id",
@@ -18038,7 +17913,50 @@
             "description": "From the top of the hierarchy down to the parent; empty for a universe at the top."
           }
         },
-        "description": "A universe with the chain of its ancestors, each leading, like the universe itself, to its works\n(fonctionnel/structure-de-l-application.md)."
+        "description": "A universe with the chain of its ancestors, each leading, like the universe itself, to its record\n(fonctionnel/structure-de-l-application.md)."
+      },
+      "UniverseInTree": {
+        "required": [
+          "id",
+          "name",
+          "parentId",
+          "seriesCount",
+          "albumCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "seriesCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "albumCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "A universe of the tree on the record of a universe (visuel/fiche-univers/contenu.md): its place in the tree, by its parent,\nnone at the top, and the numbers of series and albums its own record presents, its own sub-universes included."
       },
       "UniverseListItem": {
         "required": [
@@ -18069,22 +17987,6 @@
               "string"
             ],
             "description": "The name of the parent universe; `null` for a universe at the top of the hierarchy."
-          }
-        }
-      },
-      "UniverseWorks": {
-        "required": [
-          "universe",
-          "works"
-        ],
-        "type": "object",
-        "properties": {
-          "universe": {
-            "$ref": "#/components/schemas/UniverseInHierarchy"
-          },
-          "works": {
-            "description": "The series and the albums without series together, by sort key, those of its sub-universes included\n(fonctionnel/regles-metier/hierarchie-des-univers.md).",
-            "$ref": "#/components/schemas/PageOfWorksEntry"
           }
         }
       },
@@ -18420,36 +18322,6 @@
           "BackCover"
         ],
         "description": "Type of visual attached to an edition (Type de visuel), its values following the fixed display\norder of fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md."
-      },
-      "WorksEntry": {
-        "required": [
-          "series",
-          "album"
-        ],
-        "type": "object",
-        "properties": {
-          "series": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/SeriesWorksItem"
-              }
-            ]
-          },
-          "album": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "$ref": "#/components/schemas/AlbumCard"
-              }
-            ]
-          }
-        },
-        "description": "An entry of the works: either a series, or an album without series, exactly one of the two."
       }
     }
   },

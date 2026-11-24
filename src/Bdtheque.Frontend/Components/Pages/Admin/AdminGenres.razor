@@ -94,7 +94,7 @@
                             <Button Href="@((ListOnly with { Edit = row.Id }).Href())" Icon="IconName.Edit" Label="@L["Edit"]"
                                     IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", row.Label]" />
                             <ActionsMenu Id="@($"genre-actions-{row.Id:N}")" Label="@L["More", row.Label]">
-                                <MenuItem Href="@AppPaths.GenreWorks(row.Id)" Icon="IconName.Exit" Label="@L["Menu.Works"]" />
+                                <MenuItem Href="@AppPaths.AlbumsOfGenre(row.Id)" Icon="IconName.Exit" Label="@L["Menu.Works"]" />
                                 <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
                                 <MenuSeparator />
                                 <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"

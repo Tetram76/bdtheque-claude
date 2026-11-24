@@ -77,7 +77,7 @@ else if (_author is { } author)
 
         @if (author.Bibliography.Count > 0)
         {
-            <Bibliography Entries="author.Bibliography" />
+            <Bibliography Entries="author.Bibliography" Of="RecordType.Author" />
         }
     </div>
 

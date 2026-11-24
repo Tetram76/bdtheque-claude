@@ -76,7 +76,7 @@
     <value>Autres actions sur {0}</value>
   </data>
   <data name="Menu.Works" xml:space="preserve">
-    <value>Voir ses œuvres dans la consultation</value>
+    <value>Voir ses albums dans la consultation</value>
   </data>
   <data name="Menu.Merge" xml:space="preserve">
     <value>Fusionner avec un autre genre…</value>

@@ -68,7 +68,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 
 Les fonctions de la consultation, recherche avancée exceptée ([Structure de l'application](../fonctionnel/structure-de-l-application.md)), et les écrans de l'administration qui restent à réaliser, fusion de deux fiches comprise (décision de l'utilisateur). Objectif : à son issue, l'application est **fonctionnellement complète**, hors recherche avancée et hors recherche d'une édition par son ISBN dans les sources externes, reportée à la partie 5 (décision de l'utilisateur).
 
-La liste des albums de la consultation (#603) est réalisée la première : elle fixe le modèle des listes de la consultation et le filtre qui limite la consultation à la collection, encore à préciser avec l'utilisateur ([Périmètre de la consultation](../fonctionnel/regles-metier/perimetre-de-la-consultation.md)). Les listes des séries, des auteurs et des intentions d'acquisition (#604 à #606), et celle d'un genre ou d'un univers (#607), la suivent ; la recherche simple (#608), après les listes des albums, des séries et des auteurs. Les modalités de la fusion (#614), que rien ne statue encore, sont définies avec l'utilisateur au démarrage de son chantier. Chaque chantier de la partie est soumis à la validation fonctionnelle.
+La liste des albums de la consultation (#603) est réalisée la première : elle fixe le modèle des listes de la consultation et le filtre qui limite la consultation à la collection, encore à préciser avec l'utilisateur ([Périmètre de la consultation](../fonctionnel/regles-metier/perimetre-de-la-consultation.md)). Les listes des séries, des auteurs et des intentions d'acquisition (#604 à #606), et la fiche d'un univers, avec la liste des albums d'un genre (#607), la suivent ; la recherche simple (#608), après les listes des albums, des séries et des auteurs. Les modalités de la fusion (#614), que rien ne statue encore, sont définies avec l'utilisateur au démarrage de son chantier. Chaque chantier de la partie est soumis à la validation fonctionnelle.
 
 | Ticket | Titre |
 | --- | --- |
@@ -76,7 +76,7 @@ La liste des albums de la consultation (#603) est réalisée la première : elle
 | ~~#604~~ | Liste des séries de la consultation |
 | ~~#605~~ | Liste des auteurs de la consultation |
 | ~~#606~~ | Liste publique des intentions d'acquisition |
-| #607 | Séries et albums d'un genre ou d'un univers dans la consultation |
+| ~~#607~~ | Fiche d'un univers et liste des albums d'un genre dans la consultation |
 | ~~#608~~ | Recherche simple de la consultation |
 | ~~#609~~ | Recherche d'une fiche à modifier depuis l'en-tête de l'administration |
 | ~~#610~~ | Écran du paramétrage de l'application |

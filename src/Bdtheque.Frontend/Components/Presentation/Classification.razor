@@ -15,7 +15,7 @@
                 <dd class="classification-genres">
                     @foreach (var genre in Genres)
                     {
-                        <a class="genre" href="@AppPaths.GenreWorks(genre.Id)">@genre.Label</a>
+                        <a class="genre" href="@AppPaths.AlbumsOfGenre(genre.Id)">@genre.Label</a>
                     }
                 </dd>
             </div>

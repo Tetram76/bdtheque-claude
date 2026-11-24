@@ -12,6 +12,11 @@ a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3
 input::placeholder{color:inherit}
 :focus-visible{outline:3px solid currentColor;outline-offset:2px}
 summary{cursor:pointer}
+.cols{display:grid;grid-template-columns:15rem 5.25rem 6rem;column-gap:10px;align-items:center;flex:none;margin-right:var(--cols-end,0)}
+.cols>.c-roles{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.cols>.c-state{justify-self:start}
+.top-row{--cols-end:12px}
+@media (max-width:640px){.cols{flex:1 1 100%;grid-template-columns:minmax(0,1fr) auto auto;margin:0 0 0 50px;--cols-end:0}.top-row{--cols-end:0;margin-left:88px}.cols>.c-state{justify-self:end}.cols>.c-roles{flex-wrap:nowrap}}
 </style>
 <script src="../shared/mockup.js"></script>
 <script src="../shared/couverture-theme.js"></script>
@@ -112,11 +117,10 @@ summary{cursor:pointer}
                   <a href="#" style="align-self: flex-start; font-weight: 700; font-size: 15px; color: {{t.text}}">{{e.title}}</a>
                   <span style="font-size: 12px; color: {{t.muted}}">{{e.meta}}</span>
                 </span>
-                <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
-                  <sc-if value="{{e.hasSeriesRoles}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; color: {{t.muted}}">Sur la série :</span></sc-if>
-                  <sc-for list="{{e.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for>
-                  <sc-if value="{{e.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{e.ratingLabel}}" style="font-size: 13px; letter-spacing: 1px">{{e.stars}}</span></sc-if>
-                  <sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 11px">{{e.badge}}</span></sc-if>
+                <span class="{{cols}}">
+                  <span class="c-roles"><sc-if value="{{e.hasSeriesRoles}}" hint-placeholder-val="{{false}}"><span style="font-size: 12px; color: {{t.muted}}">Sur la série :</span></sc-if><sc-for list="{{e.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for></span>
+                  <span class="c-rating"><sc-if value="{{e.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{e.ratingLabel}}" style="font-size: 13px; letter-spacing: 1px">{{e.stars}}</span></sc-if></span>
+                  <span class="c-state"><sc-if value="{{e.isAlbum}}" hint-placeholder-val="{{false}}"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; box-sizing: border-box; border: {{e.badgeB}}; border-radius: {{t.btnR}}; background: {{e.badgeBg}}; color: {{e.badgeFg}}; font-weight: 700; font-size: 11px">{{e.badge}}</span></sc-if></span>
                 </span>
               </div>
               <sc-if value="{{e.open}}" hint-placeholder-val="{{false}}">
@@ -128,10 +132,10 @@ summary{cursor:pointer}
                         <a href="#" style="align-self: flex-start; font-weight: 700; color: {{t.text}}">{{b.title}}</a>
                         <span style="font-size: 12px; color: {{t.muted}}">{{b.meta}}</span>
                       </span>
-                      <span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
-                        <sc-for list="{{b.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for>
-                        <sc-if value="{{b.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{b.ratingLabel}}" style="font-size: 13px; letter-spacing: 1px">{{b.stars}}</span></sc-if>
-                        <span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; box-sizing: border-box; border: {{b.badgeB}}; border-radius: {{t.btnR}}; background: {{b.badgeBg}}; color: {{b.badgeFg}}; font-weight: 700; font-size: 11px">{{b.badge}}</span>
+                      <span class="{{colsIn}}">
+                        <span class="c-roles"><sc-for list="{{b.roles}}" as="r" hint-placeholder-count="1"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: {{t.btnR}}; background: {{r.bg}}; color: {{r.fg}}; font-weight: 700; font-size: 12px">{{r.label}}</span></sc-for></span>
+                        <span class="c-rating"><sc-if value="{{b.rated}}" hint-placeholder-val="{{false}}"><span role="img" aria-label="{{b.ratingLabel}}" style="font-size: 13px; letter-spacing: 1px">{{b.stars}}</span></sc-if></span>
+                        <span class="c-state"><span style="display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; box-sizing: border-box; border: {{b.badgeB}}; border-radius: {{t.btnR}}; background: {{b.badgeBg}}; color: {{b.badgeFg}}; font-weight: 700; font-size: 11px">{{b.badge}}</span></span>
                       </span>
                     </li>
                   </sc-for>
@@ -424,6 +428,8 @@ class View extends Mockup {
     const chip = { bg: 'transparent', fg: t.text, bd: t.tB === '0' ? '2px solid ' + t.line : t.tB };
     return {
       t,
+      cols: 'cols top-row',
+      colsIn: 'cols',
       // The scroll hint of the menu fades into what lies behind it: the header, or the page under a transparent one.
       hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       a: {

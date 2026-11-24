@@ -2,7 +2,7 @@
 @inject IStringLocalizer<RecordVisual> L
 
 @* The mention of the kind of a record of the consultation over the visual of its head, written once for the records of an
-   album, a series and an author (visuel/fiche-album/contenu.md, choix-implementation/socle/frontend.md): alone on its line,
+   album, a series, an author and a universe (visuel/fiche-album/contenu.md, choix-implementation/socle/frontend.md): alone on its line,
    as a title, on the left edge of the visual. A subgrid of the rows of the head, so that the identity of the record, which
    the page places on the row of the visual, starts under the mention whatever its height. *@
 <div class="record-visual">
@@ -11,11 +11,14 @@
 </div>
 
 @code {
-    /// <summary>The kind of the record: an album, a series or an author, the only records of the consultation.</summary>
+    /// <summary>The kind of the record: an album, a series, an author or a universe, the only records of the consultation.</summary>
     [Parameter, EditorRequired]
     public RecordType Kind { get; set; }
 
-    /// <summary>The visual of the head: the cover of an album, the pile of a series, the monogram of an author.</summary>
+    /// <summary>
+    /// The visual of the head: the cover of an album, the pile of a series, the monogram of an author, the thought bubble of a
+    /// universe.
+    /// </summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
@@ -24,6 +27,7 @@
         RecordType.Album => "Album",
         RecordType.Series => "Series",
         RecordType.Author => "Author",
-        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only the records of an album, a series and an author carry the mention of their kind."),
+        RecordType.Universe => "Universe",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "Only the records of an album, a series, an author and a universe carry the mention of their kind."),
     };
 }

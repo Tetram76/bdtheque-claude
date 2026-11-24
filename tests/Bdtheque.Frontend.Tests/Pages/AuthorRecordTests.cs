@@ -236,9 +236,26 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Equal(3, sangre.QuerySelectorAll(".entry-row .cover-pile .cover-slot").Length);
         Assert.Equal(AppPaths.SeriesRecord(SangreId), sangre.QuerySelector(".entry-row a.entry-title")!.GetAttribute("href"));
         Assert.Equal("Crédité sur 6 albums sur 6 · 5 dans la collection", sangre.QuerySelector(".entry-row .entry-meta")!.TextContent.Trim());
-        var seriesRoles = sangre.QuerySelector(".entry-row .entry-series-roles")!;
+        var seriesRoles = sangre.QuerySelector("div.entry-row > .entry-roles")!;
         Assert.StartsWith("Sur la série :", seriesRoles.TextContent.Trim(), StringComparison.Ordinal);
         Assert.Equal(["Dessin"], seriesRoles.QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void EveryAlbumLine_HasItsColumnsOfRolesRatingAndPossession_EvenEmpty_SoThatTheyAlign()
+    {
+        _catalog.Author = Author();
+
+        var page = Open();
+
+        // In a series or not, rated or not: the three columns, in this order, the rating empty without one (#636).
+        var lines = page.FindAll("li.entry-row, .bibliography-entry[data-kind='album'] > .entry-row");
+        Assert.NotEmpty(lines);
+        Assert.All(lines, line => Assert.Equal(
+            ["entry-roles", "entry-rating", "entry-state"],
+            line.Children.Select(c => c.ClassName ?? "").Where(c => c.StartsWith("entry-", StringComparison.Ordinal) && c != "entry-text")));
+        Assert.Contains(lines, line => line.QuerySelector(".entry-rating")!.ChildElementCount == 0);
+        Assert.NotNull(page.Find(".bibliography").GetAttribute("data-roles"));
     }
 
     [Fact]
@@ -251,7 +268,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
         var sangre = Entries(page)[0];
         Assert.Equal("Crédité sur 1 album sur 3 · aucun dans la collection", sangre.QuerySelector(".entry-row .entry-meta")!.TextContent.Trim());
-        Assert.Empty(sangre.QuerySelectorAll(".entry-row .entry-series-roles"));
+        Assert.Empty(sangre.QuerySelectorAll("div.entry-row > .entry-roles"));
     }
 
     [Fact]
@@ -407,7 +424,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         [ContributionRole.Scenarist, ContributionRole.Illustrator]);
 
     private static SeriesBibliographyItem Series(Guid id, string title, int albumCount, IReadOnlyList<ContributionRole> roles, IReadOnlyList<AlbumBibliographyItem> albums) =>
-        new(new SeriesListItem(id, title), new SeriesOverview(albumCount, [null]), roles, albums);
+        new(new SeriesListItem(id, title), new SeriesOverview(albumCount, [null]), roles.Count > 0, roles, albums);
 
     private static AuthorDetail Author() => new(
         AuthorId, "Floch", "Adrien", null, null, null,
