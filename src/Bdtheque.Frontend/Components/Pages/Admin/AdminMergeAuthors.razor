@@ -186,14 +186,17 @@ else
 
     private AuthorMergeRecord Of(MergeSide side) => side == MergeSide.First ? Preview!.First : Preview!.Second;
 
-    private RenderFragment? Result =>
-        _identity is { } identity
-            ? @<text>
-                  <span>@L["Result.Shown"] : <strong>@identity.DisplayName</strong></span>
-                  <span>@L["Result.SortKey"] : <strong>@identity.SortKey</strong></span>
-                  <span>@L["Result.Entry"] : <strong>@identity.NavigationEntry</strong></span>
-              </text>
-            : _identityProblem is { } problem ? @<ErrorMessage Problem="problem" Compact="true" TechnicalText="@L["Result.Failed"]" /> : null;
+    // What the names chosen give, the failure to compute it, or nothing while a name is left to choose.
+    private RenderFragment? Result => (_identity, _identityProblem) switch
+    {
+        ({ } identity, _) => @<text>
+                                 <span>@L["Result.Shown"] : <strong>@identity.DisplayName</strong></span>
+                                 <span>@L["Result.SortKey"] : <strong>@identity.SortKey</strong></span>
+                                 <span>@L["Result.Entry"] : <strong>@identity.NavigationEntry</strong></span>
+                             </text>,
+        (null, { } problem) => @<ErrorMessage Problem="problem" Compact="true" TechnicalText="@L["Result.Failed"]" />,
+        _ => null,
+    };
 
     private MergeRecordHead Head(AuthorMergeRecord record, string name)
     {
