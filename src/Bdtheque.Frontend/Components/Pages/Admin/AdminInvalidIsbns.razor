@@ -281,9 +281,11 @@
             1 => L["Count.One"].Value,
             _ => L["Count.Other", Format.Number(count)].Value,
         };
-        return _query.ShownState == InvalidIsbnState.All && _list.AcceptedCount > 0
-            ? L[_list.AcceptedCount == 1 ? "Count.Accepted.One" : "Count.Accepted.Other", editions, Format.Number(_list.AcceptedCount)]
-            : editions;
+        if (_query.ShownState != InvalidIsbnState.All || _list.AcceptedCount == 0)
+            return editions;
+
+        var accepted = _list.AcceptedCount == 1 ? "Count.Accepted.One" : "Count.Accepted.Other";
+        return L[accepted, editions, Format.Number(_list.AcceptedCount)];
     }
 
     // « Achat, 2004 »: the mode of the acquisition, and its year when its date is known.
