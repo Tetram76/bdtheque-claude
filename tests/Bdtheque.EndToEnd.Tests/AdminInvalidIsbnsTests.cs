@@ -48,6 +48,23 @@ public sealed class AdminInvalidIsbnsTests(ApplicationHost application) : Browse
     }
 
     [Theory, InEachTheme]
+    // The row read before its error was accepted elsewhere: once sent, the page no longer presents it, and the correction is
+    // still handled, the API telling that the album changed meanwhile, never a refused request.
+    public async Task Correct_ARowChangedMeanwhile_SaysThatTheDataChanged(string theme)
+    {
+        var publisher = await CreatePublisherAsync($"Dargaud {_marker}");
+        var album = await CreateAlbumAsync($"Barracuda {_marker}");
+        var edition = await CreateEditionAsync(album, publisher, "978-2-505-00865-3");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminInvalidIsbns}?publisherId={publisher.Id}");
+        await AcceptAsync(album, edition);
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Corriger l'ISBN de Dargaud {_marker}" }).ClickAsync();
+
+        await Assertions.Expect(page.Locator("main [role=alert][data-error-category=functional]")).ToBeVisibleAsync();
+        Assert.Equal("978-2-505-00865-3", (await ReadEditionAsync(album, edition)).Content.Isbn);
+    }
+
+    [Theory, InEachTheme]
     public async Task Accept_TakesTheErrorOutOfTheList_TheStateShowsIt_AndItIsAcceptedNoMore(string theme)
     {
         var publisher = await CreatePublisherAsync($"Delcourt {_marker}");
@@ -165,6 +182,15 @@ public sealed class AdminInvalidIsbnsTests(ApplicationHost application) : Browse
         (await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(publisher.Id, null, null, isbn, null, null, null, null, null, null, true),
             await AlbumVersionAsync(album)))).Intents.Single().EditionId!.Value;
+
+    // The error of the ISBN accepted elsewhere, which changes the version of the album.
+    private async Task AcceptAsync(AlbumForm album, Guid edition)
+    {
+        using var api = Application.CreateApiClient();
+        using var response = await api.PostAsJsonAsync(
+            $"/admin/albums/{album.Id}/editions/{edition}/isbn-acceptance", new IsbnActionRequest(await AlbumVersionAsync(album)));
+        response.EnsureSuccessStatusCode();
+    }
 
     private async Task<uint> AlbumVersionAsync(AlbumForm album)
     {

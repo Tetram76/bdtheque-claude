@@ -114,17 +114,19 @@ public sealed class AdminInvalidIsbnsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    // « Corriger » sends its own form, under the version of the album the row read; the menu modifies the edition, accepts its
-    // error and leads to the album in the consultation.
-    public void Rows_CorrectByAFormOfTheirOwn_AndOfferTheRestInTheirMenu()
+    // « Corriger » submits the form of the correction, sending the edition it targets with the version of its album the row
+    // read; the menu modifies the edition, accepts its error and leads to the album in the consultation.
+    public void Rows_CorrectByTheFormOfTheCorrection_AndOfferTheRestInTheirMenu()
     {
         var row = Rows(Open("q=978"))[0];
         var id = Dargaud.Edition.Id;
+        var target = $"{Barracuda.Id}/{id}/41";
 
-        var correction = row.QuerySelector(".isbn-actions > form")!;
-        Assert.Equal(("post", "41"), (correction.GetAttribute("method"), correction.QuerySelector("input[name='version']")!.GetAttribute("value")));
+        var correction = row.QuerySelector(".isbn-actions > button[type='submit']")!;
+        Assert.Equal(("isbn-correction", "target", target),
+            (correction.GetAttribute("form"), correction.GetAttribute("name"), correction.GetAttribute("value")));
         Assert.Equal(("Corriger", "Corriger l'ISBN de Dargaud [2010] - ISBN 9782505008653"),
-            (Text(correction.QuerySelector("button[type='submit']")!), Normalized(correction.QuerySelector("button")!.GetAttribute("aria-label")!)));
+            (Text(correction), Normalized(correction.GetAttribute("aria-label")!)));
         Assert.Equal(
             [
                 ("Modifier l'édition", AppPaths.AdminEditEdition(Barracuda.Id, id)),
@@ -132,8 +134,20 @@ public sealed class AdminInvalidIsbnsTests : BunitContext, IDisposable
                 ("Voir l'album dans la consultation", AppPaths.Album(Barracuda.Id)),
             ],
             row.QuerySelectorAll(".actions-menu-panel .menu-item").Select(item => (Text(item), item.GetAttribute("href"))));
-        var acceptance = row.QuerySelector(".actions-menu-panel form")!;
-        Assert.Equal(("post", "41"), (acceptance.GetAttribute("method"), acceptance.QuerySelector("input[name='version']")!.GetAttribute("value")));
+        var acceptance = row.QuerySelector(".actions-menu-panel button[type='submit']")!;
+        Assert.Equal(("isbn-acceptance", target), (acceptance.GetAttribute("form"), acceptance.GetAttribute("value")));
+    }
+
+    [Fact]
+    // One form per action, rendered whatever the list presents: a submission whose row is gone or changed meanwhile still
+    // finds its form, and the API says why the action no longer holds.
+    public void Forms_OnePerAction_RenderedWhateverTheListPresents()
+    {
+        Answer([], acceptedCount: 0);
+
+        var forms = Open("").FindAll("form[method='post']");
+
+        Assert.Equal(["isbn-correction", "isbn-acceptance", "isbn-revocation"], forms.Select(form => form.GetAttribute("id")));
     }
 
     [Fact]
@@ -150,7 +164,7 @@ public sealed class AdminInvalidIsbnsTests : BunitContext, IDisposable
     {
         var row = Rows(Open(""))[2];
 
-        Assert.Empty(row.QuerySelectorAll(".isbn-actions > form"));
+        Assert.Empty(row.QuerySelectorAll(".isbn-actions > button[type='submit']"));
         Assert.Equal([("Modifier l'édition", AppPaths.AdminEditEdition(Passagers.Id, Glenat.Edition.Id))],
             row.QuerySelectorAll(".isbn-actions > a.button").Select(button => (Text(button), button.GetAttribute("href"))));
         Assert.Equal(["Accepter l'erreur", "Voir l'album dans la consultation"], row.QuerySelectorAll(".actions-menu-panel .menu-item").Select(Text));
@@ -168,6 +182,7 @@ public sealed class AdminInvalidIsbnsTests : BunitContext, IDisposable
         Assert.Equal("État", Text(page.Find(".isbn-row-head .isbn-state")));
         Assert.Equal(["À corriger", "Acceptée"], rows.Select(row => Text(row.QuerySelector(".isbn-state")!)));
         Assert.Equal("Ne plus accepter l'erreur", Text(rows[1].QuerySelectorAll(".actions-menu-panel .menu-item")[1]));
+        Assert.Equal("isbn-revocation", rows[1].QuerySelector(".actions-menu-panel button[type='submit']")!.GetAttribute("form"));
         Assert.Equal("2 éditions dont 1 acceptée", Text(page.Find(".list-summary").Children[0]));
         Assert.Contains(_api.Requested, path => path.StartsWith("/admin/editions/invalid-isbns?state=All", StringComparison.Ordinal));
     }

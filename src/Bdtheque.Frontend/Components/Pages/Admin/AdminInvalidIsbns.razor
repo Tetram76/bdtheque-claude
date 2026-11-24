@@ -2,6 +2,7 @@
 @using Bdtheque.Contracts.Admin
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Enums
+@using System.Globalization
 @inject IStringLocalizer<AdminInvalidIsbns> L
 @inject ApiClient Api
 @inject RecordLabels Labels
@@ -17,7 +18,7 @@
    owned or targeted by a purchase intent, the errors to correct by default, the errors accepted on demand, then each telling
    its state. Its search, navigation and filters are those of the list of the editions, carried by its address
    (Lists/InvalidIsbnListQuery.cs). Nothing is created here; each row corrects its ISBN, or accepts its error, at once, by a
-   form of its own under the version of its album, and leads to the entry form of its edition. *@
+   form of the page, sending the edition and the version of its album, and leads to the entry form of its edition. *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminInvalidIsbns" />
 
@@ -141,12 +142,8 @@
                             @if (row.CorrectedIsbn is not null)
                             {
                                 @* Written at once, nothing being entered: the ISBN supposed put in place of the ISBN entered. *@
-                                <form method="post" @formname="@FormName(Correction, row)" @onsubmit="() => ActAsync(row, Correction)">
-                                    <AntiforgeryToken />
-                                    <input type="hidden" name="@VersionName" value="@row.AlbumVersion" />
-                                    <Button Type="submit" Icon="IconName.Swap" Label="@L["Correct"]" IconOnlyOnSmartphone="true"
-                                            aria-label="@L["Correct.Label", label]" />
-                                </form>
+                                <Button Type="submit" Icon="IconName.Swap" Label="@L["Correct"]" IconOnlyOnSmartphone="true"
+                                        aria-label="@L["Correct.Label", label]" form="@FormId(Correction)" name="@TargetName" value="@Target(row)" />
                             }
                             else
                             {
@@ -158,12 +155,8 @@
                                 {
                                     <MenuItem Href="@AppPaths.AdminEditEdition(row.Album.Id, row.Edition.Id)" Icon="IconName.Edit" Label="@edit" />
                                 }
-                                @{ var acceptance = row.IsAccepted ? Revocation : Acceptance; }
-                                <form method="post" @formname="@FormName(acceptance, row)" @onsubmit="() => ActAsync(row, acceptance)">
-                                    <AntiforgeryToken />
-                                    <input type="hidden" name="@VersionName" value="@row.AlbumVersion" />
-                                    <MenuItem Type="submit" Icon="IconName.Check" Label="@L[row.IsAccepted ? "Revoke" : "Accept"]" />
-                                </form>
+                                <MenuItem Type="submit" Icon="IconName.Check" Label="@L[row.IsAccepted ? "Revoke" : "Accept"]"
+                                          form="@FormId(row.IsAccepted ? Revocation : Acceptance)" name="@TargetName" value="@Target(row)" />
                                 <MenuItem Href="@AppPaths.Album(row.Album.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
                             </ActionsMenu>
                         </span>
@@ -177,21 +170,35 @@
     </ChildContent>
 </ListLayout>
 
+@* One form per action, rendered whatever the list presents, which the buttons of the rows submit (their form attribute) with the
+   edition they target: a static page finds the handler of a form by its name among the forms it renders again, so that a form
+   named after a row would be lost once that row is gone or changed meanwhile (corrected, accepted in another tab, an address
+   sent again), and the request refused before the API could say why. *@
+@foreach (var action in Actions)
+{
+    <form id="@FormId(action)" method="post" @formname="@FormId(action)" @onsubmit="() => ActAsync(action)" hidden>
+        <AntiforgeryToken />
+    </form>
+}
+
 @code {
-    // The actions of a row, each a form of its own, named by it and by its edition: a static page tells which one is sent
-    // by its name.
+    // The actions of a row, written at once.
     private const string Correction = "correction";
     private const string Acceptance = "acceptance";
     private const string Revocation = "revocation";
+    private static readonly string[] Actions = [Correction, Acceptance, Revocation];
 
-    private const string VersionName = "version";
+    private const string TargetName = "target";
 
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
 
-    /// <summary>The version of the album of the edition, as the row read it, which the action sends back.</summary>
-    [SupplyParameterFromForm(Name = VersionName)]
-    private uint? Version { get; set; }
+    /// <summary>
+    /// The edition an action targets, as its row read it: its album, itself and the version of its album, which the action
+    /// sends back (<see cref="Target"/>).
+    /// </summary>
+    [SupplyParameterFromForm(Name = TargetName)]
+    private string? PostedTarget { get; set; }
 
     private InvalidIsbnListQuery _query = new();
     private AdminChecks? _checks;
@@ -200,7 +207,18 @@
     private ApiProblem? _problem;
     private ApiProblem? _actionProblem;
 
-    private static string FormName(string action, InvalidIsbnListItem row) => $"isbn-{action}-{row.Edition.Id:N}";
+    private static string FormId(string action) => $"isbn-{action}";
+
+    private static string Target(InvalidIsbnListItem row) =>
+        string.Create(CultureInfo.InvariantCulture, $"{row.Album.Id}/{row.Edition.Id}/{row.AlbumVersion}");
+
+    // The target sent back, or none for one the page never wrote (an address forged by hand).
+    private static (Guid Album, Guid Edition, uint Version)? ParseTarget(string? target) =>
+        target?.Split('/') is [var album, var edition, var version]
+        && Guid.TryParse(album, out var albumId) && Guid.TryParse(edition, out var editionId)
+        && uint.TryParse(version, NumberStyles.None, CultureInfo.InvariantCulture, out var albumVersion)
+            ? (albumId, editionId, albumVersion)
+            : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -230,12 +248,14 @@
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
 
-    private async Task ActAsync(InvalidIsbnListItem row, string action)
+    // The edition is that the row targeted when it was read, whether the list still presents it or not: the API says whether
+    // the action still holds (the edition corrected, accepted or deleted meanwhile, under another version of its album).
+    private async Task ActAsync(string action)
     {
-        if (Version is not { } version)
+        if (ParseTarget(PostedTarget) is not var (albumId, editionId, version))
             return;
 
-        var edition = $"/admin/albums/{row.Album.Id}/editions/{row.Edition.Id}";
+        var edition = $"/admin/albums/{albumId}/editions/{editionId}";
         try
         {
             switch (action)
@@ -265,7 +285,7 @@
             Acceptance => AudienceFunctions.AdminInvalidIsbnAccepted,
             _ => AudienceFunctions.AdminInvalidIsbnRevoked,
         };
-        await Recorder.RecordActionAsync(function, $"edition={row.Edition.Id}", HttpContext?.RequestAborted ?? default);
+        await Recorder.RecordActionAsync(function, $"edition={editionId}", HttpContext?.RequestAborted ?? default);
         Navigation.NavigateTo(_query.Href());
     }
 
