@@ -24,7 +24,7 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
         string Within(string name) => within is { } id ? $"{query}&{name}={id}" : query;
         return kind switch
         {
-            RecordKind.Series => await FindAsync<SeriesListItem>("series", query, s => new(s.Id, s.Title, null), cancellationToken),
+            RecordKind.Series => await FindSeriesAsync(query, cancellationToken),
             RecordKind.Author => await FindAsync<AuthorListItem>(
                 "authors", query, a => new(a.Id, AuthorName(a.LastName, a.FirstName, a.Pseudonym), null), cancellationToken),
             RecordKind.Publisher => await FindAsync<PublisherListItem>("publishers", query, p => new(p.Id, p.Name, null), cancellationToken),
@@ -50,6 +50,12 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
     public RecordOption AlbumOption(AlbumSummary album, AlbumLabelFormat format) =>
         new(album.Id, labels.Album(album, format), null,
             album is { SeriesId: { } seriesId, SeriesTitle: { } seriesTitle } ? new RecordOption(seriesId, seriesTitle, null) : null);
+
+    private async Task<IReadOnlyList<RecordOption>> FindSeriesAsync(string query, CancellationToken cancellationToken)
+    {
+        var series = await api.GetAsync<SeriesCatalogList>($"/catalog/series?{query}", cancellationToken);
+        return [.. series.Series.Items.Select(row => new RecordOption(row.Id, row.Title, null))];
+    }
 
     // The settings are read with each search, which a pause of the typing already spaces out, so that a format changed
     // meanwhile applies.

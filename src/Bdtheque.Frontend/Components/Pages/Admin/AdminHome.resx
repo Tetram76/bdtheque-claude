@@ -64,7 +64,7 @@
     <value>Albums</value>
   </data>
   <data name="Records.Albums.Detail" xml:space="preserve">
-    <value>non possédés : {0}</value>
+    <value>catalogués : {0}</value>
   </data>
   <data name="Records.New.Albums" xml:space="preserve">
     <value>Nouvel album</value>

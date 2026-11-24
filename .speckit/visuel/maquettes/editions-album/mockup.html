@@ -459,13 +459,13 @@ const errorOf = (key, t, business) => ({
 // (fonctionnel/regles-metier.md § Intention d'acquisition).
 const EXAMPLES = {
   sansEdition: {
-    label: 'Le Château des étoiles (Le Château des étoiles - T. 8)', credits: 'Alex Alice', date: '2026', inCollection: 'Hors collection', cover: false,
+    label: 'Le Château des étoiles (Le Château des étoiles - T. 8)', credits: 'Alex Alice', date: '2026', inCollection: 'Catalogué', cover: false,
     count: 'Aucune édition',
     editions: [], intents: [],
     meta: 'Album créé le 14 octobre 2026, modifié le 14 octobre 2026.'
   },
   editions: {
-    label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', credits: 'Hergé', date: '1963', inCollection: 'Dans la collection', cover: true,
+    label: 'Les Bijoux de la Castafiore (Tintin - T. 21)', credits: 'Hergé', date: '1963', inCollection: 'Possédé', cover: true,
     count: '2 éditions',
     editions: [
       { label: 'Casterman [1963]', sub: 'Édition originale · Cartonnée · 62 pages', detail: 'Achat, 1987 · 2 visuels' },
@@ -530,7 +530,7 @@ class View extends Mockup {
       // The mention above a block title says what kind of data the block holds, never the title again.
       k: { album: kick(1, 'Identification'), eds: kick(2, 'Exemplaires'), intents: kick(3, 'Acquisitions prévues') },
       albumCover: x.cover ? 'hsl(20, 42%, 36%)' : generic,
-      badge, albumBadge: x.inCollection === 'Dans la collection' ? owned : dashed,
+      badge, albumBadge: x.inCollection === 'Possédé' ? owned : dashed,
       hasEditions: editions.length > 0,
       noEdition: editions.length === 0,
       // An album aimed at by an intent on itself has no edition: its first one comes with the purchase.

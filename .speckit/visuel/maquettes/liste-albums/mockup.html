@@ -435,7 +435,7 @@ const EXAMPLES = {
   // A search narrowed by cross filters.
   filtree: {
     entry: '', query: '', rows: ALBUMS.filter((a) => a.state === 'own' && a.genre),
-    active: [{ label: 'Genre', value: 'Aventure' }, { label: 'Collection', value: 'Dans la collection' }],
+    active: [{ label: 'Genre', value: 'Aventure' }, { label: 'Possession', value: 'Possédé' }],
     count: '38 albums', detail: 'sur 2 847', page: 'Albums 1 à 38 sur 38', pages: ['1']
   },
   // A search that finds nothing.
@@ -444,7 +444,7 @@ const EXAMPLES = {
 
 const FILTERS = [
   ['Série', 'serie'], ['Auteur', 'auteur'], ['Éditeur', 'editeur'], ['Collection éditeur', 'collectionEditeur'],
-  ['Genre', 'genre'], ['Univers', 'univers'], ['Collection', 'collection']
+  ['Genre', 'genre'], ['Univers', 'univers'], ['Possession', 'possession']
 ];
 const CHEVRON = 'M6 9l6 6 6-6';
 const SEARCH = 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4';
@@ -517,13 +517,13 @@ class View extends Mockup {
     };
     const activeOf = (label) => x.active.find((a) => a.label === label);
     const filters = FILTERS.map(([label]) => {
-      const set = activeOf(label === 'Collection' ? 'Collection' : label);
+      const set = activeOf(label);
       return {
         label,
-        value: set ? set.value : (label === 'Collection' ? 'Tous les albums' : 'Tous'),
+        value: set ? set.value : (label === 'Possession' ? 'Tous les albums' : 'Tous'),
         fg: set ? t.text : t.muted, fw: set ? '700' : '400',
         // A list of fixed values opens as a choice; the others are found by typing their name.
-        icon: label === 'Collection' ? CHEVRON : SEARCH
+        icon: label === 'Possession' ? CHEVRON : SEARCH
       };
     });
     // Covers get a hue of their own, so that the list reads as a shelf; an album without a cover
@@ -543,7 +543,7 @@ class View extends Mockup {
         eds: [owned ? owned + (owned > 1 ? ' éditions' : ' édition') : '', intents ? intents + (intents > 1 ? ' intentions' : ' intention') : ''].filter(Boolean).join(' · ') || '—',
         edsFg: owned + intents === 0 ? t.muted : t.text,
         intent: a.state === 'intent',
-        badge: a.state === 'own' ? 'Dans la collection' : (a.state === 'intent' ? 'Intention' : 'Hors collection'),
+        badge: a.state === 'own' ? 'Possédé' : (a.state === 'intent' ? 'Intention' : 'Catalogué'),
         badgeBg: a.state === 'own' ? t.nBg : 'transparent',
         badgeFg: a.state === 'own' ? t.nFg : t.text,
         badgeB: a.state === 'own' ? '2px solid transparent' : '2px dashed ' + t.line,

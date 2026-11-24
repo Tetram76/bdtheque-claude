@@ -18,7 +18,10 @@ public sealed class RecordSearchTests
 
     public static TheoryData<RecordKind, string, string, string, string?> Kinds => new()
     {
-        { RecordKind.Series, "/catalog/series", $$"""{"id":"{{Id}}","title":"Tintin"}""", "Tintin", null },
+        {
+            RecordKind.Series, "/catalog/series",
+            $$"""{"id":"{{Id}}","title":"Tintin","overview":{"albumCount":0,"firstVolumeCovers":[]},"albumsInCollectionCount":0}""", "Tintin", null
+        },
         { RecordKind.Publisher, "/catalog/publishers", $$"""{"id":"{{Id}}","name":"Dargaud","website":null}""", "Dargaud", null },
         {
             RecordKind.PublisherCollection, "/catalog/publisher-collections",
@@ -46,7 +49,11 @@ public sealed class RecordSearchTests
             if (request.RequestUri!.AbsolutePath == "/catalog/settings")
                 return Json("""{"albumLabelFormat":"VolumeTitleSeries","displayCulture":"FrenchFrance"}""");
             requested = request.RequestUri!.PathAndQuery;
-            return Json($$"""{"items":[{{item}}],"number":1,"size":10,"totalCount":1}""");
+            var page = $$"""{"items":[{{item}}],"number":1,"size":10,"totalCount":1}""";
+            // The list of the series carries its page with the records of its filters (SeriesCatalogList).
+            return Json(kind == RecordKind.Series
+                ? $$$"""{"series":{{{page}}},"filters":{"author":null,"publisher":null,"publisherCollection":null,"genre":null,"universe":null}}"""
+                : page);
         }))
         {
             BaseAddress = new Uri("http://api"),

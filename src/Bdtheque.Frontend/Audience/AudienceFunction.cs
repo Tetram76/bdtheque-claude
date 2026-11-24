@@ -49,6 +49,23 @@ public static class AudienceFunctions
     public static readonly AudienceFunction SeriesRecord = new("series", AudienceFunctionKind.Screen);
 
     /// <summary>
+    /// The list of the series of the consultation, entry « Séries » of its menu: its key apart from that of the record of a
+    /// series, « series », which a list of series cannot share.
+    /// </summary>
+    public static readonly AudienceFunction SeriesList = new("series.list", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogSeriesListQuery.cs).
+
+    public static readonly AudienceFunction SeriesListSearch = new("series.list.search", AudienceFunctionKind.Action);
+
+    /// <summary>The cross filters and the possession, which limits the list to the collection.</summary>
+    public static readonly AudienceFunction SeriesListFilter = new("series.list.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction SeriesListInitial = new("series.list.initial", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction SeriesListPage = new("series.list.page", AudienceFunctionKind.Action);
+
+    /// <summary>
     /// The record of an author (visuel/fiche-auteur/), with the author it presents. Unfolding its series, one or all, is no
     /// action: a disclosure of the page itself, showing what it already holds.
     /// </summary>
@@ -498,7 +515,7 @@ public static class AudienceFunctions
     [
         AlbumRecord, AlbumRecordVisual,
         Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
-        SeriesRecord, AuthorRecord,
+        SeriesRecord, SeriesList, SeriesListSearch, SeriesListFilter, SeriesListInitial, SeriesListPage, AuthorRecord,
         PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsFilter, PurchaseIntentsInitial, PurchaseIntentsPage,
         AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,

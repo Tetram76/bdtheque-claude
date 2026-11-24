@@ -660,8 +660,8 @@ class View extends Mockup {
         { label: 'T. 5', ...pick(true) },
         { label: 'Paru en novembre 1970', ...pick(false) },
         hasEdition
-          ? { label: 'Dans la collection, en 3 éditions', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
-          : { label: 'Intention d\'acquisition', bg: 'transparent', fg: t.text, bd: '2px dashed ' + t.line }
+          ? { label: 'Possédé, en 3 éditions', bg: t.colBg, fg: t.colFg, bd: '2px solid ' + t.colBg }
+          : { label: 'Intention', bg: 'transparent', fg: t.text, bd: '2px dashed ' + t.line }
       ],
       creditsTotal: distinct > 1 ? distinct + ' auteurs crédités' : 'Auteur',
       credits: ROLES.map(([role, label], r) => {
@@ -724,7 +724,7 @@ class View extends Mockup {
         const owned = !NOT_OWNED.includes(i);
         return {
           tome: 'T. ' + (i + 1), title, current: i === SHOWN, other: i !== SHOWN, cls: Math.abs(i - SHOWN) > NEIGHBOURS ? 'rest-far' : '',
-          own: owned ? 'Possédé' : 'Non possédé', ownColor: owned ? t.muted : t.link
+          own: owned ? 'Possédé' : 'Catalogué', ownColor: owned ? t.muted : t.link
         };
       })
     };

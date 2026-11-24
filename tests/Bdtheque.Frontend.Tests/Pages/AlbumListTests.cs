@@ -85,7 +85,7 @@ public sealed class AlbumListTests : BunitContext, IDisposable
         Assert.Equal("1963", Text(bijoux.QuerySelector(".album-date")!));
         Assert.Equal("Possédé", Text(bijoux.QuerySelector(".album-state")!));
         Assert.Equal("Intention", Text(rows[1].QuerySelector(".album-state")!));
-        Assert.Equal("Non possédé", Text(rows[2].QuerySelector(".album-state")!));
+        Assert.Equal("Catalogué", Text(rows[2].QuerySelector(".album-state")!));
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class AlbumListTests : BunitContext, IDisposable
 
         var select = page.Find("select[name='state']");
         Assert.Equal(
-            ["Tous les albums", "Possédé", "Intention", "Non possédé"],
+            ["Tous les albums", "Possédé", "Intention", "Catalogué"],
             select.QuerySelectorAll("option").Select(Text));
         Assert.Equal("PurchaseIntent", select.QuerySelector("option[selected]")!.GetAttribute("value"));
         Assert.Equal(AppPaths.Albums, page.Find("form.list-search").GetAttribute("action"));

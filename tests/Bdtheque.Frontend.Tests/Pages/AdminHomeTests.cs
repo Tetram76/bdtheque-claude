@@ -66,7 +66,7 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("412", "dont 28 sans statut", "+ Nouvelle série"),
-                ("2 847", "non possédés : 214", "+ Nouvel album"),
+                ("2 847", "catalogués : 214", "+ Nouvel album"),
                 ("2 913", "saisies depuis leur album, avec leurs visuels", ""),
                 ("1 106", "scénaristes, dessinateurs, coloristes…", "+ Nouvel auteur"),
                 ("96", "collections : 214", "+ Nouvel éditeur"),

@@ -6,6 +6,7 @@
 @inject ApiClient Api
 @inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject ListMemory Memory
 
 @* The record of a series in the consultation (visuel/fiche-serie/contenu.md): its pile of covers, its title, status, planned
    volumes and completeness, the progress of the collection, its publisher and collection, its authors, genres and universes,
@@ -54,7 +55,7 @@ else if (_series is { } series)
                 @if (series.Albums.Count > 0)
                 {
                     <div class="series-progress">
-                        <span class="series-progress-label"><SeriesInCollection Albums="series.Albums" /></span>
+                        <span class="series-progress-label"><SeriesInCollection OwnedCount="OwnedCount" AlbumCount="series.Albums.Count" /></span>
                         <span class="series-progress-track" aria-hidden="true">
                             <span class="series-progress-bar" style="--progress: @(OwnedCount * 100 / series.Albums.Count)%"></span>
                         </span>
@@ -132,7 +133,8 @@ else if (_series is { } series)
         }
     }
 
-    private IReadOnlyList<BreadcrumbItem> BreadcrumbItems => [new(L["Breadcrumb.Series"], AppPaths.Series), new(_series!.Title)];
+    // The list as the user left it (fonctionnel/structure-de-l-application.md, Retour à une liste).
+    private IReadOnlyList<BreadcrumbItem> BreadcrumbItems => [new(L["Breadcrumb.Series"], Memory.BackHref(AppPaths.Series)), new(_series!.Title)];
 
     private int OwnedCount => SeriesInCollection.Owned(_series!.Albums);
 }

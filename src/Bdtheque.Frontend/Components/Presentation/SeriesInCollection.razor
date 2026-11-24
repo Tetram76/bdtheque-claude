@@ -3,24 +3,22 @@
 @inject DisplayFormatter Format
 
 @* The albums of a series in the collection, out of all its albums: « 0 album sur 3 dans la collection », a zero out of a total
-   being written « 0 » (visuel/charte-graphique/convivialite-et-efficacite.md, #468). Written once for the record of a series
-   and the rest of the series of an album, whose wordings can no longer diverge; the text only, which each places. *@
+   being written « 0 » (visuel/charte-graphique/convivialite-et-efficacite.md, #468). Written once for the record of a series,
+   the rest of the series of an album and the list of the series, whose wordings can no longer diverge; the text only, which
+   each places. *@
 @Text
 
 @code {
+    /// <summary>The albums of the series in the collection.</summary>
+    [Parameter, EditorRequired]
+    public int OwnedCount { get; set; }
+
     /// <summary>Every album of the series.</summary>
     [Parameter, EditorRequired]
-    public IReadOnlyList<AlbumCard> Albums { get; set; } = [];
+    public int AlbumCount { get; set; }
 
     /// <summary>The albums of the series in the collection.</summary>
     public static int Owned(IReadOnlyList<AlbumCard> albums) => albums.Count(card => card.Album.IsInCollection);
 
-    private string Text
-    {
-        get
-        {
-            var owned = Owned(Albums);
-            return L[owned > 1 ? "Other" : "One", Format.Number(owned), Format.Number(Albums.Count)];
-        }
-    }
+    private string Text => L[OwnedCount > 1 ? "Other" : "One", Format.Number(OwnedCount), Format.Number(AlbumCount)];
 }
