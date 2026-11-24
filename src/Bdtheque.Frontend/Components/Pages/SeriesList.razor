@@ -81,7 +81,7 @@
                         </span>
                         @* Its albums in the collection, out of all of them, as its record says it; a series without album has nothing
                            to say there, its zero taking the dash of a list (visuel/charte-graphique/convivialite-et-efficacite.md). *@
-                        <span class="series-albums" role="cell">
+                        <span class="series-albums" role="cell" data-zero="@(row.Overview.AlbumCount == 0)">
                             <ListCount Value="row.Overview.AlbumCount" None="@L["Albums.None"]">
                                 <SeriesInCollection OwnedCount="row.AlbumsInCollectionCount" AlbumCount="row.Overview.AlbumCount" />
                             </ListCount>

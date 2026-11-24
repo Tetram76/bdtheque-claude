@@ -83,6 +83,9 @@ public sealed class SeriesListTests : BunitContext, IDisposable
 
         Assert.Equal("—", zorro.QuerySelector(".series-albums [aria-hidden]")!.TextContent.Trim());
         Assert.Contains("Aucun album", Text(zorro.QuerySelector(".series-albums")!));
+        // Marked, for the row on two lines to withdraw it (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul).
+        Assert.True(zorro.QuerySelector(".series-albums")!.HasAttribute("data-zero"));
+        Assert.False(Open("").FindAll(".series-row:not(.series-row-head)")[1].QuerySelector(".series-albums")!.HasAttribute("data-zero"));
     }
 
     [Fact]

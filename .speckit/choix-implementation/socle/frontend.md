@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de la consultation et de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:25:09Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T10:00:00Z }
 ---
 
 # Frontend
@@ -128,7 +128,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:25:09Z }
 
 ## Listes de la consultation
 
-- **Sur le modèle des listes de l'administration** (ci-dessous) : rendu statique, critères et panneau des filtres portés par l'adresse, cas d'une liste vide, rappel d'une recherche et mesure d'audience écrits une fois pour toutes les listes. Seuls leur sont propres l'absence d'action et de création, et l'entrée de chaque ligne, lien vers la fiche qu'elle désigne : la consultation n'a d'autre action que la navigation inter-entités ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)). Le panneau des filtres d'une liste qui a son pendant dans l'administration (les albums) est écrit une fois pour les deux.
+- **Sur le modèle des listes de l'administration** (ci-dessous) : rendu statique, critères et panneau des filtres portés par l'adresse, cas d'une liste vide, rappel d'une recherche et mesure d'audience écrits une fois pour toutes les listes. Seuls leur sont propres l'absence d'action et de création, et l'entrée de chaque ligne, lien vers la fiche qu'elle désigne : la consultation n'a d'autre action que la navigation inter-entités ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)). Le panneau des filtres d'une liste qui a son pendant dans l'administration (les albums, les séries) est écrit une fois pour les deux, et le champ de la possession une fois pour toutes les listes.
 - **Retour à une liste gardé pour la visite dans un cookie de session de chaque liste** ([Structure de l'application](../../fonctionnel/structure-de-l-application.md), retour à une liste) : la liste y garde son adresse telle que présentée, panneau des filtres excepté, avec le début de la visite, qu'un cookie d'une autre visite ne porte pas ; le fil d'Ariane d'une fiche y mène tel quel, l'entrée du menu en garde les seuls filtres, ceux de la requête en cours sur la liste elle-même, dont le cookie n'est écrit qu'au début de la réponse. Le cookie est écrit comme celui de la visite, une fois par réponse, et une adresse qui n'est pas celle de la liste n'est jamais suivie.
   - **Alternative écartée (état ajouté au cookie de la visite)** : chaque liste allongerait un cookie que lisent le thème et la mesure d'audience, et changerait sa forme, dont la lecture refuse tout autre contenu.
   - **Alternative écartée (`sessionStorage` lu par un script)** : propre à chaque onglet, il ne vaut pas la visite, et un script porterait une règle de l'application ; le serveur, qui rend les liens, ne le lit pas.

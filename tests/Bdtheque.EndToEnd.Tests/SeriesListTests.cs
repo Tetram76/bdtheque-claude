@@ -79,6 +79,27 @@ public sealed class SeriesListTests(ApplicationHost application) : BrowserTest<A
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Series, "?state=OutsideCollection"));
     }
 
+    [Theory, InEachTheme]
+    public async Task PileOfCovers_ShowsTheFirstVolumeInFront(string theme)
+    {
+        await CreateSeriesAsync($"Pile {_marker}");
+        var page = await NewPageAsync(theme);
+        await PageReadiness.GotoAsync(page, $"{AppPaths.Series}?q={_marker}");
+
+        // The card painted at the centre of the place of the first volume, the last card of the pile, is that card itself: the
+        // cards behind it, moved up and to the right, never come over it (Components/Presentation/CoverPile.razor.css).
+        var inFront = await page.Locator(".cover-pile").EvaluateAsync<bool>(
+            """
+            pile => {
+                const first = pile.lastElementChild;
+                const box = first.getBoundingClientRect();
+                return first.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2));
+            }
+            """);
+
+        Assert.True(inFront, $"{theme}: a card behind the first volume is painted over it.");
+    }
+
     [Theory]
     [InEachTheme(414)]
     [InEachTheme(768)]

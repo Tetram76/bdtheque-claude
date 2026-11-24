@@ -70,3 +70,11 @@
         font-size: inherit;
     }
 }
+
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn
+   (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container series-rows (width < 36rem) {
+    .series-albums[data-zero] {
+        display: none;
+    }
+}
