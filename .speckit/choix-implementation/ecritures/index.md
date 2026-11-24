@@ -1,4 +1,5 @@
-# Erreurs et suppressions
+# Erreurs, suppressions et fusions
 
 * [Erreurs métier, fonctionnelles et techniques](erreurs-metier-fonctionnelles-et-techniques.md) - Erreurs métier par code de règle, champ en cause porté par l'erreur, réponses ProblemDetails en trois catégories, traduction des violations de contraintes en base.
 * [Suppression des entités : mise en œuvre](suppression-des-entites-mise-en-oeuvre.md) - Impact et empreinte de suppression, édition visée comptée comme son intention, refus par le dialogue commun, verrouillage racine puis enfant, mécanisme commun, règles ON DELETE, fichiers des visuels.
+* [Fusion de deux fiches : mise en œuvre](fusion-des-fiches-mise-en-oeuvre.md) - Côté retenu de chaque donnée envoyé par le client, fiche qui reste désignée par l'API, verrous des deux fiches puis de celles qui les désignent, report par le domaine, recherches enregistrées réécrites, trois enregistrements dans une transaction, sans empreinte ; écran interactif sur le cadre des fiches de saisie ; à lire pour toute fusion.

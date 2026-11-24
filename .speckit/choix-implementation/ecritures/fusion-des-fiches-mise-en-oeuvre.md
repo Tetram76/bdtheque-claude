@@ -1,0 +1,26 @@
+---
+type: Choix d'implémentation
+title: 'Fusion de deux fiches : mise en œuvre'
+description: 'Côté retenu de chaque donnée envoyé par le client, fiche qui reste désignée par l''API, verrous des deux fiches puis de celles qui les désignent, report par le domaine, recherches enregistrées réécrites, trois enregistrements dans une transaction, sans empreinte ; écran interactif sur le cadre des fiches de saisie ; à lire pour toute fusion.'
+applies_to:
+  - 'src/Bdtheque.Api/Merge/**'
+  - 'src/Bdtheque.Frontend/Components/Merge/**'
+  - 'src/Bdtheque.Contracts/Admin/Merge.cs'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T23:30:00Z }
+---
+
+# Fusion de deux fiches : mise en œuvre
+
+Règles : [Fusion de deux fiches](../../fonctionnel/regles-metier/fusion-des-fiches.md) ; écran : [Fusion de deux fiches](../../visuel/fusion/fusion-de-deux-fiches.md).
+
+- **Le client envoie, donnée par donnée, la fiche dont la valeur est retenue**, avec l'identifiant et la version de chacune des deux fiches, et non les valeurs elles-mêmes : l'API relit les deux fiches sous leur verrou, compare leurs versions, et prend chaque valeur sur la fiche désignée. Une fiche modifiée depuis sa lecture est une erreur fonctionnelle, comme toute écriture périmée ([Concurrence d'accès](../persistance/concurrence-d-acces.md)) : l'utilisateur choisit sur ce qu'il voit, jamais sur une valeur changée depuis.
+  - **Alternative écartée (valeurs choisies envoyées par le client)** : une valeur pourrait n'être celle d'aucune des deux fiches, ce que la fusion ne permet pas, et l'API devrait le vérifier.
+- **Fiche qui reste désignée par l'API**, d'après les côtés retenus : celle dont la fusion retient le plus de données, la première en cas d'égalité. Le client n'en sait rien d'autre que la réponse, qui la nomme.
+- **Un mécanisme commun** (`RecordMerge`) : verrou et version des deux fiches, dans l'ordre de leurs identifiants, pour que deux fusions des mêmes fiches ne s'attendent jamais l'une l'autre ; racines des fiches qui désignent la fiche supprimée verrouillées et marquées modifiées, comme toute écriture sur un agrégat, chaque ressource ne déclarant que ses données et ses liens.
+- **Report par le domaine** : chaque agrégat qui désigne la fiche supprimée la remplace par celle qui reste (genres d'un album ou d'une série, contributions d'un album ou d'une série), un élément présent des deux côtés n'étant gardé qu'une fois, si bien qu'aucune contrainte d'unicité ne refuse le report.
+- **Recherches enregistrées réécrites par le schéma de la recherche avancée** : seule une valeur d'un critère qui compare une fiche du type fusionné change, à la même place des critères ; les variables gardent leur constante, et les désignations, protégées par clé étrangère ([Recherches enregistrées : mise en œuvre](../recherche-avancee/recherches-enregistrees-mise-en-oeuvre.md)), suivent les critères.
+  - **Alternative écartée (identifiant remplacé dans le texte des critères)** : une valeur de texte qui contiendrait l'identifiant serait changée aussi ; seul le schéma dit quelle valeur désigne une fiche.
+- **Trois enregistrements dans une transaction** : le report d'abord, ce qu'il retire à ses propriétaires (une contribution de l'auteur supprimé sur un album) n'étant supprimé que par l'enregistrement, avant lequel il désigne encore la fiche que la suppression refuserait de supprimer ; la suppression de l'autre fiche ensuite ; les données de la fiche qui reste enfin, une valeur unique qu'elle reprend de l'autre (le nom affiché d'un auteur) n'étant libre qu'une fois l'autre supprimée. Le journal des modifications consigne chaque fiche une fois, la modification de la fiche qui reste n'étant écrite que par le dernier enregistrement ([Journal des modifications : mise en œuvre](../domaine/journal-des-modifications-mise-en-oeuvre.md)).
+- **Sans empreinte de l'impact**, contrairement à la suppression ([Suppression des entités : mise en œuvre](suppression-des-entites-mise-en-oeuvre.md)) : la fusion ne perd rien de ce qui est lié aux deux fiches, qui passe tout entier à celle qui reste ; un lien ajouté entre la lecture et la fusion la suit de même, sans rien d'inattendu. Les versions des deux fiches suffisent à garantir les valeurs choisies.
+- **Écran interactif, sur le cadre des fiches de saisie** ([Frontend](../socle/frontend.md), fiches de saisie) : lu une fois au prérendu, son état passant au circuit, les choix se font sans requête ; la barre d'enregistrement dit ce qui reste à choisir et n'active « Fusionner… » qu'une fois tout choisi ; la confirmation est le dialogue commun, en mode « fusion », de la couleur d'une suppression. Ce que la fiche devient (le nom affiché d'un auteur, sa clé de tri, son initiale) est demandé à l'API, qui le calcule par le domaine, chaque demande numérotée comme la clé de tri d'un titre. « Recharger la fiche » recharge la page entière, que le circuit garderait sinon telle qu'il l'a lue ; « Voir mes changements » n'y est pas, rien n'étant à saisir de nouveau.
+- **Textes communs à toutes les fusions écrits une fois** (`MergeTexts`, `MergeLinks`) : ce qui reste à choisir, ce qui passe à la fiche et la confirmation, au futur ; chaque page n'apporte que ses données et le nom de ses totaux.
