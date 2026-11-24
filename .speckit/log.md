@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-24
+
+* **Exigence de l'utilisateur** : le dépôt public `Tetram76/.github`, qui porte le template des Pull Requests, se lit toujours de façon anonyme, jamais en le rattachant à la session ni en demandant à l'utilisateur de le rattacher ; le refus de l'API GitHub d'une session cloud, qui invite à le rattacher, n'est jamais suivi ([Conventions de commit](gestion-projet/depot/conventions-de-commit.md)) (#628).
+
 ## 2026-11-23
 
 * **Décision de l'utilisateur** : la consultation des indicateurs de la mesure d'audience, dans l'administration, n'est pas une fonction suivie, ni son écran ni ses actions, non plus que les pages d'accueil de la consultation et de l'administration, où l'on passe forcément ([Mesure d'audience de l'interface web](fonctionnel/mesure-audience.md), [Relevé par le frontend](choix-implementation/mesure-audience/releve-par-le-frontend.md)) (#626).
