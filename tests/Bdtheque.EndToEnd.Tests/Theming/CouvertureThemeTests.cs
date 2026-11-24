@@ -48,12 +48,29 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
     }
 
     [Fact]
+    public async Task AlbumsInVolume_AreFlatDrawingsTurnedAsAWhole_NeverA3DContext()
+    {
+        var page = await OpenAsync(AppPaths.Home);
+
+        // Firefox draws the elements of a 3D context without anti-aliasing their edges, and cuts them into pieces whose
+        // seams flicker as the book floats: the spine is drawn in the plane of the cover, which alone is turned.
+        Assert.All(await page.Locator(".cover-volume").EvaluateAllAsync<string[]>(
+                "books => books.map(book => getComputedStyle(book).transformStyle)"),
+            style => Assert.Equal("flat", style));
+        Assert.Equal(["none", "none"], await page.Locator("[data-area='spotlight'] .cover-volume").EvaluateAsync<string[]>(
+            "book => [getComputedStyle(book, '::before').transform, getComputedStyle(book, '::after').content]"));
+        // Drawn flat, the spine keeps the perspective it had in space: its back edge, further away, is shorter.
+        Assert.StartsWith("polygon(0px 1.25%", await page.Locator("[data-area='spotlight'] .cover-volume").EvaluateAsync<string>(
+            "book => getComputedStyle(book, '::before').clipPath"));
+    }
+
+    [Fact]
     public async Task AlbumsInVolume_AreSolidBooks_TheGenericVisualOfAnAlbumWithoutCoverIncluded()
     {
         var page = await OpenAsync(AppPaths.Home);
 
-        // The edge of the pages, drawn behind the cover of a book in volume, shows through anything but an opaque face: the
-        // translucent stripes of the generic visual are painted over the surface of the theme.
+        // The scene behind a book in volume shows through anything but an opaque face: the translucent stripes of the
+        // generic visual are painted over the surface of the theme.
         await Assertions.Expect(page.Locator("[data-area='latest'] .cover-volume .cover-generic")).ToHaveCountAsync(1);
         var surface = Rgb((await CustomPropertyAsync(page, "--day-surface"))!);
         Assert.All(await page.Locator(".cover-volume .cover").EvaluateAllAsync<string[]>(

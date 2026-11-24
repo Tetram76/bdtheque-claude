@@ -277,13 +277,17 @@
     color: #FFFFFF;
 }
 
-/* An album in volume: its cover, its spine on its left, of the deep colour of its own cover, and the edge of its pages on
-   its right, a little turned away; it turns to face the reader and rises when hovered. */
+/* An album in volume: its cover and its spine on its left, of the deep colour of its own cover, a little turned away; it
+   turns to face the reader, its spine hidden behind it, and rises when hovered.
+   The book is one flat drawing turned as a whole, never a 3D context (transform-style: preserve-3d) of a face and of
+   sides each turned on its own: Firefox draws the elements of a 3D context without anti-aliasing their edges, and cuts
+   them along their planes into pieces whose seams flicker as the book floats (bugzilla.mozilla.org, 1737904, 1399268,
+   1698988). Turned by 22 degrees, only the spine of a book shows, a narrow band along its cover, which the flat drawing
+   gives as well; the edge of its pages faces away from the reader. */
 [data-theme="couverture"] .cover-slot.cover-volume {
     --book-thickness: 1rem;
     position: relative;
     aspect-ratio: auto;
-    transform-style: preserve-3d;
     transform: var(--book-turn);
     transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -298,35 +302,30 @@
     box-shadow: var(--book-ground);
 }
 
-/* A solid book: its face hides the edge of its pages, drawn behind it, in every position. The generic visual of an album
-   without cover, translucent stripes, and a cover with transparent parts are painted over the surface. Of a higher
-   specificity than the frame of the visual of a record (--record-visual-background), which it overrides whatever the order
-   of the style sheets. */
+/* A solid book: the generic visual of an album without cover, translucent stripes, and a cover with transparent parts are
+   painted over the surface, never over the scene behind the book. Of a higher specificity than the frame of the visual of
+   a record (--record-visual-background), which it overrides whatever the order of the style sheets. */
 [data-theme="couverture"] .cover-slot.cover-volume .cover {
     background-color: var(--color-surface);
 }
 
-[data-theme="couverture"] .cover-volume::before,
-[data-theme="couverture"] .cover-volume::after {
+/* The spine as the reader sees it, turned away from them, as it showed when it was turned in space: a little more than a
+   quarter of the thickness of the book, its back edge shorter than the edge of the cover, which perspective sets further
+   away, from the deep colour along the cover to a lighter one at the back; it narrows to nothing as the book turns to
+   face the reader. Drawn in the plane of the cover, a band of even height would read as flat. */
+[data-theme="couverture"] .cover-volume::before {
     content: "";
     position: absolute;
-    inline-size: var(--book-thickness);
-}
-
-[data-theme="couverture"] .cover-volume::before {
     inset-block: 0;
-    inset-inline-start: 0;
-    background: linear-gradient(90deg, var(--cover-spine, var(--day-deep)), color-mix(in srgb, var(--cover-spine, var(--day-deep)) 72%, #FFFFFF));
-    transform-origin: left center;
-    transform: rotateY(90deg);
+    inset-inline-end: 100%;
+    inline-size: calc(var(--book-thickness) * 0.28);
+    clip-path: polygon(0 1.25%, 100% 0, 100% 100%, 0 98.75%);
+    background: linear-gradient(270deg, var(--cover-spine, var(--day-deep)), color-mix(in srgb, var(--cover-spine, var(--day-deep)) 72%, #FFFFFF));
+    transition: inline-size 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-[data-theme="couverture"] .cover-volume::after {
-    inset-block: 1.5%;
-    inset-inline-end: 0;
-    background: repeating-linear-gradient(90deg, #F6F2E8 0 2px, #E2DCCD 2px 3px);
-    transform-origin: right center;
-    transform: rotateY(-90deg);
+[data-theme="couverture"] .cover-volume:hover::before {
+    inline-size: 0;
 }
 
 /* The album in the spotlight, larger and thicker, floats gently; the latest arrivals come in one after the other. */
@@ -369,5 +368,9 @@
 
     [data-theme="couverture"] .cover-volume:hover {
         transform: var(--book-turn);
+    }
+
+    [data-theme="couverture"] .cover-volume:hover::before {
+        inline-size: calc(var(--book-thickness) * 0.28);
     }
 }
