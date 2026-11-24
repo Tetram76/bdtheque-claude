@@ -22,7 +22,7 @@ internal static class AdministrationEndpoints
     private static async Task<RecordCounts> GetRecordCountsAsync(BdthequeDbContext context, CancellationToken cancellationToken) =>
         new(
             await context.Albums.CountAsync(cancellationToken),
-            // The albums the filter « Hors collection » of the list of the albums keeps, by the same expression
+            // The albums the filter « Catalogué » of the list of the albums keeps, by the same expression
             // (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album): never an album wished for.
             await context.Albums.CountAsync(
                 CatalogExpressions.Expand((Album a) => a.CollectionState() == AlbumCollectionState.OutsideCollection), cancellationToken),
