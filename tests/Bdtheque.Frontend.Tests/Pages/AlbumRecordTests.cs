@@ -278,8 +278,8 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
 
         var page = Open();
 
-        Assert.Equal("Non possédé", page.FindAll(".album-facts li")[^1].TextContent.Trim());
-        Assert.Equal(("out", "Non possédé"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
+        Assert.Equal("Catalogué", page.FindAll(".album-facts li")[^1].TextContent.Trim());
+        Assert.Equal(("out", "Catalogué"), (page.Find(".collection-status").GetAttribute("data-status"), page.Find(".collection-status strong").TextContent.Trim()));
         // Neither edition nor intent: no block of the editions, which would hold nothing.
         Assert.DoesNotContain(page.FindAll("section.block .block-title"), t => t.TextContent.Trim() == "Dans quelles éditions ?");
     }
@@ -635,7 +635,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal(["T. 1", "T. 5", "T. 6", "HS 1"], albums.Select(a => a.QuerySelector(".series-album-volume")!.TextContent.Trim()));
         Assert.Equal(["La Jeunesse", "Lointaines îles du vent", "Les Celtiques", "Hors-série 1"],
             albums.Select(a => a.QuerySelector(".series-album-title")!.TextContent.Trim()));
-        Assert.Equal(["Possédé", "Possédé", "Intention", "Non possédé"],
+        Assert.Equal(["Possédé", "Possédé", "Intention", "Catalogué"],
             albums.Select(a => a.QuerySelector(".tag")!.TextContent.Trim()));
         // The album shown is no link to itself; the others lead to their records.
         Assert.Equal("page", albums[1].QuerySelector(".series-album-title")!.GetAttribute("aria-current"));
