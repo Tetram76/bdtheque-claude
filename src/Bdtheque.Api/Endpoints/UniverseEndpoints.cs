@@ -79,9 +79,7 @@ internal static class UniverseEndpoints
             .SingleAsync(cancellationToken);
         var universeIds = tree.WithDescendants(id);
 
-        var albums = context.Albums.AsNoTracking().WhereUniverse(universeIds);
-        var series = context.Series.AsNoTracking()
-            .Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)) || albums.Any(a => a.SeriesId == s.Id));
+        var (series, albums) = WorksOf(context, universeIds);
         var works = await CatalogWorks.ReadBibliographyAsync(
             context, series, albums,
             (Series s) => new CatalogWorks.BibliographySeries(new SeriesListItem(s.Id, s.Title), s.Universes.Any(u => universeIds.Contains(u.Id)), new List<ContributionRole>()),
@@ -89,8 +87,44 @@ internal static class UniverseEndpoints
                 a.ToCard(), new List<ContributionRole>(), a.FirstPublicationYear, a.FirstPublicationMonth)),
             cancellationToken);
 
+        var subUniverses = tree.SubUniverses(id);
+        var counts = await CountWorksAsync(context, tree, subUniverses, cancellationToken);
         return new UniverseDetail(
-            id, item.Name, universe.Description, ancestors, tree.SubUniverses(id), works, universe.CreatedAt, universe.ModifiedAt);
+            id, item.Name, universe.Description, ancestors,
+            [.. subUniverses.Select(u => new SubUniverse(u.Id, u.Name, u.ParentId!.Value, counts[u.Id].Series, counts[u.Id].Albums))],
+            works, universe.CreatedAt, universe.ModifiedAt);
+    }
+
+    /// <summary>
+    /// What the record of a universe presents (visuel/fiche-univers/contenu.md), its sub-universes included: its albums, attached
+    /// themselves or through their series, and its series, attached themselves or through one of these albums.
+    /// </summary>
+    private static (IQueryable<Series> Series, IQueryable<Album> Albums) WorksOf(BdthequeDbContext context, IReadOnlyCollection<Guid> universeIds)
+    {
+        var albums = context.Albums.AsNoTracking().WhereUniverse(universeIds);
+        var series = context.Series.AsNoTracking()
+            .Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)) || albums.Any(a => a.SeriesId == s.Id));
+        return (series, albums);
+    }
+
+    /// <summary>
+    /// The numbers of series and albums the record of each sub-universe presents (<see cref="WorksOf"/>), so that its line on
+    /// the record of its ancestor says what its own record says; in a single query, one count per universe joined by
+    /// <c>UNION ALL</c>.
+    /// </summary>
+    private static async Task<Dictionary<Guid, (int Series, int Albums)>> CountWorksAsync(
+        BdthequeDbContext context, UniverseTree tree, IReadOnlyList<UniverseListItem> universes, CancellationToken cancellationToken)
+    {
+        if (universes.Count == 0)
+            return [];
+        var counts = universes.Select(universe =>
+            {
+                var (series, albums) = WorksOf(context, tree.WithDescendants(universe.Id));
+                var id = universe.Id;
+                return context.Universes.Where(u => u.Id == id).Select(u => new { u.Id, Series = series.Count(), Albums = albums.Count() });
+            })
+            .Aggregate(Queryable.Concat);
+        return await counts.ToDictionaryAsync(c => c.Id, c => (c.Series, c.Albums), cancellationToken);
     }
 
     /// <summary>

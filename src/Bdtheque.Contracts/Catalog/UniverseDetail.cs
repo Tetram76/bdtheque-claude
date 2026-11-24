@@ -7,7 +7,7 @@ namespace Bdtheque.Contracts.Catalog;
 /// <param name="Ancestors">From the top of the hierarchy down to its parent; empty for a universe at the top.</param>
 /// <param name="SubUniverses">
 /// Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name; each says its
-/// parent, which places it in the tree.
+/// parent, which places it in the tree, and what is attached to it as its own record presents it.
 /// </param>
 /// <param name="Works">
 /// Its series and albums, those of its sub-universes included (fonctionnel/regles-metier/hierarchie-des-univers.md), presented
@@ -20,7 +20,13 @@ public sealed record UniverseDetail(
     string Name,
     string? Description,
     IReadOnlyList<UniverseListItem> Ancestors,
-    IReadOnlyList<UniverseListItem> SubUniverses,
+    IReadOnlyList<SubUniverse> SubUniverses,
     IReadOnlyList<BibliographyEntry> Works,
     DateTimeOffset CreatedAt,
     DateTimeOffset ModifiedAt);
+
+/// <summary>
+/// A sub-universe on the record of a universe (visuel/fiche-univers/contenu.md): its place in the tree, by its parent, and the
+/// numbers of series and albums its own record presents, its own sub-universes included.
+/// </summary>
+public sealed record SubUniverse(Guid Id, string Name, Guid ParentId, int SeriesCount, int AlbumCount);

@@ -18,8 +18,23 @@
   <data name="Breadcrumb.Universes" xml:space="preserve">
     <value>Univers</value>
   </data>
-  <data name="SubUniverses" xml:space="preserve">
-    <value>Sous-univers</value>
+  <data name="SubUniverses.Count" xml:space="preserve">
+    <value>{0} sous-univers</value>
+  </data>
+  <data name="SubUniverses.Title" xml:space="preserve">
+    <value>Quels sous-univers ?</value>
+  </data>
+  <data name="SubUniverses.Kicker" xml:space="preserve">
+    <value>Arborescence</value>
+  </data>
+  <data name="SubUniverses.Summary" xml:space="preserve">
+    <value>{0}, sur {1}, chacun sous son parent, frères par ordre alphabétique.</value>
+  </data>
+  <data name="Levels.One" xml:space="preserve">
+    <value>{0} niveau</value>
+  </data>
+  <data name="Levels.Other" xml:space="preserve">
+    <value>{0} niveaux</value>
   </data>
   <data name="Facts" xml:space="preserve">
     <value>En bref</value>

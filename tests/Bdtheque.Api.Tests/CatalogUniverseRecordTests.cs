@@ -87,8 +87,12 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
         var sub = await GetAsync<UniverseDetail>($"/catalog/universes/{xMen.Id}");
 
         Assert.Equal((marvel.Name, "L'univers partagé de Marvel Comics.", 0), (top.Name, top.Description, top.Ancestors.Count));
-        // Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name.
-        Assert.Equal([(asgard.Id, (Guid?)marvel.Id), (xMen.Id, marvel.Id), (mutants.Id, xMen.Id)], top.SubUniverses.Select(u => (u.Id, u.ParentId)));
+        // Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name, each with
+        // what is attached to it, its own sub-universes included, as its own record presents it: Daredevil through one of its
+        // albums.
+        Assert.Equal(
+            [(asgard.Id, marvel.Id, 0, 0), (xMen.Id, marvel.Id, 2, 2), (mutants.Id, xMen.Id, 1, 0)],
+            top.SubUniverses.Select(u => (u.Id, u.ParentId, u.SeriesCount, u.AlbumCount)));
         Assert.Equal(
             [(avengers.Id, (Guid?)null), (daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
             top.Works.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));

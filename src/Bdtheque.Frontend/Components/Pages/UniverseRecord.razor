@@ -33,16 +33,6 @@ else if (_universe is { } universe)
             <div class="universe-identity">
                 <h1>@universe.Name</h1>
 
-                @* Data not set is not shown (visuel/fiche-univers/contenu.md). *@
-                @if (universe.SubUniverses.Count > 0)
-                {
-                    @* Their tree at every level, each under its parent, as in the list of the universes of the administration. *@
-                    <dl class="universe-children">
-                        <dt>@L["SubUniverses"]</dt>
-                        <dd>@SubUniverses(universe.Id)</dd>
-                    </dl>
-                }
-
                 <ul class="universe-facts" aria-label="@L["Facts"]">
                     @if (_seriesCount == 0 && _albumCount == 0)
                     {
@@ -59,6 +49,11 @@ else if (_universe is { } universe)
                             <li class="universe-fact" data-fact="@(_seriesCount == 0 ? "main" : null)">@Counted("Albums", _albumCount)</li>
                         }
                     }
+                    @* Its sub-universes at every level, which their block presents; data not set is not shown. *@
+                    @if (universe.SubUniverses.Count > 0)
+                    {
+                        <li class="universe-fact">@L["SubUniverses.Count", Format.Number(universe.SubUniverses.Count)]</li>
+                    }
                 </ul>
             </div>
         </div>
@@ -67,6 +62,16 @@ else if (_universe is { } universe)
         {
             <Block Title="@L["Description.Title"]" Kicker="@L["Description.Kicker"]" data-part="description">
                 <p class="universe-description">@universe.Description</p>
+            </Block>
+        }
+
+        @* Its sub-universes, a block of their own (visuel/fiche-univers/contenu.md): their tree at every level, drawn by its
+           branches, each leading to its record with what is attached to it on the same line; no block without any. *@
+        @if (universe.SubUniverses.Count > 0)
+        {
+            <Block Title="@L["SubUniverses.Title"]" Kicker="@L["SubUniverses.Kicker"]" data-part="sub-universes">
+                <p class="sub-universes-summary">@SubUniversesSummary</p>
+                @SubUniverses(universe.Id, "sub-universes")
             </Block>
         }
 
@@ -107,17 +112,43 @@ else if (_universe is { } universe)
 
     private string Counted(string key, int count) => L[count > 1 ? $"{key}.Other" : $"{key}.One", Format.Number(count)];
 
-    // The parents of the universe, from the top down, each leading to its record, then the universe itself: a universe has no
-    // list to lead back to.
+    // Their number, that of the levels they span, and their order.
+    private string SubUniversesSummary
+    {
+        get
+        {
+            var subUniverses = _universe!.SubUniverses;
+            var levels = subUniverses.Max(u => Depth(u.ParentId));
+            return L["SubUniverses.Summary",
+                L["SubUniverses.Count", Format.Number(subUniverses.Count)],
+                L[levels > 1 ? "Levels.Other" : "Levels.One", Format.Number(levels)]];
+
+            // A sub-universe is on the first level under the universe, or one below its parent.
+            int Depth(Guid parentId) => parentId == _universe.Id ? 1 : 1 + Depth(subUniverses.First(u => u.Id == parentId).ParentId);
+        }
+    }
+
+    // What is attached to a sub-universe, as its own record says it: its series and its albums, a number at zero left out, or
+    // that nothing is, as the facts say it.
+    private string Works(SubUniverse universe) =>
+        string.Join(" · ", new[]
+        {
+            universe.SeriesCount > 0 ? Counted("Series", universe.SeriesCount) : null,
+            universe.AlbumCount > 0 ? Counted("Albums", universe.AlbumCount) : null,
+        }.OfType<string>()) is { Length: > 0 } works ? works : L["Albums.None"];
+
     // The sub-universes of a universe, each followed by its own; the API gives them in the order of the hierarchy, siblings by
     // name, each saying its parent.
-    private RenderFragment SubUniverses(Guid parentId) => __builder =>
+    private RenderFragment SubUniverses(Guid parentId, string? listClass = null) => __builder =>
     {
-        <ul>
+        <ul class="@listClass">
             @foreach (var child in _universe!.SubUniverses.Where(u => u.ParentId == parentId))
             {
                 <li>
-                    <a href="@AppPaths.UniverseRecord(child.Id)">@child.Name</a>
+                    <span class="sub-universe">
+                        <a href="@AppPaths.UniverseRecord(child.Id)">@child.Name</a>
+                        <span class="sub-universe-works">@Works(child)</span>
+                    </span>
                     @if (_universe.SubUniverses.Any(u => u.ParentId == child.Id))
                     {
                         @SubUniverses(child.Id)
@@ -127,6 +158,8 @@ else if (_universe is { } universe)
         </ul>
     };
 
+    // The parents of the universe, from the top down, each leading to its record, then the universe itself: a universe has no
+    // list to lead back to.
     private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
     [
         // « Univers » leads nowhere, the universes having no list in the consultation, but says from the first level what the

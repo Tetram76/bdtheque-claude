@@ -17679,6 +17679,46 @@
         },
         "description": "The owned edition in the spotlight of the day, the same for every display of the day."
       },
+      "SubUniverse": {
+        "required": [
+          "id",
+          "name",
+          "parentId",
+          "seriesCount",
+          "albumCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "seriesCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "albumCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "A sub-universe on the record of a universe (visuel/fiche-univers/contenu.md): its place in the tree, by its parent, and the\nnumbers of series and albums its own record presents, its own sub-universes included."
+      },
       "TitleSortKey": {
         "required": [
           "sortKey"
@@ -17809,9 +17849,9 @@
           "subUniverses": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UniverseListItem"
+              "$ref": "#/components/schemas/SubUniverse"
             },
-            "description": "Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name; each says its\nparent, which places it in the tree."
+            "description": "Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name; each says its\nparent, which places it in the tree, and what is attached to it as its own record presents it."
           },
           "works": {
             "type": "array",

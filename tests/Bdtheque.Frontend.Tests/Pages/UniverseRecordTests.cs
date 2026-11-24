@@ -21,8 +21,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Frontend.Tests.Pages;
 
 /// <summary>
-/// The record of a universe in the consultation (visuel/fiche-univers/contenu.md): its parents, its identity and sub-universes,
-/// its description, its series and albums presented as the bibliography of an author without roles, and its dates, told apart
+/// The record of a universe in the consultation (visuel/fiche-univers/contenu.md): its parents, its identity, its description,
+/// the tree of its sub-universes, its series and albums presented as the bibliography of an author without roles, and its dates, told apart
 /// by role, link and text, never by appearance.
 /// </summary>
 public sealed class UniverseRecordTests : BunitContext, IDisposable
@@ -98,22 +98,51 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Identity_LeadsToItsSubUniversesAtEveryLevel_EachUnderItsParent_AndCountsItsSeriesAndAlbums()
+    public void Identity_CountsItsSeriesAndAlbums_ThenItsSubUniversesAtEveryLevel()
+    {
+        _catalog.Universe = Universe();
+
+        var page = Open();
+
+        // Two series, and their three albums with the album without series; three sub-universes, on two levels.
+        Assert.Equal(["2 séries", "4 albums", "3 sous-univers"], page.FindAll(".universe-facts li").Select(f => f.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void SubUniverses_AreTheirOwnBlock_BetweenTheDescriptionAndTheWorks()
+    {
+        _catalog.Universe = Universe();
+
+        var page = Open();
+
+        Assert.Equal(["description", "sub-universes", "bibliography"], page.FindAll("[data-part]").Select(b => b.GetAttribute("data-part")));
+        var block = page.Find("[data-part='sub-universes']");
+        Assert.Equal("Quels sous-univers ?", block.QuerySelector(".block-title")!.TextContent.Trim());
+        Assert.Equal("Arborescence", block.QuerySelector(".block-kicker")!.TextContent.Trim());
+        Assert.Equal(
+            "3 sous-univers, sur 2 niveaux, chacun sous son parent, frères par ordre alphabétique.",
+            block.QuerySelector(".sub-universes-summary")!.TextContent.Trim());
+    }
+
+    [Fact]
+    public void SubUniverses_FormTheirTree_EachUnderItsParent_LeadingToItsRecord_WithWhatIsAttachedToIt()
     {
         _catalog.Universe = Universe();
 
         var page = Open();
 
         // Their tree, as in the list of the universes of the administration (visuel/fiche-univers/contenu.md).
+        var tree = page.Find(".sub-universes");
         Assert.Equal(
             [("Phare de Kerdran", AppPaths.UniverseRecord(ChildId)), ("Tour de la Vigie", AppPaths.UniverseRecord(SecondChildId))],
-            page.FindAll(".universe-children dd > ul > li > a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
+            tree.QuerySelectorAll(":scope > li > .sub-universe > a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
         Assert.Equal(
             [("Ordre des Gardiens", AppPaths.UniverseRecord(GrandChildId))],
-            page.FindAll(".universe-children dd > ul > li > ul > li > a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
-        Assert.Equal("Phare de Kerdran", page.Find(".universe-children li:has(> ul) > a").TextContent.Trim());
-        // Two series, and their three albums with the album without series.
-        Assert.Equal(["2 séries", "4 albums"], page.FindAll(".universe-facts li").Select(f => f.TextContent.Trim()));
+            tree.QuerySelectorAll(":scope > li > ul > li > .sub-universe > a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
+        // What is attached to it, a number at zero left out; nothing at all said as in the facts.
+        Assert.Equal(
+            ["2 séries · 7 albums", "1 album", "Aucun album rattaché"],
+            tree.QuerySelectorAll(".sub-universe-works").Select(w => w.TextContent.Trim()));
     }
 
     [Fact]
@@ -124,8 +153,8 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
         var page = Open();
 
         Assert.Equal(["Aucun album rattaché"], page.FindAll(".universe-facts li").Select(f => f.TextContent.Trim()));
-        // Data not set is not shown.
-        Assert.Empty(page.FindAll(".universe-children"));
+        // Data not set is not shown: no sub-universe, neither fact nor block.
+        Assert.Empty(page.FindAll("[data-part='sub-universes']"));
         Assert.Empty(page.FindAll("[data-part='description']"));
         Assert.Empty(page.FindAll("[data-part='bibliography']"));
     }
@@ -245,9 +274,9 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
         UniverseId, "Archipel des Brumes", "Un chapelet d'îles battues par les vents.",
         [new UniverseListItem(ParentId, "Royaumes d'Ombrelune", null, null)],
         [
-            new UniverseListItem(ChildId, "Phare de Kerdran", UniverseId, "Archipel des Brumes"),
-            new UniverseListItem(GrandChildId, "Ordre des Gardiens", ChildId, "Phare de Kerdran"),
-            new UniverseListItem(SecondChildId, "Tour de la Vigie", UniverseId, "Archipel des Brumes"),
+            new SubUniverse(ChildId, "Phare de Kerdran", UniverseId, 2, 7),
+            new SubUniverse(GrandChildId, "Ordre des Gardiens", ChildId, 0, 1),
+            new SubUniverse(SecondChildId, "Tour de la Vigie", UniverseId, 0, 0),
         ],
         [
             new BibliographyEntry(null, Album(LivreId, null, null, null, "Le Grand Livre d'Ombrelune", true, AlbumRating.Good)),
