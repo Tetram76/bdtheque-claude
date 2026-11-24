@@ -2,7 +2,7 @@
 
 ## 2026-11-24
 
-* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, les harnais ne sont pas comptés comme des chantiers du lot, mais exécutés comme tels : leur session occupe une des 3 places des chantiers menés en même temps, jusqu'à la fin de leur traitement ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md), [Contrôle de cohérence fonctionnelle](gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md)).
+* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, les harnais ne sont pas comptés comme des chantiers du lot, mais exécutés comme tels : leur session occupe une des 3 places des chantiers menés en même temps, jusqu'à la fin de leur traitement ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md), [Contrôle de cohérence fonctionnelle](gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md)) (#627).
 
 ## 2026-11-23
 
