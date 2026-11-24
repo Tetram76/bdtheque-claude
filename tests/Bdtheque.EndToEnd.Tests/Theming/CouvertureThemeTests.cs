@@ -59,6 +59,9 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
             style => Assert.Equal("flat", style));
         Assert.Equal(["none", "none"], await page.Locator("[data-area='spotlight'] .cover-volume").EvaluateAsync<string[]>(
             "book => [getComputedStyle(book, '::before').transform, getComputedStyle(book, '::after').content]"));
+        // Drawn flat, the spine keeps the perspective it had in space: its back edge, further away, is shorter.
+        Assert.StartsWith("polygon(0px 1.25%", await page.Locator("[data-area='spotlight'] .cover-volume").EvaluateAsync<string>(
+            "book => getComputedStyle(book, '::before').clipPath"));
     }
 
     [Fact]
