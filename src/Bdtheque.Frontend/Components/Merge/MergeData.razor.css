@@ -1,22 +1,20 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). The frame is the container the rows are laid
-   out by (MergeChoice): its own width, not the screen's, which the margins of each theme make misleading. */
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md), mobile-first. The frame is the container the
+   rows are laid out by (MergeChoice): its own width, not the screen's, which the margins of each theme make misleading. */
 .merge-data-frame {
     container: merge-data / inline-size;
 }
 
+/* On a smartphone, a single column: the heads go, each value carrying the name of its record. */
 .merge-data-grid {
     display: grid;
-    grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-s) var(--space-m);
     align-items: stretch;
 }
 
+.merge-data-corner,
 .merge-data-head {
-    display: flex;
-    flex-direction: column;
-    padding-block-end: var(--space-xs);
-    border-block-end: 1px solid var(--color-rule);
-    overflow-wrap: anywhere;
+    display: none;
 }
 
 .merge-data-head-detail {
@@ -35,13 +33,21 @@
     font-size: var(--font-size-small);
 }
 
-@container merge-data (max-width: 40rem) {
+/* Wide enough, the name of each data, then the values side by side under the heads of their records. */
+@container merge-data (min-width: 40rem) {
     .merge-data-grid {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1fr);
     }
 
-    .merge-data-corner,
+    .merge-data-corner {
+        display: block;
+    }
+
     .merge-data-head {
-        display: none;
+        display: flex;
+        flex-direction: column;
+        padding-block-end: var(--space-xs);
+        border-block-end: 1px solid var(--color-rule);
+        overflow-wrap: anywhere;
     }
 }

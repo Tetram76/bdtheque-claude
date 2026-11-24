@@ -1,7 +1,8 @@
-/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). The cells are those of the grid of MergeData:
-   the name of the data in the first column, its values in the next two, or, the same value, across both. */
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md), mobile-first. The cells are those of the grid of
+   MergeData: on a smartphone, one under the other, each value naming its record; wider, the name of the data in the first column,
+   its values in the next two, or, the same value, across both. */
 .merge-choice-label {
-    padding-block-start: var(--space-s);
+    padding-block-start: var(--space-m);
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-strong);
 }
@@ -12,7 +13,6 @@
 }
 
 .merge-choice-same {
-    grid-column: 2 / -1;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -40,7 +40,7 @@
 }
 
 /* The value retained, ticked and bordered in the accent of the theme. */
-.merge-choice-option[data-selected="true"] {
+.merge-choice-option[data-selected] {
     border-color: var(--color-accent);
     background: var(--color-surface-raised);
 }
@@ -71,7 +71,7 @@
     color: transparent;
 }
 
-.merge-choice-option[data-selected="true"] .merge-choice-mark {
+.merge-choice-option[data-selected] .merge-choice-mark {
     border-color: var(--color-accent);
     background: var(--color-accent);
     color: var(--color-text-on-accent);
@@ -90,15 +90,14 @@
     overflow-wrap: anywhere;
 }
 
-/* The record a value comes from, named only where the values are no longer under the heads of the records. */
+/* The record a value comes from, named where the values are not under the heads of the records. */
 .merge-choice-record {
-    display: none;
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
 }
 
 /* A long text on a few lines. */
-.merge-choice-value[data-long="True"] {
+.merge-choice-value[data-long] {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
@@ -107,16 +106,16 @@
     font-size: var(--font-size-small);
 }
 
-@container merge-data (max-width: 40rem) {
+@container merge-data (min-width: 40rem) {
     .merge-choice-label {
-        padding-block-start: var(--space-m);
+        padding-block-start: var(--space-s);
     }
 
     .merge-choice-same {
-        grid-column: auto;
+        grid-column: 2 / -1;
     }
 
     .merge-choice-record {
-        display: block;
+        display: none;
     }
 }
