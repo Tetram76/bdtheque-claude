@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes des listes et leurs réglages.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Maquettes

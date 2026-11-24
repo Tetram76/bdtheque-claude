@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Validation de l''ISBN'
 description: 'ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l''enregistrement, ISBN corrigé que suppose l''application, erreur acceptée pour un ISBN.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Validation de l'ISBN

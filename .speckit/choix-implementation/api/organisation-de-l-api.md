@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Organisation de l'API

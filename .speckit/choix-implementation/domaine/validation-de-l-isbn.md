@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Domain/Common/IsbnChecksumValidator.cs'
   - 'src/Bdtheque.Domain/Common/IsbnText.cs'
   - 'src/Bdtheque.Api/Endpoints/InvalidIsbnEndpoints.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Validation de l'ISBN

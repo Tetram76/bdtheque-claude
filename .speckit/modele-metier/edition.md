@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Domain/Entities/Edition.cs'
   - 'src/Bdtheque.Domain/Entities/EditionAcquisition.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/EditionConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Édition

@@ -283,6 +283,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    // The cases of the list of the ISBN to check (visuel/listes/liste-par-liste.md): an owned edition and an intent to correct,
+    // an ISBN no check character corrects, an error accepted, which the home page does not count.
+    public async Task InvalidIsbns_EveryCaseOfTheirList()
+    {
+        var toCorrect = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.InvalidIsbnList>("/admin/editions/invalid-isbns"))!.Editions.Items;
+        var accepted = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.InvalidIsbnList>("/admin/editions/invalid-isbns?state=Accepted"))!.Editions.Items;
+
+        Assert.Contains(toCorrect, row => row is { IsOwned: true, CorrectedIsbn: not null });
+        Assert.Contains(toCorrect, row => row is { IsOwned: false, CorrectedIsbn: not null });
+        Assert.Contains(toCorrect, row => row.CorrectedIsbn is null);
+        Assert.NotEmpty(accepted);
+        Assert.Equal(toCorrect.Count, (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.AdminChecks>("/admin/checks"))!.InvalidIsbnCount);
+    }
+
+    [Fact]
     public async Task Collective_CreditsManyAuthors_MoreThanTheRecordShowsInARoleBeforeFoldingThem()
     {
         var album = await AlbumAsync(ValidationDataLoader.CollectiveTitle);

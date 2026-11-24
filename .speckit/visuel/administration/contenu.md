@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la page d''accueil de l''administration.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Contenu
