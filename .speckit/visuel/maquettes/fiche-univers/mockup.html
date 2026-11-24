@@ -85,7 +85,8 @@ summary{cursor:pointer}
       </section></sc-if>
 
       <!-- Its sub-universes, a block of their own between its description and its series and albums: their tree at every
-           level, drawn by its branches, each with what is attached to it, its own sub-universes included. -->
+           level, drawn by its branches, each with what is attached to it, its own sub-universes included; no icon, which
+           would say nothing the block does not already say. -->
       <sc-if value="{{a.hasChildren}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-subs" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.subs}}</span>
         <h2 id="a-subs" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Quels sous-univers ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
@@ -93,11 +94,9 @@ summary{cursor:pointer}
         <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
           <sc-for list="{{subs}}" as="r" hint-placeholder-count="5">
             <li style="display: flex; align-items: stretch; min-height: 48px">
-              <sc-for list="{{r.guides}}" as="g" hint-placeholder-count="1"><span aria-hidden="true" style="flex: none; width: 34px; position: relative"><span style="position: absolute; left: 16px; top: 0; bottom: 0; border-left: {{g.bd}}"></span></span></sc-for>
-              <span aria-hidden="true" style="flex: none; width: 34px; position: relative"><span style="position: absolute; left: 16px; top: 0; height: {{r.stem}}; border-left: 2px solid {{t.line}}"></span><span style="position: absolute; left: 16px; top: 22px; width: 18px; border-top: 2px solid {{t.line}}"></span></span>
-              <span style="position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: flex-start; gap: 10px; padding-block: 6px">
-                <sc-if value="{{r.hasKids}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 16px; top: 40px; bottom: 0; border-left: 2px solid {{t.line}}"></span></sc-if>
-                <span aria-hidden="true" style="flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: {{t.cvB}}; border-radius: {{mono.r}}; background: {{mono.bg}}; color: {{mono.fg}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14a4 4 0 0 1-1-7.9A5 5 0 0 1 15.5 5a4.5 4.5 0 0 1 2.5 9zM7.5 18.2a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0-4.4 0M3 21.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0"></path></svg></span>
+              <sc-for list="{{r.guides}}" as="g" hint-placeholder-count="1"><span aria-hidden="true" style="flex: none; width: 24px; position: relative"><span style="position: absolute; left: 6px; top: 0; bottom: 0; border-left: {{g.bd}}"></span></span></sc-for>
+              <span aria-hidden="true" style="flex: none; width: 24px; position: relative"><span style="position: absolute; left: 6px; top: 0; height: {{r.stem}}; border-left: 2px solid {{t.line}}"></span><span style="position: absolute; left: 6px; top: 17px; width: 12px; border-top: 2px solid {{t.line}}"></span></span>
+              <span style="flex: 1 1 0; min-width: 0; display: flex; padding-block: 6px">
                 <span style="min-width: 0; display: flex; flex-direction: column; gap: 1px">
                   <a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline; text-underline-offset: .2em">{{r.name}}</a>
                   <span style="font-size: 13px; color: {{t.muted}}">{{r.meta}}</span>
@@ -407,8 +406,7 @@ class View extends Mockup {
         name: n.name,
         meta: what || 'Aucun album rattaché',
         guides: guides.map((more) => ({ bd: more ? '2px solid ' + t.line : '0' })),
-        stem: last ? '23px' : '100%',
-        hasKids: n.children.length > 0
+        stem: last ? '18px' : '100%'
       });
       walk(n.children, [...guides, !last]);
     });
