@@ -83,12 +83,12 @@ C'est aussi ce job qui enregistre le cache des packages NuGet que les autres job
 
 ### `End-to-end tests (<thème>)`
 
-Les tests de bout en bout pilotent l'application complète dans un navigateur. Ils s'exécutent dans une matrice d'un job par thème proposé, `theme: [base, planche, gazette, couverture]`, dans l'ordre de `ThemeCatalog.Offered`, et un thème en échec n'interrompt pas les autres. Quand le rendu peut avoir changé, chaque job enchaîne les étapes suivantes :
+Les tests de bout en bout pilotent l'application complète dans un navigateur. Ils s'exécutent dans une matrice d'un job par thème proposé, `theme: [planche, gazette, couverture]`, dans l'ordre de `ThemeCatalog.Offered`, ce que vérifie `TestThemesTests`, et un thème en échec n'interrompt pas les autres. Quand le rendu peut avoir changé, chaque job enchaîne les étapes suivantes :
 
 1. Il compile le seul projet de bout en bout, à partir des packages du cache.
 2. Il installe Chromium dans sa version sans interface (`playwright.ps1 install --with-deps --only-shell chromium`).
 3. Il règle les interfaces réseau que crée Docker pour qu'elles ne reçoivent pas d'adresse IPv6 de lien local (`sysctl … addr_gen_mode=1`), puis il enregistre, pendant toute la durée des tests, les changements d'adresses (`ip monitor`) et les évènements de Docker.
-4. Il exécute les tests en fixant la variable `BDTHEQUE_TEST_THEME` au thème du job. Le job `base` exécute tout le projet, tandis que les autres n'exécutent que les tests marqués du trait `Themes=Each`, ceux dont le résultat dépend du thème ([Stratégie de tests](strategie-de-tests.md#thème-imposé)). La couverture est publiée dans l'artefact `coverage-end-to-end-<thème>`.
+4. Il exécute les tests en fixant la variable `BDTHEQUE_TEST_THEME` au thème du job. Le job du premier thème, `planche`, exécute tout le projet, tandis que les autres n'exécutent que les tests marqués du trait `Themes=Each`, ceux dont le résultat dépend du thème ([Stratégie de tests](strategie-de-tests.md#thème-imposé)). La couverture est publiée dans l'artefact `coverage-end-to-end-<thème>`.
 5. Il échoue si une interface de Docker a gagné ou perdu une adresse pendant les tests, même si ceux-ci ont réussi.
 
 Quand le job échoue, il publie le relevé des changements du réseau, ainsi que les captures qui diffèrent de leur référence accompagnées de leur image de différence, dans l'artefact `captures-<thème>`.

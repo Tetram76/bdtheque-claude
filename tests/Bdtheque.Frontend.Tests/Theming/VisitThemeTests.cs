@@ -113,6 +113,20 @@ public sealed class VisitThemeTests
     }
 
     [Fact]
+    public void Visit_InTheBaseTheme_DrawsAnOfferedThemeAgain()
+    {
+        // The base theme only gives its contracts to the offered themes (visuel/charte-graphique/theme-de-base.md), never
+        // drawn: a visit started in it by an earlier version of the application goes on in an offered theme.
+        var visit = new BrowserVisit(Today, "base", Today);
+
+        var drawn = Enumerable.Range(0, ThemeCatalog.Offered.Count)
+            .Select(index => VisitTheme.Continue(visit, Today, Today, ThemeCatalog.Offered, Draw(index)).ThemeKey);
+
+        Assert.Equal(ThemeCatalog.Offered.Select(theme => theme.Key), drawn);
+        Assert.DoesNotContain("base", ThemeCatalog.Offered.Select(theme => theme.Key));
+    }
+
+    [Fact]
     public void VisitThatIsOver_GivesWayToANewVisit()
     {
         var visit = new BrowserVisit(new DateOnly(2025, 9, 30), Second.Key, Today);

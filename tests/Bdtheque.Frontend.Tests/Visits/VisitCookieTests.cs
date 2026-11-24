@@ -8,7 +8,7 @@ namespace Bdtheque.Frontend.Tests.Visits;
 /// </summary>
 public sealed class VisitCookieTests
 {
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3));
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3));
 
     [Fact]
     public void Visit_IsTheOneTheRequestBrings()

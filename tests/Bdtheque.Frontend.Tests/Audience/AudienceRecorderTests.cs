@@ -18,7 +18,7 @@ public sealed class AudienceRecorderTests
     private const string SafariOnAnIPhone =
         "Mozilla/5.0 (iPhone; CPU iPhone OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1";
 
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3));
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3));
     private static readonly AudienceFunction Screen = new("screen", AudienceFunctionKind.Screen);
     private static readonly AudienceFunction Action = new("action", AudienceFunctionKind.Action);
 

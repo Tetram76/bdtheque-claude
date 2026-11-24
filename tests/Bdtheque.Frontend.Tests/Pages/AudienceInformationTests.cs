@@ -14,7 +14,7 @@ namespace Bdtheque.Frontend.Tests.Pages;
 /// </summary>
 public sealed class AudienceInformationTests : BunitContext
 {
-    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "base", new DateOnly(2026, 11, 3));
+    private static readonly BrowserVisit Visit = new(new DateOnly(2026, 11, 3), "planche", new DateOnly(2026, 11, 3));
 
     private readonly FakeAudienceApi _api = new();
 

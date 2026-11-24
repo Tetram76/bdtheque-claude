@@ -25,7 +25,7 @@ public sealed partial class WelcomeScreenCaptureTests(ApplicationHost applicatio
     public async Task Screen_LooksLikeItsReference(string viewport)
     {
         // Any theme: the screen comes before it.
-        var page = await NewCapturePageAsync(ThemeCatalog.Base.Key, ScreenCaptureTests.Viewports[viewport]);
+        var page = await NewCapturePageAsync(ThemeCatalog.Offered[0].Key, ScreenCaptureTests.Viewports[viewport]);
         await page.RouteAsync(url => new Uri(url).AbsolutePath == AppPaths.Home, async route =>
         {
             var response = await route.FetchAsync();

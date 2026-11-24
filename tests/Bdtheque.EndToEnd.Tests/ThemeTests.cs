@@ -85,7 +85,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
         var start = today.AddDays(-3);
         await page.Context.AddCookiesAsync([
             Cookie(BrowserTimeZone.CookieName, "Europe/Paris"),
-            Cookie(BrowserVisit.CookieName, new BrowserVisit(start, ThemeCatalog.Base.Key, today.AddDays(-1)).Format()),
+            Cookie(BrowserVisit.CookieName, new BrowserVisit(start, ThemeCatalog.Gazette.Key, today.AddDays(-1)).Format()),
         ]);
 
         await page.GotoAsync(Page);
@@ -97,6 +97,8 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
         Assert.Equal(visit.ThemeKey, await page.Locator("html").GetAttributeAsync("data-theme"));
     }
 
+    // The base theme, which a visit started by an earlier version of the application may still carry: it only gives its
+    // contracts to the offered themes (visuel/charte-graphique/theme-de-base.md), as a theme no longer offered.
     [Fact]
     public async Task Visit_WhoseThemeIsNoLongerOffered_IsPresentedInAnOfferedTheme()
     {
@@ -104,7 +106,7 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
         var today = Application.TodayIn("Europe/Paris");
         await page.Context.AddCookiesAsync([
             Cookie(BrowserTimeZone.CookieName, "Europe/Paris"),
-            Cookie(BrowserVisit.CookieName, new BrowserVisit(today, "withdrawn", today).Format()),
+            Cookie(BrowserVisit.CookieName, new BrowserVisit(today, "base", today).Format()),
         ]);
 
         await page.GotoAsync(Page);
@@ -114,21 +116,6 @@ public sealed class ThemeTests(ApplicationHost application) : BrowserTest<Applic
         // The visit goes on, and with it the visit of the audience measurement, which its page records.
         var visit = VisitOf(await VisitCookieAsync(page));
         Assert.Equal(new BrowserVisit(today, theme!, today), visit with { AudienceVisit = null });
-    }
-
-    [Fact]
-    public async Task Page_UsesTheFontsServedByTheApplication()
-    {
-        // The font of the base theme; those of « La planche encrée » are checked with its drawings (PlancheThemeTests).
-        var page = await NewPageInThemeAsync(ThemeCatalog.Base.Key, new ViewportSize { Width = 1440, Height = 900 });
-
-        await PageReadiness.GotoAsync(page, Page);
-
-        Assert.True(await page.EvaluateAsync<bool>("async () => (await document.fonts.ready, document.fonts.check('16px Inter'))"),
-            "The font of the base theme is not loaded.");
-        Assert.True(await page.EvaluateAsync<bool>(
-            "() => [...document.fonts].some(font => font.family.replaceAll('\"', '') === 'Inter' && font.status === 'loaded')"),
-            "No face of the font of the base theme was loaded from the Application.");
     }
 
     private async Task<IPage> PageInAsync(string timeZone)

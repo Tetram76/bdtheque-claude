@@ -159,7 +159,7 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
     [Fact]
     public async Task EnhancedNavigation_IntoThisTheme_DrawsTheBlocksOfTheNewPage()
     {
-        var page = await OpenAsync(ThemeCatalog.Base.Key);
+        var page = await OpenAsync(ThemeCatalog.Gazette.Key);
 
         await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = ThemeCatalog.Planche.Key });
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
@@ -176,10 +176,10 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
     {
         var page = await OpenAsync(ThemeCatalog.Planche.Key);
 
-        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = ThemeCatalog.Base.Key });
+        await page.SetExtraHTTPHeadersAsync(new Dictionary<string, string> { [RequestThemeSelector.HeaderName] = ThemeCatalog.Gazette.Key });
         await page.GetByRole(AriaRole.Link, new() { Name = "Afficher de nouveau" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(CasesPage.Path, "?again=1"));
-        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Base.Key);
+        await Assertions.Expect(page.Locator("html")).ToHaveAttributeAsync("data-theme", ThemeCatalog.Gazette.Key);
         // Past the frame in which the script of the theme would deal and draw the new page.
         await page.EvaluateAsync("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
 
@@ -191,10 +191,11 @@ public sealed class PlancheThemeTests(ApplicationHost application) : BrowserTest
         });
     }
 
+    // A theme without a script of its own, on which that of this theme acts no more than on any other.
     [Fact]
-    public async Task BaseTheme_DrawsNothing()
+    public async Task AnotherTheme_DrawsNothing()
     {
-        var page = await OpenAsync(ThemeCatalog.Base.Key);
+        var page = await OpenAsync(ThemeCatalog.Gazette.Key);
 
         Assert.All(await CasesAsync(page), @case =>
         {

@@ -167,8 +167,8 @@ jobs:
       # Each theme reports its own failures.
       fail-fast: false
       matrix:
-        # The offered themes, in the order of the catalog (ThemeCatalog.Offered, CiThemeMatrixTests).
-        theme: [base, planche, gazette, couverture]
+        # The offered themes, in the order of the catalog (ThemeCatalog.Offered, TestThemesTests).
+        theme: [planche, gazette, couverture]
     env:
       BDTHEQUE_TEST_THEME: ${{ matrix.theme }}
     steps:
@@ -236,7 +236,7 @@ jobs:
         if: needs.changes.outputs.rendering == 'true'
         run: >-
           dotnet test tests/Bdtheque.EndToEnd.Tests --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
-          ${{ matrix.theme != 'base' && '--filter "Themes=Each"' || '' }}
+          ${{ matrix.theme != 'planche' && '--filter "Themes=Each"' || '' }}
           --collect "XPlat Code Coverage"
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
           "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[Bdtheque.Testing]*"

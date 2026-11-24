@@ -13,7 +13,7 @@ public sealed class ChosenThemeSelectorTests
     [Theory]
     [InlineData("planche")]
     [InlineData("gazette")]
-    [InlineData("base")]
+    [InlineData("couverture")]
     public void ThemeInTheAddress_IsTheThemeOfTheVisit_AndKeptByItsCookie(string key)
     {
         var request = new TestRequest();
@@ -29,6 +29,8 @@ public sealed class ChosenThemeSelectorTests
     [Theory]
     [InlineData("")]
     [InlineData("?theme=unknown")]
+    // The base theme only gives its contracts to the offered themes (visuel/charte-graphique/theme-de-base.md): never chosen.
+    [InlineData("?theme=base")]
     public void WithoutAnOfferedThemeInTheAddress_TheThemeOfTheVisitIsKept(string query)
     {
         var request = new TestRequest(new Dictionary<string, string>

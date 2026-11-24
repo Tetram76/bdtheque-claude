@@ -69,7 +69,7 @@ Cette règle est appliquée par [`VisitTheme.Continue`](../../../src/Bdtheque.Fr
 
 ## Les thèmes
 
-Les thèmes proposés sont déclarés par [`ThemeCatalog`](../../../src/Bdtheque.Frontend/Theming/ThemeCatalog.cs) : `base`, `planche`, `gazette` et `couverture`. Chacun y est décrit par sa feuille de style, son script éventuel et la police de texte que la page charge en avance.
+Les thèmes proposés sont déclarés par [`ThemeCatalog`](../../../src/Bdtheque.Frontend/Theming/ThemeCatalog.cs) : `planche`, `gazette` et `couverture`. Chacun y est décrit par sa feuille de style, son script éventuel et la police de texte que la page charge en avance. Le thème de base n'en fait pas partie : il n'est jamais présenté seul, et ne fait que donner ses contrats à chaque thème proposé (ci-dessous). Une visite dont le cookie porte encore le thème `base`, commencée par une version antérieure, reçoit donc un thème tiré de nouveau, comme toute visite dont le thème n'est plus proposé.
 
 Le thème d'une requête est choisi par un service `IThemeSelector`, dont il existe trois mises en œuvre selon le contexte :
 

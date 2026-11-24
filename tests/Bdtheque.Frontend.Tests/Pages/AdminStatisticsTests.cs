@@ -46,7 +46,7 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
     private readonly FakeAdminApi _api;
     // A request of a visit of the browser, which the audience measurement records.
     private readonly TestRequest _request = new(
-        new Dictionary<string, string> { [BrowserVisit.CookieName] = new BrowserVisit(new DateOnly(2026, 11, 23), "base", new DateOnly(2026, 11, 23)).Format() },
+        new Dictionary<string, string> { [BrowserVisit.CookieName] = new BrowserVisit(new DateOnly(2026, 11, 23), "planche", new DateOnly(2026, 11, 23)).Format() },
         authenticated: true);
 
     public AdminStatisticsTests()
