@@ -8,7 +8,7 @@ applies_to:
   - 'src/Bdtheque.Frontend/Components/**'
   - 'tests/Bdtheque.EndToEnd.Tests/**'
   - 'scripts/Test-Captures.ps1'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T13:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T08:57:05Z }
 ---
 
 # Thèmes
@@ -36,6 +36,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T13:55:00Z }
   - **Alternative écartée (`color-mix()` dans la feuille)** : aucun test ne lirait les couleurs obtenues, et la lisibilité d'une couverture pâle ne serait vérifiée que par l'œil.
 - **En-tête et bouton d'aide portés par des contrats propres**, valant par défaut ceux de la surface et des contrôles : un thème leur donne une couleur sans redéfinir celles de la page dans l'en-tête, qui porte aussi le menu flottant de l'administration.
 - **Albums mis en avant marqués comme tels** (`.cover-volume`), avec la couleur profonde de leur couverture : un thème les présente en volume, leur dos de cette couleur ; leurs mouvements sont omis en mouvement réduit par la feuille qui les déclare.
+  - **Album en volume, un seul dessin à plat tourné d'un bloc** : le dos est dessiné dans le plan de la couverture, comme le lecteur le voit quand l'album est tourné, et la perspective s'applique à l'ensemble. Tourné de 22°, un album ne montre que son dos, une bande étroite le long de sa couverture, que le dessin à plat rend aussi ; la tranche de ses pages est tournée vers l'arrière.
+  - **Alternative écartée (contexte 3D, `transform-style: preserve-3d`, couverture et côtés tournés chacun dans l'espace)** : Firefox dessine les éléments d'un contexte 3D sans lisser leurs bords et les découpe selon leurs plans en morceaux dont les jointures clignotent quand l'album flotte (bugzilla.mozilla.org, bugs 1737904, 1399268 et 1698988 ; constaté par l'utilisateur sur l'édition à la une, le bord de la couverture en escalier et un trait vertical qui clignotait).
 - **Couleurs du jour fixées dans les tests** par l'application qui porte ses propres données (accueil, administration, fiches) ; celle que partagent les autres tests garde les couleurs propres au thème, l'édition à la une de sa base dépendant de l'ordre des écritures de ces tests.
 
 ## Thème de la visite
