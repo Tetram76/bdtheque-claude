@@ -40,7 +40,7 @@ public sealed class SeriesListTests(ApplicationHost application) : BrowserTest<A
         await PageReadiness.GotoAsync(page, $"{AppPaths.Series}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Possession" }).SelectOptionAsync("Possédé");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Possession" }).SelectOptionAsync("Dont des albums possédés");
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
         await Assertions.Expect(Titles(page)).ToHaveTextAsync([$"Possédée {_marker}"]);

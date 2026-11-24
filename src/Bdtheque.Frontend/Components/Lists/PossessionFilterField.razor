@@ -5,7 +5,8 @@
 @* The filter of the possession of a list of the consultation or of the administration, the same in every list
    (fonctionnel/regles-metier/perimetre-de-la-consultation.md): « Possession », its three states named as the tag of an album
    names them (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album), and what the list presents without
-   it, which only the list knows. *@
+   it, which only the list knows. Outside the list of the albums, each option names the albums it holds to, « dont des albums
+   sont » in the state chosen: the possession is never that of the element listed. *@
 <Field Id="filter-state" Label="@L["Label"]" Context="control">
     <FilterSelect Id="@control.Id" Name="@Name" Selected="@(State?.ToString() ?? "")" Options="@Options" />
 </Field>
@@ -23,9 +24,19 @@
     [Parameter, EditorRequired]
     public string AllLabel { get; set; } = null!;
 
+    /// <summary>
+    /// Whether the list presents something else than albums: each option then reads « dont des albums » in the state, as
+    /// the filter keeps the elements that contain an album of it (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+    /// </summary>
+    [Parameter]
+    public bool OfAlbums { get; set; }
+
+    private string StateLabel(AlbumCollectionState state) =>
+        OfAlbums ? L[$"OfAlbums.{state}"] : States[state.ToString()];
+
     private IReadOnlyList<FilterSelect.FilterOption> Options =>
     [
         new("", AllLabel),
-        .. Enum.GetValues<AlbumCollectionState>().Select(state => new FilterSelect.FilterOption(state.ToString(), States[state.ToString()])),
+        .. Enum.GetValues<AlbumCollectionState>().Select(state => new FilterSelect.FilterOption(state.ToString(), StateLabel(state))),
     ];
 }

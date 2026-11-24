@@ -109,7 +109,7 @@ public sealed class SeriesListTests : BunitContext, IDisposable
             ["filter-author", "filter-publisher", "filter-collection", "filter-genre", "filter-universe", "filter-state"],
             page.FindAll(".list-filters label[for]").Select(label => label.GetAttribute("for")!));
         var select = page.Find("select[name='state']");
-        Assert.Equal(["Toutes les séries", "Possédé", "Intention", "Catalogué"], select.QuerySelectorAll("option").Select(Text));
+        Assert.Equal(["Toutes les séries", "Dont des albums possédés", "Dont des albums en intention", "Dont des albums catalogués"], select.QuerySelectorAll("option").Select(Text));
         Assert.Equal("PurchaseIntent", select.QuerySelector("option[selected]")!.GetAttribute("value"));
         Assert.Equal(AppPaths.Series, page.Find("form.list-search").GetAttribute("action"));
     }
