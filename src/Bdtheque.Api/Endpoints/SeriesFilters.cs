@@ -54,8 +54,9 @@ internal sealed record SeriesFilters(
         }
 
         if (State is { } state)
+            // A series that contains an album of the state chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
             series = series.Where(CatalogExpressions.Expand(
-                (Series s) => context.Albums.Where(a => a.SeriesId == s.Id).CollectionStateOfAlbums() == state));
+                (Series s) => context.Albums.Any(a => a.SeriesId == s.Id && a.CollectionState() == state)));
         return series;
     }
 

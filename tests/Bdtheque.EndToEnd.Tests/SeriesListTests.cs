@@ -65,6 +65,8 @@ public sealed class SeriesListTests(ApplicationHost application) : BrowserTest<A
     public async Task ReturnFromARecord_ByItsFilDAriane_FindsTheListAsLeft_AndTheMenu_ItsFiltersOnly(string theme)
     {
         var series = await CreateSeriesAsync($"Retour {_marker}");
+        // An album catalogued only: the series contains albums of that state (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+        await CreateAlbumAsync(series);
         var page = await NewPageAsync(theme);
         await PageReadiness.GotoAsync(page, $"{AppPaths.Series}?q={_marker}&entry=R&state=OutsideCollection");
 

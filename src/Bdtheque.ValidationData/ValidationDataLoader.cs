@@ -27,7 +27,7 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     public const string CollectiveTitle = "...Et après ?";
     public const string SeriesWithoutAlbumTitle = "Les Gardiens du phare";
 
-    /// <summary>A series of which nothing is owned, one of its albums wished for: « Intention » in the list of the series.</summary>
+    /// <summary>A series of which nothing is owned, one of its albums wished for: among those that contain albums wished for.</summary>
     public const string IntendedSeriesTitle = "La Piste des Ombres";
     public const string PaleCoverTitle = "Soleil pâle";
     public const string WishedForOnlyTitle = "La Marée des phares";
@@ -281,10 +281,10 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
         await data.IntentOnAlbumAsync(convoy);
 
-        // A series of which nothing is owned, but one album wished for in an edition with a cover, its other one catalogued
-        // only: « Intention » by the possession of its albums in the list of the series
-        // (fonctionnel/regles-metier/perimetre-de-la-consultation.md), sorted under its article, under `P`. Its pile shows the
-        // cover of the edition wished for in the list of all the series.
+        // A series of which nothing is owned, one album wished for in an edition with a cover, its other one catalogued only:
+        // found under « Intention » and under the third state, never under « Possédé », in the list of the series, which keeps
+        // the series that contain albums of the state chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md);
+        // sorted under its article, under `P`. Its pile shows the cover of the edition wished for in the list of all the series.
         var trail = await data.SeriesAsync(Series(IntendedSeriesTitle, SeriesStatus.InProgress, Template(horizon.Id, null, null), [western], [wildWest],
             [Credit(ganier, ContributionRole.Scenarist), Credit(rambert, ContributionRole.Illustrator)]));
         var trailFirst = await data.AlbumAsync(Album("Le Gué du Coyote", trail, 1, 2022));

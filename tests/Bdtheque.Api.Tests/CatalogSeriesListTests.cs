@@ -8,7 +8,8 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// The list of the series of the consultation (<c>/catalog/series</c>): what a row carries, the filter of the possession that
-/// limits the list to the collection, the same as in every list (fonctionnel/regles-metier/perimetre-de-la-consultation.md),
+/// limits the list to the collection, the series that contain albums of the state chosen
+/// (fonctionnel/regles-metier/perimetre-de-la-consultation.md),
 /// and the covers of the pile of a series, taken among the editions the list presents
 /// (fonctionnel/regles-metier/couverture-d-un-album.md).
 /// </summary>
@@ -45,19 +46,21 @@ public sealed class CatalogSeriesListTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
-    public async Task Possession_KeepsEachSeriesByThePossessionOfItsAlbums()
+    public async Task Possession_KeepsTheSeriesThatContainAnAlbumOfTheStateChosen()
     {
         var publisher = await CreatePublisherAsync("Casterman");
         var owned = await CreateSeriesAsync($"A possédée {_marker}");
         await CreateOwnedEditionAsync((await CreateAlbumAsync(owned.Id, 1)).Id, publisher.Id, 1990);
+        await CreateAlbumAsync(owned.Id, 2);
         var intended = await CreateSeriesAsync($"B visée {_marker}");
         await CreateIntendedEditionAsync((await CreateAlbumAsync(intended.Id, 1)).Id, publisher.Id, 1990);
-        var outside = await CreateSeriesAsync($"C sans album {_marker}");
+        var empty = await CreateSeriesAsync($"C sans album {_marker}");
 
-        Assert.Equal([owned.Id, intended.Id, outside.Id], await IdsAsync($"q={_marker}"));
+        Assert.Equal([owned.Id, intended.Id, empty.Id], await IdsAsync($"q={_marker}"));
         Assert.Equal([owned.Id], await IdsAsync($"q={_marker}&state=InCollection"));
         Assert.Equal([intended.Id], await IdsAsync($"q={_marker}&state=PurchaseIntent"));
-        Assert.Equal([outside.Id], await IdsAsync($"q={_marker}&state=OutsideCollection"));
+        // Its second album, catalogued only: the series owned in part is found among those that contain such albums.
+        Assert.Equal([owned.Id], await IdsAsync($"q={_marker}&state=OutsideCollection"));
     }
 
     [Fact]
