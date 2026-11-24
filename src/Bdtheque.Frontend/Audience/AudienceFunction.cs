@@ -68,6 +68,20 @@ public static class AudienceFunctions
 
     public static readonly AudienceFunction AuthorsPage = new("authors.page", AudienceFunctionKind.Action);
 
+    /// <summary>The public list of the purchase intents, entry « Intentions d'acquisition » of the menu of the consultation.</summary>
+    public static readonly AudienceFunction PurchaseIntents = new("purchase-intents", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogPurchaseIntentListQuery.cs).
+
+    public static readonly AudienceFunction PurchaseIntentsSearch = new("purchase-intents.search", AudienceFunctionKind.Action);
+
+    /// <summary>The cross filters of the albums, applied to the album of each intent.</summary>
+    public static readonly AudienceFunction PurchaseIntentsFilter = new("purchase-intents.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction PurchaseIntentsInitial = new("purchase-intents.initial", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction PurchaseIntentsPage = new("purchase-intents.page", AudienceFunctionKind.Action);
+
     /// <summary>
     /// The search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the
     /// page of its results.
@@ -500,6 +514,7 @@ public static class AudienceFunctions
         Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
         SeriesRecord, AuthorRecord,
         Authors, AuthorsSearch, AuthorsFilter, AuthorsInitial, AuthorsPage,
+        PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsFilter, PurchaseIntentsInitial, PurchaseIntentsPage,
         AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated, AdminAlbumSeriesCreated,
