@@ -156,7 +156,7 @@ public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactor
     private async Task<IReadOnlyList<Guid>> IdsAsync(string query) => [.. (await ListAsync(query)).Series.Items.Select(r => r.Id)];
 
     private async Task<IReadOnlyList<Guid>> CatalogIdsAsync(string query) =>
-        [.. (await GetAsync<Page<SeriesListItem>>($"/catalog/series?{query}")).Items.Select(s => s.Id)];
+        [.. (await GetAsync<SeriesCatalogList>($"/catalog/series?{query}")).Series.Items.Select(s => s.Id)];
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
 

@@ -326,8 +326,8 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
 
     private async Task<SeriesDetail> SeriesAsync(string title)
     {
-        var found = await _client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q={Uri.EscapeDataString(title)}");
-        return (await _client.GetFromJsonAsync<SeriesDetail>($"/catalog/series/{Assert.Single(found!.Items).Id}"))!;
+        var found = await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/series?q={Uri.EscapeDataString(title)}");
+        return (await _client.GetFromJsonAsync<SeriesDetail>($"/catalog/series/{Assert.Single(found!.Series.Items).Id}"))!;
     }
 
     private async Task<AlbumDetail> AlbumAsync(string title)

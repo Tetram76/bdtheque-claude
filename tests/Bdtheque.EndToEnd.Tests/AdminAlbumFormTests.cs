@@ -165,13 +165,13 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(dialog).ToHaveCountAsync(0);
         await Assertions.Expect(page.GetByRole(AriaRole.Combobox, new() { Name = "Série" })).ToHaveValueAsync($"Fourneaux{_marker}");
         using (var api = Application.CreateApiClient())
-            Assert.Empty((await api.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q=Fourneaux{_marker}"))!.Items);
+            Assert.Empty((await api.GetFromJsonAsync<SeriesCatalogList>($"/catalog/series?q=Fourneaux{_marker}"))!.Series.Items);
         await page.GetByLabel("Titre").FillAsync($"Album {_marker}");
         await page.GetByRole(AriaRole.Button, new() { Name = "Créer l'album" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
         using var client = Application.CreateApiClient();
-        var series = Assert.Single((await client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q=Fourneaux{_marker}"))!.Items);
+        var series = Assert.Single((await client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/series?q=Fourneaux{_marker}"))!.Series.Items);
         var created = Assert.Single((await client.GetFromJsonAsync<AlbumAdminList>($"/admin/albums?q=Album {_marker}"))!.Albums.Items);
         Assert.Equal(series.Id, (await GetAsync(created.Album.Id)).Content.SeriesId);
     }
