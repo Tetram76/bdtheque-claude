@@ -163,12 +163,14 @@
         Add("PublisherCollection", filters.PublisherCollection?.Name, _query with { PublisherCollectionId = null });
         Add("Genre", filters.Genre?.Label, _query with { GenreId = null });
         Add("Universe", filters.Universe?.Name, _query with { UniverseId = null });
-        Add("State", _query.State is { } state ? States[state.ToString()].Value : null, _query with { State = null });
+        // The possession is not that of the series: the tag names its albums, as the option does
+        // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+        Add("State", _query.State is { } state ? Possession[$"OfAlbums.{state}"].Value : null, _query with { State = null });
         return tags;
     }
 
     [Inject]
-    private IStringLocalizer<CollectionStateTag> States { get; set; } = null!;
+    private IStringLocalizer<PossessionFilterField> Possession { get; set; } = null!;
 
     private RenderFragment FiltersPanel => @<SeriesFilterFields Filters="_list!.Filters" OffersPossession="true" State="_query.State" />;
 

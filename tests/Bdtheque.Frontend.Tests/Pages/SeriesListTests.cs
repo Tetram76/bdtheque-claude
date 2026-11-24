@@ -121,7 +121,9 @@ public sealed class SeriesListTests : BunitContext, IDisposable
 
         var page = Open("state=InCollection");
 
-        Assert.Contains("Possession : Possédé", Text(page.Find(".active-filters")));
+        // The possession is not that of the series: the tag names its albums, as the option does
+        // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+        Assert.Contains("Possession : Dont des albums possédés", Text(page.Find(".active-filters")));
         Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.Series}?entry=B&state=InCollection");
         Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.Series}?state=InCollection&page=2");
     }
