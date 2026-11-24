@@ -2,6 +2,7 @@
 
 ## 2026-11-24
 
+* **Décisions de l'utilisateur** : écran de la fusion de deux fiches, page dédiée qui présente, donnée par donnée, la valeur de chaque fiche à retenir, sans fiche privilégiée, ce qui passe à la fiche compté une fois et dit « commun aux deux fiches », séries d'un auteur comprises, et une confirmation au futur ([Fusion de deux fiches](visuel/fusion/fusion-de-deux-fiches.md), maquette validée, [Contenu](visuel/liste-albums/contenu.md)) (#642).
 * **Décision de l'utilisateur** : deux fiches que la fusion rendrait homonymes là où leur nom doit être unique (collections de deux éditeurs, sous-univers de deux univers) sont fusionnées avec elle, selon le même principe ([Fusion de deux fiches](fonctionnel/regles-metier/fusion-des-fiches.md)) (#614).
 * **Décision de l'utilisateur** : les fiches qui désignent l'une des deux fiches fusionnées passent toutes, sans choix, à celle qui reste ; ce qui en découle des règles existantes (listes, doublons, intentions, univers, confirmation, journal) est consigné ([Fusion de deux fiches](fonctionnel/regles-metier/fusion-des-fiches.md)) (#614).
 * **Décision de l'utilisateur** : la fusion de deux fiches garde le meilleur des deux, chaque donnée retenue au détriment de l'autre fiche ou écartée à son profit, sans fiche privilégiée, la plus simple à garder étant celle dont la fusion retient le plus de données ([Fusion de deux fiches](fonctionnel/regles-metier/fusion-des-fiches.md), [Structure de l'application](fonctionnel/structure-de-l-application.md)) (#614).
