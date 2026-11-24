@@ -88,6 +88,29 @@ public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactor
     }
 
     [Fact]
+    public async Task Possession_KeepsEachSeriesByThePossessionOfItsAlbums_AllWithoutIt()
+    {
+        var publisher = await CreatePublisherAsync($"Casterman {_marker}");
+        // Owned whatever its intents, as an album is.
+        var owned = await CreateSeriesAsync($"A possédée {_marker}");
+        await CreateOwnedEditionAsync((await CreateAlbumAsync(null, owned.Id, 1)).Id, publisher.Id);
+        await CreateIntendedEditionAsync((await CreateAlbumAsync(null, owned.Id, 2)).Id, publisher.Id);
+        var intended = await CreateSeriesAsync($"B visée {_marker}");
+        await CreateAlbumAsync(null, intended.Id, 1);
+        await CreateIntendedEditionAsync((await CreateAlbumAsync(null, intended.Id, 2)).Id, publisher.Id);
+        var outside = await CreateSeriesAsync($"C cataloguée {_marker}");
+        await CreateAlbumAsync(null, outside.Id, 1);
+        // A series without album has none owned nor intended.
+        var empty = await CreateSeriesAsync($"D sans album {_marker}");
+
+        Assert.Equal([owned.Id, intended.Id, outside.Id, empty.Id], await IdsAsync($"q={_marker}"));
+        Assert.Equal([owned.Id], await IdsAsync($"q={_marker}&state=InCollection"));
+        Assert.Equal([intended.Id], await IdsAsync($"q={_marker}&state=PurchaseIntent"));
+        Assert.Equal([outside.Id, empty.Id], await IdsAsync($"q={_marker}&state=OutsideCollection"));
+        Assert.Equal([owned.Id], await CatalogIdsAsync($"q={_marker}&state=InCollection"));
+    }
+
+    [Fact]
     public async Task Filters_NameTheRecordsTheListIsFilteredOn()
     {
         var author = await CreateAuthorAsync($"Auteur {_marker}");
