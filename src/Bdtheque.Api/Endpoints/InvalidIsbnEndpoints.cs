@@ -73,7 +73,7 @@ internal static class InvalidIsbnEndpoints
             .Select(r => new InvalidIsbnListItem(
                 r.Album, r.Edition, r.Cover, IsbnChecksumValidator.Corrected(r.Edition.Isbn), r.IsOwned,
                 EnumMapping.Map<ContractEnums.AcquisitionMode>(r.AcquisitionMode), r.AcquisitionDate?.Year,
-                IsAccepted(r.Edition.Isbn, r.AcceptedIsbn), r.ModifiedAt, r.AlbumVersion))
+                HoldsFor(r.AcceptedIsbn, r.Edition.Isbn), r.ModifiedAt, r.AlbumVersion))
             .ToList();
         return new InvalidIsbnList(
             new Page<InvalidIsbnListItem>(items, rows.Number, rows.Size, rows.TotalCount),
@@ -91,11 +91,11 @@ internal static class InvalidIsbnEndpoints
             .Select(e => new { e.Id, e.Isbn, e.AcceptedIsbn })
             .ToListAsync(cancellationToken))
         .Where(e => !IsbnChecksumValidator.IsValid(e.Isbn))
-        .Select(e => new IsbnError(e.Id, IsAccepted(e.Isbn, e.AcceptedIsbn)))
+        .Select(e => new IsbnError(e.Id, HoldsFor(e.AcceptedIsbn, e.Isbn)))
         .ToList();
 
-    // The acceptance holds for the ISBN accepted (modele-metier/edition.md), which the domain clears when the ISBN changes.
-    private static bool IsAccepted(string? isbn, string? acceptedIsbn) => acceptedIsbn is not null && acceptedIsbn == isbn;
+    // Whether an acceptance holds: it does for the ISBN accepted (modele-metier/edition.md), which the domain clears when the ISBN changes.
+    private static bool HoldsFor(string? acceptedIsbn, string? isbn) => acceptedIsbn is not null && acceptedIsbn == isbn;
 
     private static async Task<NoContent> WriteAsync(
         Guid rootId, Guid id, uint albumVersion, Action<Edition> write, BdthequeDbContext context, CancellationToken cancellationToken)
