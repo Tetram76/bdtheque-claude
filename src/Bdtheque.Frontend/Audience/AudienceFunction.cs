@@ -71,6 +71,20 @@ public static class AudienceFunctions
     /// </summary>
     public static readonly AudienceFunction AuthorRecord = new("author", AudienceFunctionKind.Screen);
 
+    /// <summary>The list of the authors of the consultation, entry « Auteurs » of its menu.</summary>
+    public static readonly AudienceFunction Authors = new("authors", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogAuthorListQuery.cs).
+
+    public static readonly AudienceFunction AuthorsSearch = new("authors.search", AudienceFunctionKind.Action);
+
+    /// <summary>The possession, its only filter, which limits the list to the collection.</summary>
+    public static readonly AudienceFunction AuthorsFilter = new("authors.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AuthorsInitial = new("authors.initial", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AuthorsPage = new("authors.page", AudienceFunctionKind.Action);
+
     /// <summary>The public list of the purchase intents, entry « Intentions d'acquisition » of the menu of the consultation.</summary>
     public static readonly AudienceFunction PurchaseIntents = new("purchase-intents", AudienceFunctionKind.Screen);
 
@@ -516,6 +530,7 @@ public static class AudienceFunctions
         AlbumRecord, AlbumRecordVisual,
         Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
         SeriesRecord, SeriesList, SeriesListSearch, SeriesListFilter, SeriesListInitial, SeriesListPage, AuthorRecord,
+        Authors, AuthorsSearch, AuthorsFilter, AuthorsInitial, AuthorsPage,
         PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsFilter, PurchaseIntentsInitial, PurchaseIntentsPage,
         AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,

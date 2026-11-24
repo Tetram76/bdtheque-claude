@@ -7,6 +7,7 @@
 @inject RecordLabels Labels
 @inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject ListMemory Memory
 
 @* The record of an author in the consultation (visuel/fiche-auteur/contenu.md): its monogram and its identity, the number of
    the albums it is credited on, by role; its biography; its whole bibliography in a single list (Records/Bibliography.razor);
@@ -132,7 +133,8 @@ else if (_author is { } author)
 
     private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
     [
-        new(L["Breadcrumb.Authors"], AppPaths.Authors),
+        // The list as the user left it (fonctionnel/structure-de-l-application.md, Retour à une liste).
+        new(L["Breadcrumb.Authors"], Memory.BackHref(AppPaths.Authors)),
         new(Name),
     ];
 }

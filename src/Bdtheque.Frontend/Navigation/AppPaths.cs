@@ -41,7 +41,8 @@ public static class AppPaths
     /// <summary>The list of the series of the consultation, under which the record of a series is.</summary>
     public const string Series = SeriesSection;
 
-    public const string Authors = NotYetImplemented;
+    /// <summary>The list of the authors of the consultation, under which the record of an author is.</summary>
+    public const string Authors = AuthorsSection;
 
     /// <summary>The public list of the purchase intents, each leading to the record of its album (fonctionnel/structure-de-l-application.md).</summary>
     public const string PurchaseIntents = "/acquisition-intents";
@@ -73,7 +74,7 @@ public static class AppPaths
     public static string SeriesRecord(Guid id) => $"{SeriesSection}/{id}";
 
     /// <summary>
-    /// The path of the list of the authors once implemented, under which the record of an author is: where the entry
+    /// The path of the list of the authors, under which the record of an author is: where the entry
     /// « Auteurs » of the menu is current.
     /// </summary>
     public const string AuthorsSection = "/authors";

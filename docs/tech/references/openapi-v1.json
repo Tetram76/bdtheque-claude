@@ -7488,6 +7488,13 @@
             }
           },
           {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/AlbumCollectionState"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -7540,7 +7547,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfAuthorListItem"
+                  "$ref": "#/components/schemas/PageOfAuthorCatalogListItem"
                 }
               }
             }
@@ -11136,6 +11143,75 @@
         },
         "description": "An author as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md)."
       },
+      "AuthorCatalogListItem": {
+        "required": [
+          "id",
+          "lastName",
+          "firstName",
+          "pseudonym",
+          "nationality",
+          "creditedAlbumCount",
+          "creditedAlbumsInCollectionCount",
+          "roles"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lastName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "firstName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pseudonym": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "creditedAlbumCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The albums the author is credited on, each once whatever its roles.",
+            "format": "int32"
+          },
+          "creditedAlbumsInCollectionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Those of CreditedAlbumCount that are in the collection.",
+            "format": "int32"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContributionRole"
+            },
+            "description": "The roles the author holds on albums and series, each once, in role order."
+          }
+        },
+        "description": "An author as a row of the list of the consultation presents it, that of the administration without its actions."
+      },
       "AuthorDetail": {
         "required": [
           "id",
@@ -14226,6 +14302,51 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AuthorAdminListItem"
+            }
+          },
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of the page, from 1.",
+            "format": "int32"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of items of the whole list.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+      },
+      "PageOfAuthorCatalogListItem": {
+        "required": [
+          "items",
+          "number",
+          "size",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorCatalogListItem"
             }
           },
           "number": {

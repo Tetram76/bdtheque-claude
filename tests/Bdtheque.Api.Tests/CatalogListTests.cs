@@ -72,7 +72,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         var query = $"q={_marker}";
         Assert.Equal(ranged.Select(name => series[name]), Ids(await ListAsync<SeriesListItem>("series", query)));
         Assert.Equal(ranged.Select(name => albums[name]), Ids(await ListAsync<AlbumSummary>("albums", query)));
-        Assert.Equal(ranged.Select(name => authors[name]), Ids(await ListAsync<AuthorListItem>("authors", query)));
+        Assert.Equal(ranged.Select(name => authors[name]), Ids(await ListAsync<AuthorCatalogListItem>("authors", query)));
         Assert.Equal(ranged.Select(name => publishers[name]), Ids(await ListAsync<PublisherListItem>("publishers", query)));
         Assert.Equal(ranged.Select(name => genres[name]), Ids(await ListAsync<GenreListItem>("genres", query)));
     }
@@ -248,13 +248,13 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
 
         // Sort keys: "Moebius" < "Van Hamme Jean".
         Assert.Equal(
-            [new AuthorListItem(moebius.Id, "Giraud", "Jean", "Moebius"), new AuthorListItem(vanHamme.Id, "Van Hamme", "Jean", null)],
-            await ListAsync<AuthorListItem>("authors", "q=jean"));
-        Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorListItem>("authors", $"q={Uri.EscapeDataString("jean van")}")));
-        Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorListItem>("authors", $"q={Uri.EscapeDataString("hamme jean")}")));
-        Assert.Equal([herge.Id], Ids(await ListAsync<AuthorListItem>("authors", "q=REMI")));
-        Assert.Equal([herge.Id], Ids(await ListAsync<AuthorListItem>("authors", "q=herge")));
-        Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorListItem>("authors", "q=jean&entry=V")));
+            [(moebius.Id, "Giraud", "Jean", "Moebius"), (vanHamme.Id, "Van Hamme", "Jean", (string?)null)],
+            (await ListAsync<AuthorCatalogListItem>("authors", "q=jean")).Select(a => (a.Id, a.LastName, a.FirstName, a.Pseudonym)));
+        Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", $"q={Uri.EscapeDataString("jean van")}")));
+        Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", $"q={Uri.EscapeDataString("hamme jean")}")));
+        Assert.Equal([herge.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", "q=REMI")));
+        Assert.Equal([herge.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", "q=herge")));
+        Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", "q=jean&entry=V")));
     }
 
     [Fact]

@@ -127,6 +127,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task CatalogAuthorList_PresentsEachPossession_AlbumsAllOrPartlyInTheCollection_AndRolesOnASeriesAlone()
+    {
+        foreach (var state in Enum.GetValues<Bdtheque.Contracts.Admin.AlbumCollectionState>())
+            Assert.NotEmpty((await _client.GetFromJsonAsync<Page<AuthorCatalogListItem>>($"/catalog/authors?state={state}"))!.Items);
+
+        var list = (await _client.GetFromJsonAsync<Page<AuthorCatalogListItem>>("/catalog/authors?pageSize=100"))!.Items;
+        Assert.Contains(list, a => a.CreditedAlbumsInCollectionCount > 0 && a.CreditedAlbumsInCollectionCount == a.CreditedAlbumCount);
+        Assert.Contains(list, a => a.CreditedAlbumsInCollectionCount > 0 && a.CreditedAlbumsInCollectionCount < a.CreditedAlbumCount);
+        Assert.Contains(list, a => a is { CreditedAlbumCount: > 0, CreditedAlbumsInCollectionCount: 0 });
+        // Credited on a series and none of its albums: no album, yet a role.
+        Assert.Contains(list, a => a is { CreditedAlbumCount: 0, Roles.Count: > 0 });
+        Assert.Contains(list, a => a.Nationality is not null);
+    }
+
+    [Fact]
     public async Task Series_ACompleteOneAndOneWithoutAlbum_WhoseDeletionIsAccepted()
     {
         var list = (await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.SeriesAdminList>("/admin/series?pageSize=100"))!.Series.Items;

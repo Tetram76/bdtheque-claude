@@ -1,0 +1,206 @@
+@attribute [Route(AppPaths.Authors)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<AuthorList> L
+@inject IStringLocalizer<PossessionFilterField> Possession
+@inject ApiClient Api
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+@inject AudienceRecorder Recorder
+@inject ListMemory Memory
+@inject NavigationManager Navigation
+
+@* The list of the authors of the consultation, after the model of the list of its albums: every author of the base, limited to
+   the collection by its own filter of the possession, an author taking the state of the albums it is credited on
+   (fonctionnel/regles-metier/perimetre-de-la-consultation.md). Its rows are those of the list of the authors of the
+   administration (visuel/listes/liste-par-liste.md) without its actions, each leading to the record of its author; the
+   albums credited say how many are in the collection. Rendered statically: its criteria and the panel of its filters are
+   carried by its address (Lists/CatalogAuthorListQuery.cs). Its styles read the contracts of the base theme only. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.Authors" />
+
+<ListLayout Title="@L["ListTitle"]" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_wholeCount" InAdministration="false" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.Authors" FieldId="authors-search" TextName="@ListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@_query.WithoutSearchHref()" PanelId="authors-filters"
+                    FiltersName="@ListQuery.FiltersName" FiltersOpenValue="@ListQuery.FiltersOpenValue"
+                    FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel"
+                    HiddenFilters="KeptFilters" />
+
+        <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
+
+        <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (_query with { Entry = entry, Page = 1 }).Href())" />
+
+        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@_query.IsNarrowed" WholeCount="_wholeCount" Order="@L["Order"]" />
+
+        @if (_list!.Items.Count == 0)
+        {
+            switch (_query.EmptyReason)
+            {
+                case EmptyListReason.Search:
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" SearchedIn="@L["Empty.SearchedIn"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Filters:
+                    <EmptyList Message="@L["Empty.Criteria"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Entry:
+                    <EmptyList Message="@L["Empty.Entry"]">
+                        <Actions>
+                            <Button Href="@AppPaths.Authors" Label="@L["Empty.All"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]" />
+                    break;
+            }
+        }
+        else
+        {
+            <div class="author-rows" role="table" aria-label="@L["Title"]">
+                <div class="author-row author-row-head" role="row">
+                    <span class="author-monogram" role="columnheader"><span class="visually-hidden">@L["Column.Monogram"]</span></span>
+                    <span class="author-main" role="columnheader">@L["Column.Author"]</span>
+                    <span class="author-nationality" role="columnheader">@L["Column.Nationality"]</span>
+                    <span class="author-albums" role="columnheader">@L["Column.Albums"]</span>
+                    <span class="author-roles" role="columnheader">@L["Column.Roles"]</span>
+                </div>
+                @foreach (var row in _list.Items)
+                {
+                    <div class="author-row" role="row">
+                        <span class="author-monogram" role="cell">
+                            <Monogram LastName="@row.LastName" FirstName="@row.FirstName" Pseudonym="@row.Pseudonym" />
+                        </span>
+                        <span class="author-main" role="cell">
+                            <RowEntry Detail="@RecordSearch.AuthorIdentity(row.LastName, row.FirstName, row.Pseudonym)">
+                                <a href="@AppPaths.AuthorRecord(row.Id)">@RecordSearch.AuthorName(row.LastName, row.FirstName, row.Pseudonym)</a>
+                            </RowEntry>
+                        </span>
+                        <span class="author-meta">
+                            <span class="author-nationality" role="cell" data-none="@(row.Nationality is null)">
+                                @if (row.Nationality is { } nationality)
+                                {
+                                    @nationality
+                                }
+                                else
+                                {
+                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
+                                }
+                            </span>
+                            @* No album credited: a zero, which says nothing (visuel/charte-graphique/convivialite-et-efficacite.md,
+                               nombre nul); the roles held on a series alone remain. *@
+                            <span class="author-albums" role="cell" data-zero="@(row.CreditedAlbumCount == 0)">
+                                <ListCount Value="row.CreditedAlbumCount" None="@L["Albums.None"]">@AlbumsText(row)</ListCount>
+                            </span>
+                            <span class="author-roles" role="cell" data-none="@(row.Roles.Count == 0)">
+                                @if (row.Roles.Count == 0)
+                                {
+                                    <NotSet Brief="true" Mention="@L["Roles.None"]" />
+                                }
+                                else
+                                {
+                                    @string.Join(" · ", row.Roles.Select(Values.Of))
+                                }
+                            </span>
+                        </span>
+                    </div>
+                }
+            </div>
+
+            <Pagination Number="_list.Number" Size="_list.Size" TotalCount="_list.TotalCount"
+                        ItemsLabel="@L["Title"]" PageHref="@(page => (_query with { Page = page }).Href())" />
+        }
+    </ChildContent>
+</ListLayout>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private CatalogAuthorListQuery _query = CatalogAuthorListQuery.All;
+    private Page<AuthorCatalogListItem>? _list;
+    private int? _wholeCount;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = CatalogAuthorListQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            _list = await Api.GetAsync<Page<AuthorCatalogListItem>>(_query.ApiPath());
+            // A page beyond the last one (an old address) is no empty list: its authors are on the pages before it, the last of
+            // which it leads to, with the same criteria.
+            if (_list is { Items.Count: 0, TotalCount: > 0 } && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (_list.TotalCount + _list.Size - 1) / _list.Size }).Href());
+                return;
+            }
+
+            // The number of all the authors, which the heading gives: that of the list itself, unless its criteria narrow it.
+            _wholeCount = _query.IsNarrowed || _query.Entry is not null
+                ? (await Api.GetAsync<Page<AuthorCatalogListItem>>(CatalogAuthorListQuery.All.ApiPath(1))).TotalCount
+                : _list.TotalCount;
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        // The list as it presents itself, which a record and the menu lead back to (fonctionnel/structure-de-l-application.md,
+        // Retour à une liste).
+        Memory.Keep(_query);
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    private string CountText() => _list!.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // The albums credited and, of them, those in the collection, in one phrase, as the series of the administration say it
+    // (visuel/listes/liste-par-liste.md): « 7 albums dans la collection » when all are, « 9 albums dont 4 dans la collection »
+    // when some are, « 9 albums » when none is.
+    private string AlbumsText(AuthorCatalogListItem row)
+    {
+        var albums = row.CreditedAlbumCount == 1 ? L["Albums.One"].Value : L["Albums.Other", Format.Number(row.CreditedAlbumCount)].Value;
+        if (row.CreditedAlbumsInCollectionCount == 0)
+            return albums;
+        return row.CreditedAlbumsInCollectionCount == row.CreditedAlbumCount
+            ? L["Albums.AllInCollection", albums]
+            : L["Albums.InCollection", albums, Format.Number(row.CreditedAlbumsInCollectionCount)];
+    }
+
+    // An author is not owned: the filter names the albums of the author it looks for, one of which is enough, as its options do
+    // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+    private string StateLabel(AlbumCollectionState state) => Possession[$"OfAlbums.{state}"];
+
+    // The possession chosen, with the list without it.
+    private IReadOnlyList<ActiveFilters.ActiveFilter> ActiveFilterTags() =>
+        _query.State is { } state
+            ? [new(L["Filter.State"].Value, StateLabel(state), (_query with { State = null, Page = 1 }).Href())]
+            : [];
+
+    private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
+        <PossessionFilterField Name="@CatalogAuthorListQuery.StateName" State="_query.State" AllLabel="@L["State.All"]" OfAlbums="true" />
+    </ListFilters>;
+
+    // The filters chosen, kept by the search while their panel is folded.
+    private RenderFragment KeptFilters => @<QueryFields Parameters="@((_query with { Text = null, Entry = null, Page = 1 }).Parameters())" />;
+}
