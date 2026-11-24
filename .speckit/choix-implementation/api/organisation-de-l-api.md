@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:25:09Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:30:00Z }
 ---
 
 # Organisation de l'API
@@ -65,6 +65,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T19:25:09Z }
 - **Couleurs du jour en dehors du dashboard**, celles de la couverture de l'édition à la une, que toute page du thème « La couverture du jour » demande ; le tirage du jour est commun aux deux ([Édition « À la une » : mise en œuvre](../domaine/edition-a-la-une-mise-en-oeuvre.md)).
 - **Contrôles de l'accueil de l'administration** : ceux seuls que définit la spécification, l'ISBN étant vérifié en mémoire par le validateur du domaine, qu'aucun SQL ne traduit ([Validation de l'ISBN](../domaine/validation-de-l-isbn.md)).
 - **Liste des albums de la consultation** : ses lignes portent ce que la liste présente de chaque album (couverture, auteurs, date, appréciation, possession) et la réponse nomme les fiches de ses filtres, comme une liste de l'administration ; le choix d'un album par son nom la lit aussi.
+- **Liste publique des intentions d'acquisition** : ses lignes portent ce que la liste présente de chaque intention (album, possession de l'album, édition visée et site de son éditeur, couverture de l'album parmi toutes ses éditions, date) ; elle trouve et range ses intentions par la même requête que la liste de l'administration, recherche et navigation par initiale comprises, sans filtre ([Périmètre de la consultation](../../fonctionnel/regles-metier/perimetre-de-la-consultation.md)). Les résultats de la recherche avancée sur les intentions, présentés comme dans la consultation, en reprennent la ligne.
 - **Listes de l'administration** : recherche, navigation et filtres partagés avec la consultation, possession comprise ; l'**état dans la collection** est une expression unique que la projection et le filtre partagent ; la réponse **nomme les fiches de ses filtres**, pour que l'écran les présente sans autre requête.
   - **Nombres d'albums et de séries d'un genre ou d'un univers comptés par les filtres des listes** : ceux que la liste des albums, ou des séries, filtrée sur lui trouve, sous-univers compris, par les mêmes expressions.
   - **Liste des univers dans l'ordre de la hiérarchie, ordonnée et paginée en mémoire** sur le référentiel chargé en entier, frères triés par la base selon sa collation ; seules les lignes de la page sont ensuite comptées, en une requête. Chaque ligne porte ses ancêtres : sa place dans la hiérarchie, et ce qui la nomme quand la page ne montre pas son parent.
