@@ -4,14 +4,15 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using ContributionRole = Bdtheque.Contracts.Enums.ContributionRole;
 
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Lists presented as the bibliography of an author (fonctionnel/structure-de-l-application.md): the
 /// series and the albums without series together at the first level, by sort key, each series grouping
-/// its albums, in the order of the series. Shared by the bibliography of an author and by the works of a
-/// genre or of a universe.
+/// its albums, in the order of the series. Shared by the bibliography of an author and by the record of a
+/// universe.
 /// </summary>
 internal static class CatalogWorks
 {
@@ -37,37 +38,36 @@ internal static class CatalogWorks
             .ThenBy(e => e.SeriesId)
             .ThenBy(e => e.AlbumId);
 
+    /// <summary>A series of a bibliography as its list presents it: credited, or attached, itself or not, and its roles.</summary>
+    internal sealed record BibliographySeries(SeriesListItem Item, bool OnSeries, List<ContributionRole> Roles);
+
     /// <summary>
-    /// One page of the first level, each series with those of <paramref name="albums"/> it contains: the
-    /// list is unbounded, unlike the bibliography of an author.
+    /// The whole bibliography (bounded, it is not paginated): the first level of <paramref name="series"/> and of the albums
+    /// without series among <paramref name="albums"/>, each series with those of <paramref name="albums"/> it contains, in its
+    /// order, and its overview. The caller reads it in a single snapshot, the reads being assembled into one another.
     /// </summary>
     /// <param name="series">The series of the list, those of <paramref name="albums"/> included.</param>
-    public static async Task<Page<WorksEntry>> ReadPageAsync(
-        BdthequeDbContext context, IQueryable<Series> series, IQueryable<Album> albums, int page, int pageSize,
-        CancellationToken cancellationToken)
+    /// <param name="seriesItem">A series as the list presents it.</param>
+    /// <param name="albumItem">An album as the list presents it.</param>
+    public static async Task<List<BibliographyEntry>> ReadBibliographyAsync(
+        BdthequeDbContext context, IQueryable<Series> series, IQueryable<Album> albums, Expression<Func<Series, BibliographySeries>> seriesItem,
+        Expression<Func<Album, AlbumBibliographyItem>> albumItem, CancellationToken cancellationToken)
     {
-        var entries = await FirstLevel(series, albums).ToPageAsync(page, pageSize, e => e, cancellationToken);
-        var seriesIds = entries.Items.Where(e => e.SeriesId is not null).Select(e => e.SeriesId!.Value).ToList();
-        var albumIds = entries.Items.Where(e => e.AlbumId is not null).Select(e => e.AlbumId!.Value).ToList();
+        var entries = await FirstLevel(series, albums).ToListAsync(cancellationToken);
+        var seriesItems = await series.Select(seriesItem).ToDictionaryAsync(s => s.Item.Id, cancellationToken);
+        var overviews = await OverviewsAsync(context, seriesItems.Keys, cancellationToken);
+        var albumItems = (await albums.OrderInSeries().Select(albumItem).ToListAsync(cancellationToken))
+            .ToLookup(a => a.Album.Album.SeriesId);
 
-        var seriesItems = await series
-            .Where(s => seriesIds.Contains(s.Id))
-            .Select(s => new SeriesListItem(s.Id, s.Title))
-            .ToDictionaryAsync(s => s.Id, cancellationToken);
-        var overviews = await OverviewsAsync(context, seriesIds, cancellationToken);
-        var cards = (await albums
-                .Where(a => (a.SeriesId != null && seriesIds.Contains(a.SeriesId.Value)) || albumIds.Contains(a.Id))
-                .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => a.ToCard()))
-                .ToListAsync(cancellationToken))
-            .ToLookup(a => a.Album.SeriesId);
-
-        var items = entries.Items
+        return entries
             .Select(e => e.SeriesId is { } seriesId
-                ? new WorksEntry(new SeriesWorksItem(seriesItems[seriesId], overviews[seriesId], cards[seriesId].ToList()), null)
-                : new WorksEntry(null, cards[null].Single(a => a.Album.Id == e.AlbumId)))
+                ? new BibliographyEntry(
+                    new SeriesBibliographyItem(
+                        seriesItems[seriesId].Item, overviews[seriesId], seriesItems[seriesId].OnSeries, seriesItems[seriesId].Roles,
+                        albumItems[seriesId].ToList()),
+                    null)
+                : new BibliographyEntry(null, albumItems[null].Single(a => a.Album.Album.Id == e.AlbumId)))
             .ToList();
-        return new Page<WorksEntry>(items, entries.Number, entries.Size, entries.TotalCount);
     }
 
     /// <summary>

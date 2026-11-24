@@ -9,6 +9,7 @@ using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using ContributionRole = Bdtheque.Contracts.Enums.ContributionRole;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 
 namespace Bdtheque.Api.Endpoints;
@@ -42,7 +43,7 @@ internal static class UniverseEndpoints
     public static void MapUniverseCatalog(this RouteGroupBuilder catalog)
     {
         catalog.MapGet("/universes", ListAsync);
-        catalog.MapGet("/universes/{id:guid}/works", GetWorksAsync);
+        catalog.MapGet("/universes/{id:guid}", GetDetailAsync);
     }
 
     internal static readonly Expression<Func<Universe, UniverseListItem>> ListItem = CatalogExpressions.Expand((Universe u) => u.ToListItem());
@@ -56,25 +57,40 @@ internal static class UniverseEndpoints
             .ToPageAsync(page, pageSize, ListItem, cancellationToken);
 
     /// <summary>
-    /// The series and albums of a universe, which has no record, with its ancestors
-    /// (fonctionnel/structure-de-l-application.md): those of its sub-universes included
-    /// (fonctionnel/regles-metier/hierarchie-des-univers.md), a series attached with all its albums, the universes of
-    /// an album in a series being those
-    /// of the album and of the series, and a series with those of its albums only that are attached.
+    /// The record of a universe in the consultation (visuel/fiche-univers/): its description, its ancestors and its
+    /// sub-universes, and its series and albums, those of its sub-universes included
+    /// (fonctionnel/regles-metier/hierarchie-des-univers.md), presented as the bibliography of an author, whole, a record
+    /// having no filter (fonctionnel/structure-de-l-application.md).
     /// </summary>
-    private static async Task<UniverseWorks> GetWorksAsync(
-        Guid id, BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize)
+    /// <remarks>
+    /// A series attached itself comes with all its albums, the universes of an album in a series being those of the album and
+    /// of the series (fonctionnel/regles-metier/genres-et-univers-d-un-album.md); a series attached through some of its albums
+    /// only, with those only. Bounded, like the bibliography of an author, the list is whole.
+    /// </remarks>
+    private static async Task<UniverseDetail> GetDetailAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken)
     {
         // A single snapshot for the reads assembled into one another.
         await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
         var tree = await UniverseTree.LoadAsync(context, cancellationToken);
-        var universe = tree.InHierarchy(id);
+        var (item, ancestors) = tree.InHierarchy(id);
+        var universe = await context.Universes.AsNoTracking()
+            .Where(u => u.Id == id)
+            .Select(u => new { u.Description, u.CreatedAt, u.ModifiedAt })
+            .SingleAsync(cancellationToken);
         var universeIds = tree.WithDescendants(id);
 
         var albums = context.Albums.AsNoTracking().WhereUniverse(universeIds);
         var series = context.Series.AsNoTracking()
             .Where(s => s.Universes.Any(u => universeIds.Contains(u.Id)) || albums.Any(a => a.SeriesId == s.Id));
-        return new UniverseWorks(universe, await CatalogWorks.ReadPageAsync(context, series, albums, page, pageSize, cancellationToken));
+        var works = await CatalogWorks.ReadBibliographyAsync(
+            context, series, albums,
+            (Series s) => new CatalogWorks.BibliographySeries(new SeriesListItem(s.Id, s.Title), s.Universes.Any(u => universeIds.Contains(u.Id)), new List<ContributionRole>()),
+            CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(
+                a.ToCard(), new List<ContributionRole>(), a.FirstPublicationYear, a.FirstPublicationMonth)),
+            cancellationToken);
+
+        return new UniverseDetail(
+            id, item.Name, universe.Description, ancestors, tree.Children(id), works, universe.CreatedAt, universe.ModifiedAt);
     }
 
     /// <summary>

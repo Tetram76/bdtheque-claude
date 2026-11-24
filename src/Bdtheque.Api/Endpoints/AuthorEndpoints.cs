@@ -72,30 +72,13 @@ internal static class AuthorEndpoints
         var creditedSeries = context.Series.AsNoTracking()
             .Where(s => s.TemplateContributions.Any(c => c.AuthorId == id) || credited.Any(a => a.SeriesId == s.Id));
 
-        var entries = await CatalogWorks.FirstLevel(creditedSeries, credited).ToListAsync(cancellationToken);
-
-        var series = await creditedSeries
-            .Select(CatalogExpressions.Expand((Series s) => new
-            {
-                s.Id,
-                Item = new SeriesListItem(s.Id, s.Title),
-                Roles = s.TemplateContributions.RolesOf(id),
-            }))
-            .ToDictionaryAsync(s => s.Id, cancellationToken);
-        var overviews = await CatalogWorks.OverviewsAsync(context, series.Keys, cancellationToken);
-        var albums = (await credited
-                .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(a.ToCard(), a.Contributions.RolesOf(id), a.FirstPublicationYear, a.FirstPublicationMonth)))
-                .ToListAsync(cancellationToken))
-            .ToLookup(a => a.Album.Album.SeriesId);
-
-        var bibliography = entries
-            .Select(e => e.SeriesId is { } seriesId
-                ? new BibliographyEntry(
-                    new SeriesBibliographyItem(series[seriesId].Item, overviews[seriesId], series[seriesId].Roles, albums[seriesId].ToList()),
-                    null)
-                : new BibliographyEntry(null, albums[null].Single(a => a.Album.Album.Id == e.AlbumId)))
-            .ToList();
+        var bibliography = await CatalogWorks.ReadBibliographyAsync(
+            context, creditedSeries, credited,
+            CatalogExpressions.Expand((Series s) => new CatalogWorks.BibliographySeries(
+                new SeriesListItem(s.Id, s.Title), s.TemplateContributions.Any(c => c.AuthorId == id), s.TemplateContributions.RolesOf(id))),
+            CatalogExpressions.Expand((Album a) => new AlbumBibliographyItem(
+                a.ToCard(), a.Contributions.RolesOf(id), a.FirstPublicationYear, a.FirstPublicationMonth)),
+            cancellationToken);
 
         return new AuthorDetail(
             id, author.LastName, author.FirstName, author.Pseudonym, author.Biography, author.Nationality, bibliography, author.CreatedAt,

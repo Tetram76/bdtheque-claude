@@ -198,9 +198,10 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void GenresAndUniverses_LeadToTheirWorks_EachUniverseWithItsAncestors()
+    public void GenresAndUniverses_LeadToTheAlbumsOfTheGenre_AndToTheRecordOfEachUniverse_WithItsAncestors()
     {
-        _catalog.Album = Album();
+        var album = Album();
+        _catalog.Album = album;
 
         var page = Open();
 
@@ -209,7 +210,13 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         var chain = classification.QuerySelector(".universe-chain")!;
         Assert.Equal(["Univers Hugo Pratt", "Corto Maltese", "Les Antilles"], chain.QuerySelectorAll("a").Select(a => a.TextContent.Trim()));
         Assert.Equal("Les Antilles", chain.QuerySelector("a.universe-attached")!.TextContent.Trim());
-        Assert.All(classification.QuerySelectorAll("a"), a => Assert.Equal(AppPaths.NotYetImplemented, a.GetAttribute("href")));
+        // A genre leads to the list of the albums filtered on it, a universe and each of its ancestors to its record
+        // (fonctionnel/structure-de-l-application.md).
+        Assert.Equal([AppPaths.AlbumsOfGenre(album.Genres[0].Id)], classification.QuerySelectorAll(".classification-genres a").Select(a => a.GetAttribute("href")));
+        var universe = album.Universes[0];
+        Assert.Equal(
+            [.. universe.Ancestors.Select(a => AppPaths.UniverseRecord(a.Id)), AppPaths.UniverseRecord(universe.Universe.Id)],
+            chain.QuerySelectorAll("a").Select(a => a.GetAttribute("href")));
     }
 
     [Fact]

@@ -98,7 +98,7 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
         Assert.Equal(["Modifier Aventure"], row.QuerySelectorAll($"a[href='{AppPaths.AdminGenres}?q=a&edit={id}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(
             [
-                ("Voir ses œuvres dans la consultation", AppPaths.GenreWorks(id)),
+                ("Voir ses albums dans la consultation", AppPaths.AlbumsOfGenre(id)),
                 ("Fusionner avec un autre genre…", $"{AppPaths.AdminGenres}?q=a&merge={id}"),
                 ("Supprimer…", $"{AppPaths.AdminGenres}?q=a&delete={id}"),
             ],

@@ -87,8 +87,8 @@
   <data name="More" xml:space="preserve">
     <value>Autres actions sur {0}</value>
   </data>
-  <data name="Menu.Works" xml:space="preserve">
-    <value>Voir ses œuvres dans la consultation</value>
+  <data name="Menu.View" xml:space="preserve">
+    <value>Voir dans la consultation</value>
   </data>
   <data name="Menu.Merge" xml:space="preserve">
     <value>Fusionner avec un autre univers…</value>

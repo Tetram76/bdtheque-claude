@@ -39,6 +39,9 @@
   <data name="author" xml:space="preserve">
     <value>Fiche d&apos;un auteur</value>
   </data>
+  <data name="universe" xml:space="preserve">
+    <value>Fiche d&apos;un univers</value>
+  </data>
   <data name="audience" xml:space="preserve">
     <value>Information sur la mesure d&apos;audience</value>
   </data>

@@ -135,7 +135,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal(["Modifier Corto Maltese"], row.QuerySelectorAll($"a[href='{AppPaths.AdminUniverses}?q=c&edit={id}']").Select(link => link.GetAttribute("aria-label")));
         Assert.Equal(
             [
-                ("Voir ses œuvres dans la consultation", AppPaths.UniverseWorks(id)),
+                ("Voir dans la consultation", AppPaths.UniverseRecord(id)),
                 ("Fusionner avec un autre univers…", $"{AppPaths.AdminUniverses}?q=c&merge={id}"),
                 ("Supprimer…", $"{AppPaths.AdminUniverses}?q=c&delete={id}"),
             ],

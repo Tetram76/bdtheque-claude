@@ -21,4 +21,7 @@
   <data name="Series" xml:space="preserve">
     <value>Série</value>
   </data>
+  <data name="Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
 </root>

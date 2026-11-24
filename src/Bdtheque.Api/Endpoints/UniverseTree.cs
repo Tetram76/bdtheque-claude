@@ -72,6 +72,9 @@ internal sealed class UniverseTree
         return new UniverseInHierarchy(universe, ancestors);
     }
 
+    /// <summary>The direct sub-universes of a universe, by name.</summary>
+    public IReadOnlyList<UniverseListItem> Children(Guid id) => [.. _children[id].Select(childId => _universes[childId])];
+
     /// <summary>The most ancestors a universe has: the depth of the hierarchy below its top.</summary>
     public int MaxAncestorCount => _universes.Values.Select(u => InHierarchy(u).Ancestors.Count).DefaultIfEmpty().Max();
 

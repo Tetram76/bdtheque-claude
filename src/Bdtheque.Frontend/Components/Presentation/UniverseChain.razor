@@ -7,10 +7,10 @@
 <span class="universe-chain">
     @foreach (var ancestor in Universe.Ancestors)
     {
-        <a class="universe-ancestor" href="@AppPaths.UniverseWorks(ancestor.Id)">@ancestor.Name</a>
+        <a class="universe-ancestor" href="@AppPaths.UniverseRecord(ancestor.Id)">@ancestor.Name</a>
         <span class="universe-separator" aria-hidden="true">›</span>
     }
-    <a class="universe-attached" href="@AppPaths.UniverseWorks(Universe.Universe.Id)">@Universe.Universe.Name</a>
+    <a class="universe-attached" href="@AppPaths.UniverseRecord(Universe.Universe.Id)">@Universe.Universe.Name</a>
 </span>
 
 @code {

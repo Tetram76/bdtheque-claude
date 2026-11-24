@@ -6,7 +6,8 @@
 @inject ValueLabels Values
 @inject DisplayFormatter Format
 
-@* The whole bibliography of an author (visuel/fiche-auteur/contenu.md), a single list: the series and the albums without
+@* The whole bibliography of an author (visuel/fiche-auteur/contenu.md), or the series and albums of a universe, presented the
+   same way without roles, nobody being credited on a universe (visuel/fiche-univers/contenu.md), a single list: the series and the albums without
    series at its first level, in the order the API gives them (by sort key, choix-implementation/api/organisation-de-l-api.md).
    Every album has the same representation, in a series or not: its cover, its title, what places it, the roles held on it,
    its rating and where it stands with regard to the collection. A series is told apart by its pile of three covers, with
@@ -15,9 +16,11 @@
    six albums: no request, nor action followed, to show what the page already holds (choix-implementation/socle/frontend.md).
    « Tout déplier » and « Tout replier » act on the whole list (wwwroot/bibliography-folds.js), and are shown only once the
    script is there to act. Never empty: the record leaves it out for an author credited on nothing, data not set being not
-   shown in the consultation. *@
-<Block Title="@L["Title"]" Kicker="@L["Kicker"]" data-part="bibliography">
-    <div class="bibliography">
+   shown in the consultation. On the right of each line, the roles, the rating and the possession are each a column, aligned from
+   one line to the next whatever a line holds, shared by the albums of an unfolded series and the albums without series; they go
+   under the title when the list is narrow (#636). *@
+<Block Title="@L[$"{Key}.Title"]" Kicker="@L[$"{Key}.Kicker"]" data-part="bibliography">
+    <div class="bibliography" data-roles="@(WithRoles ? "" : null)">
         <app-bibliography-folds>
             <div class="bibliography-head">
                 <p class="bibliography-summary">@Summary</p>
@@ -39,11 +42,14 @@
                                 <CoverPile Covers="series.Overview.FirstVolumeCovers" />
                                 <span class="entry-text">
                                     <a class="entry-title" href="@AppPaths.SeriesRecord(series.Series.Id)">@series.Series.Title</a>
-                                    <span class="entry-meta">@SeriesMeta(series)</span>
+                                    @if (HasSeriesMeta(series))
+                                    {
+                                        <span class="entry-meta">@SeriesMeta(series)</span>
+                                    }
                                 </span>
                                 @if (series.Roles.Count > 0)
                                 {
-                                    <span class="entry-tags entry-series-roles">
+                                    <span class="entry-roles">
                                         <span class="entry-series-roles-label">@L["SeriesRoles"]</span>
                                         @Roles(series.Roles)
                                     </span>
@@ -89,6 +95,19 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<BibliographyEntry> Entries { get; set; } = [];
 
+    /// <summary>The record that presents it: an author, whose roles it gives, or a universe, without roles.</summary>
+    [Parameter, EditorRequired]
+    public RecordType Of { get; set; }
+
+    private bool WithRoles => Of == RecordType.Author;
+
+    private string Key => Of switch
+    {
+        RecordType.Author => "Author",
+        RecordType.Universe => "Universe",
+        _ => throw new ArgumentOutOfRangeException(nameof(Of), Of, "Only the records of an author and of a universe present a bibliography."),
+    };
+
     private string Summary
     {
         get
@@ -106,11 +125,35 @@
         _ => L[$"{key}.Other", Format.Number(count)],
     };
 
-    // The albums credited out of those of the series, and those of the collection among them; credited on the series itself
-    // only, the albums it has none of the author's.
-    private string SeriesMeta(SeriesBibliographyItem series)
+    // In a universe: attached itself, the series has all its albums, those of the collection out of all of them, as on its
+    // record; attached through some of its albums only, those out of all, then those of the collection among them. Nothing for
+    // a series attached itself without any album, which has nothing to say.
+    // In a bibliography: the albums credited out of those of the series, and those of the collection among them; credited on
+    // the series itself only, the albums it has none of the author's.
+    private bool HasSeriesMeta(SeriesBibliographyItem series) => WithRoles || !series.OnSeries || series.Overview.AlbumCount > 0;
+
+    private RenderFragment SeriesMeta(SeriesBibliographyItem series) => __builder =>
     {
         var total = series.Overview.AlbumCount;
+        var owned = series.Albums.Count(a => a.Album.Album.IsInCollection);
+        if (!WithRoles)
+        {
+            if (series.OnSeries)
+            {
+                <SeriesInCollection OwnedCount="owned" AlbumCount="total" />
+                return;
+            }
+
+            var attached = L[series.Albums.Count == 1 ? "Attached.One" : "Attached.Other", Format.Number(series.Albums.Count), Format.Number(total)];
+            @(owned == 0 ? L["Owned.None", attached] : L["Owned", attached, Format.Number(owned)])
+            return;
+        }
+
+        @CreditedMeta(series, total, owned)
+    };
+
+    private string CreditedMeta(SeriesBibliographyItem series, int total, int owned)
+    {
         if (series.Albums.Count == 0)
             return total switch
             {
@@ -120,7 +163,6 @@
             };
 
         var credited = L[series.Albums.Count == 1 ? "Credited.One" : "Credited.Other", Format.Number(series.Albums.Count), Format.Number(total)];
-        var owned = series.Albums.Count(a => a.Album.Album.IsInCollection);
         return owned == 0 ? L["Owned.None", credited] : L["Owned", credited, Format.Number(owned)];
     }
 
@@ -144,14 +186,18 @@
                 <span class="entry-meta">@meta</span>
             }
         </span>
-        <span class="entry-tags">
-            @Roles(item.Roles)
+        @* Each in its column, empty when there is nothing to say, so that the next ones do not move. *@
+        @if (WithRoles)
+        {
+            <span class="entry-roles">@Roles(item.Roles)</span>
+        }
+        <span class="entry-rating">
             @if (item.Album.Rating is not null)
             {
                 <RatingStars Rating="item.Album.Rating" />
             }
-            <CollectionStateTag State="item.Album.State" />
         </span>
+        <span class="entry-state"><CollectionStateTag State="item.Album.State" /></span>
     };
 
     // Each role in its own colour, the same all over the page, so that a role reads at a glance in a long list.

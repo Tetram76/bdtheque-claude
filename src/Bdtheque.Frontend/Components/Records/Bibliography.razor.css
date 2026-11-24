@@ -1,7 +1,18 @@
 /* Built on the contracts of the theme only (visuel/fiche-auteur/declinaison-par-theme.md, choix-implementation/socle/themes.md):
    one entry per line, apart by rules, its cover or its pile of covers first, then its title and what places it, then its
-   tags, which go under them when the line is too narrow; the chevron of a series in front of its pile, the albums without
-   series aligned on the piles. */
+   columns, the roles (in the bibliography of an author only), the rating and the possession, aligned from one line to the next
+   (visuel/fiche-auteur/contenu.md, #636), which go under the title when the list is narrow; the chevron of a series in front
+   of its pile, the albums without series aligned on the piles. */
+.bibliography {
+    /* Wide enough for three roles, five stars and « Catalogué » in every theme. */
+    --entry-columns: 16rem 5.5rem 6.5rem;
+    container-type: inline-size;
+}
+
+.bibliography:not([data-roles]) {
+    --entry-columns: 5.5rem 6.5rem;
+}
+
 app-bibliography-folds {
     display: grid;
     gap: var(--space-m);
@@ -49,16 +60,17 @@ app-bibliography-folds:not(:defined) .bibliography-actions {
    align. */
 .entry-row {
     --cover-width: 1.875rem;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) var(--entry-columns);
     align-items: center;
     gap: 0.125rem var(--space-s);
     min-block-size: 3rem;
     padding-block: var(--space-xs);
 }
 
+/* Its end set in as much as the box of the albums of an unfolded series sets in theirs, so that both share the columns. */
 .bibliography-entry > .entry-row {
-    padding-inline-start: var(--toggle-size);
+    padding-inline: var(--toggle-size) var(--space-m);
 }
 
 .entry-row > ::deep .cover-slot {
@@ -67,7 +79,7 @@ app-bibliography-folds:not(:defined) .bibliography-actions {
 
 .entry-text {
     display: flex;
-    flex: 1 1 12rem;
+    grid-column: 2;
     flex-direction: column;
     min-inline-size: 0;
     line-height: 1.3;
@@ -94,12 +106,56 @@ app-bibliography-folds:not(:defined) .bibliography-actions {
     color: var(--color-text-muted);
 }
 
-.entry-tags {
-    --star-size: 0.875rem;
+.entry-roles {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-xs);
+}
+
+.entry-rating {
+    --star-size: 0.875rem;
+    display: flex;
+}
+
+.entry-state {
+    display: flex;
+}
+
+/* Narrow (a smartphone), the columns go under the title, aligned on it: the roles on the left, the possession against the end,
+   the rating just before it. */
+@container (width < 44rem) {
+    .entry-row {
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+    }
+
+    .bibliography-entry > .entry-row {
+        padding-inline-end: 0;
+    }
+
+    .entry-row > :first-child {
+        grid-row: span 2;
+    }
+
+    .entry-text {
+        grid-column: 2 / -1;
+    }
+
+    .entry-roles {
+        grid-row: 2;
+        grid-column: 2;
+    }
+
+    .entry-rating {
+        grid-row: 2;
+        grid-column: 3;
+    }
+
+    .entry-state {
+        grid-row: 2;
+        grid-column: 4;
+        justify-self: end;
+    }
 }
 
 .entry-series-roles-label {

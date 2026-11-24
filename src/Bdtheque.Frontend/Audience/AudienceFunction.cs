@@ -71,6 +71,12 @@ public static class AudienceFunctions
     /// </summary>
     public static readonly AudienceFunction AuthorRecord = new("author", AudienceFunctionKind.Screen);
 
+    /// <summary>
+    /// The record of a universe (visuel/fiche-univers/), with the universe it presents. Unfolding its series, one or all, is no
+    /// action, as in the record of an author.
+    /// </summary>
+    public static readonly AudienceFunction UniverseRecord = new("universe", AudienceFunctionKind.Screen);
+
     /// <summary>The list of the authors of the consultation, entry « Auteurs » of its menu.</summary>
     public static readonly AudienceFunction Authors = new("authors", AudienceFunctionKind.Screen);
 
@@ -637,7 +643,7 @@ public static class AudienceFunctions
     [
         AlbumRecord, AlbumRecordVisual,
         Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
-        SeriesRecord, SeriesList, SeriesListSearch, SeriesListFilter, SeriesListInitial, SeriesListPage, AuthorRecord,
+        SeriesRecord, SeriesList, SeriesListSearch, SeriesListFilter, SeriesListInitial, SeriesListPage, AuthorRecord, UniverseRecord,
         Authors, AuthorsSearch, AuthorsFilter, AuthorsInitial, AuthorsPage,
         PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsFilter, PurchaseIntentsInitial, PurchaseIntentsPage,
         Search, SearchQuery, AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,

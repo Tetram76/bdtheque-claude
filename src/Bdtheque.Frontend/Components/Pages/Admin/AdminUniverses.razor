@@ -91,7 +91,7 @@
                             <Button Href="@((ListOnly with { Edit = row.Id }).Href())" Icon="IconName.Edit" Label="@L["Edit"]"
                                     IconOnlyOnSmartphone="true" aria-label="@L["Edit.Label", row.Name]" />
                             <ActionsMenu Id="@($"universe-actions-{row.Id:N}")" Label="@L["More", row.Name]">
-                                <MenuItem Href="@AppPaths.UniverseWorks(row.Id)" Icon="IconName.Exit" Label="@L["Menu.Works"]" />
+                                <MenuItem Href="@AppPaths.UniverseRecord(row.Id)" Icon="IconName.Exit" Label="@L["Menu.View"]" />
                                 <MenuItem Href="@((ListOnly with { Merge = row.Id }).Href())" Icon="IconName.Merge" Label="@L["Menu.Merge"]" />
                                 <MenuSeparator />
                                 <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Delete"]"

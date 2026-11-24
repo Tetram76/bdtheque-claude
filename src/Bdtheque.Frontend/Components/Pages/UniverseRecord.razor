@@ -1,0 +1,123 @@
+@attribute [Route(AppPaths.UniverseRoute)]
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Records
+@inject IStringLocalizer<UniverseRecord> L
+@inject ApiClient Api
+@inject DisplayFormatter Format
+
+@* The record of a universe in the consultation (visuel/fiche-univers/contenu.md): its parents in the breadcrumb, a universe having
+   neither list nor entry in the menu; the thought bubble of the universes under the mention of its kind; its name, its
+   sub-universes and the number of its series and albums; its description; its series and albums, those of its sub-universes
+   included, presented as the bibliography of an author, without roles (Records/Bibliography.razor), whole, a record having no
+   filter; its dates. Its styles read the contracts of the base theme only (visuel/fiche-univers/declinaison-par-theme.md). *@
+<PageTitle>@(_universe?.Name ?? L["Title"])</PageTitle>
+<AudienceScreen Function="AudienceFunctions.UniverseRecord" Record="new PresentedRecord(RecordType.Universe, Id)" />
+
+@if (_problem is not null)
+{
+    <h1 class="visually-hidden">@L["Title"]</h1>
+    <ErrorMessage Problem="_problem" />
+}
+else if (_universe is { } universe)
+{
+    <Breadcrumb Items="BreadcrumbItems" />
+
+    <div class="universe-record">
+        <div class="universe-head">
+            @* Decorative, put forward as a theme puts forward the visual of a record (--record-visual-…). *@
+            <RecordVisual Kind="RecordType.Universe">
+                <span class="universe-visual" aria-hidden="true"><Icon Name="IconName.Universe" /></span>
+            </RecordVisual>
+
+            <div class="universe-identity">
+                <h1>@universe.Name</h1>
+
+                @* Data not set is not shown (visuel/fiche-univers/contenu.md). *@
+                @if (universe.SubUniverses.Count > 0)
+                {
+                    <dl class="universe-children">
+                        <div>
+                            <dt>@L["SubUniverses"]</dt>
+                            <dd>
+                                @foreach (var child in universe.SubUniverses)
+                                {
+                                    <a href="@AppPaths.UniverseRecord(child.Id)">@child.Name</a>
+                                }
+                            </dd>
+                        </div>
+                    </dl>
+                }
+
+                <ul class="universe-facts" aria-label="@L["Facts"]">
+                    @if (_seriesCount == 0 && _albumCount == 0)
+                    {
+                        <li class="universe-fact" data-fact="main">@L["Albums.None"]</li>
+                    }
+                    else
+                    {
+                        @if (_seriesCount > 0)
+                        {
+                            <li class="universe-fact" data-fact="main">@Counted("Series", _seriesCount)</li>
+                        }
+                        @if (_albumCount > 0)
+                        {
+                            <li class="universe-fact" data-fact="@(_seriesCount == 0 ? "main" : null)">@Counted("Albums", _albumCount)</li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(universe.Description))
+        {
+            <Block Title="@L["Description.Title"]" Kicker="@L["Description.Kicker"]" data-part="description">
+                <p class="universe-description">@universe.Description</p>
+            </Block>
+        }
+
+        @if (universe.Works.Count > 0)
+        {
+            <Bibliography Entries="universe.Works" Of="RecordType.Universe" />
+        }
+    </div>
+
+    <p class="universe-dates" data-local>@L["Dates", Format.LocalDate(universe.CreatedAt), Format.LocalDate(universe.ModifiedAt)]</p>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private UniverseDetail? _universe;
+    private ApiProblem? _problem;
+    private int _seriesCount;
+    private int _albumCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _universe = await Api.GetAsync<UniverseDetail>($"/catalog/universes/{Id}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            return;
+        }
+
+        _seriesCount = _universe.Works.Count(e => e.Series is not null);
+        // Every album attached, in a series or not: a series attached itself presents all of them.
+        _albumCount = _universe.Works.Sum(e => e.Series?.Albums.Count ?? 1);
+    }
+
+    private string Counted(string key, int count) => L[count > 1 ? $"{key}.Other" : $"{key}.One", Format.Number(count)];
+
+    // The parents of the universe, from the top down, each leading to its record, then the universe itself: a universe has no
+    // list to lead back to.
+    private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
+    [
+        .. _universe!.Ancestors.Select(ancestor => new BreadcrumbItem(ancestor.Name, AppPaths.UniverseRecord(ancestor.Id))),
+        new(_universe.Name),
+    ];
+}

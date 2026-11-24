@@ -72,6 +72,29 @@ public sealed partial class AuthorRecordTests(RecordsApplication application) : 
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/albums/{Application.AlbumId}$"));
     }
 
+    // The roles, the rating and the possession, each a column aligned from one line to the next, the albums of an unfolded series
+    // sharing them with the albums without series (#636): on a large screen, each column starts at the same place on every line;
+    // on a smartphone, under the title, the possession ends at the same place on every line of a level.
+    [Theory, InEachTheme]
+    public async Task Columns_AreAlignedFromOneLineToTheNext(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await page.GotoAsync(AppPaths.AuthorRecord(Application.AuthorId));
+        await page.GetByRole(AriaRole.Button, new() { Name = "Tout déplier" }).ClickAsync();
+
+        foreach (var column in new[] { "entry-roles", "entry-rating", "entry-state" })
+            Assert.Single(await Edges(page, $".bibliography-entry[data-kind='album'] > .entry-row > .{column}, li.entry-row > .{column}", "left"));
+
+        await page.SetViewportSizeAsync(414, 900);
+        Assert.Single(await Edges(page, "li.entry-row > .entry-state", "right"));
+    }
+
+    // The distinct edges, to the pixel, of the elements, each read in a single call of the page.
+    private static async Task<HashSet<int>> Edges(IPage page, string selector, string edge) =>
+        [.. await page.EvaluateAsync<int[]>(
+            "([selector, edge]) => [...document.querySelectorAll(selector)].map(e => Math.round(e.getBoundingClientRect()[edge]))",
+            new object[] { selector, edge })];
+
     // The entry of a series of the bibliography, by its title.
     private static ILocator Series(IPage page, string title) =>
         page.Locator(".bibliography-entry[data-kind='series']").Filter(new() { Has = page.Locator(".entry-row > .entry-text > .entry-title", new() { HasText = title }) });
