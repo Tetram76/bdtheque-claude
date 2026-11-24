@@ -111,7 +111,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
     {
         var form = Open("").Find("form.list-search");
 
-        Assert.Equal("Titre de l'album ou de sa série…", form.QuerySelector("input[type='search']")!.GetAttribute("placeholder"));
+        Assert.Equal("Titre de l'album, de sa série ou ISBN…", form.QuerySelector("input[type='search']")!.GetAttribute("placeholder"));
         Assert.Empty(form.QuerySelectorAll("button[aria-controls]"));
     }
 
@@ -200,7 +200,7 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         var empty = Open("q=Zorglub").Find(".empty-list");
 
         Assert.Equal("Aucune intention d'acquisition ne correspond à « Zorglub ».", Text(empty.QuerySelector("strong")!));
-        Assert.Equal("La recherche porte sur le titre de l'album et sur celui de sa série, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
+        Assert.Equal("La recherche porte sur le titre de l'album, sur celui de sa série et sur l'ISBN de l'édition visée, sans tenir compte des majuscules ni des accents.", Text(empty.QuerySelector("strong + span")!));
         Assert.Equal([("Effacer la recherche", AppPaths.AdminPurchaseIntents)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
