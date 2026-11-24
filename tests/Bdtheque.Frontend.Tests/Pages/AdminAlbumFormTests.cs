@@ -151,7 +151,7 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
 
     [Theory]
     [InlineData(AlbumCollectionState.PurchaseIntent, "intent", "Intention")]
-    [InlineData(AlbumCollectionState.OutsideCollection, "out", "Non possédé")]
+    [InlineData(AlbumCollectionState.OutsideCollection, "out", "Catalogué")]
     public void Album_NotInTheCollection_IsMarkedByABanner(AlbumCollectionState state, string status, string name)
     {
         _api.Answers[$"/admin/albums/{AlbumId}"] = Bijoux with { CollectionState = state };

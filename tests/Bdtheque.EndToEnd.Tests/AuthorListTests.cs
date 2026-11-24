@@ -39,7 +39,7 @@ public sealed class AuthorListTests(ApplicationHost application) : BrowserTest<A
         await PageReadiness.GotoAsync(page, $"{AppPaths.Authors}?q={_marker}");
 
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "Possession" }).SelectOptionAsync("Avec un album possédé");
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "Possession" }).SelectOptionAsync("Dont des albums possédés");
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Possesseur {_marker}"]);

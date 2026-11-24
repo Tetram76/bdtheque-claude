@@ -113,7 +113,7 @@ public sealed class AdminHomeTests(AdministrationApplication application) : Brow
         var albumsList = page.GetByRole(AriaRole.Heading, new() { Name = "Albums, voir la liste", Exact = true }).GetByRole(AriaRole.Link);
         var albums = page.Locator(".admin-record", new() { Has = albumsList });
         await Assertions.Expect(albums.Locator(".admin-record-count")).ToHaveTextAsync("4");
-        await Assertions.Expect(albums.Locator(".admin-record-detail")).ToHaveTextAsync("non possédés : 1");
+        await Assertions.Expect(albums.Locator(".admin-record-detail")).ToHaveTextAsync("catalogués : 1");
         var check = page.GetByRole(AriaRole.Link, new() { Name = "ISBN au chiffre de contrôle incohérent" });
         await Assertions.Expect(check.Locator(".admin-check-count")).ToHaveTextAsync("1");
         // The genre deleted is no record any more; the album renamed, under its new title.

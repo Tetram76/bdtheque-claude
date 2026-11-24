@@ -13,4 +13,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Label" xml:space="preserve"><value>Possession</value></data>
+  <data name="OfAlbums.InCollection" xml:space="preserve"><value>Dont des albums possédés</value></data>
+  <data name="OfAlbums.PurchaseIntent" xml:space="preserve"><value>Dont des albums en intention</value></data>
+  <data name="OfAlbums.OutsideCollection" xml:space="preserve"><value>Dont des albums catalogués</value></data>
 </root>

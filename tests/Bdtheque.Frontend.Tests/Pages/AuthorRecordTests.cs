@@ -199,7 +199,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Equal(["Scénario", "Dessin"], album.QuerySelectorAll(".role").Select(r => r.TextContent.Trim()));
         Assert.Equal(["scenarist", "illustrator"], album.QuerySelectorAll(".role").Select(r => r.GetAttribute("data-role")));
         Assert.Equal("Appréciation : Bien, 4 sur 5", album.QuerySelector(".rating-stars[role='img']")!.GetAttribute("aria-label"));
-        Assert.Equal("Non possédé", album.QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Equal("Catalogué", album.QuerySelector(".tag")!.TextContent.Trim());
         // An album has nothing to unfold.
         Assert.Empty(album.QuerySelectorAll("details"));
     }

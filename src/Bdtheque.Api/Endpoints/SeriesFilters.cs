@@ -16,6 +16,12 @@ internal sealed record SeriesFilters(
     Guid? UniverseId, AlbumCollectionState? State)
 {
     /// <summary>
+    /// Whether the list presents the owned editions of the albums of its series only, among which their covers are taken
+    /// (fonctionnel/regles-metier/couverture-d-un-album.md): limited to the series of the collection.
+    /// </summary>
+    public bool PresentsOwnedEditionsOnly => State == AlbumCollectionState.InCollection;
+
+    /// <summary>
     /// Narrows <paramref name="series"/>: a series is found by its title, and is credited, published or collected on itself —
     /// its contributions, publisher and collection are data of the series as much as a template
     /// (modele-metier/relations-et-cardinalites.md#série--relations) — or through its albums.
@@ -48,8 +54,9 @@ internal sealed record SeriesFilters(
         }
 
         if (State is { } state)
+            // A series that contains an album of the state chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
             series = series.Where(CatalogExpressions.Expand(
-                (Series s) => context.Albums.Where(a => a.SeriesId == s.Id).CollectionStateOfAlbums() == state));
+                (Series s) => context.Albums.Any(a => a.SeriesId == s.Id && a.CollectionState() == state)));
         return series;
     }
 

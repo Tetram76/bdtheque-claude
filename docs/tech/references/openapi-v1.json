@@ -7110,7 +7110,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfSeriesListItem"
+                  "$ref": "#/components/schemas/SeriesCatalogList"
                 }
               }
             }
@@ -15054,6 +15054,51 @@
         },
         "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
       },
+      "PageOfSeriesCatalogListItem": {
+        "required": [
+          "items",
+          "number",
+          "size",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesCatalogListItem"
+            }
+          },
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of the page, from 1.",
+            "format": "int32"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of items of the whole list.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+      },
       "PageOfSeriesListItem": {
         "required": [
           "items",
@@ -17098,6 +17143,54 @@
           }
         },
         "description": "A series of a bibliography, credited on the series itself or on one of its albums."
+      },
+      "SeriesCatalogList": {
+        "required": [
+          "series",
+          "filters"
+        ],
+        "type": "object",
+        "properties": {
+          "series": {
+            "$ref": "#/components/schemas/PageOfSeriesCatalogListItem"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/SeriesListFilters"
+          }
+        },
+        "description": "The list of the series of the consultation: a page of its rows, and the records it is filtered on, named as the lists name\nthem, for the screen to present them without another request."
+      },
+      "SeriesCatalogListItem": {
+        "required": [
+          "id",
+          "title",
+          "overview",
+          "albumsInCollectionCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "overview": {
+            "description": "Its pile of covers and the number of its albums, the covers taken among the editions the list presents\n(fonctionnel/regles-metier/couverture-d-un-album.md): the owned editions only in the list limited to them, all of them\notherwise.",
+            "$ref": "#/components/schemas/SeriesOverview"
+          },
+          "albumsInCollectionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Its albums that are part of the collection, an album only targeted by a purchase intent being none\n(fonctionnel/regles-metier/appartenance-a-la-collection.md).",
+            "format": "int32"
+          }
+        },
+        "description": "A series as a row of the list of the consultation presents it."
       },
       "SeriesContent": {
         "required": [

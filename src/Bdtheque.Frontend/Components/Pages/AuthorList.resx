@@ -19,9 +19,6 @@
   <data name="Filter.State" xml:space="preserve"><value>Possession</value></data>
   <data name="State.All" xml:space="preserve"><value>Tous les auteurs</value></data>
   <data name="Filters.Note" xml:space="preserve"><value>Les albums d'un auteur sont ceux sur lesquels il est crédité.</value></data>
-  <data name="State.InCollection" xml:space="preserve"><value>Avec un album possédé</value></data>
-  <data name="State.PurchaseIntent" xml:space="preserve"><value>Avec un album en intention</value></data>
-  <data name="State.OutsideCollection" xml:space="preserve"><value>Avec un album catalogué</value></data>
   <data name="Count.None" xml:space="preserve"><value>Aucun auteur</value></data>
   <data name="Count.One" xml:space="preserve"><value>1 auteur</value></data>
   <data name="Count.Other" xml:space="preserve"><value>{0} auteurs</value></data>

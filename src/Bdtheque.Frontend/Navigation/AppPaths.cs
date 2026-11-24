@@ -38,7 +38,8 @@ public static class AppPaths
     /// <summary>The list of the albums of the consultation, under which the record of an album is.</summary>
     public const string Albums = AlbumsSection;
 
-    public const string Series = NotYetImplemented;
+    /// <summary>The list of the series of the consultation, under which the record of a series is.</summary>
+    public const string Series = SeriesSection;
 
     /// <summary>The list of the authors of the consultation, under which the record of an author is.</summary>
     public const string Authors = AuthorsSection;
@@ -63,10 +64,7 @@ public static class AppPaths
     /// <summary>The series and albums of a universe, those of its sub-universes included.</summary>
     public static string UniverseWorks(Guid id) => NotYetImplemented;
 
-    /// <summary>
-    /// The path of the list of the series once implemented, under which the record of a series is: where the entry « Séries »
-    /// of the menu is current.
-    /// </summary>
+    /// <summary>The path of the list of the series, under which the record of a series is: where the entry « Séries » of the menu is current.</summary>
     public const string SeriesSection = "/series";
 
     /// <summary>The route of the record of a series.</summary>

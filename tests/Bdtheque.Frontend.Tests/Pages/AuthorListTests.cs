@@ -132,7 +132,7 @@ public sealed class AuthorListTests : BunitContext, IDisposable
         var select = page.Find("select[name='state']");
         // An author is not owned (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
         Assert.Equal(
-            ["Tous les auteurs", "Avec un album possédé", "Avec un album en intention", "Avec un album catalogué"],
+            ["Tous les auteurs", "Dont des albums possédés", "Dont des albums en intention", "Dont des albums catalogués"],
             select.QuerySelectorAll("option").Select(Text));
         Assert.Equal("PurchaseIntent", select.QuerySelector("option[selected]")!.GetAttribute("value"));
         Assert.Single(page.FindAll(".list-filters select, .list-filters input:not([type=hidden])"));
@@ -146,7 +146,7 @@ public sealed class AuthorListTests : BunitContext, IDisposable
 
         var page = Open("state=InCollection");
 
-        Assert.Contains("Possession : Avec un album possédé", Text(page.Find(".active-filters")));
+        Assert.Contains("Possession : Dont des albums possédés", Text(page.Find(".active-filters")));
         Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.Authors}?entry=B&state=InCollection");
         Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.Authors}?state=InCollection&page=2");
     }

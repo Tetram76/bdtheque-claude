@@ -21,6 +21,21 @@
   <data name="series" xml:space="preserve">
     <value>Fiche d&apos;une série</value>
   </data>
+  <data name="series.list" xml:space="preserve">
+    <value>Liste des séries de la consultation</value>
+  </data>
+  <data name="series.list.search" xml:space="preserve">
+    <value>Liste des séries de la consultation · recherche</value>
+  </data>
+  <data name="series.list.filter" xml:space="preserve">
+    <value>Liste des séries de la consultation · filtres</value>
+  </data>
+  <data name="series.list.initial" xml:space="preserve">
+    <value>Liste des séries de la consultation · navigation par initiale</value>
+  </data>
+  <data name="series.list.page" xml:space="preserve">
+    <value>Liste des séries de la consultation · changement de page</value>
+  </data>
   <data name="author" xml:space="preserve">
     <value>Fiche d&apos;un auteur</value>
   </data>
