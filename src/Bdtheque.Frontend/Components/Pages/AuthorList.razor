@@ -186,7 +186,7 @@
             : L["Albums.InCollection", albums, Format.Number(row.CreditedAlbumsInCollectionCount)];
     }
 
-    // An author is not owned: each state says what the filter keeps from its albums
+    // An author is not owned: each state names the albums of the author the filter looks for, one of which is enough
     // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
     private string StateLabel(AlbumCollectionState state) => L[$"State.{state}"];
 

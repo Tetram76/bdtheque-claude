@@ -52,6 +52,8 @@ public sealed class AuthorListTests(ApplicationHost application) : BrowserTest<A
     public async Task ReturnFromARecord_ByItsFilDAriane_FindsTheListAsLeft_AndTheMenu_ItsFiltersOnly(string theme)
     {
         var author = await CreateAuthorAsync($"Retour {_marker}");
+        // Credited on a catalogued album, which keeps it under « Catalogué ».
+        await CreateAlbumAsync(author);
         var page = await NewPageAsync(theme);
         await PageReadiness.GotoAsync(page, $"{AppPaths.Authors}?q={_marker}&entry=R&state=OutsideCollection");
 
