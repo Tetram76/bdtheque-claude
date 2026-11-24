@@ -7,8 +7,8 @@ namespace Bdtheque.Api.Tests;
 
 /// <summary>
 /// The list of the authors of the consultation (<c>/catalog/authors</c>): what a row carries, and the filter of the possession,
-/// by which it limits itself to the collection, an author taking the state of the albums it is credited on
-/// (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+/// by which it limits itself to the collection, an author being kept when one of the albums it is credited on is in the state
+/// chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
 /// </summary>
 /// <remarks>
 /// The list covers the whole base, shared by the tests of the class: each test names its records with a marker of its own, and
@@ -44,32 +44,29 @@ public sealed class CatalogAuthorListTests : IClassFixture<ApiWebApplicationFact
     }
 
     [Fact]
-    public async Task Possession_KeepsEachAuthorUnderTheStateOfItsAlbums_AllWithoutIt()
+    public async Task Possession_KeepsTheAuthorsCreditedOnAnAlbumInTheStateChosen_AllWithoutIt()
     {
         var publisher = await CreatePublisherAsync();
-        // Owned as soon as one album credited is, whatever the others.
+        // An owned album and another, neither owned nor targeted: under both states.
         var owner = await CreateAuthorAsync("A");
         var ownedAlbum = await CreateAlbumAsync(null, [new(owner.Id, ContributionRole.Scenarist)]);
         await CreateOwnedEditionAsync(ownedAlbum.Id, publisher.Id);
         await CreateAlbumAsync(null, [new(owner.Id, ContributionRole.Scenarist)]);
-        // An intent when no album credited is owned and one is targeted.
+        // An album targeted by an intent.
         var intender = await CreateAuthorAsync("B");
         var intendedAlbum = await CreateAlbumAsync(null, [new(intender.Id, ContributionRole.Scenarist)]);
         await CreateIntentAsync(intendedAlbum.Id);
-        await CreateAlbumAsync(null, [new(intender.Id, ContributionRole.Scenarist)]);
-        // Not owned otherwise: an album neither owned nor targeted, the series alone credited, or nothing at all.
-        var outsider = await CreateAuthorAsync("C");
-        await CreateAlbumAsync(null, [new(outsider.Id, ContributionRole.Scenarist)]);
+        // Credited on a series alone, whose album is owned, or on nothing: no album, under no state.
         var seriesOnly = await CreateAuthorAsync("D");
         var series = await CreateSeriesAsync([new(seriesOnly.Id, ContributionRole.Scenarist)]);
         var ownedInSeries = await CreateAlbumAsync(series.Id, []);
         await CreateOwnedEditionAsync(ownedInSeries.Id, publisher.Id);
         var uncredited = await CreateAuthorAsync("E");
 
-        Assert.Equal([owner.Id, intender.Id, outsider.Id, seriesOnly.Id, uncredited.Id], await IdsAsync($"q={_marker}"));
+        Assert.Equal([owner.Id, intender.Id, seriesOnly.Id, uncredited.Id], await IdsAsync($"q={_marker}"));
         Assert.Equal([owner.Id], await IdsAsync($"q={_marker}&state=InCollection"));
         Assert.Equal([intender.Id], await IdsAsync($"q={_marker}&state=PurchaseIntent"));
-        Assert.Equal([outsider.Id, seriesOnly.Id, uncredited.Id], await IdsAsync($"q={_marker}&state=OutsideCollection"));
+        Assert.Equal([owner.Id], await IdsAsync($"q={_marker}&state=OutsideCollection"));
     }
 
     [Fact]

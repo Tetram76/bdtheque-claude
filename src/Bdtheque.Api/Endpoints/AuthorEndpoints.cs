@@ -170,8 +170,8 @@ internal static class AuthorEndpoints
     /// <summary>
     /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as
     /// displayed ("First Last") or as sorted ("Last First",
-    /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), under the entry of the navigation, in the possession
-    /// they take from the albums they are credited on (fonctionnel/regles-metier/perimetre-de-la-consultation.md), by sort key.
+    /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), under the entry of the navigation, credited on at
+    /// least one album in the possession chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md), by sort key.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
     private static IOrderedQueryable<Author> Search(BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state)
@@ -183,7 +183,7 @@ internal static class AuthorEndpoints
             authors = authors.Where(a => a.NavigationEntry == entry);
         if (state is { } wanted)
             authors = authors.Where(CatalogExpressions.Expand((Author a) =>
-                context.Albums.Where(album => album.Contributions.Any(c => c.AuthorId == a.Id)).CollectionStateOfAlbums() == wanted));
+                context.Albums.Any(album => album.Contributions.Any(c => c.AuthorId == a.Id) && album.CollectionState() == wanted)));
         return authors.OrderByEntry(a => a.NavigationEntry).ThenBy(a => a.SortKey).ThenBy(a => a.Id);
     }
 
