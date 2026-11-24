@@ -261,6 +261,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             AcquisitionAmount = 19.99m, AcquisitionCurrency = "USD",
         });
         await data.VisualAsync(summer, summerEdition, VisualType.Cover, Images.Portrait(0.48));
+        // Owned, and wished for again from a publisher without a website, whose name, in the label of the edition, is no link
+        // (fonctionnel/presentation/libelle-d-une-edition.md).
+        await data.IntentOnEditionAsync(summer, new PurchaseIntentEditionContent(bubbles.Id, null, null, null, null, null, null, null, null, null, true));
 
         // A free gift, without cover.
         var fog = await data.AlbumAsync(OneShot("Brouillard sur Ombrelune", 2008, null, [fantasy], [ombrelune], [Credit(brume, ContributionRole.Scenarist), Credit(pinceau, ContributionRole.Illustrator)]));

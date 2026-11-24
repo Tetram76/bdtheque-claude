@@ -8061,6 +8061,20 @@
         ],
         "parameters": [
           {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entry",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -15654,7 +15668,11 @@
         "required": [
           "id",
           "album",
-          "edition"
+          "state",
+          "edition",
+          "publisherWebsite",
+          "cover",
+          "createdAt"
         ],
         "type": "object",
         "properties": {
@@ -15664,6 +15682,10 @@
           },
           "album": {
             "$ref": "#/components/schemas/AlbumSummary"
+          },
+          "state": {
+            "description": "The possession of the album, never outside the collection for an album targeted.",
+            "$ref": "#/components/schemas/AlbumCollectionState"
           },
           "edition": {
             "oneOf": [
@@ -15675,9 +15697,32 @@
                 "$ref": "#/components/schemas/EditionSummary"
               }
             ]
+          },
+          "publisherWebsite": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Where the publisher of the edition targeted leads (fonctionnel/presentation/libelle-d-une-edition.md); `null` when unknown,\nor for an intent on the whole album."
+          },
+          "cover": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The cover of the album among all its editions, the list being a context of documentary base\n(fonctionnel/regles-metier/couverture-d-un-album.md); `null` for the generic visual.",
+                "$ref": "#/components/schemas/AlbumCover"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the intent was set.",
+            "format": "date-time"
           }
         },
-        "description": "An entry of the public list of the purchase intents, which leads to the record of the album, or of\nthe edition targeted (fonctionnel/structure-de-l-application.md)."
+        "description": "An intent as a row of the public list of the purchase intents presents it, which leads to the record of the album targeted\n(fonctionnel/structure-de-l-application.md): always as an intent, with the album or the edition it targets\n(fonctionnel/regles-metier/intention-d-acquisition.md)."
       },
       "PurchaseIntentsForm": {
         "required": [

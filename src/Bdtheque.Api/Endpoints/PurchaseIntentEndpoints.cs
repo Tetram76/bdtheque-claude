@@ -140,28 +140,40 @@ internal static class PurchaseIntentEndpoints
         return ToForm(album, context.VersionOf(album));
     }
 
+    /// <summary>
+    /// An intent as the public list presents it (<see cref="PurchaseIntentListItem"/>), and the results of the advanced search,
+    /// presented as in the consultation (fonctionnel/recherche-avancee/entites-recherchees.md).
+    /// </summary>
     internal static readonly Expression<Func<PurchaseIntent, PurchaseIntentListItem>> ListItem = CatalogExpressions.Expand(
-        (PurchaseIntent p) => new PurchaseIntentListItem(p.Id, p.Album.ToSummary(), p.Edition == null ? null : p.Edition.ToSummary()));
-
-    /// <summary>The public list of the intents, in the order of their albums.</summary>
-    private static Task<Page<PurchaseIntentListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize) =>
-        InListOrder(context.PurchaseIntents.AsNoTracking()).ToPageAsync(page, pageSize, ListItem, cancellationToken);
+        (PurchaseIntent p) => new PurchaseIntentListItem(
+            p.Id,
+            p.Album.ToSummary(),
+            p.Album.CollectionState(),
+            p.Edition == null ? null : p.Edition.ToSummary(),
+            p.Edition == null ? null : p.Edition.Publisher.Website,
+            CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
+            p.CreatedAt));
 
     /// <summary>
-    /// The list of the intents of the administration (visuel/listes/liste-par-liste.md), found by the title of their album or
-    /// of its series, part of its label (fonctionnel/presentation/libelle-d-un-album.md), filed under the entry of the navigation
-    /// by initial of their album, in the order of the public list. Each row carries the album and what the intent targets, the
-    /// cover of the album, whether the intent can turn into one on the other target, when it was set, and the version of its
-    /// album, which its removal sends back.
+    /// The public list of the intents (fonctionnel/structure-de-l-application.md), found and ordered as that of the
+    /// administration. It has no filter of the possession (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
+    private static Task<Page<PurchaseIntentListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
+        int pageSize = Paging.DefaultSize) =>
+        Found(context, q, entry).ToPageAsync(page, pageSize, ListItem, cancellationToken);
+
+    /// <summary>
+    /// The list of the intents of the administration (visuel/listes/liste-par-liste.md). Each row carries the album and what
+    /// the intent targets, the cover of the album, whether the intent can turn into one on the other target, when it was set,
+    /// and the version of its album, which its removal sends back.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
     private static Task<Page<PurchaseIntentAdminListItem>> ListForAdministrationAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
         int pageSize = Paging.DefaultSize) =>
-        InListOrder(context.PurchaseIntents.AsNoTracking()
-                .WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title)
-                .WhereAlbumEntry(p => p.Album, entry))
+        Found(context, q, entry)
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((PurchaseIntent p) => new PurchaseIntentAdminListItem(
                 p.Id,
                 p.Album.ToSummary(),
@@ -173,6 +185,14 @@ internal static class PurchaseIntentEndpoints
                 p.EditionId == null || p.Album.Editions.Count == 1,
                 p.CreatedAt,
                 EF.Property<uint>(p.Album, BdthequeDbContext.VersionProperty))), cancellationToken);
+
+    // The intents of both lists, found by the title of their album or of its series, part of its label
+    // (fonctionnel/presentation/libelle-d-un-album.md), filed under the entry of the navigation by initial of their album,
+    // in the order of the albums.
+    private static IOrderedQueryable<PurchaseIntent> Found(BdthequeDbContext context, string? q, string? entry) =>
+        InListOrder(context.PurchaseIntents.AsNoTracking()
+            .WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title)
+            .WhereAlbumEntry(p => p.Album, entry));
 
     private static IOrderedQueryable<PurchaseIntent> InListOrder(IQueryable<PurchaseIntent> intents) =>
         intents.OrderByAlbum(p => p.Album).ThenBy(p => p.Id);
