@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-24
+
+* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, les harnais ne sont pas comptés comme des chantiers du lot, mais exécutés comme tels : leur session occupe une des 3 places des chantiers menés en même temps, jusqu'à la fin de leur traitement ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md), [Contrôle de cohérence fonctionnelle](gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md)).
+
 ## 2026-11-23
 
 * **Décision de l'utilisateur** : la consultation des indicateurs de la mesure d'audience, dans l'administration, n'est pas une fonction suivie, ni son écran ni ses actions, non plus que les pages d'accueil de la consultation et de l'administration, où l'on passe forcément ([Mesure d'audience de l'interface web](fonctionnel/mesure-audience.md), [Relevé par le frontend](choix-implementation/mesure-audience/releve-par-le-frontend.md)) (#626).

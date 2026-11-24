@@ -43,7 +43,8 @@ user gave in this conversation; only the tickets within it are candidates.
 ## 1. The batch
 
 - A batch is **always run in parallel**, never one chantier after the other
-  by choice: **3 at once at most**, fewer only when the resources (step 2.3)
+  by choice: **3 at once at most**, the harness session included (below),
+  fewer only when the resources (step 2.3)
   or a dependency between chantiers require it. Never ask the user how many
   at once.
 - The user gives the **number of chantiers** of the batch. It is not fixed:
@@ -52,8 +53,10 @@ user gave in this conversation; only the tickets within it are candidates.
   identified and ranked (dependencies and independence checked), present the
   ranked candidates and the dropped ones, then ask how many chantiers the
   batch counts — never before, the user deciding from that ranking.
-- Count the places taken: a chantier whose pull request is not merged yet.
-  A harness never takes a place nor counts in the batch (below).
+- Count the places taken: a chantier whose pull request is not merged yet,
+  and the harness session until every harness given to it is done (its
+  pull request merged included). A harness never counts in the number of
+  chantiers of the batch (below), but its session takes a place.
 - A sub-ticket is a chantier like the others. When it is launched, give it to
   the session that split its ticket only if that session's context suits it
   (what it knows serves the sub-ticket, and its conversation is not too
@@ -61,21 +64,25 @@ user gave in this conversation; only the tickets within it are candidates.
   `list_events`): then send it the brief with `SendMessage`. Otherwise start a
   new session (step 3).
 
-## Harnesses: handled, never chantiers of the batch
+## Harnesses: never counted as chantiers, run as one
 
 The harnesses due when work resumes — version survey
 (`releve-des-versions-a-la-reprise-du-travail.md`), quality treatment
 (`traitement-du-controle-qualite-a-la-reprise-du-travail.md`), functional
 consistency check (`controle-de-coherence-a-la-reprise-du-travail.md`) — are
-handled during the batch, but are **not chantiers of the batch**: never in the
-order of priority, never counted in the number of chantiers the user set,
-never taking one of the places of the chantiers run at once.
+handled during the batch, but are **not counted as chantiers of the batch**:
+never in the order of priority, never counted in the number of chantiers the
+user set. They are **run as a chantier**, though: their session **takes one
+of the places** of the chantiers run at once — it counts in the maximum of 3,
+from its launch until every harness given to it is done, its pull request
+merged included; once freed, its place is filled like a chantier's.
 
 - **Checked once for the batch, by the orchestrator alone**, at its start:
   read each tracking ticket (labels `security-audit`, `quality-audit`,
   `ergonomy-audit`, each with `harness`) and decide from those concepts which
-  are due. Give the due ones to **one separate session** (step 3, same
-  launch, title `Harnais <week or date>`), whose brief names them and the
+  are due. Give the due ones to **one separate session** (step 3, launched
+  like a chantier's, resources evaluated, in one of the places; title
+  `Harnais <week or date>`), whose brief names them and the
   concepts to follow, with the same notification, exchange and watch rules
   as a chantier's brief (step 3); no chantier session checks or runs them.
 - **A pull request opened by a harness itself** (monthly or security version
@@ -91,7 +98,8 @@ never taking one of the places of the chantiers run at once.
   existing code included; improvement too big for a bump's pull request;
   deferred quality entry) is a ticket like any other: a candidate like any
   open ticket.
-- Its heavy runs count in the resources (step 2.3) like any session's.
+- Besides its place, its heavy runs count in the resources (step 2.3) like
+  any session's.
 
 ## 2. Before each launch — every time, never reused
 
@@ -186,7 +194,7 @@ never taking one of the places of the chantiers run at once.
    ```
 
    Decide from these figures how many chantiers more fit, within the maximum
-   of 3 at once, beside the
+   of 3 at once (the harness session, while it runs, taking one), beside the
    heavy runs in progress (end-to-end tests, captures, `bdtheque-validation-*`
    containers of the functional validation), and launch that many of the
    candidates (step 3) — every free place filled. If none fits, do not
@@ -204,6 +212,9 @@ never taking one of the places of the chantiers run at once.
      or to come, with what it waits for (a free place, a dependency: name
      it). The ones to come are the current choice, which the next pass may
      change;
+   - the harness session, when harnesses are due: the harnesses it handles,
+     its state and the place it takes, outside the number of chantiers of
+     the selection;
    - the candidates dropped, each with its reason (independence, dependency),
      and the shortfall when the selection counts fewer chantiers than the
      batch for lack of candidates.
@@ -282,12 +293,12 @@ chosen before the others; the whole selection was presented at step 2.4.
   the app relays at the end of a session's turn do not always say whether the
   chantier is over, and an archived session sends none: when a session goes
   quiet, check its pull request on GitHub.
-- A note from the harness session: it frees no place. Once every harness
-  given to it is done, check its trace in the body of each tracking ticket
+- A note from the harness session: once every harness given to it is done,
+  check its trace in the body of each tracking ticket
   (`gh issue view <n> --json body`), a ticket for each follow-up, and its
   pull request merged, cleaned as below; then archive the session and leave
-  the tracking tickets open. Its follow-up tickets join the candidates
-  (step 2.1).
+  the tracking tickets open. Its place is then free: back to step 2, like
+  after a merge. Its follow-up tickets join the candidates (step 2.1).
 - A note that reports a merged (or abandoned) pull request: **check the
   cleanup** and finish it if needed, before launching the next chantier:
 
