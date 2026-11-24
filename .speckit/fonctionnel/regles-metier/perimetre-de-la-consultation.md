@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Périmètre de la consultation'
-description: 'Base documentaire et inventaire : tout est consultable, l''appartenance est signalée, les statistiques ne portent que sur la collection, chaque liste se limite à la collection par son propre filtre de possession.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:00:00Z }
+description: 'Base documentaire et inventaire : tout est consultable, l''appartenance est signalée, les statistiques ne portent que sur la collection, chaque liste se limite à la collection par son propre filtre de possession, sauf celle des intentions d''acquisition, qui n''en a pas.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:00:00Z }
 ---
 
 # Périmètre de la consultation
@@ -14,3 +14,4 @@ La base est à la fois l'**inventaire de la collection** et une **base documenta
 - L'**appartenance à la collection** est **signalée visuellement** sur les albums et les éditions, pour que l'inventaire reste lisible au sein de la base documentaire.
 - Les **statistiques** portent exclusivement sur la **collection** (albums et éditions possédés), jamais sur l'ensemble de la base.
 - La consultation se limite à la collection **liste par liste** : chaque liste de la consultation propose, parmi ses propres filtres, celui de la **possession** (« Possession », [États d'un album](appartenance-a-la-collection.md#états-dun-album)), qui ne vaut que pour elle ; aucun réglage commun à toute la consultation ne la limite d'une liste à l'autre (décision de l'utilisateur, #603). Une liste filtrée sur « Possédé » est limitée à la collection : c'en est un contexte de collection ([Couverture d'un album](couverture-d-un-album.md)).
+  - **Sauf la liste des intentions d'acquisition**, qui n'a pas ce filtre : il n'y a aucun intérêt (décision de l'utilisateur, #606), l'album d'une intention n'étant jamais « Non possédé ». Ses autres filtres restent utiles : ce sont ceux de la liste des albums (série, auteur, éditeur, collection, genre, univers), appliqués à l'album de chaque intention (décision de l'utilisateur, #606). La possession de son album y reste signalée comme partout ([Appartenance à la collection](appartenance-a-la-collection.md)), et la liste est un contexte de base documentaire ([Couverture d'un album](couverture-d-un-album.md)).

@@ -432,6 +432,21 @@
   <data name="albums.page" xml:space="preserve">
     <value>Liste des albums de la consultation · changement de page</value>
   </data>
+  <data name="purchase-intents" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition de la consultation</value>
+  </data>
+  <data name="purchase-intents.search" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition de la consultation · recherche</value>
+  </data>
+  <data name="purchase-intents.filter" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition de la consultation · filtres</value>
+  </data>
+  <data name="purchase-intents.initial" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition de la consultation · navigation par initiale</value>
+  </data>
+  <data name="purchase-intents.page" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition de la consultation · changement de page</value>
+  </data>
   <data name="admin.settings" xml:space="preserve">
     <value>Saisie du paramétrage</value>
   </data>
