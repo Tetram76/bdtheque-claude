@@ -40,7 +40,9 @@
 
         <InitialNavigation Current="@_query.Entry" EntryHref="@(entry => (_query with { Entry = entry, Page = 1 }).Href())" />
 
-        <ListSummary Count="@CountText()" Entry="@_query.Entry" Narrowed="@_query.IsNarrowed"
+        @* Out of every error to correct, the number of the home page, once searched or filtered beyond the state by default. *@
+        <ListSummary Count="@CountText()" Entry="@_query.Entry"
+                     Narrowed="@(_query.ShownState == InvalidIsbnState.ToCorrect && (_query.Text is not null || _query.ActiveFilterCount > 1))"
                      WholeCount="@(_query.ShownState == InvalidIsbnState.ToCorrect ? _checks?.InvalidIsbnCount : null)" Order="@L["Order"]" />
 
         @if (_list!.Editions.Items.Count == 0)
@@ -302,7 +304,9 @@
                 tags.Add(new(L[$"Filter.{name}"].Value, value, (without with { Page = 1 }).Href()));
         }
 
-        Add("State", _query.State is { } state ? L[$"State.Option.{state}"].Value : null, _query with { State = null });
+        // The errors to correct, presented by default, a filter applied as any other; without it, every error.
+        Add("State", _query.ShownState is var state && state != InvalidIsbnState.All ? L[$"State.Option.{state}"].Value : null,
+            _query with { State = InvalidIsbnState.All });
         Add("Series", filters.Series?.Title, _query with { SeriesId = null });
         Add("Album", filters.Album is { } album ? AlbumLabel(album) : null, _query with { AlbumId = null });
         Add("Publisher", filters.Publisher?.Name, _query with { PublisherId = null });

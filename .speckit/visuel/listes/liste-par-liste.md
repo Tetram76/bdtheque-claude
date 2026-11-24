@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Liste par liste'
 description: 'Visuel, entrée, colonnes et filtres de chaque liste de l''administration.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:28:41Z }
 ---
 
 # Liste par liste
@@ -21,6 +21,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 **ISBN au chiffre de contrôle incohérent** (décisions de l'utilisateur, #613) : la liste du bloc « À vérifier » de l'accueil de l'administration ([Contenu](../administration/contenu.md)), de titre son libellé sur l'accueil, et dont le bloc porte la mention « Contrôles », celle de ce bloc. Rien ne s'y crée : une phrase dit, à la place de la création, que « Corriger » remplace l'ISBN saisi par l'ISBN corrigé.
 
 - **Actions** : l'action principale est **Corriger** ([Validation de l'ISBN](../../fonctionnel/regles-metier/validation-de-l-isbn.md#isbn-au-chiffre-de-contrôle-incohérent)) ; le menu « ⋯ » porte **Modifier l'édition** (ou **Modifier l'intention**, pour une édition visée par une intention d'acquisition), qui ouvre sa fiche de saisie, **Accepter l'erreur** (**Ne plus accepter l'erreur** pour une erreur acceptée) et **Voir l'album dans la consultation** ; ni fusion ni suppression. Sans ISBN corrigé, l'action principale est **Modifier l'édition** (ou **Modifier l'intention**), que le menu ne reprend pas.
+- **Filtre « État » par défaut** : « À corriger », présenté par défaut, est un filtre appliqué : la liste en présente l'étiquette, « État : À corriger », comme de tout filtre appliqué, et le bouton **Filtres** le compte ; la retirer, ou « Tout effacer », présente toutes les erreurs, « Toutes » étant le seul état qui ne filtre rien (décision de l'utilisateur, #613).
 - **État** : présentées ensemble (filtre « Toutes »), erreurs à corriger et erreurs acceptées se distinguent par une colonne « État », la première après l'entrée : « À corriger » en gras, de la couleur d'alerte du thème, seule incohérence qui l'a, ou l'étiquette en tirets « Acceptée » ; le décompte dit combien sont acceptées (« 6 éditions dont 1 acceptée »).
 
 **Navigation par initiale** ([Tri et navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md)) : toute liste triée par titre, par nom ou par libellé, ou rangée dans l'ordre des albums, la propose, avec les mêmes entrées (#, A à Z, puis @), dans l'ordre desquelles elle est rangée ([Entrées de la navigation par initiale](../../fonctionnel/presentation/tri-et-navigation-par-initiale.md#entrées-de-la-navigation-par-initiale), décision de l'utilisateur, #421), et son utilisation suivie par la mesure d'audience ([Mesure d'audience de l'interface web](../../fonctionnel/mesure-audience.md)). Un éditeur est rangé sous l'initiale de son nom, un genre sous celle de son libellé ; une édition ou une intention d'acquisition, sous l'entrée de navigation de son album, comme dans la liste des albums (décisions de l'utilisateur, #421, #478). Seuls les univers, rangés selon leur hiérarchie, n'en ont pas.

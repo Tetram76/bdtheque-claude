@@ -191,25 +191,60 @@ public sealed class AdminInvalidIsbnsTests : BunitContext, IDisposable
         Assert.Equal("Accepted", form.QuerySelector("select[name='state'] option[selected]")!.GetAttribute("value"));
     }
 
-    [Fact]
-    public void ActiveFilters_TheStateChosen_ATagThatLeadsBackToTheErrorsToCorrect()
+    [Theory]
+    // The errors to correct, presented by default, are a filter applied, presented and counted as any other; without it,
+    // every error (visuel/listes/liste-par-liste.md, filtre « État » par défaut).
+    [InlineData("q=978", "État : À corriger")]
+    [InlineData("q=978&state=Accepted", "État : Acceptées")]
+    public void ActiveFilters_TheStateApplied_ByDefaultToo_ATagThatLeadsToEveryError(string criteria, string tag)
     {
-        var filters = Open("q=978&state=All").Find(".active-filters");
+        var page = Open(criteria);
 
         Assert.Equal(
-            [("État : Toutes", $"{AppPaths.AdminInvalidIsbns}?q=978")],
-            filters.QuerySelectorAll(".tag").Select(tag => (Text(tag.QuerySelector("span")!), tag.QuerySelector("a")!.GetAttribute("href"))));
+            [(tag, $"{AppPaths.AdminInvalidIsbns}?q=978&state=All")],
+            page.Find(".active-filters").QuerySelectorAll(".tag").Select(t => (Text(t.QuerySelector("span")!), t.QuerySelector("a")!.GetAttribute("href"))));
+        // « Tout effacer » keeps the search, as in every list.
+        Assert.Equal($"{AppPaths.AdminInvalidIsbns}?q=978&state=All", page.Find(".active-filters a:not(.tag-remove)").GetAttribute("href"));
+        Assert.Equal("Filtres 1", Text(page.Find("form.list-search button[aria-controls]")));
     }
 
     [Fact]
-    public void Empty_WithoutAnyCriterion_SaysThereIsNoIsbnToCheck()
+    public void ActiveFilters_EveryError_IsNoFilter()
+    {
+        Assert.Empty(Open("state=All").FindAll(".active-filters .tag"));
+    }
+
+    [Fact]
+    // The state by default is a filter: an empty list under it offers to present every error.
+    public void Empty_NoErrorToCorrect_OffersEveryError()
     {
         Answer([], acceptedCount: 0);
 
         var empty = Open("").Find(".empty-list");
 
+        Assert.Equal("Aucune édition ne correspond à ces critères.", Normalized(empty.QuerySelector("strong")!.TextContent));
+        Assert.Equal([("Effacer les filtres", $"{AppPaths.AdminInvalidIsbns}?state=All")],
+            empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
+    }
+
+    [Fact]
+    public void Empty_NoErrorAtAll_SaysThereIsNoIsbnToCheck()
+    {
+        Answer([], acceptedCount: 0);
+
+        var empty = Open("state=All").Find(".empty-list");
+
         Assert.Equal("Aucun ISBN à vérifier.", Normalized(empty.QuerySelector("strong")!.TextContent));
         Assert.Empty(empty.QuerySelectorAll("a"));
+    }
+
+    [Theory]
+    // Out of every error to correct once searched; the state by default alone narrows nothing.
+    [InlineData("", "3 éditions")]
+    [InlineData("q=978", "3 éditions sur 7")]
+    public void Summary_TheCount_OutOfEveryErrorToCorrectOnceSearched(string criteria, string count)
+    {
+        Assert.Equal(count, Text(Open(criteria).Find(".list-summary").Children[0]));
     }
 
     [Fact]

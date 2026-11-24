@@ -43,8 +43,15 @@ public sealed record InvalidIsbnListQuery(
     /// <summary>The state the list presents: the errors to correct unless another is chosen.</summary>
     public InvalidIsbnState ShownState => State ?? InvalidIsbnState.ToCorrect;
 
-    /// <summary>The list without its filters, back on its first page: « Tout effacer ».</summary>
-    public InvalidIsbnListQuery WithoutFilters() => new(Text, Entry);
+    /// <summary>
+    /// The errors to correct, presented by default, are a filter applied, which the list presents and counts as any other
+    /// (visuel/listes/liste-par-liste.md, filtre « État » par défaut); « Toutes » alone filters nothing.
+    /// </summary>
+    public override int ActiveFilterCount =>
+        Filters.Count(filter => filter.Name != StateName && filter.Value is not null) + (ShownState == InvalidIsbnState.All ? 0 : 1);
+
+    /// <summary>The list without its filters, back on its first page, every error presented: « Tout effacer ».</summary>
+    public InvalidIsbnListQuery WithoutFilters() => new(Text, Entry, InvalidIsbnState.All);
 
     /// <summary>The criteria of the list read from its address.</summary>
     public static InvalidIsbnListQuery Parse(string query)

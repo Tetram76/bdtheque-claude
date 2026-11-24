@@ -70,20 +70,25 @@ public sealed class AdminInvalidIsbnsTests(ApplicationHost application) : Browse
     }
 
     [Theory, InEachTheme]
-    public async Task Filter_OnTheState_ShowsTheErrorsAccepted_AndItsTagLeadsBackToThoseToCorrect(string theme)
+    // The errors to correct, by default, a filter applied whose tag the list presents; without it, every error, each telling
+    // its state; the state chosen again in the panel of the filters.
+    public async Task Filter_OnTheState_AppliedByDefault_ItsTagRemovedPresentsEveryError(string theme)
     {
         var publisher = await CreatePublisherAsync($"Glénat {_marker}");
         await CreateEditionAsync(await CreateAlbumAsync($"Les Passagers du vent {_marker}"), publisher, "2-7234-3451");
-        var page = await OpenAsync(theme, $"{AppPaths.AdminInvalidIsbns}?publisherId={publisher.Id}&filters=open");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminInvalidIsbns}?publisherId={publisher.Id}");
 
-        await page.GetByRole(AriaRole.Combobox, new() { Name = "État" }).SelectOptionAsync("All");
-        await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Retirer « État : À corriger »" }).ClickAsync();
 
-        // The form of the filters sends its fields as they are, empty ones included, as in every list.
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminInvalidIsbns, $"?state=All&publisherId={publisher.Id}"));
         await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "État" })).ToBeVisibleAsync();
         await Assertions.Expect(Rows(page).Locator(".isbn-state")).ToHaveTextAsync(["À corriger"]);
-        await page.GetByRole(AriaRole.Link, new() { Name = "Retirer « État : Toutes »" }).ClickAsync();
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminInvalidIsbns, $"?publisherId={publisher.Id}"));
+        await page.GetByRole(AriaRole.Button, new() { Name = "Filtres" }).ClickAsync();
+        await page.GetByRole(AriaRole.Combobox, new() { Name = "État" }).SelectOptionAsync("Accepted");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
+        // The form of the filters sends its fields as they are, empty ones included, as in every list.
+        await Assertions.Expect(page.GetByRole(AriaRole.Link, new() { Name = "Retirer « État : Acceptées »" })).ToBeVisibleAsync();
+        await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync("Aucune édition ne correspond à ces critères.");
     }
 
     [Theory, InEachTheme]

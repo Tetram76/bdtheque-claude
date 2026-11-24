@@ -14,14 +14,31 @@ public sealed class InvalidIsbnListQueryTests
     private static readonly Guid Album = Guid.Parse("01900000-0000-7000-8000-000000000001");
 
     [Fact]
-    public void Href_CarriesTheStateFirstAmongItsFilters_TheErrorsToCorrectBeingNone()
+    public void Href_CarriesTheStateFirstAmongItsFilters_TheErrorsToCorrectByDefaultBeingLeftOut()
     {
         var query = new InvalidIsbnListQuery(Text: "978-2", Entry: "L", State: InvalidIsbnState.All, AlbumId: Album, Page: 2);
 
         Assert.Equal($"{AppPaths.AdminInvalidIsbns}?q=978-2&entry=L&state=All&albumId={Album}&page=2", query.Href());
-        Assert.Equal(2, query.ActiveFilterCount);
         Assert.Equal(AppPaths.AdminInvalidIsbns, new InvalidIsbnListQuery(State: InvalidIsbnState.ToCorrect).Href());
-        Assert.Equal(0, new InvalidIsbnListQuery(State: InvalidIsbnState.ToCorrect).ActiveFilterCount);
+    }
+
+    [Theory]
+    // The errors to correct, by default, are a filter applied, left out of the address; every error alone filters nothing
+    // (visuel/listes/liste-par-liste.md, filtre « État » par défaut).
+    [InlineData(null, 2)]
+    [InlineData(InvalidIsbnState.ToCorrect, 2)]
+    [InlineData(InvalidIsbnState.Accepted, 2)]
+    [InlineData(InvalidIsbnState.All, 1)]
+    public void ActiveFilterCount_CountsTheStateUnlessEveryErrorIsPresented(InvalidIsbnState? state, int count)
+    {
+        Assert.Equal(count, new InvalidIsbnListQuery(State: state, AlbumId: Album).ActiveFilterCount);
+    }
+
+    [Fact]
+    // A search alone, under the state by default, is a search, as the control used.
+    public void Action_OfASearchUnderTheStateByDefault_IsTheSearch()
+    {
+        Assert.Equal("admin.invalid-isbns.search", InvalidIsbnListQuery.Parse("q=978").Action!.Value.Function.Key);
     }
 
     [Fact]
@@ -66,10 +83,11 @@ public sealed class InvalidIsbnListQueryTests
     }
 
     [Fact]
-    public void WithoutFilters_KeepsTheSearchAndTheEntry_BackToTheErrorsToCorrect()
+    public void WithoutFilters_KeepsTheSearchAndTheEntry_PresentingEveryError()
     {
-        var query = new InvalidIsbnListQuery(Text: "978-2", Entry: "L", State: InvalidIsbnState.All, AlbumId: Album, Page: 3);
+        var query = new InvalidIsbnListQuery(Text: "978-2", Entry: "L", AlbumId: Album, Page: 3);
 
-        Assert.Equal(new InvalidIsbnListQuery(Text: "978-2", Entry: "L"), query.WithoutFilters());
+        Assert.Equal(new InvalidIsbnListQuery(Text: "978-2", Entry: "L", State: InvalidIsbnState.All), query.WithoutFilters());
+        Assert.Equal(0, query.WithoutFilters().ActiveFilterCount);
     }
 }
