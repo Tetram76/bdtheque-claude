@@ -1,0 +1,31 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<PossessionFilterField> L
+@inject IStringLocalizer<CollectionStateTag> States
+
+@* The filter of the possession of a list of the consultation or of the administration, the same in every list
+   (fonctionnel/regles-metier/perimetre-de-la-consultation.md): « Possession », its three states named as the tag of an album
+   names them (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album), and what the list presents without
+   it, which only the list knows. *@
+<Field Id="filter-state" Label="@L["Label"]" Context="control">
+    <FilterSelect Id="@control.Id" Name="@Name" Selected="@(State?.ToString() ?? "")" Options="@Options" />
+</Field>
+
+@code {
+    /// <summary>The name of the criterion in the address of the list.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = null!;
+
+    /// <summary>The possession chosen; <c>null</c> for every element of the list.</summary>
+    [Parameter]
+    public AlbumCollectionState? State { get; set; }
+
+    /// <summary>What the list presents without the filter (« Tous les albums », « Toutes les séries »…).</summary>
+    [Parameter, EditorRequired]
+    public string AllLabel { get; set; } = null!;
+
+    private IReadOnlyList<FilterSelect.FilterOption> Options =>
+    [
+        new("", AllLabel),
+        .. Enum.GetValues<AlbumCollectionState>().Select(state => new FilterSelect.FilterOption(state.ToString(), States[state.ToString()])),
+    ];
+}

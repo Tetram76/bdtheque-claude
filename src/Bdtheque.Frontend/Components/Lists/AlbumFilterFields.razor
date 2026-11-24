@@ -31,15 +31,7 @@
         <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Universe" Name="@AlbumListQuery.UniverseName"
                       Value="@Option(Filters.Universe, u => new(u.Id, u.Name, u.ParentName))" Placeholder="@L["Any"]" />
     </Field>
-    <Field Id="filter-state" Label="@L["State"]" Context="control">
-        <select id="@control.Id" name="@AlbumListQuery.StateName">
-            <option value="" selected="@(State is null)">@L["State.All"]</option>
-            @foreach (var state in Enum.GetValues<AlbumCollectionState>())
-            {
-                <option value="@state" selected="@(State == state)">@L[$"State.{state}"]</option>
-            }
-        </select>
-    </Field>
+    <PossessionFilterField Name="@AlbumListQuery.StateName" State="@State" AllLabel="@L["State.All"]" />
 </ListFilters>
 
 @code {

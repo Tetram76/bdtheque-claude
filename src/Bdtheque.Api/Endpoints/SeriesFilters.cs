@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The search, navigation by initial and cross filters of a list of series (choix-implementation/api/recherche.md), which
+/// The search, navigation by initial and cross filters of a list of series (choix-implementation/api/recherche.md), the
+/// possession included (fonctionnel/regles-metier/perimetre-de-la-consultation.md), which
 /// the list of the consultation and that of the administration share, bound as a whole from the query of their request
 /// (<c>[AsParameters]</c>): the search is its parameter <c>q</c>, each other criterion that of its name.
 /// </summary>
 internal sealed record SeriesFilters(
     [FromQuery(Name = "q")] string? Text, string? Entry, Guid? AuthorId, Guid? PublisherId, Guid? PublisherCollectionId, Guid? GenreId,
-    Guid? UniverseId)
+    Guid? UniverseId, AlbumCollectionState? State)
 {
     /// <summary>
     /// Narrows <paramref name="series"/>: a series is found by its title, and is credited, published or collected on itself —
@@ -46,6 +47,9 @@ internal sealed record SeriesFilters(
             series = series.WhereUniverse(universeIds);
         }
 
+        if (State is { } state)
+            series = series.Where(CatalogExpressions.Expand(
+                (Series s) => context.Albums.Where(a => a.SeriesId == s.Id).CollectionStateOfAlbums() == state));
         return series;
     }
 

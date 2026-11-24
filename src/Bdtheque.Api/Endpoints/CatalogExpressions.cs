@@ -59,6 +59,13 @@ internal static class CatalogExpressions
     /// <summary>Marker of where an album stands with regard to the collection, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumCollectionState CollectionState(this Album album) => throw NotExpanded();
 
+    /// <summary>
+    /// Marker of where a record that is not an album (a series, an author…) stands with regard to the collection, by the
+    /// possession of <paramref name="albums"/>, its own (fonctionnel/regles-metier/perimetre-de-la-consultation.md), for
+    /// <see cref="Expand{TSource, TResult}"/> only.
+    /// </summary>
+    public static AlbumCollectionState CollectionStateOfAlbums(this IEnumerable<Album> albums) => throw NotExpanded();
+
     /// <summary>Marker of the card of an album, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumCard ToCard(this Album album) => throw NotExpanded();
 
@@ -153,6 +160,13 @@ internal static class CatalogExpressions
         a.Editions.Any(e => e.IsOwned())
             ? AlbumCollectionState.InCollection
             : a.PurchaseIntents.Any() ? AlbumCollectionState.PurchaseIntent : AlbumCollectionState.OutsideCollection;
+
+    // The rule of an album, over albums: owned if one of them is, whatever their intents; then aimed at if one of them is.
+    // Without any album, outside the collection.
+    private static readonly Expression<Func<IEnumerable<Album>, AlbumCollectionState>> CollectionStateOfAlbumsOf = albums =>
+        albums.Any(a => a.Editions.Any(e => e.IsOwned()))
+            ? AlbumCollectionState.InCollection
+            : albums.Any(a => a.PurchaseIntents.Any()) ? AlbumCollectionState.PurchaseIntent : AlbumCollectionState.OutsideCollection;
 
     private static readonly Expression<Func<Album, Guid, bool>> AlbumOfGenre =
         (album, genreId) => album.Genres.Any(g => g.Id == genreId) || album.Series!.Genres.Any(g => g.Id == genreId);
@@ -285,6 +299,7 @@ internal static class CatalogExpressions
                 nameof(ToSummary) => EditionSummaryOf,
                 nameof(ToCard) => AlbumCardOf,
                 nameof(CollectionState) => CollectionStateOf,
+                nameof(CollectionStateOfAlbums) => CollectionStateOfAlbumsOf,
                 nameof(CoverVisualOf) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => AlbumCoverVisualOf,
                 nameof(CoverVisualOf) => EditionCoverVisualOf,
                 nameof(CoverVisualAmong) => CoverVisualAmongEditions,
