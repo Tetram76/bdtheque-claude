@@ -406,8 +406,8 @@ const menuOf = (t, current) => {
 const EXAMPLES = {
   auteur: {
     list: 'Auteurs', heading: 'Fusionner deux auteurs', confirmTitle: 'Fusionner les deux auteurs ?', noun: "l'auteur",
-    a: { name: 'Gotlib', links: 'crédité sur 24 albums', modified: '30 mars 2026' },
-    b: { name: 'Marcel Gotlib', links: 'crédité sur 3 albums', modified: '2 février 2026' },
+    a: { name: 'Gotlib', links: 'crédité sur 2 séries · 24 albums', modified: '30 mars 2026' },
+    b: { name: 'Marcel Gotlib', links: 'crédité sur 1 série · 3 albums', modified: '2 février 2026' },
     rows: [
       { id: 'first', label: 'Prénom', a: 'Marcel', b: 'Marcel' },
       { id: 'last', label: 'Nom', a: 'Gotlieb', b: 'Gotlib' },
@@ -424,9 +424,10 @@ const EXAMPLES = {
     },
     pending: (v) => v.last == null,
     moved: [
+      { count: 'Crédité sur 2 séries', detail: 'les 2 de Gotlib et celle de Marcel Gotlib, commune aux deux fiches' },
       { count: 'Crédité sur 26 albums', detail: 'les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches' }
     ],
-    impact: (name) => ['Les deux fiches n\'en font plus qu\'une : ' + name + '.', name + ' est crédité sur les 26 albums des deux fiches.']
+    impact: (name) => ['Les deux fiches n\'en font plus qu\'une : ' + name + '.', name + ' est crédité sur les 2 séries et les 26 albums des deux fiches.']
   },
   genre: {
     list: 'Genres', heading: 'Fusionner deux genres', confirmTitle: 'Fusionner les deux genres ?', noun: 'le genre',
