@@ -129,6 +129,21 @@ public sealed class Series : EntityBase, IAggregateRoot
 
     public void RemoveGenre(Genre genre) => _genres.RemoveById(genre);
 
+    /// <summary>
+    /// Classes the series under <paramref name="kept"/> instead of <paramref name="merged"/>, as the merge of two genres does
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md); a series of both genres keeps <paramref name="kept"/> once.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same genre twice.</exception>
+    public void TransferGenre(Genre merged, Genre kept) => _genres.Transfer(merged, kept);
+
+    /// <summary>
+    /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> on the series, in the same roles, as the merge of two
+    /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md); a role both of them hold is credited once.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same author twice.</exception>
+    public void TransferAuthor(Author merged, Author kept) =>
+        Contribution.Transfer(_templateContributions, merged, kept, (author, role) => Contribution.ForSeriesTemplate(this, author, role));
+
     public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);

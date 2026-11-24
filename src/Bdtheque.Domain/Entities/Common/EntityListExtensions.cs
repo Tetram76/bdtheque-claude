@@ -17,4 +17,16 @@ internal static class EntityListExtensions
         ArgumentNullException.ThrowIfNull(entity);
         entities.RemoveAll(e => e.Id == entity.Id);
     }
+
+    /// <summary>
+    /// Associates <paramref name="kept"/> instead of <paramref name="merged"/>, when the list holds the latter, as a merge does
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md): a list holding both holds <paramref name="kept"/> once.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same entity twice.</exception>
+    public static void Transfer<TEntity>(this List<TEntity> entities, TEntity merged, TEntity kept) where TEntity : EntityBase
+    {
+        Domain.Common.MergeGuard.EnsureDistinct(merged, kept);
+        if (entities.RemoveAll(e => e.Id == merged.Id) > 0)
+            entities.AddOnce(kept);
+    }
 }

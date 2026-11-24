@@ -91,4 +91,21 @@ public sealed class Contribution : EntityBase
         foreach (var (author, role) in credits.Where(w => !contributions.Exists(c => c.AuthorId == w.Author.Id && c.Role == w.Role)))
             contributions.Add(create(author, role));
     }
+
+    /// <summary>
+    /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> in every role the latter holds, as the merge of two
+    /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md): a role both of them hold is credited once.
+    /// </summary>
+    /// <param name="create">Creates a contribution of the owner, for a role <paramref name="kept"/> does not hold yet.</param>
+    /// <exception cref="ArgumentException">The same author twice.</exception>
+    internal static void Transfer(
+        List<Contribution> contributions, Author merged, Author kept, Func<Author, ContributionRole, Contribution> create)
+    {
+        MergeGuard.EnsureDistinct(merged, kept);
+
+        var roles = contributions.Where(c => c.AuthorId == merged.Id).Select(c => c.Role).ToList();
+        contributions.RemoveAll(c => c.AuthorId == merged.Id);
+        foreach (var role in roles.Where(role => !contributions.Exists(c => c.AuthorId == kept.Id && c.Role == role)))
+            contributions.Add(create(kept, role));
+    }
 }
