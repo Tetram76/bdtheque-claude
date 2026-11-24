@@ -363,19 +363,14 @@ else
     // targets) after that list; any other page, the album, by the page of its editions, then the edition by its full label,
     // ISBN included (visuel/saisie-edition/contenu.md, #470), or what the page does for a new one.
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => OpenedFromIntents
-        ?
-        [
-            new(L["Administration"], AppPaths.AdminHome),
-            ListOfThePage,
-            new(Entry!.Id is null ? AlbumLabel : Labels.PurchaseIntent(Entry.Album, ReadSummary(), AlbumFormat)),
-        ]
-        :
-        [
-            new(L["Administration"], AppPaths.AdminHome),
-            ListOfThePage,
-            new(AlbumLabel, AppPaths.AdminAlbumEditions(Entry!.AlbumId)),
-            new(Entry.Id is null ? Title : Subject),
-        ];
+        ? [new(L["Administration"], AppPaths.AdminHome), ListOfThePage, new(IntentLabel)]
+        : [new(L["Administration"], AppPaths.AdminHome), ListOfThePage, new(AlbumLabel, AppPaths.AdminAlbumEditions(Entry!.AlbumId)), new(EditionLabel)];
+
+    // The intent an action realizes or converts: on the whole album, the album; on an edition, the album and that edition.
+    private string IntentLabel => Entry!.Id is null ? AlbumLabel : Labels.PurchaseIntent(Entry.Album, ReadSummary(), AlbumFormat);
+
+    // The edition entered, by its label, or what the page does for a new one.
+    private string EditionLabel => Entry!.Id is null ? Title : Subject;
 
     // The edition as it was read, which the intent targets: the breadcrumb names the intent, not what is being entered.
     private EditionSummary ReadSummary() => new(
