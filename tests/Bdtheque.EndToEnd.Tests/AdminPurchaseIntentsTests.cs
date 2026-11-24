@@ -85,6 +85,86 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await Assertions.Expect(page.GetByRole(AriaRole.Status)).ToContainTextAsync($"Aucune intention d'acquisition ne correspond à « {_marker} ».");
     }
 
+    [Theory, InEachTheme]
+    public async Task Confirmation_OfAnIntentOnAnEdition_RecordsTheAcquisition_AndLeadsBackToTheListWithoutTheIntent(string theme)
+    {
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
+        var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), await AlbumVersionAsync(album.Id)));
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Link, new() { Name = $"Confirmer l'acquisition : Buddy Longway {_marker}" }).ClickAsync();
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await Assertions.Expect(page.Locator("h1")).ToContainTextAsync("Confirmer l'acquisition");
+        await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Achat" });
+        await page.GetByRole(AriaRole.Button, new() { Name = "Confirmer l'acquisition" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
+        var editions = await EditionsPageAsync(album.Id);
+        Assert.Empty(editions.PurchaseIntents);
+        Assert.Equal(AcquisitionMode.Purchase, Assert.Single(editions.Editions).AcquisitionMode);
+    }
+
+    [Theory, InEachTheme]
+    public async Task Confirmation_OfAnIntentOnTheWholeAlbum_CreatesItsFirstEdition(string theme)
+    {
+        var album = await CreateAlbumAsync(null, (await CreateSeriesWithPublisherAsync()).Id, 3);
+        await CreateAlbumIntentAsync(album);
+        var intent = Assert.Single((await EditionsPageAsync(album.Id)).PurchaseIntents);
+        var page = await OpenAsync(theme, AppPaths.AdminConfirmPurchase(album.Id, intent.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+
+        await page.GetByLabel("Mode d'acquisition").SelectOptionAsync(new SelectOptionValue { Label = "Offerte" });
+        await page.GetByRole(AriaRole.Button, new() { Name = "Confirmer l'acquisition" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
+        var editions = await EditionsPageAsync(album.Id);
+        Assert.Empty(editions.PurchaseIntents);
+        Assert.Equal(AcquisitionMode.Gift, Assert.Single(editions.Editions).AcquisitionMode);
+    }
+
+    [Theory, InEachTheme]
+    public async Task ConversionToAnEdition_FromTheList_EntersTheEditionTargeted_AndLeadsBackToTheList(string theme)
+    {
+        var album = await CreateAlbumAsync(null, (await CreateSeriesWithPublisherAsync()).Id, 5);
+        await CreateAlbumIntentAsync(album);
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention d'acquisition de La Mémoire de l'eau {_marker} - T. 5" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Viser plutôt une édition…" }).ClickAsync();
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await page.GetByLabel("Année d'édition").FillAsync("2012");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Viser cette édition" }).ClickAsync();
+
+        // Back where the action was opened (decision of the user, #612), without its criteria, as after any record saved.
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
+        var intent = Assert.Single((await EditionsPageAsync(album.Id)).PurchaseIntents);
+        Assert.Equal(2012, intent.Edition!.PublicationYear);
+    }
+
+    [Theory, InEachTheme]
+    public async Task ConversionToTheAlbum_FromTheList_ConfirmedInADialog_DeletesTheEditionTargeted(string theme)
+    {
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []));
+        var album = await CreateAlbumAsync($"Buddy Longway {_marker}");
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(publisher.Id, null, 1974, null, null, null, null, null, null, null, true), await AlbumVersionAsync(album.Id)));
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
+
+        await page.GetByRole(AriaRole.Button, new() { Name = $"Autres actions sur l'intention d'acquisition de Buddy Longway {_marker}" }).ClickAsync();
+        await page.GetByRole(AriaRole.Link, new() { Name = "Viser plutôt l'album…" }).ClickAsync();
+        var dialog = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Viser plutôt l'album ?" });
+        await Assertions.Expect(dialog).ToContainTextAsync("l'édition visée est supprimée");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Viser l'album" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents, $"?q={_marker}"));
+        await Assertions.Expect(page.GetByRole(AriaRole.Table, new() { Name = "Intentions d'acquisition" })).ToContainTextAsync("toute édition");
+        var editions = await EditionsPageAsync(album.Id);
+        Assert.Null(Assert.Single(editions.PurchaseIntents).Edition);
+        Assert.Empty(editions.Editions);
+    }
+
     [Theory]
     [InEachTheme(414)]
     [InEachTheme(768)]
@@ -129,6 +209,21 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
 
     private async Task CreateAlbumIntentAsync(AlbumForm album) =>
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, album.Version));
+
+    // A series whose new editions are proposed its publisher, so that a new edition of its albums is saved without choosing one.
+    private async Task<SeriesForm> CreateSeriesWithPublisherAsync()
+    {
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Glénat {_marker}", null, []));
+        return await PostAsync<SeriesForm>("/admin/series", new SeriesContent(
+            $"La Mémoire de l'eau {_marker}", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(publisher.Id, null, null, null, null, null, null, null, null), [], [], []));
+    }
+
+    private async Task<AlbumEditionsPage> EditionsPageAsync(Guid albumId)
+    {
+        using var api = Application.CreateApiClient();
+        return (await api.GetFromJsonAsync<AlbumEditionsPage>($"/admin/albums/{albumId}/editions-and-purchase-intents"))!;
+    }
 
     private async Task<uint> AlbumVersionAsync(Guid albumId)
     {

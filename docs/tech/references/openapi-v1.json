@@ -9753,6 +9753,16 @@
             ],
             "description": "Version of the album the form was read at.",
             "format": "uint32"
+          },
+          "visuals": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/EditionVisualEntry"
+            },
+            "description": "The visuals of the edition as entered (EditionVisualEntry); none, its visuals left as they are."
           }
         },
         "description": "Confirms the purchase of an edition targeted by an intent\n(fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the edition, with its\nacquisition, which realizes the intent."
@@ -12105,6 +12115,16 @@
             ],
             "description": "Version of the album the form was read at.",
             "format": "uint32"
+          },
+          "visuals": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/EditionVisualEntry"
+            },
+            "description": "The visuals of the new edition targeted, all pending (EditionVisualEntry); none, without visuals."
           }
         },
         "description": "Converts the intent on the whole album into an intent on a new edition."

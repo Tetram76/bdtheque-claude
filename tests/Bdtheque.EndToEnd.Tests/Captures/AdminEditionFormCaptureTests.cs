@@ -11,13 +11,15 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// (<see cref="AdministrationApplication"/>), whose editions and dates are fixed, without writing anything: the owned edition of
 /// « Le Nid des Marsupilamis », as read; the same edition given rather than bought, free, its ISBN mistyped, as the user left it
 /// before saving; the edition targeted by its purchase intent; and a new edition of « Z comme Zorglub », whose series proposes
-/// nothing, whose saving is to correct. In a window as high as the page, the bar of the form at its bottom
+/// nothing, whose saving is to correct; the confirmation of the purchase of the edition targeted, its copy to enter, and of the
+/// whole album « Le Prisonnier du Bouddha », its first edition to enter; and the conversion of the intent on that album into one
+/// on a new edition. In a window as high as the page, the bar of the form at its bottom
 /// (<see cref="ScreenCaptureTests.CaptureAsync"/>).
 /// </summary>
 [Collection(AdministrationApplication.Name)]
 public sealed class AdminEditionFormCaptureTests(AdministrationApplication application) : BrowserTest<AdministrationApplication>(application)
 {
-    private static readonly string[] States = ["edit", "edit-changed", "intent", "new-error"];
+    private static readonly string[] States = ["edit", "edit-changed", "intent", "new-error", "confirmation", "confirmation-album", "conversion"];
 
     public static TheoryData<string, string, string> Captures
     {
@@ -37,8 +39,12 @@ public sealed class AdminEditionFormCaptureTests(AdministrationApplication appli
     public async Task Screen_LooksLikeItsReference(string theme, string state, string viewport)
     {
         var album = await AlbumIdAsync("Le Nid des Marsupilamis");
+        var wanted = await AlbumIdAsync("Le Prisonnier du Bouddha");
         var path = state switch
         {
+            "confirmation" => AppPaths.AdminConfirmPurchase(album, Assert.Single((await EditionsPageAsync(album)).PurchaseIntents).Id),
+            "confirmation-album" => AppPaths.AdminConfirmPurchase(wanted, Assert.Single((await EditionsPageAsync(wanted)).PurchaseIntents).Id),
+            "conversion" => AppPaths.AdminConvertPurchaseIntentToEdition(wanted, Assert.Single((await EditionsPageAsync(wanted)).PurchaseIntents).Id),
             "new-error" => AppPaths.AdminNewAlbumEdition(await AlbumIdAsync("Z comme Zorglub")),
             "intent" => AppPaths.AdminEditEdition(album, Assert.Single((await EditionsPageAsync(album)).PurchaseIntents).Edition!.Id),
             _ => AppPaths.AdminEditEdition(album, Assert.Single((await EditionsPageAsync(album)).Editions).Edition.Id),

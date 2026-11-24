@@ -492,4 +492,76 @@
   <data name="admin.settings.changes" xml:space="preserve">
     <value>Saisie du paramétrage · « Voir mes changements »</value>
   </data>
+  <data name="admin.purchase-intents.conversion" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition · dialogue de conversion vers l&apos;album ouvert</value>
+  </data>
+  <data name="admin.purchase-intents.converted" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition · conversion vers l&apos;album confirmée</value>
+  </data>
+  <data name="admin.album-editions.intent-conversion" xml:space="preserve">
+    <value>Éditions et intentions d&apos;un album · dialogue de conversion vers l&apos;album ouvert</value>
+  </data>
+  <data name="admin.album-editions.intent-converted" xml:space="preserve">
+    <value>Éditions et intentions d&apos;un album · conversion vers l&apos;album confirmée</value>
+  </data>
+  <data name="admin.purchase-confirmation" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition</value>
+  </data>
+  <data name="admin.purchase-confirmation.confirmed" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · acquisition confirmée</value>
+  </data>
+  <data name="admin.purchase-confirmation.changes" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · « Voir mes changements »</value>
+  </data>
+  <data name="admin.purchase-confirmation.publisher-created" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · éditeur créé sur place</value>
+  </data>
+  <data name="admin.purchase-confirmation.collection-created" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · collection créée sur place</value>
+  </data>
+  <data name="admin.purchase-confirmation.visual-added" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · visuel ajouté</value>
+  </data>
+  <data name="admin.purchase-confirmation.visuals-arranged" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · visuels réordonnés</value>
+  </data>
+  <data name="admin.purchase-confirmation.visual-type-changed" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · type d&apos;un visuel changé</value>
+  </data>
+  <data name="admin.purchase-confirmation.visual-deletion" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · dialogue de suppression d&apos;un visuel ouvert</value>
+  </data>
+  <data name="admin.purchase-confirmation.visual-deleted" xml:space="preserve">
+    <value>Confirmation d&apos;une acquisition · suppression d&apos;un visuel confirmée</value>
+  </data>
+  <data name="admin.purchase-intent-conversion" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.converted" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · intention convertie</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.changes" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · « Voir mes changements »</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.publisher-created" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · éditeur créé sur place</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.collection-created" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · collection créée sur place</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.visual-added" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · visuel ajouté</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.visuals-arranged" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · visuels réordonnés</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.visual-type-changed" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · type d&apos;un visuel changé</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.visual-deletion" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · dialogue de suppression d&apos;un visuel ouvert</value>
+  </data>
+  <data name="admin.purchase-intent-conversion.visual-deleted" xml:space="preserve">
+    <value>Conversion d&apos;une intention vers une édition · suppression d&apos;un visuel confirmée</value>
+  </data>
 </root>

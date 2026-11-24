@@ -164,17 +164,48 @@ public static class AppPaths
     /// <summary>The list of the purchase intents of the administration (visuel/listes/).</summary>
     public const string AdminPurchaseIntents = "/admin/acquisition-intents";
 
-    /// <summary>
-    /// The confirmation of the purchase that realizes an intent, addressed by its album
-    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention), which no mockup presents yet.
-    /// </summary>
-    public static string AdminConfirmPurchase(Guid albumId, Guid id) => NotYetImplemented;
+    /// <summary>The route of the confirmation of the purchase that realizes an intent, addressed by its album.</summary>
+    public const string AdminConfirmPurchaseRoute = AdminAlbums + "/{AlbumId:guid}/acquisition-intents/{IntentId:guid}/confirmation";
 
     /// <summary>
-    /// The conversion of an intent into one on the other target, an edition or the whole album, addressed by its album
-    /// (fonctionnel/regles-metier/intention-d-acquisition.md), which no mockup presents yet.
+    /// The confirmation of the purchase that realizes an intent (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention):
+    /// the entry form of the edition acquired, the one the intent targets or, for an intent on the whole album, its first one.
     /// </summary>
-    public static string AdminConvertPurchaseIntent(Guid albumId, Guid id) => NotYetImplemented;
+    public static string AdminConfirmPurchase(Guid albumId, Guid id) => $"{AdminAlbums}/{albumId}/acquisition-intents/{id}/confirmation";
+
+    /// <summary>Whether a path is that of the confirmation of a purchase, which shares its page with the editions.</summary>
+    public static bool IsPurchaseConfirmation(string path) => IsOfAnIntent(path, "/confirmation");
+
+    /// <summary>The route of the conversion of an intent on the whole album into an intent on a new edition.</summary>
+    public const string AdminConvertPurchaseIntentToEditionRoute = AdminAlbums + "/{AlbumId:guid}/acquisition-intents/{IntentId:guid}/edition";
+
+    /// <summary>
+    /// The conversion of an intent on the whole album into an intent on a new edition (fonctionnel/regles-metier/intention-d-acquisition.md):
+    /// the entry form of the new edition targeted. The conversion of an intent on an edition into one on the whole album, which
+    /// deletes the edition, is confirmed in a dialog of the page it is asked from, as a removal.
+    /// </summary>
+    public static string AdminConvertPurchaseIntentToEdition(Guid albumId, Guid id) => $"{AdminAlbums}/{albumId}/acquisition-intents/{id}/edition";
+
+    /// <summary>
+    /// The same conversion, asked from the list of the intents, which it leads back to once saved or cancelled, instead of the
+    /// page of the editions of the album (decision of the user, #612).
+    /// </summary>
+    public static string AdminConvertPurchaseIntentToEditionFromIntents(Guid albumId, Guid id) =>
+        $"{AdminConvertPurchaseIntentToEdition(albumId, id)}?{FromParameter}={FromPurchaseIntents}";
+
+    /// <summary>The parameter of the address of an entry form that tells the page it was opened from, when it has several.</summary>
+    public const string FromParameter = "from";
+
+    /// <summary>The value of <see cref="FromParameter"/> for the list of the purchase intents.</summary>
+    public const string FromPurchaseIntents = "acquisition-intents";
+
+    /// <summary>Whether a path is that of the conversion of an intent into one on a new edition, which shares its page with the editions.</summary>
+    public static bool IsPurchaseIntentConversion(string path) => IsOfAnIntent(path, "/edition");
+
+    // A page of an intent: under the intents of its album, ending with what it does.
+    private static bool IsOfAnIntent(string path, string ending) =>
+        path.Contains("/acquisition-intents/", StringComparison.OrdinalIgnoreCase)
+        && path.TrimEnd('/').EndsWith(ending, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// The list of the authors of the administration (visuel/listes/), where an author is entered in a side panel over the list

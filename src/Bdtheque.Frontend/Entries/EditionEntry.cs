@@ -176,6 +176,19 @@ public sealed class EditionEntry
         return entry;
     }
 
+    /// <summary>
+    /// The edition an intent targets, to acquire: the edition as read, owned once its copy is entered, whose condition is the one
+    /// proposed to any new edition of the album (modele-metier/edition.md, valeurs proposées à la saisie), the traits of a copy
+    /// being entered then for the first time.
+    /// </summary>
+    public static EditionEntry ToAcquire(EditionForm targeted, EditionContent proposed)
+    {
+        var entry = Of(targeted);
+        entry.IsPurchaseIntent = false;
+        entry.Condition = proposed.Condition;
+        return entry;
+    }
+
     private void Apply(EditionContent content, EditionFormReferences references)
     {
         Publisher = references.Publisher is { } publisher ? new RecordOption(publisher.Id, publisher.Name, null) : null;

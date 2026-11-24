@@ -259,15 +259,16 @@ internal static class EditionEndpoints
 
     /// <summary>
     /// Confirms the purchase of an edition targeted by an intent
-    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the whole form is applied,
-    /// with the acquisition, which realizes the intent.
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the whole form is applied, its
+    /// visuals included, with the acquisition, which realizes the intent.
     /// </summary>
     private static async Task<EditionForm> AcquireAsync(
-        Guid rootId, Guid id, AcquireEditionRequest request, BdthequeDbContext context, ContentFields fields,
-        CancellationToken cancellationToken)
+        Guid rootId, Guid id, AcquireEditionRequest request, BdthequeDbContext context, ContentFields fields, VisualStorage storage,
+        TimeProvider clock, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
+        var album = await context.LoadAggregateForWriteAsync<Album>(
+            rootId, request.AlbumVersion, request.Visuals is null ? null : EditionVisualEntries.WithVisuals, cancellationToken);
         var edition = album.Editions.SingleOrDefault(e => e.Id == id) ?? throw new EntityNotFoundException(typeof(Edition), id);
         fields.Place(edition);
         var content = request.Content;
@@ -277,9 +278,12 @@ internal static class EditionEndpoints
         // Not owned until then, the edition has no amount its year could leave undated.
         edition.SetPublicationYear(content.PublicationYear);
         album.RecordAcquisition(edition, ToAcquisition(content));
+        var removed = await EditionVisualEntries.ApplyAsync(context, edition, request.Visuals, clock, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
+        // After the commit, as any deletion: a failed one leaves the files intact, a file not deleted is left to the reconciliation.
+        storage.Delete(removed);
         return await GetAsync(rootId, id, context, cancellationToken);
     }
 

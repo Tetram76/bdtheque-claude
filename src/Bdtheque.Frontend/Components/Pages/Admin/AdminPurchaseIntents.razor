@@ -15,7 +15,8 @@
    it is set from the page of the editions and intents of its album, which the heading says in place of a creation; its main
    action confirms the purchase, and its menu leads to that page, converts it or removes it, its entry being no link
    (visuel/listes/principes-communs.md, Entrée en texte simple). Rendered statically, its search, the navigation by initial of
-   its albums, its page and its removal dialog are carried by its address (Lists/PurchaseIntentListQuery.cs). Its styles read the contracts of the base
+   its albums, its page and its dialogs, the removal of an intent and the conversion of one on an edition into one on the whole
+   album, are carried by its address (Lists/PurchaseIntentListQuery.cs). Its styles read the contracts of the base
    theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminPurchaseIntents" />
@@ -105,8 +106,10 @@
                                 <MenuItem Href="@AppPaths.AdminAlbumEditions(row.Album.Id)" Icon="PageIcons.AlbumEditions" Label="@L["Menu.Editions"]" />
                                 @if (row.IsConvertible)
                                 {
-                                    <MenuItem Href="@AppPaths.AdminConvertPurchaseIntent(row.Album.Id, row.Id)" Icon="IconName.Swap"
-                                              Label="@(row.Edition is null ? L["Menu.ToEdition"] : L["Menu.ToAlbum"])" />
+                                    @* One on the whole album turns into one on a new edition, entered on its form; one on the only edition
+                                       of its album into one on the album, which deletes the edition, once confirmed in a dialog. *@
+                                    <MenuItem Href="@(row.Edition is null ? AppPaths.AdminConvertPurchaseIntentToEditionFromIntents(row.Album.Id, row.Id) : (ListOnly with { ToAlbum = row.Id }).Href())"
+                                              Icon="IconName.Swap" Label="@(row.Edition is null ? L["Menu.ToEdition"] : L["Menu.ToAlbum"])" />
                                 }
                                 <MenuSeparator />
                                 <MenuItem Href="@((ListOnly with { Delete = row.Id }).Href())" Icon="IconName.Delete" Label="@L["Menu.Remove"]"
@@ -126,15 +129,24 @@
         {
             <DeletionDialog Id="intent-removal" FormName="@RemovalFormName" Title="@L["Removal.Title"]"
                             Subject="@Labels.PurchaseIntent(_dialogIntent.Album, _dialogIntent.Edition, _settings!.AlbumLabelFormat)"
-                            CloseHref="@ListOnly.Href()" Removal="true" RefusalLead="@L["Refusal.Lead"]"
+                            CloseHref="@ListOnly.Href()" Kind="DeletionKind.Removal" RefusalLead="@L["Refusal.Lead"]"
                             RefusalHint="@(key => L[$"Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_removalProblem"
                             Version="_dialogIntent.AlbumVersion" OnConfirm="RemoveAsync" />
+        }
+        else if (_convertedIntent is not null)
+        {
+            <DeletionDialog Id="intent-conversion" FormName="@ConversionFormName" Title="@L["Conversion.Title"]"
+                            Subject="@Labels.PurchaseIntent(_convertedIntent.Album, _convertedIntent.Edition, _settings!.AlbumLabelFormat)"
+                            CloseHref="@ListOnly.Href()" Kind="DeletionKind.ConversionToAlbum" RefusalLead="@L["Conversion.Refusal.Lead"]"
+                            RefusalHint="@(key => L[$"Refusal.Hint.{key}"].Value)" Impact="_impact" Problem="_removalProblem"
+                            Version="_convertedIntent.AlbumVersion" OnConfirm="ConvertToAlbumAsync" />
         }
     </Dialogs>
 </ListLayout>
 
 @code {
     private const string RemovalFormName = "intent-removal";
+    private const string ConversionFormName = "intent-conversion";
 
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
@@ -147,17 +159,27 @@
     [SupplyParameterFromForm(FormName = RemovalFormName, Name = DeletionDialog.FingerprintName)]
     private string? Fingerprint { get; set; }
 
+    /// <summary>The version of the album of the intent whose conversion into one on the whole album is confirmed.</summary>
+    [SupplyParameterFromForm(FormName = ConversionFormName, Name = DeletionDialog.VersionName)]
+    private uint? ConversionVersion { get; set; }
+
+    /// <summary>The fingerprint of the impact of the conversion the administrator confirmed: that of the removal of the intent.</summary>
+    [SupplyParameterFromForm(FormName = ConversionFormName, Name = DeletionDialog.FingerprintName)]
+    private string? ConversionFingerprint { get; set; }
+
     private PurchaseIntentListQuery _query = new();
     private RecordCounts? _counts;
     private ApplicationSettings? _settings;
     private Page<PurchaseIntentAdminListItem>? _list;
     private ApiProblem? _problem;
     private PurchaseIntentAdminListItem? _dialogIntent;
+    // The intent on an edition whose conversion into one on the whole album the dialog confirms.
+    private PurchaseIntentAdminListItem? _convertedIntent;
     private DeletionImpact? _impact;
     private ApiProblem? _removalProblem;
 
     // The list with its criteria, without its dialog: where a link of the list, or the closing of the dialog, leads.
-    private PurchaseIntentListQuery ListOnly => _query with { Delete = null };
+    private PurchaseIntentListQuery ListOnly => _query with { Delete = null, ToAlbum = null };
 
     protected override async Task OnInitializedAsync()
     {
@@ -177,6 +199,8 @@
             }
             // The dialog opens on an intent of the page, from its row: an address written by hand on another one opens none.
             _dialogIntent = _list.Items.FirstOrDefault(row => row.Id == _query.Delete);
+            // Only an intent on an edition the list offers to convert, the only edition of its album.
+            _convertedIntent = _list.Items.FirstOrDefault(row => row.Id == _query.ToAlbum && row is { Edition: not null, IsConvertible: true });
         }
         catch (ApiProblemException exception)
         {
@@ -185,8 +209,10 @@
             return;
         }
 
-        if (_dialogIntent is not null)
-            await LoadImpactAsync(_dialogIntent);
+        // The conversion deletes the edition targeted, with its visuals, as the removal of the intent does: its impact is the
+        // impact of the removal (choix-implementation/api/organisation-de-l-api.md, Écritures).
+        if ((_dialogIntent ?? _convertedIntent) is { } concerned)
+            await LoadImpactAsync(concerned);
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
@@ -229,6 +255,31 @@
 
         await Recorder.RecordActionAsync(
             AudienceFunctions.AdminPurchaseIntentsRemoved, $"intent={_dialogIntent.Id}", HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(ListOnly.Href());
+    }
+
+    private async Task ConvertToAlbumAsync()
+    {
+        if (_convertedIntent is null || ConversionVersion is not { } version || ConversionFingerprint is null)
+            return;
+
+        try
+        {
+            await Api.PostAsync<ConvertPurchaseIntentToAlbumRequest, PurchaseIntentsForm>(
+                $"{IntentPath(_convertedIntent)}/to-album", new ConvertPurchaseIntentToAlbumRequest(version, ConversionFingerprint));
+        }
+        catch (ApiProblemException exception)
+        {
+            // As a removal: refused, or with an impact changed since its confirmation, the dialog announces the current impact.
+            _removalProblem = exception.Problem;
+            _impact = exception.Problem.Impact;
+            if (_impact is { BlockedBy.Count: > 0 })
+                _removalProblem = null;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(
+            AudienceFunctions.AdminPurchaseIntentsConverted, $"intent={_convertedIntent.Id}", HttpContext?.RequestAborted ?? default);
         Navigation.NavigateTo(ListOnly.Href());
     }
 

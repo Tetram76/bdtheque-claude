@@ -218,7 +218,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         // Nothing to modify: its main action turns it into an intent on an edition, which its menu no longer repeats (#444).
         var convert = Assert.Single(row.QuerySelectorAll(".intent-actions a.button"));
         Assert.Equal(
-            ("Viser une édition…", "Viser une édition plutôt que l'album", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnAlbum.Id)),
+            ("Viser une édition…", "Viser une édition plutôt que l'album", AppPaths.AdminConvertPurchaseIntentToEdition(AlbumId, OnAlbum.Id)),
             (Text(convert), Normalized(convert.GetAttribute("aria-label")!), convert.GetAttribute("href")));
         Assert.True(convert.HasAttribute("data-icon-only-on-smartphone"));
         Assert.Equal([("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnAlbum.Id}")], Items(row));
@@ -234,7 +234,7 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
 
         Assert.Equal(
             [
-                ("Viser plutôt l'album…", AppPaths.AdminConvertPurchaseIntent(AlbumId, OnEdition.Id)),
+                ("Viser plutôt l'album…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?intent-to-album={OnEdition.Id}"),
                 ("Retirer l'intention…", $"{AppPaths.AdminAlbumEditions(AlbumId)}?remove-intent={OnEdition.Id}"),
             ],
             Items(row));
@@ -329,6 +329,31 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         // The edition targeted goes with its intent without being counted, the intent removed standing for it: only its visuals
         // are (fonctionnel/regles-metier/suppression-des-entites.md).
         Assert.Equal(["Suppression aussi de 1 visuel"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
+    }
+
+    [Fact]
+    public void ConversionToAlbum_ADialogThatSaysTheEditionTargetedIsDeleted_WithTheImpactOfTheRemoval()
+    {
+        Answer(AlbumState.Intended, [], [OnEdition with { IsConvertible = true }]);
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents/{OnEdition.Id}/deletion-impact"] = new DeletionImpact(
+            [], [], [new ImpactCount(EntityKind.EditionVisual, 1)], [], "f2");
+
+        var dialog = Open($"intent-to-album={OnEdition.Id}", recorded: true).Find("dialog");
+
+        Assert.Equal(("Viser plutôt l'album ?", "Les Bijoux de la Castafiore (Tintin - T. 21) · Casterman (Fac-similé) [2013]"),
+            (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La conversion est définitive : l'édition visée est supprimée.", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["Suppression aussi de 1 visuel"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
+        Assert.Equal("Viser l'album", Text(dialog.QuerySelector("form[method='post'] button[type='submit']")!));
+        Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), dialog.QuerySelector("[data-dialog-close]")!.GetAttribute("href"));
+        Assert.Contains("admin.album-editions.intent-conversion", _audience.Functions);
+    }
+
+    [Fact]
+    public void ConversionToAlbum_OfAnIntentThePageDoesNotOfferToConvert_OpensNoDialog()
+    {
+        // Another edition of the album is known: an address written by hand opens nothing.
+        Assert.Empty(Open($"intent-to-album={OnEdition.Id}").FindAll("dialog"));
     }
 
     [Fact]
