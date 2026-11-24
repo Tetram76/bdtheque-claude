@@ -159,4 +159,7 @@
   <data name="Empty.All" xml:space="preserve">
     <value>Toutes les éditions</value>
   </data>
+  <data name="Items" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
 </root>

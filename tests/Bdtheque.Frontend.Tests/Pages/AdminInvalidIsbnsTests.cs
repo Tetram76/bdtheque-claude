@@ -173,6 +173,13 @@ public sealed class AdminInvalidIsbnsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    // The pagination counts editions, as that of the list of the editions: « Éditions 1 à 3 sur 3 ».
+    public void Pagination_CountsEditions()
+    {
+        Assert.StartsWith("Éditions 1 à 3 sur 3", Text(Open("").Find(".pagination")));
+    }
+
+    [Fact]
     public void Filters_TheStateChosenInAList_ThenTheRecordsChosenByTyping()
     {
         var form = Open("filters=open&state=Accepted").Find("form.list-search");
