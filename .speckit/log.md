@@ -2,6 +2,7 @@
 
 ## 2026-11-24
 
+* **Décision de l'utilisateur** : le filtre « Possession » a les mêmes états et le même sens dans toutes les listes de la consultation, et n'est plus jamais soumis à l'utilisateur ; une liste d'autre chose que des albums retient chaque élément d'après la possession de ses albums ([Périmètre de la consultation](fonctionnel/regles-metier/perimetre-de-la-consultation.md)) (#604).
 * **Exigence de l'utilisateur** : le dépôt public `Tetram76/.github`, qui porte le template des Pull Requests, se lit toujours de façon anonyme, jamais en le rattachant à la session ni en demandant à l'utilisateur de le rattacher ; le refus de l'API GitHub d'une session cloud, qui invite à le rattacher, n'est jamais suivi ([Conventions de commit](gestion-projet/depot/conventions-de-commit.md)) (#628).
 * **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, les harnais ne sont pas comptés comme des chantiers du lot, mais exécutés comme tels : leur session occupe une des 3 places des chantiers menés en même temps, jusqu'à la fin de leur traitement ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md), [Contrôle de cohérence fonctionnelle](gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md)) (#627).
 
