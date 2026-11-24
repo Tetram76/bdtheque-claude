@@ -37,9 +37,10 @@ public sealed class AdminMergeCaptureTests(MergeApplication application) : Brows
         await PageReadiness.WaitAsync(page);
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
+        // A value is named after its record too on a smartphone: « Gotlieb » is only that of Gotlib.
         if (state == "authors-confirmation")
         {
-            await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).GetByRole(AriaRole.Radio, new() { Name = "Gotlieb", Exact = true }).CheckAsync();
+            await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).GetByRole(AriaRole.Radio, new() { Name = "Gotlieb" }).CheckAsync();
             await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Né à Paris" }).CheckAsync();
             await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync("Affiché : Gotlib");
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
