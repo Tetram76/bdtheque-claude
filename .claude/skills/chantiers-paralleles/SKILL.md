@@ -5,8 +5,8 @@ description: >-
   session and worktree, to complete the current milestone first: picks them
   among all its open tickets (within the user's scope, if any) in the order of
   priority of the .speckit, the current milestone's tickets first, linking tickets on close subjects into one chantier,
-  briefs each session to notify the orchestrator of major
-  events and to run its own time-boxed watches, evaluates the
+  briefs each session with what is specific to the batch only, never how to
+  do its work, relays the user's instructions to the sessions, evaluates the
   resources of the machine before each
   launch, starts a session per chantier and starts the next one each time a
   pull request of the batch is merged. Use when the user asks to run the next
@@ -82,9 +82,9 @@ merged included; once freed, its place is filled like a chantier's.
   `ergonomy-audit`, each with `harness`) and decide from those concepts which
   are due. Give the due ones to **one separate session** (step 3, launched
   like a chantier's, resources evaluated, in one of the places; title
-  `Harnais <week or date>`), whose brief names them and the
-  concepts to follow, with the same notification, exchange and watch rules
-  as a chantier's brief (step 3); no chantier session checks or runs them.
+  `Harnais <week or date>`), whose brief names the harnesses given to it and
+  is otherwise a chantier's brief (step 3); no chantier session checks or
+  runs them.
 - **A pull request opened by a harness itself** (monthly or security version
   bump, corrections of the quality treatment), with no ticket of its own, is
   part of that harness: its session carries it to the merge; it is not a
@@ -225,67 +225,44 @@ merged included; once freed, its place is filled like a chantier's.
 ## 3. Launch
 
 One session per chantier: `start_session`, `initiation: "user_asked"`,
-`context: "fresh"`, `use_worktree: true`, title `#<n> <ticket title>`. The
-brief (`prompt`) says:
+`context: "fresh"`, `use_worktree: true`, title `#<n> <ticket title>`.
 
-- the ticket, its milestone, and that the chantier is carried out end to end
-  — up to the merge, the closing comment and the lock of the ticket, the
-  local branch and worktree cleaned — following `AGENTS.md` to the letter
-  (map and core first, then the concepts the chantier needs, naming the main
-  ones), the conversation renamed after the ticket;
-- what the ticket requires in particular (functional validation or not,
-  associated or duplicate tickets, a split expected, decisions of the user to
-  ask one at a time); for linked tickets, every ticket of the group, each
-  fully handled by its single pull request, cited there with a closing
-  keyword, then closed, commented and locked at the merge as
-  `suivi-par-tickets.md` says;
-- that, if it splits the ticket, it carries out the first sub-ticket only and
-  reports the others, which are launched as chantiers of the batch;
-- that it **notifies the orchestrator** with `SendMessage` (`to`: the
-  orchestrator's session id, given in the brief) at **each major event, and
-  only then**: the end of its chantier (pull request merged, ticket commented
-  and locked, branches and worktree cleaned), with the pull request, the
-  squashed commit and what is left to do; its abandonment; a problem that
-  blocks it or goes beyond its chantier; a split of its ticket or a ticket
-  it cannot avoid creating (below); a wait on the user (decision, functional
-  validation). It never reports its progress at regular intervals;
-- that a problem it finds follows the rule on creating tickets
-  (`.speckit/gestion-projet/revue-tickets/issues.md`, « Décision de créer un
-  ticket »): it fixes it in its own pull request whenever that is within
-  reach and reasonable, even a little outside its objective; only when it
-  really cannot (fix too big for its pull request, decision of the user,
-  unmet dependency) does it submit the ticket to the orchestrator **before**
-  creating it, then create it itself once the orchestrator agrees; a finding
-  with no real effect is only said in its pull request;
-- that it may exchange directly with the sessions of the other chantiers of
-  the batch, only for information **useful** in the light of the context its
-  brief gives (coordinating a heavy run or a shared environment, a file both
-  chantiers touch, a finding that concerns the other chantier); nothing else;
-- that the **watches** of its chantier (CI, Codex review, SonarQube Cloud
-  analysis…) are its own: nobody does them for it, neither the orchestrator
-  nor the user. Each watch is **time-boxed** (maximum delay set from the
-  expected duration, `regles-de-travail-de-l-agent.md`): when the delay
-  expires, it reads the real state itself (checks, comments, reactions)
-  instead of trusting the silence of its watching script — a badly written
-  script may detect nothing without noticing it is badly written.
+The brief tells the session **only what is specific to the batch and that it
+cannot find by itself** (« Brief d'une session » of the concept). It never
+tells it how to do its work: the session applies `AGENTS.md` and the
+`.speckit/` by itself (reading the map, the core and what its chantier
+requires; pull request, review, validation and closing rules). So the brief
+gives **no list of concepts** (not even « the main ones », which a session
+takes for the scope of its reading), **copies no rule** of the `.speckit/`
+and says nothing of how to carry out the chantier. Written in French, the
+brief (`prompt`, and `background` for the rest) holds:
 
-The `background` says: the batch and the other chantiers in progress (by
-ticket, pull request and **session id**) with the files they may share; the
-orchestrator's session id; the resources measured
-at this launch and the rule of the heavy runs (check `docker ps`, bounded,
-before any command that starts containers or browsers; wait for another
-session's run to end; size the run for the real resources; one functional
-validation environment at a time); that the harnesses (version survey,
-quality treatment, functional consistency check) are checked by the
-orchestrator once for the batch and run by the harness session, not by a
-chantier session, with the harness pull request open if any;
-that the superpowers plugin is forbidden; that it answers in French.
+- its ticket and its title, or every ticket of a group of linked tickets;
+  for the harness session, the harnesses given to it;
+- the orchestrator's session id, and the session ids of the other sessions
+  of the batch;
+- the other chantiers in progress (by ticket, pull request and session id)
+  and the files they may share with this one;
+- the harnesses, kept apart: which are due and which session runs them
+  (with its pull request, if any), or that none is due;
+- the resources measured at this launch and how they are shared (e.g. how to
+  start Docker on this machine, a heavy run in progress elsewhere);
+- the pointer to `.speckit/gestion-projet/gouvernance/chantiers-en-parallele.md`
+  for what the sessions of a batch do in their own right (notifications,
+  tickets submitted to the orchestrator, exchanges, watches), never a copy
+  of it.
 
 Tell the user, in one line per chantier, which ticket started and why it was
 chosen before the others; the whole selection was presented at step 2.4.
 
 ## 4. While the batch runs
 
+- **Relay, never instruct**: the orchestrator relays the user's instructions
+  to the sessions (`SendMessage`) and helps the sessions communicate with
+  each other (e.g. a session id, a shared file, a heavy run to coordinate).
+  It sends them no instruction of its own on how to do their work, not even
+  after an incident: never a copy of a rule of the `.speckit/`, nor a list of
+  concepts to read.
 - Each message or note of a session of the batch: report it to the user in a
   line or two, with the links of its pull request; never fabricate its
   result. A message is the session's report, not a proof: check on GitHub
