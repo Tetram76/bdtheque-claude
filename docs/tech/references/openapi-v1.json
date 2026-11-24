@@ -473,6 +473,152 @@
         }
       }
     },
+    "/admin/genres/merge": {
+      "get": {
+        "tags": [
+          "GenreEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenreMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "GenreEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenreMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/universes": {
       "get": {
         "tags": [
@@ -2420,6 +2566,234 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DeletionImpact"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/authors/identity": {
+      "get": {
+        "tags": [
+          "AuthorEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "lastName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "firstName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pseudonym",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorIdentity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/authors/merge": {
+      "get": {
+        "tags": [
+          "AuthorEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthorMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "AuthorEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
                 }
               }
             }
@@ -11665,6 +12039,26 @@
         },
         "description": "An author as its administration form edits it, with the dates of the record, which the form presents."
       },
+      "AuthorIdentity": {
+        "required": [
+          "displayName",
+          "sortKey",
+          "navigationEntry"
+        ],
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "sortKey": {
+            "type": "string"
+          },
+          "navigationEntry": {
+            "type": "string"
+          }
+        },
+        "description": "The identity of an author as the domain derives it from the names (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes),\nwhich the merge of two authors presents for the names chosen."
+      },
       "AuthorLabel": {
         "required": [
           "lastName",
@@ -11727,6 +12121,127 @@
           }
         },
         "description": "What the main identifier of an author is built from\n            (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes)."
+      },
+      "AuthorMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/AuthorMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/AuthorMergeRecord"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            }
+          }
+        },
+        "description": "Two authors to merge, and the series and albums they are credited on, in the order of the entity types."
+      },
+      "AuthorMergeRecord": {
+        "required": [
+          "id",
+          "lastName",
+          "firstName",
+          "pseudonym",
+          "nationality",
+          "biography",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "lastName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "firstName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pseudonym": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "biography": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "An author as its merge presents it."
+      },
+      "AuthorMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "lastName",
+          "firstName",
+          "pseudonym",
+          "nationality",
+          "biography"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "lastName": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "firstName": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "pseudonym": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "nationality": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "biography": {
+            "$ref": "#/components/schemas/MergeSide"
+          }
+        },
+        "description": "The merge of two authors: each data kept, of the one or the other."
       },
       "BibliographyEntry": {
         "required": [
@@ -13982,6 +14497,80 @@
           }
         }
       },
+      "GenreMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/GenreMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/GenreMergeRecord"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            }
+          }
+        },
+        "description": "Two genres to merge, and the series and albums classed under them, in the order of the entity types."
+      },
+      "GenreMergeRecord": {
+        "required": [
+          "id",
+          "label",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "label": {
+            "type": "string"
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "A genre as its merge presents it."
+      },
+      "GenreMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "label": {
+            "$ref": "#/components/schemas/MergeSide"
+          }
+        },
+        "description": "The merge of two genres: the label kept, of the one or the other."
+      },
       "IFormFile": {
         "type": "string",
         "format": "binary"
@@ -14213,6 +14802,101 @@
           }
         },
         "description": "An edition entered in the collection."
+      },
+      "MergedRecord": {
+        "required": [
+          "id",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "A merged record, at the version its data were read, as the merge sends it back."
+      },
+      "MergeLinkCount": {
+        "required": [
+          "kind",
+          "total",
+          "first",
+          "second",
+          "common"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "description": "The type of the linked records.",
+            "$ref": "#/components/schemas/EntityKind"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The records linked to the merged record, each once.",
+            "format": "int32"
+          },
+          "first": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Those linked to the first record.",
+            "format": "int32"
+          },
+          "second": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Those linked to the second record.",
+            "format": "int32"
+          },
+          "common": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Those linked to both, counted once in Total.",
+            "format": "int32"
+          }
+        },
+        "description": "What a type of records linked to the merged records counts, as the screen says it passes to the record\n(« Crédité sur 26 albums — les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches »)."
+      },
+      "MergeResult": {
+        "required": [
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "The record the merge leaves, the other one being deleted."
+      },
+      "MergeSide": {
+        "enum": [
+          "First",
+          "Second"
+        ],
+        "description": "Which of the two merged records a data of the merged record comes from."
       },
       "MonthlyUsage": {
         "required": [

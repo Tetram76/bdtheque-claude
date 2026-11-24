@@ -664,6 +664,23 @@ public static class AudienceFunctions
     /// <summary>The changes of the user shown, the setting having been modified in the meantime.</summary>
     public static readonly AudienceFunction AdminSettingsChanges = new("admin.settings.changes", AudienceFunctionKind.Action);
 
+    /// <summary>
+    /// The merge of two genres (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list, which it presents
+    /// without designating the genres.
+    /// </summary>
+    public static readonly AudienceFunction AdminGenreMerge = new("admin.genre-merge", AudienceFunctionKind.Screen);
+
+    // The merge, interactive, recorded in the visit of the prerendering of its page, once done.
+
+    /// <summary>The merge of the two genres, confirmed and done.</summary>
+    public static readonly AudienceFunction AdminGenreMerged = new("admin.genre-merge.merged", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of two authors, as that of two genres.</summary>
+    public static readonly AudienceFunction AdminAuthorMerge = new("admin.author-merge", AudienceFunctionKind.Screen);
+
+    /// <summary>The merge of the two authors, confirmed and done.</summary>
+    public static readonly AudienceFunction AdminAuthorMerged = new("admin.author-merge.merged", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -704,5 +721,6 @@ public static class AudienceFunctions
         AdminPurchaseIntentConversionVisualsArranged, AdminPurchaseIntentConversionVisualTypeChanged, AdminPurchaseIntentConversionVisualDeletion,
         AdminPurchaseIntentConversionVisualDeleted,
         AdminSettings, AdminSettingsSaved, AdminSettingsChanges,
+        AdminGenreMerge, AdminGenreMerged, AdminAuthorMerge, AdminAuthorMerged,
     ];
 }

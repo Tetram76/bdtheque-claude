@@ -306,6 +306,15 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.AlbumAsync(new AlbumContent("Les Carnets de Port-Grisé", "Port-Grisé (carnets)", null, AlbumType.Regular, false, null, null, null,
             2019, null, null, "À relier à sa série.", null, [humour], [greyPort], []));
 
+        // Saved twice, to merge (visuel/fusion/fusion-de-deux-fiches.md): an author saved again under a misspelled name, with
+        // other data, credited with the first one on an album and alone on another; a genre saved again under its abbreviation,
+        // classing an album with the first one and another alone.
+        var arnautTwin = await data.AuthorAsync(TwinAuthorLastName, "Émile", biography: "Scénariste.");
+        var sf = await data.GenreAsync(TwinGenre);
+        await data.AlbumAsync(OneShot("Les Phares jumeaux", 2023, 5, [scienceFiction, sf], [],
+            [Credit(arnaud, ContributionRole.Scenarist), Credit(arnautTwin, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));
+        await data.AlbumAsync(OneShot("Orbite basse", 2024, 2, [sf], [], [Credit(arnautTwin, ContributionRole.Scenarist)]));
+
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
         // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
         // its record as on its cards (fonctionnel/regles-metier/couverture-d-un-album.md).
@@ -359,6 +368,12 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
     /// <summary>A genre whose label differs from another typed only by its case and its accents.</summary>
     public const string AccentedGenre = "Épopée";
+
+    /// <summary>The author « Émile Arnaud » saved again under a misspelled name, to merge with him.</summary>
+    public const string TwinAuthorLastName = "Arnaut";
+
+    /// <summary>The genre « Science-fiction » saved again under its abbreviation, to merge with it.</summary>
+    public const string TwinGenre = "SF";
 
     /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
     public const string DeletedGenre = "Genre supprimé";

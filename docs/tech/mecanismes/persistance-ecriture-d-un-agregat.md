@@ -1,6 +1,6 @@
 ---
 title: 'Persistance : écriture d''un agrégat'
-description: 'Cette page explique comment `api` écrit une fiche : la transaction, le verrou et la version qui protègent un agrégat des écritures concurrentes, ce que fait l''enregistrement, les verrous propres à certaines écritures, la suppression d''une fiche et la traduction des échecs de la base ; à lire avant d''écrire ou de modifier un endpoint qui écrit, ou pour comprendre un conflit, un verrou ou un refus de la base.'
+description: 'Cette page explique comment `api` écrit une fiche : la transaction, le verrou et la version qui protègent un agrégat des écritures concurrentes, ce que fait l''enregistrement, les verrous propres à certaines écritures, la suppression d''une fiche, la fusion de deux fiches et la traduction des échecs de la base ; à lire avant d''écrire ou de modifier un endpoint qui écrit, ou pour comprendre un conflit, un verrou ou un refus de la base.'
 code:
   - 'src/Bdtheque.Infrastructure/AggregateWriteExtensions.cs'
   - 'src/Bdtheque.Infrastructure/UniverseHierarchy.cs'
@@ -9,6 +9,7 @@ code:
   - 'src/Bdtheque.Domain/Entities/Common/**'
   - 'src/Bdtheque.Api/Deletion/**'
   - 'src/Bdtheque.Api/Endpoints/DeletionEndpoints.cs'
+  - 'src/Bdtheque.Api/Merge/**'
 ---
 
 # Persistance : écriture d'un agrégat
@@ -143,6 +144,26 @@ Si une référence a échappé au calcul de l'impact, la règle `ON DELETE RESTR
 
 Les fichiers des visuels ne sont pas dans la base, et aucune cascade ne les atteint. Ils sont supprimés après le `COMMIT`, d'après les visuels que l'impact annonçait. Une suppression qui échoue les laisse donc intacts ; un fichier qui ne peut pas être supprimé devient un orphelin, que la réconciliation quotidienne des visuels finit par retirer ([Visuels](visuels.md)).
 
+## Fusion de deux fiches
+
+La fusion réunit en une seule deux fiches d'un même type saisies en double. L'utilisateur choisit, donnée par donnée, la fiche dont la valeur est gardée ; tout ce qui désignait l'une ou l'autre désigne ensuite la fiche qui reste, et l'autre est supprimée. Les règles en sont données dans [Fusion de deux fiches](../../../.speckit/fonctionnel/regles-metier/fusion-des-fiches.md), et les raisons de leur mise en œuvre dans [Fusion de deux fiches : mise en œuvre](../../../.speckit/choix-implementation/ecritures/fusion-des-fiches-mise-en-oeuvre.md).
+
+Le client n'envoie pas les valeurs choisies, mais, pour chaque donnée, la fiche dont la valeur est gardée, avec l'identifiant et la version des deux fiches. Le mécanisme commun, [`RecordMerge`](../../../src/Bdtheque.Api/Merge/RecordMerge.cs), relit alors les deux fiches sous leur verrou par [`LoadAggregatesForWriteAsync`](../../../src/Bdtheque.Infrastructure/AggregateWriteExtensions.cs), qui les verrouille dans l'ordre de leurs identifiants et refuse l'écriture si l'une d'elles a changé depuis sa lecture. La fiche qui reste est celle dont la fusion garde le plus de données. Le schéma suivant, tracé à la main d'après le code, montre les étapes de la fusion dans sa transaction. Il répond à la question : dans quel ordre la fusion écrit-elle, et pourquoi en trois enregistrements ?
+
+```mermaid
+flowchart TD
+    verrous["Les deux fiches verrouillées dans l'ordre de leurs identifiants,<br/>leurs versions comparées à celles lues par le client"] --> lies["Les fiches qui désignent l'autre fiche verrouillées et marquées modifiées,<br/>puis reportées sur celle qui reste par le domaine"]
+    lies --> recherches["Les recherches enregistrées qui la désignent réécrites"]
+    recherches --> premier["Premier enregistrement : le report"]
+    premier --> suppression["Second enregistrement : la suppression de l'autre fiche"]
+    suppression --> donnees["Troisième enregistrement : les données gardées par la fiche qui reste"]
+    donnees --> commit["COMMIT"]
+```
+
+Le report est confié au domaine : un album ou une série remplace le genre supprimé par celui qui reste (`TransferGenre`), ou crédite à l'auteur qui reste les contributions de l'autre (`TransferAuthor`). Une contribution garde son identité, qu'une recherche enregistrée peut désigner ; une contribution que portaient déjà les deux fiches n'est gardée qu'une fois, la contribution retirée étant remplacée, dans les recherches enregistrées qui la désignaient, par celle qui reste. Aucune contrainte d'unicité ne refuse donc le report. Chaque album ou série concerné est verrouillé et marqué modifié par `LoadOtherAggregateForWriteAsync`, comme toute écriture sur un agrégat, pour qu'une saisie ouverte auparavant soit refusée comme périmée. Les recherches enregistrées sont réécrites par le schéma de la recherche avancée, qui seul sait quelle valeur d'un critère désigne une fiche ([Recherche simple et avancée](recherche.md)).
+
+L'écriture se fait en trois enregistrements d'une même transaction, pour deux raisons. D'abord, une contribution retirée par le report, en double, n'est supprimée que par l'enregistrement (`DeleteSeveredContributions`) : avant lui, elle désigne encore l'auteur supprimé, dont la suppression serait alors refusée. Ensuite, une valeur unique que la fiche qui reste reprend de l'autre, comme le nom affiché d'un auteur, n'est libre qu'une fois l'autre supprimée. Le journal des modifications consigne la fiche qui reste, l'autre et chaque fiche reportée une seule fois chacune.
+
 ## Échecs de la base
 
 Les échecs de la base remontent sous forme d'exception jusqu'à [`ApiExceptionHandler`](../../../src/Bdtheque.Api/Errors/ApiExceptionHandler.cs), qui les classe d'après le code d'erreur de PostgreSQL dans l'une des trois catégories d'erreur de l'application ([Erreurs métier, fonctionnelles et techniques](../../../.speckit/choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md)). La suite de leur parcours, jusqu'à leur présentation à l'utilisateur, est décrite dans [Erreurs, de la règle à leur présentation](erreurs.md).
@@ -159,11 +180,12 @@ Les échecs de la base remontent sous forme d'exception jusqu'à [`ApiExceptionH
 - [`AggregateConcurrencyTests`](../../../tests/Bdtheque.Infrastructure.Tests/AggregateConcurrencyTests.cs) vérifie le verrou, la version et le marquage de la racine.
 - [`AuditTimestampsTests`](../../../tests/Bdtheque.Infrastructure.Tests/AuditTimestampsTests.cs) et [`CollectionEntryDateTests`](../../../tests/Bdtheque.Infrastructure.Tests/CollectionEntryDateTests.cs) vérifient les dates.
 - [`AggregateDeletionTests`](../../../tests/Bdtheque.Api.Tests/AggregateDeletionTests.cs) vérifie le mécanisme de suppression, et [`DeleteRuleTests`](../../../tests/Bdtheque.Infrastructure.Tests/DeleteRuleTests.cs) les règles `ON DELETE` de la base.
+- [`MergeEndpointsTests`](../../../tests/Bdtheque.Api.Tests/MergeEndpointsTests.cs) vérifie la fusion de deux genres et de deux auteurs, report et recherches enregistrées compris.
 - [`ErrorResponseTests`](../../../tests/Bdtheque.Api.Tests/ErrorResponseTests.cs) vérifie les réponses d'erreur.
 
 ## Invariants à préserver
 
-- Toute écriture sur un agrégat existant passe par `LoadAggregateForWriteAsync`, dans une transaction, avant que le contexte ne suive la moindre entité. Seul l'éditeur d'une collection créée sur place depuis une autre fiche est verrouillé ensuite, par `LoadOtherAggregateForWriteAsync`, qui relit sa racine si le contexte la suit déjà.
+- Toute écriture sur un agrégat existant passe par `LoadAggregateForWriteAsync`, dans une transaction, avant que le contexte ne suive la moindre entité. Seuls l'éditeur d'une collection créée sur place depuis une autre fiche, et les fiches reportées par une fusion, sont verrouillés ensuite, par `LoadOtherAggregateForWriteAsync`, qui relit leur racine si le contexte la suit déjà ; une fusion verrouille ses deux fiches ensemble, par `LoadAggregatesForWriteAsync`.
 - Les verrous de ligne se prennent toujours de la racine vers l'enfant, d'une fiche saisie vers l'éditeur d'une collection qu'elle crée sur place, jamais dans l'autre sens, et le verrou de la hiérarchie des univers avant celui de toute ligne d'univers. Deux écritures ne peuvent ainsi jamais s'attendre mutuellement.
 - Aucune écriture d'une fiche ne passe par du SQL brut, car elle échapperait au journal des modifications et aux dates.
 - Un enregistrement est toujours asynchrone, par `SaveChangesAsync`.

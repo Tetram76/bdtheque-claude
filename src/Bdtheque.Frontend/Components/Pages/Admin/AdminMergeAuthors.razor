@@ -1,0 +1,268 @@
+@attribute [Route(AppPaths.AdminMergeAuthors)]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@inject IStringLocalizer<AdminMergeAuthors> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two authors (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the authors, which
+   gives the author and the other one: each data the author keeps, of the one or the other, what the names chosen make of it,
+   what passes to it, then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor
+   of an author, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the
+   identity the names chosen give. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminAuthorMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", FirstName, SecondName]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminAuthors" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        <MergeData First="Head(Preview.First, FirstName)" Second="Head(Preview.Second, SecondName)" Result="@Result">
+            @Choice("merge-first-name", L["FirstName"], a => a.FirstName, Choices!.FirstName, side => Choose(c => c.FirstName = side))
+            @Choice("merge-last-name", L["LastName"], a => a.LastName, Choices.LastName, side => Choose(c => c.LastName = side))
+            @Choice("merge-pseudonym", L["Pseudonym"], a => a.Pseudonym, Choices.Pseudonym, side => Choose(c => c.Pseudonym = side))
+            @Choice("merge-nationality", L["Nationality"], a => a.Nationality, Choices.Nationality, side => Choose(c => c.Nationality = side))
+            @Choice("merge-biography", L["Biography"], a => a.Biography, Choices.Biography, side => Choose(c => c.Biography = side), isLong: true)
+        </MergeData>
+        <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count" />
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(KeptName)</li>
+                    @if (Merge.Linked(Preview.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Credited", KeptName, linked]</li>
+                    }
+                </ul>
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private ApiProblem? _identityProblem;
+    private AuthorIdentity? _identity;
+    private int _identityNumber;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The author the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "author")]
+    public Guid? AuthorId { get; set; }
+
+    /// <summary>The other author, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two authors as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public AuthorMergePreview? Preview { get; set; }
+
+    /// <summary>The record each data is kept from, as the user chose it.</summary>
+    [PersistentState]
+    public AuthorMergeChoices? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Authors"], AppPaths.AdminAuthors), new(L["Breadcrumb"])];
+
+    // Each author named as its list names it (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes).
+    private string FirstName => RecordSearch.AuthorName(Preview!.First.LastName, Preview.First.FirstName, Preview.First.Pseudonym);
+
+    private string SecondName => RecordSearch.AuthorName(Preview!.Second.LastName, Preview.Second.FirstName, Preview.Second.Pseudonym);
+
+    private int Pending => new[] { Choices!.LastName, Choices.FirstName, Choices.Pseudonym, Choices.Nationality, Choices.Biography }.Count(c => c is null);
+
+    // The name the author keeps, that the confirmation names it by, the identity being known once every name is chosen.
+    private string KeptName => _identity?.DisplayName ?? FirstName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is null)
+        {
+            if (AuthorId is not { } first || OtherId is not { } second)
+            {
+                Navigation.NavigateTo(AppPaths.AdminAuthors);
+                return;
+            }
+
+            try
+            {
+                Preview = await Api.GetAsync<AuthorMergePreview>($"/admin/authors/merge?first={first}&second={second}");
+            }
+            catch (ApiProblemException exception)
+            {
+                _loadProblem = exception.Problem;
+                return;
+            }
+
+            // A value set on one side only, or the same on both, is retained at once; two different values wait for the user's
+            // choice: no record is favoured (fonctionnel/regles-metier/fusion-des-fiches.md).
+            Choices = new AuthorMergeChoices
+            {
+                LastName = Initial(a => a.LastName),
+                FirstName = Initial(a => a.FirstName),
+                Pseudonym = Initial(a => a.Pseudonym),
+                Nationality = Initial(a => a.Nationality),
+                Biography = Initial(a => a.Biography),
+            };
+        }
+
+        await ReadIdentityAsync();
+    }
+
+    private MergeSide? Initial(Func<AuthorMergeRecord, string?> data) =>
+        (data(Preview!.First), data(Preview.Second)) switch
+        {
+            var (first, second) when first == second => MergeSide.First,
+            (_, null) => MergeSide.First,
+            (null, _) => MergeSide.Second,
+            _ => null,
+        };
+
+    private RenderFragment Choice(string id, string label, Func<AuthorMergeRecord, string?> data, MergeSide? selected,
+        Func<MergeSide?, Task> choose, bool isLong = false) =>
+        @<MergeChoice Id="@id" Label="@label" FirstRecord="@FirstName" SecondRecord="@SecondName" First="@data(Preview!.First)"
+                      Second="@data(Preview.Second)" Selected="selected" SelectedChanged="choose" Long="isLong" />;
+
+    private async Task Choose(Action<AuthorMergeChoices> choose)
+    {
+        choose(Choices!);
+        await ReadIdentityAsync();
+    }
+
+    // The identity the names chosen give, asked to the API, which derives it (choix-implementation/socle/frontend.md, no rule of
+    // entry in the frontend): numbered, so that only the answer for the last choice is presented.
+    private async Task ReadIdentityAsync()
+    {
+        var number = ++_identityNumber;
+        _identity = null;
+        _identityProblem = null;
+        if (Choices!.LastName is null || Choices.FirstName is null || Choices.Pseudonym is null)
+            return;
+
+        var (lastName, firstName, pseudonym) = (
+            Of(Choices.LastName.Value).LastName, Of(Choices.FirstName.Value).FirstName, Of(Choices.Pseudonym.Value).Pseudonym);
+        try
+        {
+            var identity = await Api.GetAsync<AuthorIdentity>(
+                $"/admin/authors/identity?lastName={Uri.EscapeDataString(lastName ?? "")}&firstName={Uri.EscapeDataString(firstName ?? "")}"
+                + $"&pseudonym={Uri.EscapeDataString(pseudonym ?? "")}");
+            if (number == _identityNumber)
+                _identity = identity;
+        }
+        catch (ApiProblemException exception)
+        {
+            if (number == _identityNumber)
+                _identityProblem = exception.Problem;
+        }
+    }
+
+    private AuthorMergeRecord Of(MergeSide side) => side == MergeSide.First ? Preview!.First : Preview!.Second;
+
+    // What the names chosen give, the failure to compute it, or nothing while a name is left to choose.
+    private RenderFragment? Result => (_identity, _identityProblem) switch
+    {
+        ({ } identity, _) => @<text>
+                                 <span>@L["Result.Shown"] : <strong>@identity.DisplayName</strong></span>
+                                 <span>@L["Result.SortKey"] : <strong>@identity.SortKey</strong></span>
+                                 <span>@L["Result.Entry"] : <strong>@identity.NavigationEntry</strong></span>
+                             </text>,
+        (null, { } problem) => @<ErrorMessage Problem="problem" Compact="true" TechnicalText="@L["Result.Failed"]" />,
+        _ => null,
+    };
+
+    private MergeRecordHead Head(AuthorMergeRecord record, string name)
+    {
+        var links = Preview!.Links.Select(l => (l.Kind, Count: record == Preview.First ? l.First : l.Second)).Where(l => l.Count > 0)
+            .Select(l => L[$"Head.{l.Kind}.{(l.Count == 1 ? "One" : "Other")}", l.Count].Value).ToList();
+        return new MergeRecordHead(name, links.Count == 0 ? null : L["Head.Credited", string.Join(" · ", links)].Value, record.ModifiedAt);
+    }
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<AuthorMergeRequest, MergeResult>("/admin/authors/merge", new AuthorMergeRequest(
+                new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+                Choices!.LastName!.Value, Choices.FirstName!.Value, Choices.Pseudonym!.Value, Choices.Nationality!.Value,
+                Choices.Biography!.Value));
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminAuthorMerged);
+            Navigation.NavigateTo(AppPaths.AdminAuthors);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The authors as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+
+    /// <summary>The record each data of an author is kept from, none while the user has not chosen.</summary>
+    public sealed class AuthorMergeChoices
+    {
+        public MergeSide? LastName { get; set; }
+        public MergeSide? FirstName { get; set; }
+        public MergeSide? Pseudonym { get; set; }
+        public MergeSide? Nationality { get; set; }
+        public MergeSide? Biography { get; set; }
+    }
+}

@@ -6,11 +6,11 @@
 <div class="save-bar">
     <div class="save-bar-content">
         <p class="save-bar-state" role="status" data-state="@StateName">
-            <span class="save-bar-state-long">@L[$"{State}.Long"]</span><span class="save-bar-state-short">@L[$"{State}.Short"]</span>
+            <span class="save-bar-state-long">@(StateText ?? L[$"{State}.Long"])</span><span class="save-bar-state-short">@(StateShortText ?? L[$"{State}.Short"])</span>
         </p>
         <div class="save-bar-actions">
             <Button Label="@L["Cancel"]" Href="@CancelHref" />
-            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" Disabled="@(Saving || State == SaveBarState.Sending)" />
+            <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" Disabled="@(Saving || SaveDisabled || State == SaveBarState.Sending)" />
         </div>
     </div>
 </div>
@@ -30,6 +30,18 @@
     /// <summary>The record is being saved: it is not saved twice.</summary>
     [Parameter]
     public bool Saving { get; set; }
+
+    /// <summary>What the bar says of the record instead of its state (e.g. the data a merge leaves to choose), and in short.</summary>
+    [Parameter]
+    public string? StateText { get; set; }
+
+    /// <summary>The state in a few words, on a smartphone, with <see cref="StateText"/>.</summary>
+    [Parameter]
+    public string? StateShortText { get; set; }
+
+    /// <summary>Whether the record cannot be saved yet (e.g. a merge with data left to choose).</summary>
+    [Parameter]
+    public bool SaveDisabled { get; set; }
 
     private string StateName => State.ToString().ToLowerInvariant();
 }

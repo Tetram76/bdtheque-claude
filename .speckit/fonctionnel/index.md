@@ -12,6 +12,6 @@
 * [Page d'accueil](page-accueil.md) - Dashboard public : blocs fixes, édition à la une, statistiques tirées au hasard et règles du tirage, écran d'une collection vide.
 * [Présentation des données](presentation/index.md) - Langue, culture et fuseau horaire d'affichage, tri et navigation par initiale, libellés des albums et des éditions, ordre des types de fiche.
 * [Recherche avancée](recherche-avancee/index.md)
-* [Règles métier](regles-metier/index.md) - Règles métier de l'application : appartenance à la collection, périmètre de la consultation, initialisation des saisies, rattachements, ordres de présentation, visuels, ISBN, séquence de tomes, suppression des entités et intention d'acquisition.
+* [Règles métier](regles-metier/index.md) - Règles métier de l'application : appartenance à la collection, périmètre de la consultation, initialisation des saisies, rattachements, ordres de présentation, visuels, ISBN, séquence de tomes, suppression des entités, fusion de deux fiches et intention d'acquisition.
 * [Fonctionnalités de second plan](second-plan/index.md)
 * [Estimations et devises](valorisation/index.md) - Calcul des estimations, estimation de la valeur des éditions, coût de remplacement de la collection et gestion des devises.

@@ -1,0 +1,73 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<MergeChoice> L
+
+@* One data of the two merged records, on its row of the merge (visuel/fusion/fusion-de-deux-fiches.md): its name, then the value
+   of each record, which a click retains, the other one being discarded; a value missing is chosen too, discarding the other
+   one. The same value in both records is presented once, with nothing to choose. Placed in the grid of MergeData, its
+   name and its values are cells of the grid, the values side by side under the record they come from, or, on a smartphone,
+   one under the other, each preceded by the name of its record. *@
+<span class="merge-choice-label" id="@LabelId">@Label</span>
+@if (IsSame)
+{
+    <div class="merge-choice-same">
+        <span class="merge-choice-value" data-long="@Long">@if (First is null) { <NotSet Brief /> } else { @First }</span>
+        <span class="merge-choice-note">@L["Same"]</span>
+    </div>
+}
+else
+{
+    <div class="merge-choice-options" role="radiogroup" aria-labelledby="@LabelId">
+        @Option(MergeSide.First, FirstRecord, First)
+        @Option(MergeSide.Second, SecondRecord, Second)
+    </div>
+}
+
+@code {
+    /// <summary>The identifier of the row, unique in the page, which names its options.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>The name of the data (« Nom », « Biographie »…).</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>The name of the first record, which its value carries on a smartphone.</summary>
+    [Parameter, EditorRequired]
+    public string FirstRecord { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string SecondRecord { get; set; } = null!;
+
+    /// <summary>The value of the first record, none when it is missing.</summary>
+    [Parameter]
+    public string? First { get; set; }
+
+    [Parameter]
+    public string? Second { get; set; }
+
+    /// <summary>The record whose value is retained, none while the user has not chosen.</summary>
+    [Parameter]
+    public MergeSide? Selected { get; set; }
+
+    [Parameter]
+    public EventCallback<MergeSide?> SelectedChanged { get; set; }
+
+    /// <summary>A long text (a biography, a summary…), presented on a few lines.</summary>
+    [Parameter]
+    public bool Long { get; set; }
+
+    private string LabelId => $"{Id}-label";
+
+    private bool IsSame => string.Equals(First, Second, StringComparison.Ordinal);
+
+    private RenderFragment Option(MergeSide side, string record, string? value) =>
+        @<label class="merge-choice-option" data-selected="@(Selected == side)">
+            <input class="merge-choice-radio" type="radio" name="@Id" value="@side" checked="@(Selected == side)"
+                   @onchange="() => SelectedChanged.InvokeAsync(side)" />
+            <span class="merge-choice-mark" aria-hidden="true"><Icon Name="IconName.Check" /></span>
+            <span class="merge-choice-text">
+                <span class="merge-choice-record">@record</span>
+                <span class="merge-choice-value" data-long="@Long">@if (value is null) { <NotSet Brief /> } else { @value }</span>
+            </span>
+        </label>;
+}

@@ -1,6 +1,7 @@
 using System.Data;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -39,7 +40,88 @@ internal static class AuthorEndpoints
         authors.MapPost("/", CreateAsync);
         authors.MapPut("/{id:guid}", UpdateAsync);
         authors.MapDeletion<Author>(DeletionLinks);
+        authors.MapGet("/identity", GetIdentity);
+        authors.MapGet("/merge", GetMergeAsync);
+        authors.MapPost("/merge", MergeAsync);
     }
+
+    // The series and albums an author is credited on (visuel/fusion/fusion-de-deux-fiches.md).
+    private static readonly (EntityKind Kind, Func<BdthequeDbContext, Guid, IQueryable<Guid>> Records)[] MergeLinks =
+    [
+        (EntityKind.Series, (context, id) => context.Contributions.Where(c => c.AuthorId == id && c.SeriesId != null).Select(c => c.SeriesId!.Value)),
+        (EntityKind.Album, (context, id) => context.Contributions.Where(c => c.AuthorId == id && c.AlbumId != null).Select(c => c.AlbumId!.Value)),
+    ];
+
+    /// <summary>
+    /// The identity the domain derives from names (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes): the merge of
+    /// two authors presents it for the names chosen, without writing anything.
+    /// </summary>
+    private static AuthorIdentity GetIdentity(string? lastName = null, string? firstName = null, string? pseudonym = null)
+    {
+        var author = new Author(lastName, firstName, pseudonym);
+        return new AuthorIdentity(author.DisplayName, author.SortKey, author.NavigationEntry);
+    }
+
+    /// <summary>Two authors to merge, and what they are credited on (fonctionnel/regles-metier/fusion-des-fiches.md).</summary>
+    private static async Task<AuthorMergePreview> GetMergeAsync(Guid first, Guid second, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot: the counts are those of the two authors read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        return new AuthorMergePreview(
+            await MergeRecordAsync(context, first, cancellationToken),
+            await MergeRecordAsync(context, second, cancellationToken),
+            await RecordMerge.CountLinksAsync(context, first, second, MergeLinks, cancellationToken));
+    }
+
+    private static async Task<AuthorMergeRecord> MergeRecordAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken) =>
+        await context.Authors.AsNoTracking()
+            .Where(a => a.Id == id)
+            .Select(a => new AuthorMergeRecord(
+                a.Id, a.LastName, a.FirstName, a.Pseudonym, a.Nationality, a.Biography, a.ModifiedAt,
+                EF.Property<uint>(a, BdthequeDbContext.VersionProperty)))
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(Author), id);
+
+    /// <summary>
+    /// Merges two authors: the author that remains keeps each data chosen, and is credited on the series and albums of both, in
+    /// the same roles, a role both held being credited once.
+    /// </summary>
+    private static Task<MergeResult> MergeAsync(AuthorMergeRequest request, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        RecordMerge.MergeAsync<Author>(
+            context, request.First, request.Second,
+            RecordMerge.KeepsFirst([request.LastName, request.FirstName, request.Pseudonym, request.Nationality, request.Biography]),
+            pair =>
+            {
+                // Read from both before the kept author changes.
+                var (lastName, firstName, pseudonym) =
+                    (pair.Of(request.LastName).LastName, pair.Of(request.FirstName).FirstName, pair.Of(request.Pseudonym).Pseudonym);
+                var (nationality, biography) = (pair.Of(request.Nationality).Nationality, pair.Of(request.Biography).Biography);
+                pair.Kept.UpdateIdentity(lastName, firstName, pseudonym);
+                pair.Kept.UpdateNationality(nationality);
+                pair.Kept.UpdateBiography(biography);
+            },
+            async pair =>
+            {
+                // The contributions removed as duplicates, which a saved search may designate (contributions are searched).
+                var removed = new List<(Guid Removed, Guid Kept)>();
+                foreach (var series in await RecordMerge.LoadLinkedForWriteAsync<Series>(
+                             context,
+                             context.Contributions.Where(c => c.AuthorId == pair.Merged.Id && c.SeriesId != null).Select(c => c.SeriesId!.Value),
+                             cancellationToken))
+                {
+                    await context.Entry(series).Collection(s => s.TemplateContributions).LoadAsync(cancellationToken);
+                    removed.AddRange(series.TransferAuthor(pair.Merged, pair.Kept));
+                }
+
+                foreach (var album in await RecordMerge.LoadLinkedForWriteAsync<Album>(
+                             context,
+                             context.Contributions.Where(c => c.AuthorId == pair.Merged.Id && c.AlbumId != null).Select(c => c.AlbumId!.Value),
+                             cancellationToken))
+                    removed.AddRange(album.TransferAuthor(pair.Merged, pair.Kept));
+
+                return [.. removed.Select(r => new MergeReplacement(EntityKind.Contribution, r.Removed, r.Kept))];
+            },
+            cancellationToken);
 
     public static void MapAuthorCatalog(this RouteGroupBuilder catalog)
     {

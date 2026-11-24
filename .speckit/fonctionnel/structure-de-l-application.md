@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Structure de l''application'
 description: 'Consultation publique (fiches, dont celle d''un univers, genre menant à la liste des albums, navigation, retour à une liste, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T18:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:30:00Z }
 ---
 
 # Structure de l'application
@@ -28,7 +28,7 @@ L'application se compose de trois parties distinctes :
    - **États et statistiques** : rapports et indicateurs sur la collection (à préciser), selon le niveau d'accès de chacun (cf. [Règles d'accès](regles-d-acces.md)).
 2. **Administration** — protégée par **authentification** :
    - CRUD sur toutes les entités, paramétrage de l'application, gestion des référentiels, gestion des recherches enregistrées (cf. [Recherche avancée](recherche-avancee/recherche-avancee.md)), gestion des jetons d'accès de l'outil pour agents IA et suivi de son utilisation (cf. [Interface pour agents IA](agents-ia/interface-pour-agents-ia.md)), mesure d'audience de l'interface web (cf. [Mesure d'audience de l'interface web](mesure-audience.md)), etc.
-   - **Fusion** de deux fiches d'un même type, proposée depuis la liste de leur type, en plus des opérations CRUD (ex. deux albums saisis en double). Ses modalités restent à définir : rien n'est statué sur ce que la fusion conserve de chaque fiche.
+   - **Fusion** de deux fiches d'un même type, proposée depuis la liste de leur type, en plus des opérations CRUD (ex. deux albums saisis en double) : elle garde le meilleur des deux fiches ([Fusion de deux fiches](regles-metier/fusion-des-fiches.md)).
    - Les listes n'offrent pas, dans un premier temps, d'opération groupée (plusieurs fiches sélectionnées à la fois) ; l'idée n'est pas écartée, mais rien n'est statué (YAGNI).
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
    - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.

@@ -224,10 +224,10 @@ public static class AppPaths
     public static string AdminEditAuthor(Guid id) => $"{AdminAuthors}?edit={id}";
 
     /// <summary>
-    /// The next step of the merge of two authors, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the author and the other one, <c>author</c> and <c>other</c>.
+    /// The merge of two authors (visuel/fusion/fusion-de-deux-fiches.md): it receives the author and the other one,
+    /// <c>author</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergeAuthors = NotYetImplemented;
+    public const string AdminMergeAuthors = AdminAuthors + "/merge";
 
     /// <summary>The list of the publishers of the administration (visuel/listes/).</summary>
     public const string AdminPublishers = "/admin/publishers";
@@ -251,10 +251,10 @@ public static class AppPaths
     public static string AdminEditGenre(Guid id) => $"{AdminGenres}?edit={id}";
 
     /// <summary>
-    /// The next step of the merge of two genres, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the genre and the other one, <c>genre</c> and <c>other</c>.
+    /// The merge of two genres (visuel/fusion/fusion-de-deux-fiches.md): it receives the genre and the other one, <c>genre</c>
+    /// and <c>other</c>.
     /// </summary>
-    public const string AdminMergeGenres = NotYetImplemented;
+    public const string AdminMergeGenres = AdminGenres + "/merge";
 
     /// <summary>
     /// The list of the universes of the administration (visuel/listes/), where a universe is entered in a side panel over the

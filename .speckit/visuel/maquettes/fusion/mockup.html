@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fusion de deux fiches — administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
+input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
+.adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
+.fu-layout{display:grid;grid-template-columns:minmax(0,1100px);gap:22px}
+/* One row per data: its name, then the value of each record side by side, so that the two are read
+   across the same line. */
+.fu-grid{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:8px 14px;align-items:stretch}
+.fu-head{display:contents}
+.fu-span{grid-column:2 / span 2}
+.fu-label-sm{display:none}
+.fu-radio{position:absolute;opacity:0;width:1px;height:1px}
+.fu-status-sm{display:none}
+@media (max-width: 640px){
+  .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
+  .adm-actions{margin-left:auto}
+  .adm-consult-label,.adm-menu-label{display:none}
+  .adm-menu{width:38px;padding:0 !important;justify-content:center}
+  .adm-tag{padding:2px 8px !important;font-size:11px !important}
+  /* On a phone each data takes its own lines: its name, then one value under the other, each naming
+     the record it comes from. */
+  .fu-grid{grid-template-columns:minmax(0,1fr)}
+  .fu-head{display:none}
+  .fu-span{grid-column:auto}
+  .fu-label-sm{display:block}
+  .fu-status{display:none}
+  .fu-status-sm{display:inline}
+  .fu-bar{flex-wrap:nowrap !important}
+}
+</style>
+<script src="../shared/mockup.js"></script>
+<script src="../shared/couverture-theme.js"></script>
+<script src="../shared/comic-skin.js"></script>
+<script src="../shared/comic-bubbles.js"></script>
+<script src="../shared/comic-frames.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
+<div style="--placeholder: {{t.muted}}; --focus: {{t.text}}; --focus-gap: {{t.bg}}; min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
+
+  <header style="--placeholder: {{hdrMuted}}; --focus: {{t.hText}}; --focus-gap: {{hdrBg}}; position: sticky; top: 0; z-index: 20; background: {{hdrBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
+        <sc-if value="{{t.lgMark}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
+        <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
+      </a>
+      <span class="adm-tag" style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
+      <div class="adm-search" style="min-width: 0; display: flex; align-items: center; gap: 8px">
+        <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Retrouver une fiche</label>
+        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 1 1 auto; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+      </div>
+      <div class="adm-actions" style="display: flex; align-items: center; gap: 8px">
+      <a href="#" aria-label="Aller à la consultation" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px"><span class="adm-consult-label">Aller à la consultation</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+      <button type="button" aria-label="Menu" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" class="adm-menu" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; flex: none; padding: 0 12px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg><span class="adm-menu-label">Menu</span></button>
+      </div>
+
+      <sc-if value="{{menuOpen}}">
+    <button type="button" tabindex="-1" aria-label="Fermer le menu" onClick="{{closeMenu}}" style="position: fixed; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default"></button>
+    <nav id="admin-menu" aria-label="Plan de l'administration" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 8px); right: 24px; width: min(340px, calc(100% - 48px)); max-height: 80vh; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 12px; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: {{t.rowB}}">
+        <span style="padding-left: 10px; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">Menu</span>
+        <button type="button" aria-label="Fermer le menu" onClick="{{toggleMenu}}" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <sc-for list="{{menu}}" as="g">
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <span style="padding: 0 10px 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: {{t.muted}}">{{g.label}}</span>
+          <sc-for list="{{g.items}}" as="m">
+            <a href="#" aria-current="{{m.current}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; padding: 0 10px; font-size: 14px; border-radius: {{t.btnR}}; background: {{m.bg}}; color: {{m.fg}}; font-weight: {{m.fw}}">
+              <span>{{m.label}}</span>
+              <span style="font-size: 13px; font-variant-numeric: tabular-nums; opacity: .85">{{m.n}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="padding-top: 8px; border-top: {{t.rowB}}">
+        <button type="button" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg>Se déconnecter</button>
+      </div>
+    </nav>
+      </sc-if>
+    </div>
+  </header>
+
+  <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box">
+    <main style="display: flex; flex-direction: column; gap: 18px">
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <nav aria-label="Fil d'Ariane" style="font-size: 13px; color: {{t.muted}}; overflow-wrap: anywhere">
+          <a href="#" style="color: {{t.link}}; font-weight: 700">Administration</a>
+          <span aria-hidden="true" style="margin: 0 6px">›</span>
+          <a href="#" style="color: {{t.link}}; font-weight: 700">{{x.list}}</a>
+          <span aria-hidden="true" style="margin: 0 6px">›</span>
+          <span aria-current="page">Fusion</span>
+        </nav>
+        <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">{{x.heading}}</h1>
+        <span style="font-size: 14px; color: {{t.muted}}"><span style="font-weight: 700; color: {{t.text}}">{{x.a.name}}</span> et <span style="font-weight: 700; color: {{t.text}}">{{x.b.name}}</span></span>
+      </div>
+
+      <div class="fu-layout">
+        <form style="min-width: 0; display: flex; flex-direction: column; gap: 22px" onSubmit="{{noSubmit}}">
+
+          <section aria-labelledby="s-data" style="{{block}}">
+            <span style="{{kickStyle}}">{{k.data}}</span>
+            <h2 id="s-data" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Ce que garde la fiche</h2>
+
+            <div class="fu-grid">
+              <div class="fu-head">
+                <span></span>
+                <sc-for list="{{records}}" as="r">
+                  <span style="display: flex; flex-direction: column; padding: 0 2px; border-bottom: {{t.rowB}}">
+                    <strong style="font-size: 15px">{{r.name}}</strong>
+                    <span style="font-size: 12px; color: {{t.muted}}">{{r.links}} · modifié le {{r.modified}}</span>
+                  </span>
+                </sc-for>
+              </div>
+
+              <sc-for list="{{rows}}" as="row">
+                <span id="{{row.id}}" style="padding-top: 9px; font-weight: 700; font-size: 13px">{{row.label}}</span>
+                <sc-if value="{{row.same}}">
+                  <div class="fu-span" style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 8px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}">
+                    <span>{{row.same}}</span>
+                    <span style="font-size: 12px; color: {{t.muted}}">Identique dans les deux fiches</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{row.options}}">
+                  <div class="fu-span" role="radiogroup" aria-labelledby="{{row.id}}" style="display: contents">
+                    <sc-for list="{{row.options}}" as="o">
+                      <label style="{{o.style}}">
+                        <input class="fu-radio" type="radio" name="{{row.id}}" checked="{{o.checked}}" onClick="{{o.pick}}">
+                        <span aria-hidden="true" style="{{o.dot}}"><sc-if value="{{o.checked}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"></path></svg></sc-if></span>
+                        <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                          <span class="fu-label-sm" style="font-size: 12px; color: {{t.muted}}">{{o.from}}</span>
+                          <span style="{{o.textStyle}}">{{o.text}}</span>
+                        </span>
+                      </label>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 6px 24px; padding: 10px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; font-size: 13px">
+              <sc-for list="{{result}}" as="p"><span>{{p.label}} : <strong>{{p.value}}</strong></span></sc-for>
+            </div>
+          </section>
+
+          <section aria-labelledby="s-links" style="{{block}}">
+            <span style="{{kickStyle}}">{{k.links}}</span>
+            <h2 id="s-links" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Ce qui passe à la fiche</h2>
+            <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{x.moved}}" as="m"><li style="display: flex; flex-wrap: wrap; gap: 4px 10px; padding-bottom: 6px; border-bottom: {{t.rowB}}"><strong>{{m.count}}</strong><span style="color: {{t.muted}}">{{m.detail}}</span></li></sc-for>
+            </ul>
+          </section>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <div style="position: sticky; bottom: 0; z-index: 15; background: {{barBg}}; border-top: {{barB}}; box-shadow: 0 -6px 16px rgba(0,0,0,.08)">
+    <div class="fu-bar" style="max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px">
+      <span style="font-size: 13px; color: {{t.muted}}"><span class="fu-status">{{statusText}}</span><span class="fu-status-sm">{{statusShort}}</span></span>
+      <span style="display: flex; gap: 8px; margin-left: auto">
+        <a href="#" style="display: inline-flex; align-items: center; height: 40px; padding: 0 16px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; color: {{t.secText}}; font-weight: 700; font-size: 14px">Annuler</a>
+        <button type="button" onClick="{{openConfirm}}" aria-disabled="{{fuseDisabled}}" style="opacity: {{fuseOpacity}}; height: 40px; padding: 0 20px; border: 0; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-family: {{t.fb}}; font-weight: 700; font-size: 15px; cursor: pointer">Fusionner…</button>
+      </span>
+    </div>
+  </div>
+
+  <sc-if value="{{confirmOpen}}">
+    <div style="position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.45)">
+      <div role="dialog" aria-modal="true" aria-labelledby="d-title" style="--focus-gap: {{panelBg}}; width: min(520px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; box-sizing: border-box; padding: 20px 22px; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 14px">
+        <h2 id="d-title" style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 22px; line-height: 1.15; text-transform: {{t.fdTT}}">{{x.confirmTitle}}</h2>
+        <p style="margin: 0">La fusion est définitive.</p>
+        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px">
+          <sc-for list="{{impact}}" as="i"><li>{{i}}</li></sc-for>
+        </ul>
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px">
+          <button type="button" onClick="{{closeConfirm}}" style="height: 40px; padding: 0 16px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">Annuler</button>
+          <button type="button" style="height: 40px; padding: 0 18px; border: 0; border-radius: {{t.btnR}}; background: {{t.warn}}; color: {{t.onWarn}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer">Fusionner définitivement</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</template>
+<script>
+// Shared defaults: each theme only states what its identity changes.
+const BASE = {
+  kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
+  kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
+  mkDisp: 'none', lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
+  tagTT: 'none', tagLS: '0', h2fs: 'normal', h2sh: 'none', h2tt: 'none', h2line: '0', h2pad: '0', h2r: '0', h2bg: 'transparent',
+  fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none', thR: '3px'
+};
+
+// Tokens of a theme drawn in cases, from its page, panel and border colours: « La planche encrée » starts from them.
+const cases = (c) => ({
+  ...BASE,
+  bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
+  acc: '#FFB547', onAcc: c.bg, link: '#FFB547', warn: '#FF7A6B', onWarn: c.bg, del: '#FF7A6B', nBg: '#FBF3EA', nFg: c.bg,
+  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
+  tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
+  inBg: c.bg, inB: '2px solid ' + c.border, inR: '14px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', thR: '6px 3px 7px 4px',
+  hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
+  helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px',
+  h2c: c.bg, h2bg: '#FBF3EA', h2pad: '4px 14px', h2r: '999px', h2size: '17px', h2lift: 'calc(-1 * clamp(14px, 2.2vw, 22px) - 20px)', cTop: '16px', tail: true,
+  infoBg: '#4FD1C5', infoFg: c.bg
+});
+
+// « La planche encrée »: a comic page, white outside its blocks, black ink throughout. Its blocks become
+// cases of their own colours, with hand-drawn edges and balloon titles (comic-skin.js): the theme
+// itself only sets what the template draws.
+const planche = {
+  ...cases({ bg: '#FFFFFF', panel: '#FFFFFF', border: '#111111', soft: '#111111', muted: '#111111' }),
+  text: '#111111', acc: '#111111', onAcc: '#FFFFFF', link: '#111111', warn: '#F2775A', onWarn: '#111111', del: '#B42318', nBg: '#FFFFFF', nFg: '#111111',
+  fb: "Delius, 'DM Sans', system-ui, sans-serif",
+  cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0',
+  tBg: '#FFFFFF', tB: '3px solid #111111', tR: '0', rowB: '1px solid #111111',
+  inBg: '#FFFFFF', inB: '2px solid #111111', secB: '2px solid #111111', secText: '#111111', thR: '0', chipR: '999px',
+  hBg: '#FFFFFF', hText: '#111111', hLine: '3px solid #111111', hInBg: '#FFFFFF', hInB: '2px solid #111111', hInText: '#111111',
+  helpBg: '#FFC93C', helpText: '#111111', helpR: '50%', helpB: '2px solid #111111',
+  lgBg: '#FFFFFF', lgText: '#111111', lgPad: '3px 14px', lgR: '0', lgSh: '0 0 0 3px #111111, 7px 7px 0 #111111', lgFont: '800 22px Fraunces, Georgia, serif', lgDot: 'transparent',
+  tagBg: '#FFFFFF', tagText: '#111111', tagB: '2px solid #111111',
+  h2c: '#111111', h2bg: 'transparent', h2pad: '0', h2r: '0', h2rot: '0deg', h2lift: '0', cTop: '0', tail: false,
+  infoBg: '#4FB0E6', infoFg: '#111111', colBg: '#63C36A', colFg: '#111111',
+  cvB: '3px solid #111111', cvBg: '#FFFFFF', cvR: '0', cvSh: '6px 6px 0 #111111', imgR: '0',
+  pal: [['#FFC93C', '#111111'], ['#4FB0E6', '#111111'], ['#F483AE', '#111111']]
+};
+
+// Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
+// another ink of the same theme carries the text or the fill.
+const THEMES = {
+  planche,
+  gazette: {
+    ...BASE,
+    bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
+    acc: '#2B1030', onAcc: '#FBF3EA', link: '#9A3D12', warn: '#9A3D12', onWarn: '#FBF3EA', del: '#9A3D12', nBg: '#F1E3D6', nFg: '#2B1030',
+    fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+    cBg: 'transparent', cB: '0', cBT: '2px solid #2B1030', cR: '0', cPad: '14px 0 0',
+    tBg: 'transparent', tB: '1px solid #D9C6CF', tR: '0', rowB: '1px solid #D9C6CF',
+    inBg: '#FFFFFF', inB: '2px solid #2B1030', inR: '0', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', thR: '0',
+    hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
+    helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    tagBg: '#FFB547', tagText: '#2B1030', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.08em',
+    h2c: '#2B1030', h2size: '21px',
+    kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase',
+    infoBg: '#2B1030', infoFg: '#FBF3EA'
+  },
+  sommaire: {
+    ...BASE,
+    bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
+    acc: '#1D4ED8', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#E63946', onWarn: '#FFFFFF', del: '#C62D3A', nBg: '#111111', nFg: '#FFFFFF',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 48px)',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
+    tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
+    inBg: '#FFFFFF', inB: '2px solid #111111', inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', thR: '0',
+    hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
+    helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    tagBg: '#111111', tagText: '#FFFFFF', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.06em',
+    h2c: '#111111', h2size: '24px', h2tt: 'uppercase', h2line: '4px solid #111111', h2pad: '0 0 6px',
+    infoBg: '#1D4ED8', infoFg: '#FFFFFF'
+  },
+  festival: {
+    ...BASE,
+    bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
+    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#C2412F', onWarn: '#FFFFFF', del: '#C2412F', nBg: '#F6C343', nFg: '#1B2350',
+    fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)',
+    tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
+    inBg: '#FFFFFF', inB: '2px solid #1B2350', inR: '14px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', thR: '8px',
+    hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
+    helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: '#F6C343', tagText: '#1B2350', tagB: '0', tagR: '999px',
+    h2c: '#1B2350', h2size: '21px', mkDisp: 'inline-block',
+    kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (i, label) => 'Station ' + label,
+    infoBg: '#1F3A93', infoFg: '#FFFFFF'
+  },
+  riso: {
+    ...BASE,
+    bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
+    acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FF48B0', onWarn: '#002284', del: '#C4007A', nBg: 'rgba(0,120,191,.12)', nFg: '#00578C',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.4vw, 28px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)',
+    tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
+    inBg: '#FFFFFF', inB: '2px dashed #0078BF', inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', thR: '0',
+    hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
+    helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    tagBg: 'transparent', tagText: '#0078BF', tagB: '2px solid #FF48B0', tagR: '0',
+    h2c: '#0078BF', h2size: '16px', h2sh: '3px 2px 0 rgba(255,72,176,.7)',
+    infoBg: '#FFE800', infoFg: '#002284'
+  },
+  librairie: {
+    ...BASE,
+    bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
+    acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', warn: '#B5523B', onWarn: '#FBF7EE', del: '#A3472F', nBg: '#EFE6D2', nFg: '#2A2420',
+    fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)',
+    tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
+    inBg: '#FFFFFF', inB: '1px solid #B8924A', inR: '2px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', thR: '1px',
+    hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF', hMuted: '#D8C9A8',
+    helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: 'transparent', tagText: '#B8924A', tagB: '1px solid #B8924A', tagR: '0', tagTT: 'uppercase', tagLS: '.3em',
+    h2c: '#1E3B2F', h2size: '22px', h2fs: 'italic',
+    infoBg: '#1E3B2F', infoFg: '#F5EEDF'
+  },
+  vignettes: {
+    ...BASE,
+    bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
+    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#C8366B', onWarn: '#FFFFFF', del: '#B42E5E', nBg: '#9DD6DD', nFg: '#23323A',
+    fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
+    tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
+    inBg: '#FFFFFF', inB: '2px solid #0F7C8C', inR: '14px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', thR: '4px',
+    hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A', hMuted: '#5B6B72',
+    helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    tagBg: '#FFD23F', tagText: '#23323A', tagB: '0', tagR: '999px',
+    h2c: '#23323A', h2size: '21px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (i, label) => 'Page ' + i + ' · ' + label,
+    infoBg: '#0F7C8C', infoFg: '#FFFFFF'
+  }
+};
+
+// « La couverture du jour »: the colours of the day's featured cover, on the festival's rounded forms
+// (shared/couverture-theme.js).
+THEMES.couverture = { ...THEMES.festival, ...COUVERTURE_THEME };
+
+const ICONS = {
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4',
+  intent: 'M6 3h12v18l-6-4-6 4V3z',
+  merge: 'M6 4v5a5 5 0 0 0 5 5h1a5 5 0 0 1 5 5v1 M18 4v5a5 5 0 0 1-5 5 M3 7l3-3 3 3 M15 7l3-3 3 3',
+  trash: 'M4 7h16 M9 7V4h6v3 M6 7l1 13h10l1-13 M10 11v6 M14 11v6',
+  business: 'M12 7v6 M12 17h.01',
+  functional: 'M4 12a8 8 0 0 1 14-5.3 M20 4v4h-4 M20 12a8 8 0 0 1-14 5.3 M4 20v-4h4',
+  technical: 'M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z'
+};
+// What every block, field and button of the page shares, whatever the record.
+function commonVals(view, t, kick) {
+  const menuOpen = view.state?.menuOpen ?? (view.props.menuOpen ?? false);
+  document.documentElement.style.overflow = menuOpen ? 'hidden' : '';
+  const panelBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+  const field = 'width: 100%; box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
+  return {
+    icons: ICONS,
+    hdrBg: t.hBg === 'transparent' ? t.bg : t.hBg, hdrMuted: t.hMuted ?? t.muted,
+    menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
+    panelBg, panelB: t.cB !== '0' ? t.cB : (t.cBT !== '0' ? t.cBT : '2px solid ' + t.line), panelSh: '0 18px 40px rgba(0,0,0,.28)',
+    toggleMenu: () => view.setState({ menuOpen: !menuOpen }),
+    closeMenu: () => view.setState({ menuOpen: false }),
+    // A click anywhere outside an open menu closes it.
+    noSubmit: (e) => e.preventDefault(),
+    block: 'position: relative; margin-top: ' + (t.cTop ?? '0') + '; padding: ' + t.cPad + '; border: ' + t.cB + '; border-top: ' + t.cBT + '; border-radius: ' + t.cR + '; background: ' + t.cBg + '; box-shadow: ' + t.cSh + '; display: flex; flex-direction: column; gap: 14px; --focus-gap: ' + panelBg + ';',
+    kickStyle: 'display: ' + t.kDisp + '; position: ' + t.kPos + '; top: ' + t.kTop + '; left: ' + t.kLeft + '; width: max-content; margin-bottom: -6px; padding: ' + t.kPad + '; border-radius: ' + t.kR + '; background: ' + t.kBg + '; color: ' + t.kText + '; font-family: ' + t.kFont + '; font-weight: ' + t.kW + '; font-size: ' + t.kSize + '; letter-spacing: ' + t.kLS + '; text-transform: ' + t.kTT + ';',
+    h2: 'position: relative; align-self: ' + (t.h2line !== '0' ? 'stretch' : 'flex-start') + '; margin: ' + (t.h2lift ?? '0') + ' 0 0; transform: rotate(' + (t.h2rot ?? '0deg') + '); display: flex; align-items: center; gap: 12px; padding: ' + t.h2pad + '; border-radius: ' + t.h2r + '; border-bottom: ' + t.h2line + '; background: ' + t.h2bg + '; color: ' + t.h2c + '; font-family: ' + t.fd + '; font-weight: ' + t.fdw + '; font-style: ' + t.h2fs + '; font-size: ' + t.h2size + '; line-height: 1.15; text-transform: ' + t.h2tt + '; text-shadow: ' + t.h2sh + ';',
+    // As on the dashboard, a speech bubble straddles the top edge of its panel, its tail pointing into it.
+    tail: t.tail ? 'position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: ' + t.h2bg + ';' : 'display: none;',
+    mark: 'display: ' + t.mkDisp + '; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF;',
+    lbl: 'font-weight: 700; font-size: 13px;',
+    help: 'font-size: 12px; color: ' + t.muted + ';',
+    inp: field + ' height: 42px; padding: 0 14px;',
+    area: field + ' padding: 10px 14px; resize: vertical; line-height: 1.5;',
+    iconBtn: 'width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: ' + t.text + '; cursor: pointer;',
+    addBtn: 'display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 12px; box-sizing: border-box; border: 2px dashed ' + t.line + '; border-radius: ' + t.btnR + '; background: transparent; color: ' + t.text + '; font-family: ' + t.fb + '; font-weight: 700; font-size: 13px; cursor: pointer;',
+    menuBtn: 'display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: ' + t.btnR + '; background: transparent; color: ' + t.text + '; font-family: ' + t.fb + '; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer;',
+    barBg: t.cBg === 'transparent' ? t.bg : t.cBg,
+    barB: t.cBT !== '0' ? t.cBT : '2px solid ' + t.line
+  };
+}
+
+const menuOf = (t, current) => {
+  const item = (label, n) => ({
+    label, n, current: label === current ? 'page' : 'false',
+    bg: label === current ? t.acc : 'transparent', fg: label === current ? t.onAcc : t.text, fw: label === current ? '700' : '500'
+  });
+  return [
+    { label: 'Accueil', items: [item('Tableau de bord', ''), item('Nouvelle édition', '')] },
+    { label: 'Collection', items: [item('Albums', '2 847'), item('Séries', '412'), item('Éditions', '2 913'), item("Intentions d'acquisition", '18')] },
+    { label: 'Auteurs et éditeurs', items: [item('Auteurs', '1 106'), item('Éditeurs', '96')] },
+    { label: 'Référentiels', items: [item('Genres', '24'), item('Univers', '37')] },
+    { label: 'Réglages', items: [item('Paramétrage', ''), item('Statistiques privées', '')] }
+  ];
+};
+
+// Two records saved twice. Neither is favoured (fonctionnel/regles-metier/fusion-des-fiches.md): a value
+// filled on one side only is kept to begin with, but where both differ the choice is left open.
+const EXAMPLES = {
+  auteur: {
+    list: 'Auteurs', heading: 'Fusionner deux auteurs', confirmTitle: 'Fusionner les deux auteurs ?', noun: "l'auteur",
+    a: { name: 'Gotlib', links: 'crédité sur 2 séries · 24 albums', modified: '30 mars 2026' },
+    b: { name: 'Marcel Gotlib', links: 'crédité sur 1 série · 3 albums', modified: '2 février 2026' },
+    rows: [
+      { id: 'first', label: 'Prénom', a: 'Marcel', b: 'Marcel' },
+      { id: 'last', label: 'Nom', a: 'Gotlieb', b: 'Gotlib' },
+      { id: 'pen', label: 'Pseudonyme', a: 'Gotlib', b: '' },
+      { id: 'nat', label: 'Nationalité', a: 'Française', b: 'Française' },
+      { id: 'bio', label: 'Biographie', long: true,
+        a: 'Né à Paris en 1934, il entre à Pilote en 1965, où naissent Gai-Luron et la Rubrique-à-brac, puis cofonde L\'Écho des savanes en 1972 et Fluide glacial en 1975, qu\'il dirige jusqu\'en 1987.',
+        b: 'Auteur de la Rubrique-à-brac et de Gai-Luron.' }
+    ],
+    result: (v) => {
+      const shown = v.pen || [v.first, v.last].filter(Boolean).join(' ');
+      const sort = v.pen || [v.last, v.first].filter(Boolean).join(' ');
+      return [{ label: 'Affiché', value: shown }, { label: 'Classé à', value: sort }, { label: 'Initiale', value: sort ? sort[0].toUpperCase() : '—' }];
+    },
+    pending: (v) => v.last == null,
+    moved: [
+      { count: 'Crédité sur 2 séries', detail: 'les 2 de Gotlib et celle de Marcel Gotlib, commune aux deux fiches' },
+      { count: 'Crédité sur 26 albums', detail: 'les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches' }
+    ],
+    impact: (name) => ['Les deux fiches n\'en feront plus qu\'une : ' + name + '.', name + ' sera crédité sur les 2 séries et les 26 albums des deux fiches.']
+  },
+  genre: {
+    list: 'Genres', heading: 'Fusionner deux genres', confirmTitle: 'Fusionner les deux genres ?', noun: 'le genre',
+    a: { name: 'Science-fiction', links: '12 séries · 48 albums', modified: '14 janvier 2026' },
+    b: { name: 'SF', links: '3 séries · 9 albums', modified: '2 mars 2026' },
+    rows: [
+      { id: 'label', label: 'Libellé', a: 'Science-fiction', b: 'SF' }
+    ],
+    result: (v) => [{ label: 'Libellé', value: v.label ?? '—' }],
+    pending: () => false,
+    moved: [
+      { count: '15 séries', detail: 'les 12 de Science-fiction et les 3 de SF' },
+      { count: '55 albums', detail: 'les 48 de Science-fiction et les 9 de SF, dont 2 communs aux deux fiches' }
+    ],
+    impact: (name) => ['Les deux fiches n\'en feront plus qu\'une : ' + name + '.', name + ' classera les 15 séries et les 55 albums des deux fiches.']
+  }
+};
+
+class View extends Mockup {
+  renderVals() {
+    const t = THEMES[this.props.theme] ?? THEMES.planche;
+    const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.auteur;
+    const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
+    // What the user has chosen so far: 'a', 'b', or nothing yet where both records hold a value.
+    const initial = Object.fromEntries(x.rows.map((r) => [r.id, r.a === r.b ? 'a' : !r.b ? 'a' : !r.a ? 'b' : (this.props.choix === 'complet' ? 'b' : null)]));
+    const picks = { ...initial, ...(this.state?.picks ?? {}) };
+    const values = Object.fromEntries(x.rows.map((r) => [r.id, picks[r.id] == null ? null : (picks[r.id] === 'a' ? r.a : r.b)]));
+    const pick = (id, side) => () => this.setState({ picks: { ...picks, [id]: side } });
+    const option = (r, side) => {
+      const text = side === 'a' ? r.a : r.b;
+      const checked = picks[r.id] === side;
+      return {
+        checked, pick: pick(r.id, side), from: side === 'a' ? x.a.name : x.b.name,
+        text: text || '—',
+        textStyle: (text ? '' : 'color: ' + t.muted + ';') + (r.long ? ' display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px;' : ''),
+        style: 'position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; box-sizing: border-box; border: 2px solid ' + (checked ? t.acc : t.line) + '; border-radius: ' + t.tR + '; background: ' + (checked ? t.tBg : 'transparent') + '; cursor: pointer;',
+        dot: 'width: 20px; height: 20px; flex: none; margin-top: 2px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid ' + (checked ? t.acc : t.line) + '; background: ' + (checked ? t.acc : 'transparent') + '; color: ' + t.onAcc + ';'
+      };
+    };
+    const rows = x.rows.map((r) => r.a === r.b
+      ? { id: r.id, label: r.label, same: r.a || '—', options: null }
+      : { id: r.id, label: r.label, same: null, options: [option(r, 'a'), option(r, 'b')] });
+    const pending = x.rows.filter((r) => picks[r.id] == null).length;
+    const result = x.result(values);
+    const name = result[0].value;
+    const confirmOpen = this.state?.confirmOpen ?? (this.props.dialogue === 'confirmation');
+    return {
+      ...commonVals(this, t, kick),
+      t, x, rows, result,
+      records: [x.a, x.b],
+      statusText: pending ? (pending === 1 ? '1 donnée reste à choisir' : pending + ' données restent à choisir') : 'Tout est choisi',
+      statusShort: pending ? pending + ' à choisir' : 'Tout est choisi',
+      impact: x.impact(name),
+      fuseDisabled: pending ? 'true' : 'false', fuseOpacity: pending ? '.55' : '1',
+      confirmOpen: confirmOpen && !pending,
+      openConfirm: () => { if (!pending) this.setState({ confirmOpen: true }); },
+      closeConfirm: () => this.setState({ confirmOpen: false }),
+      k: { data: kick(1, 'Données'), links: kick(2, 'Fiches liées') },
+      menu: menuOf(t, x.list)
+    };
+  }
+}
+
+Mockup.mount(View, {
+  theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['auteur', 'genre'], default: 'auteur' },
+  choix: { label: 'Choix', editor: 'enum', options: ['en-cours', 'complet'], default: 'en-cours' },
+  dialogue: { label: 'Dialogue', editor: 'enum', options: ['aucun', 'confirmation'], default: 'aucun' },
+  menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
+});
+</script>
+</body>
+</html>

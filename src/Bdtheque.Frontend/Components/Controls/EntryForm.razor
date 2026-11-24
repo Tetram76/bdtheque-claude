@@ -31,7 +31,8 @@
             }
             @ChildContent
         </fieldset>
-        <SaveBar State="State" SaveLabel="@SaveLabel" CancelHref="@CancelHref" Saving="Saving" />
+        <SaveBar State="State" SaveLabel="@SaveLabel" CancelHref="@CancelHref" Saving="Saving" StateText="@StateText"
+                 StateShortText="@StateShortText" SaveDisabled="SaveDisabled" />
     </form>
 </div>
 
@@ -84,6 +85,17 @@
 
     [Parameter]
     public EventCallback OnSave { get; set; }
+
+    /// <summary>What the bar says instead of the state of the record, and in short (<see cref="SaveBar"/>).</summary>
+    [Parameter]
+    public string? StateText { get; set; }
+
+    [Parameter]
+    public string? StateShortText { get; set; }
+
+    /// <summary>Whether the record cannot be saved yet.</summary>
+    [Parameter]
+    public bool SaveDisabled { get; set; }
 
     /// <summary>
     /// Brings into view what is to correct, the error of the saving being rendered: the first field in error, focused, or

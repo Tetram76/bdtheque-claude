@@ -224,6 +224,22 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     public void RemoveGenre(Genre genre) => _genres.RemoveById(genre);
 
+    /// <summary>
+    /// Classes the album under <paramref name="kept"/> instead of <paramref name="merged"/>, as the merge of two genres does
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md); an album of both genres keeps <paramref name="kept"/> once.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same genre twice.</exception>
+    public void TransferGenre(Genre merged, Genre kept) => _genres.Transfer(merged, kept);
+
+    /// <summary>
+    /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> on the album, in the same roles, as the merge of two
+    /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md); a role both of them hold is credited once.
+    /// </summary>
+    /// <returns>Each contribution removed as a duplicate, with the one that replaces it, which a saved search designating it designates instead.</returns>
+    /// <exception cref="ArgumentException">The same author twice.</exception>
+    public IReadOnlyList<(Guid Removed, Guid Kept)> TransferAuthor(Author merged, Author kept) =>
+        Contribution.Transfer(_contributions, merged, kept);
+
     public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);

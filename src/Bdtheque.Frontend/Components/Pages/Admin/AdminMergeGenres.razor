@@ -1,0 +1,172 @@
+@attribute [Route(AppPaths.AdminMergeGenres)]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@inject IStringLocalizer<AdminMergeGenres> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two genres (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the genres, which
+   gives the genre and the other one: the label the genre keeps, of the one or the other, what passes to it, then the
+   confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge, which the API alone holds:
+   it sends, data by data, the record whose value is kept. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminGenreMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Label, Preview.Second.Label]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminGenres" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)">
+            <MergeChoice Id="merge-label" Label="@L["Label"]" FirstRecord="@Preview.First.Label" SecondRecord="@Preview.Second.Label"
+                         First="@Preview.First.Label" Second="@Preview.Second.Label" @bind-Selected="Choices!.Label" />
+        </MergeData>
+        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Label" SecondName="@Preview.Second.Label" Count="Count" />
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(Kept)</li>
+                    @if (Merge.Linked(Preview.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Classes", Kept, linked]</li>
+                    }
+                </ul>
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The genre the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "genre")]
+    public Guid? GenreId { get; set; }
+
+    /// <summary>The other genre, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two genres as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public GenreMergePreview? Preview { get; set; }
+
+    /// <summary>The record each data is kept from, as the user chose it.</summary>
+    [PersistentState]
+    public GenreMergeChoices? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Genres"], AppPaths.AdminGenres), new(L["Breadcrumb"])];
+
+    private int Pending => Choices!.Label is null ? 1 : 0;
+
+    // The label the genre keeps, that the confirmation names it by.
+    private string Kept => Choices!.Label == MergeSide.Second ? Preview!.Second.Label : Preview!.First.Label;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is not null)
+            return;
+        if (GenreId is not { } first || OtherId is not { } second)
+        {
+            Navigation.NavigateTo(AppPaths.AdminGenres);
+            return;
+        }
+
+        try
+        {
+            Preview = await Api.GetAsync<GenreMergePreview>($"/admin/genres/merge?first={first}&second={second}");
+            // A single data, the same or not in both: retained at once only when there is nothing to choose.
+            Choices = new GenreMergeChoices { Label = Preview.First.Label == Preview.Second.Label ? MergeSide.First : null };
+        }
+        catch (ApiProblemException exception)
+        {
+            _loadProblem = exception.Problem;
+        }
+    }
+
+    private static MergeRecordHead Head(GenreMergeRecord record) => new(record.Label, null, record.ModifiedAt);
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<GenreMergeRequest, MergeResult>("/admin/genres/merge", new GenreMergeRequest(
+                new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+                Choices!.Label!.Value));
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminGenreMerged);
+            Navigation.NavigateTo(AppPaths.AdminGenres);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The genres as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+
+    /// <summary>The record each data of a genre is kept from, none while the user has not chosen.</summary>
+    public sealed class GenreMergeChoices
+    {
+        public MergeSide? Label { get; set; }
+    }
+}

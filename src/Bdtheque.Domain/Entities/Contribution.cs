@@ -91,4 +91,33 @@ public sealed class Contribution : EntityBase
         foreach (var (author, role) in credits.Where(w => !contributions.Exists(c => c.AuthorId == w.Author.Id && c.Role == w.Role)))
             contributions.Add(create(author, role));
     }
+
+    /// <summary>
+    /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> in every role the latter holds, as the merge of two
+    /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md): each contribution keeps its identity, which a saved search may
+    /// designate, and a role both of them hold is credited once, by the contribution of <paramref name="kept"/>.
+    /// </summary>
+    /// <returns>Each contribution removed as a duplicate, with the one that replaces it.</returns>
+    /// <exception cref="ArgumentException">The same author twice.</exception>
+    internal static IReadOnlyList<(Guid Removed, Guid Kept)> Transfer(List<Contribution> contributions, Author merged, Author kept)
+    {
+        MergeGuard.EnsureDistinct(merged, kept);
+
+        var replaced = new List<(Guid Removed, Guid Kept)>();
+        foreach (var contribution in contributions.Where(c => c.AuthorId == merged.Id).ToList())
+        {
+            if (contributions.Find(c => c.AuthorId == kept.Id && c.Role == contribution.Role) is { } held)
+            {
+                contributions.Remove(contribution);
+                replaced.Add((contribution.Id, held.Id));
+            }
+            else
+            {
+                contribution.Author = kept;
+                contribution.AuthorId = kept.Id;
+            }
+        }
+
+        return replaced;
+    }
 }

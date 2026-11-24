@@ -1,0 +1,26 @@
+---
+type: Référence visuelle
+title: 'Fusion de deux fiches'
+description: 'Écran de la fusion de deux fiches d''un même type : page dédiée, ce que garde la fiche donnée par donnée, ce qui passe à elle, barre de fusion et confirmation au futur ; à lire pour toute fusion.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T21:00:00Z }
+---
+
+# Fusion de deux fiches
+
+Écran de la fusion de deux fiches d'un même type ([Fusion de deux fiches](../../fonctionnel/regles-metier/fusion-des-fiches.md)), ouvert par « Continuer » du dialogue qui, depuis la liste de leur type, demande l'autre fiche ([Contenu](../liste-albums/contenu.md), fusion). Maquettes : [Maquettes](maquettes.md). Décliné selon chacun des thèmes comme une fiche de saisie, dans le ton de l'administration ([Déclinaison par thème](../saisie-album/declinaison-par-theme.md), [Ton](../administration/ton.md)) (présentation validée par l'utilisateur).
+
+De haut en bas :
+
+- **En-tête et menu** de l'administration ([En-tête et menu](../administration/en-tete-et-menu.md)), l'entrée du type de fiche étant l'entrée courante du menu.
+- **Fil d'Ariane** : Administration, la liste du type de fiche, puis « Fusion ».
+- **Titre** « Fusionner deux auteurs » (« deux genres »…), et dessous le nom des deux fiches (« Gotlib et Marcel Gotlib »).
+- **« Ce que garde la fiche »** (mention « Données ») : une ligne par donnée de la fiche, son nom à gauche, puis la valeur de chacune des deux fiches, côte à côte, sous l'en-tête de sa fiche : son nom, ce qui lui est rattaché (« crédité sur 2 séries · 24 albums », « 12 séries · 48 albums ») et sa date de dernière modification.
+  - Une donnée dont les valeurs diffèrent se choisit d'un clic sur l'une des deux, la valeur retenue marquée d'une coche et bordée de la couleur d'accent. Une valeur absente (« — ») se choisit aussi : c'est écarter celle de l'autre fiche.
+  - **Aucune fiche privilégiée** : une valeur renseignée d'un seul côté est retenue d'office ; deux valeurs renseignées et différentes ne le sont ni l'une ni l'autre, jusqu'au choix de l'utilisateur.
+  - Une donnée de même valeur dans les deux fiches est présentée une seule fois, sur toute la largeur, avec « Identique dans les deux fiches ».
+  - Un long texte (biographie, résumé…) est présenté sur quelques lignes.
+  - Sous les données, le **résultat** calculé, comme sur la fiche de saisie (« Affiché », « Classé à », « Initiale » d'un auteur).
+- **« Ce qui passe à la fiche »** (mention « Fiches liées ») : une ligne par type de fiche liée, dans l'ordre des types de fiche ([Ordre des types de fiche](../../fonctionnel/presentation/ordre-des-types-de-fiche.md)), son total après la fusion en gras, puis d'où il vient : « **Crédité sur 26 albums** — les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches ». Ce qui était lié aux deux fiches n'est compté qu'une fois, et dit « commun aux deux fiches », jamais « en double » ni « retiré » : rien n'en est perdu (décision de l'utilisateur). Un auteur est crédité sur des séries comme sur des albums (décision de l'utilisateur).
+- **Barre de fusion**, figée en bas comme la barre d'enregistrement d'une fiche de saisie : ce qui reste à choisir (« 2 données restent à choisir », « Tout est choisi »), **Annuler**, qui ramène à la liste, et **Fusionner…**, inactif tant qu'une donnée reste à choisir.
+- **Confirmation** : un dialogue « Fusionner les deux auteurs ? », ouvert par « Fusionner… », qui s'ouvre sur « La fusion est définitive. », puis dit, **au futur**, ce que fera la fusion, la confirmation précédant ce qu'elle annonce (décision de l'utilisateur) : « Les deux fiches n'en feront plus qu'une : Gotlib. », « Gotlib sera crédité sur les 2 séries et les 26 albums des deux fiches. ». **Annuler**, et **Fusionner définitivement**, de la couleur d'alerte du thème, comme la confirmation d'une suppression ([Contenu](../liste-albums/contenu.md), suppression).
+- **Smartphone** : chaque donnée sur ses propres lignes, son nom, puis ses deux valeurs l'une sous l'autre, chacune précédée du nom de sa fiche ; la barre de fusion réduit ce qui reste à choisir à « 2 à choisir ».

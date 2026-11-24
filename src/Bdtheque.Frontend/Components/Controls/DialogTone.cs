@@ -6,6 +6,9 @@ public enum DialogTone
     /// <summary>The confirmation of a deletion (visuel/liste-albums/contenu.md, suppression).</summary>
     Deletion,
 
+    /// <summary>The confirmation of a merge, definitive as a deletion (visuel/fusion/fusion-de-deux-fiches.md).</summary>
+    Merge,
+
     /// <summary>A refusal, which only closes (e.g. a deletion that a reference blocks).</summary>
     Refusal,
 

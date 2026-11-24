@@ -93,7 +93,16 @@ public sealed class SaveErrorTests : BunitContext
         Assert.Empty(saveError.FindAll(".error-actions a"));
     }
 
-    private IRenderedComponent<SaveError> RenderSaveError(ApiProblem problem, bool staticForm, bool canReload = true) =>
+    // A merge, whose choices the reload leaves, has no changes to show: it only reloads (visuel/fusion/fusion-de-deux-fiches.md).
+    [Fact]
+    public void FunctionalError_OfAFormWithoutChangesToShow_OnlyReloads()
+    {
+        var saveError = RenderSaveError(
+            new ApiProblem(ProblemCategory.Functional, StatusCodes.Status409Conflict, null, null), staticForm: false, canShowChanges: false);
+
+        Assert.Equal(["Recharger la fiche"], saveError.FindAll(".error-actions button").Select(button => button.TextContent.Trim()));
+    }
+    private IRenderedComponent<SaveError> RenderSaveError(ApiProblem problem, bool staticForm, bool canReload = true, bool canShowChanges = true) =>
         Render<SaveError>(parameters => parameters
             .Add(p => p.Problem, problem)
             .Add(p => p.Conflict, "Conflit.")
@@ -101,5 +110,6 @@ public sealed class SaveErrorTests : BunitContext
             .Add(p => p.Technical, "Non enregistrée.")
             .Add(p => p.CanReload, canReload)
             .Add(p => p.StaticForm, staticForm)
-            .Add(p => p.ReloadHref, staticForm ? ReloadHref : null));
+            .Add(p => p.ReloadHref, staticForm ? ReloadHref : null)
+            .Add(p => p.OnShowChanges, canShowChanges && !staticForm ? Microsoft.AspNetCore.Components.EventCallback.Factory.Create(this, () => { }) : default));
 }

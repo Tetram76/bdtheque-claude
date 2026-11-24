@@ -68,11 +68,12 @@
     private string ToneName => Tone.ToString().ToLowerInvariant();
 
     // A confirmation or a refusal interrupts to warn; the others do not.
-    private string Role => Tone is DialogTone.Deletion or DialogTone.Refusal ? "alertdialog" : "dialog";
+    private string Role => Tone is DialogTone.Deletion or DialogTone.Merge or DialogTone.Refusal ? "alertdialog" : "dialog";
 
     private IconName ToneIcon => Tone switch
     {
         DialogTone.Deletion => IconName.Delete,
+        DialogTone.Merge => IconName.Merge,
         DialogTone.Refusal => IconName.Blocked,
         DialogTone.Creation => IconName.Add,
         DialogTone.Information => IconName.Edit,

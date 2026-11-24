@@ -116,12 +116,13 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
         }
     }
 
-    // A contribution is added or removed, never modified: a removed one is deleted on save
-    // (BdthequeDbContext), its owner then being known from its original values only.
+    // A contribution is added or removed, its owner then being known from its original values only for a removed one, deleted on
+    // save (BdthequeDbContext); or credited to another author by the merge of two authors, which keeps it, as a saved search may
+    // designate it: a change from the one to the other (fonctionnel/regles-metier/fusion-des-fiches.md).
     private CarriedChange? ContributionChange(EntityEntry entry)
     {
         if (entry.State == EntityState.Modified)
-            return null;
+            return CreditChange(entry);
 
         var values = entry.State == EntityState.Added ? entry.CurrentValues : entry.OriginalValues;
         var ownerId = (values.GetValue<Guid?>(nameof(Contribution.AlbumId)) ?? values.GetValue<Guid?>(nameof(Contribution.SeriesId)))!.Value;
@@ -133,6 +134,22 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
             ChangeLogValue value = new ContributionValue(authorId, await _labels.AuthorAsync(authorId, cancellationToken), role);
             return Added(entry, ChangeLogAttribute.Contribution, value);
         });
+    }
+
+    // The only change a contribution undergoes: its author. Its owner and its role never change.
+    private CarriedChange? CreditChange(EntityEntry entry)
+    {
+        var before = entry.OriginalValues.GetValue<Guid>(nameof(Contribution.AuthorId));
+        var after = entry.CurrentValues.GetValue<Guid>(nameof(Contribution.AuthorId));
+        if (before == after)
+            return null;
+
+        var ownerId = (entry.OriginalValues.GetValue<Guid?>(nameof(Contribution.AlbumId)) ?? entry.OriginalValues.GetValue<Guid?>(nameof(Contribution.SeriesId)))!.Value;
+        var role = entry.OriginalValues.GetValue<ContributionRole>(nameof(Contribution.Role));
+        return new CarriedChange(ownerId, async cancellationToken => new ChangeLogChange(
+            ChangeLogAttribute.Contribution,
+            new ContributionValue(before, await _labels.AuthorAsync(before, cancellationToken), role),
+            new ContributionValue(after, await _labels.AuthorAsync(after, cancellationToken), role)));
     }
 
     private static CarriedChange VisualChange(EntityEntry entry)
