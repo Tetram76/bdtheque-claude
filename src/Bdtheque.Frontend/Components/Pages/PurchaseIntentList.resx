@@ -15,21 +15,13 @@
   <data name="Title" xml:space="preserve"><value>Intentions d'acquisition</value></data>
   <data name="ListTitle" xml:space="preserve"><value>Liste des intentions d'acquisition</value></data>
   <data name="Search.Label" xml:space="preserve"><value>Rechercher une intention d'acquisition</value></data>
-  <data name="Search.Placeholder" xml:space="preserve"><value>Titre de l'album ou de sa série…</value></data>
+  <data name="Search.Placeholder" xml:space="preserve"><value>Titre de l'album, de sa série ou ISBN…</value></data>
   <data name="Count.None" xml:space="preserve"><value>Aucune intention</value></data>
   <data name="Count.One" xml:space="preserve"><value>1 intention</value></data>
   <data name="Count.Other" xml:space="preserve"><value>{0} intentions</value></data>
   <data name="Order" xml:space="preserve"><value>Dans l'ordre des albums</value></data>
-  <data name="Column.Cover" xml:space="preserve"><value>Couverture</value></data>
-  <data name="Column.Album" xml:space="preserve"><value>Album visé</value></data>
-  <data name="Column.Target" xml:space="preserve"><value>Porte sur</value></data>
-  <data name="Column.State" xml:space="preserve"><value>Possession</value></data>
-  <data name="Column.Created" xml:space="preserve"><value>Posée le</value></data>
-  <data name="Target.Album" xml:space="preserve"><value>Album</value></data>
-  <data name="Target.AnyEdition" xml:space="preserve"><value>toute édition</value></data>
-  <data name="Target.Edition" xml:space="preserve"><value>Édition</value></data>
   <data name="Empty.Text" xml:space="preserve"><value>Aucune intention d'acquisition ne correspond à « {0} ».</value></data>
-  <data name="Empty.SearchedIn" xml:space="preserve"><value>le titre de l'album et sur celui de sa série</value></data>
+  <data name="Empty.SearchedIn" xml:space="preserve"><value>le titre de l'album, sur celui de sa série et sur l'ISBN de l'édition visée</value></data>
   <data name="Empty.Clear" xml:space="preserve"><value>Effacer la recherche</value></data>
   <data name="Filter.Series" xml:space="preserve"><value>Série</value></data>
   <data name="Filter.Author" xml:space="preserve"><value>Auteur</value></data>

@@ -236,6 +236,9 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal([intended, bravoEdition.Id], EditionIds(await ListAsync<EditionListItem>("editions", $"q={Uri.EscapeDataString("2 205")}")));
         Assert.Equal([alphaEdition.Id, intended], EditionIds(await ListAsync<EditionListItem>("editions", $"albumId={alpha.Id}")));
         Assert.Equal([bravoEdition.Id], EditionIds(await ListAsync<EditionListItem>("editions", $"publisherCollectionId={collection.Id}")));
+        // The editions of the collection only, the one an intent targets being that intent.
+        Assert.Equal(
+            [alphaEdition.Id, bravoEdition.Id], EditionIds(await ListAsync<EditionListItem>("editions", $"publisherId={publisher.Id}&inCollection=true")));
     }
 
     [Fact]

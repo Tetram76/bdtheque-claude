@@ -25,7 +25,7 @@
     <value>Rechercher une intention d&apos;acquisition</value>
   </data>
   <data name="Search.Placeholder" xml:space="preserve">
-    <value>Titre de l&apos;album ou de sa série…</value>
+    <value>Titre de l&apos;album, de sa série ou ISBN…</value>
   </data>
   <data name="Count.None" xml:space="preserve">
     <value>Aucune intention</value>
@@ -91,7 +91,7 @@
     <value>Aucune intention d&apos;acquisition ne correspond à « {0} ».</value>
   </data>
   <data name="Empty.SearchedIn" xml:space="preserve">
-    <value>le titre de l&apos;album et sur celui de sa série</value>
+    <value>le titre de l&apos;album, sur celui de sa série et sur l&apos;ISBN de l&apos;édition visée</value>
   </data>
   <data name="Empty.Clear" xml:space="preserve">
     <value>Effacer la recherche</value>

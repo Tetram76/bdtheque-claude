@@ -3,7 +3,6 @@
 @using Bdtheque.Contracts.Catalog
 @inject IStringLocalizer<AlbumList> L
 @inject ApiClient Api
-@inject RecordLabels Labels
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
 @inject ListMemory Memory
@@ -66,49 +65,7 @@
         }
         else
         {
-            <div class="album-rows" role="table" aria-label="@L["Title"]">
-                <div class="album-row album-row-head" role="row">
-                    <span class="album-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
-                    <span class="album-main" role="columnheader">@L["Column.Album"]</span>
-                    <span class="album-date" role="columnheader">@L["Column.Date"]</span>
-                    <span class="album-rating" role="columnheader">@L["Column.Rating"]</span>
-                    <span class="album-state" role="columnheader">@L["Column.State"]</span>
-                </div>
-                @foreach (var row in _list.Albums.Items)
-                {
-                    <div class="album-row" role="row">
-                        <span class="album-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
-                        <span class="album-main" role="cell">
-                            <RowEntry Detail="@RecordSearch.AuthorNames(row.Authors)">
-                                <a href="@AppPaths.Album(row.Album.Id)">@Labels.Album(row.Album, _settings!.AlbumLabelFormat)</a>
-                            </RowEntry>
-                        </span>
-                        <span class="album-meta">
-                            <span class="album-date" role="cell">
-                                @if (row.FirstPublicationYear is { } year)
-                                {
-                                    @Format.PartialDate(year, row.FirstPublicationMonth)
-                                }
-                                else
-                                {
-                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
-                                }
-                            </span>
-                            <span class="album-rating" role="cell" data-none="@(row.Rating is null)">
-                                @if (row.Rating is not null)
-                                {
-                                    <RatingStars Rating="row.Rating" />
-                                }
-                                else
-                                {
-                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
-                                }
-                            </span>
-                            <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
-                        </span>
-                    </div>
-                }
-            </div>
+            <CatalogAlbumRows Rows="_list.Albums.Items" Label="@L["Title"]" LabelFormat="_settings!.AlbumLabelFormat" />
 
             <Pagination Number="_list.Albums.Number" Size="_list.Albums.Size" TotalCount="_list.Albums.TotalCount"
                         ItemsLabel="@L["Title"]" PageHref="@(page => (_query with { Page = page }).Href())" />

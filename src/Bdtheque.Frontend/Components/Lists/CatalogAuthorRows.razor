@@ -1,0 +1,80 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<CatalogAuthorRows> L
+@inject ValueLabels Values
+@inject DisplayFormatter Format
+
+@* The rows of authors of the consultation, which its list of the authors and its search present alike: each row leads to the
+   record of its author, with the albums credited and those of them in the collection. *@
+<div class="author-rows" role="table" aria-label="@Label">
+    <div class="author-row author-row-head" role="row">
+        <span class="author-monogram" role="columnheader"><span class="visually-hidden">@L["Column.Monogram"]</span></span>
+        <span class="author-main" role="columnheader">@L["Column.Author"]</span>
+        <span class="author-nationality" role="columnheader">@L["Column.Nationality"]</span>
+        <span class="author-albums" role="columnheader">@L["Column.Albums"]</span>
+        <span class="author-roles" role="columnheader">@L["Column.Roles"]</span>
+    </div>
+    @foreach (var row in Rows)
+    {
+        <div class="author-row" role="row">
+            <span class="author-monogram" role="cell">
+                <Monogram LastName="@row.LastName" FirstName="@row.FirstName" Pseudonym="@row.Pseudonym" />
+            </span>
+            <span class="author-main" role="cell">
+                <RowEntry Detail="@RecordSearch.AuthorIdentity(row.LastName, row.FirstName, row.Pseudonym)">
+                    <a href="@AppPaths.AuthorRecord(row.Id)">@RecordSearch.AuthorName(row.LastName, row.FirstName, row.Pseudonym)</a>
+                </RowEntry>
+            </span>
+            <span class="author-meta">
+                <span class="author-nationality" role="cell" data-none="@(row.Nationality is null)">
+                    @if (row.Nationality is { } nationality)
+                    {
+                        @nationality
+                    }
+                    else
+                    {
+                        <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
+                    }
+                </span>
+                @* No album credited: a zero, which says nothing (visuel/charte-graphique/convivialite-et-efficacite.md,
+                   nombre nul); the roles held on a series alone remain. *@
+                <span class="author-albums" role="cell" data-zero="@(row.CreditedAlbumCount == 0)">
+                    <ListCount Value="row.CreditedAlbumCount" None="@L["Albums.None"]">@AlbumsText(row)</ListCount>
+                </span>
+                <span class="author-roles" role="cell" data-none="@(row.Roles.Count == 0)">
+                    @if (row.Roles.Count == 0)
+                    {
+                        <NotSet Brief="true" Mention="@L["Roles.None"]" />
+                    }
+                    else
+                    {
+                        @string.Join(" · ", row.Roles.Select(Values.Of))
+                    }
+                </span>
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The rows, as the list presents them.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AuthorCatalogListItem> Rows { get; set; } = null!;
+
+    /// <summary>The name of the table, which assistive technologies read.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    // The albums credited and, of them, those in the collection, in one phrase, as the series of the administration say it
+    // (visuel/listes/liste-par-liste.md): « 7 albums dans la collection » when all are, « 9 albums dont 4 dans la collection »
+    // when some are, « 9 albums » when none is.
+    private string AlbumsText(AuthorCatalogListItem row)
+    {
+        var albums = row.CreditedAlbumCount == 1 ? L["Albums.One"].Value : L["Albums.Other", Format.Number(row.CreditedAlbumCount)].Value;
+        if (row.CreditedAlbumsInCollectionCount == 0)
+            return albums;
+        return row.CreditedAlbumsInCollectionCount == row.CreditedAlbumCount
+            ? L["Albums.AllInCollection", albums]
+            : L["Albums.InCollection", albums, Format.Number(row.CreditedAlbumsInCollectionCount)];
+    }
+}

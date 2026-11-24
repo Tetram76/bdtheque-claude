@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Column.Cover" xml:space="preserve"><value>Couverture</value></data>
+  <data name="Column.Album" xml:space="preserve"><value>Album visé</value></data>
+  <data name="Column.Target" xml:space="preserve"><value>Porte sur</value></data>
+  <data name="Column.State" xml:space="preserve"><value>Possession</value></data>
+  <data name="Column.Created" xml:space="preserve"><value>Posée le</value></data>
+  <data name="Target.Album" xml:space="preserve"><value>Album</value></data>
+  <data name="Target.AnyEdition" xml:space="preserve"><value>toute édition</value></data>
+  <data name="Target.Edition" xml:space="preserve"><value>Édition</value></data>
+</root>

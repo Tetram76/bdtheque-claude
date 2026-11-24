@@ -1,0 +1,39 @@
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<CatalogSeriesRows> L
+
+@* The rows of series of the consultation, which its list of the series and its search present alike: each row leads to the
+   record of its series, with its albums in the collection out of all of them. *@
+<div class="series-rows" role="table" aria-label="@Label">
+    <div class="series-row series-row-head" role="row">
+        <span class="series-pile" role="columnheader"><span class="visually-hidden">@L["Column.Covers"]</span></span>
+        <span class="series-main" role="columnheader">@L["Column.Series"]</span>
+        <span class="series-albums" role="columnheader">@L["Column.Albums"]</span>
+    </div>
+    @foreach (var row in Rows)
+    {
+        <div class="series-row" role="row">
+            <span class="series-pile" role="cell"><CoverPile Covers="row.Overview.FirstVolumeCovers" /></span>
+            <span class="series-main" role="cell">
+                <RowEntry><a href="@AppPaths.SeriesRecord(row.Id)">@row.Title</a></RowEntry>
+            </span>
+            @* Its albums in the collection, out of all of them, as its record says it; a series without album has nothing
+               to say there, its zero taking the dash of a list (visuel/charte-graphique/convivialite-et-efficacite.md). *@
+            <span class="series-albums" role="cell" data-zero="@(row.Overview.AlbumCount == 0)">
+                <ListCount Value="row.Overview.AlbumCount" None="@L["Albums.None"]">
+                    <SeriesInCollection OwnedCount="row.AlbumsInCollectionCount" AlbumCount="row.Overview.AlbumCount" />
+                </ListCount>
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The rows, as the list presents them.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<SeriesCatalogListItem> Rows { get; set; } = null!;
+
+    /// <summary>The name of the table, which assistive technologies read.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+}

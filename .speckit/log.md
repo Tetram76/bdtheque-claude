@@ -2,6 +2,7 @@
 
 ## 2026-11-24
 
+* **Choix** : recherche simple de la consultation composée des recherches de ses listes, chaque type présenté par les lignes de sa liste, écrites une fois pour la liste et la recherche ([Frontend](choix-implementation/socle/frontend.md)) ; une intention d'acquisition recherchée aussi par l'ISBN de l'édition qu'elle vise ([Recherche](choix-implementation/api/recherche.md)) (#639).
 * **Décision de l'utilisateur** : hors de la liste des albums, les options du filtre « Possession » nomment les albums (« Dont des albums possédés », « Dont des albums en intention », « Dont des albums catalogués »), pour ne pas laisser croire que l'état est celui de l'élément listé ([Périmètre de la consultation](fonctionnel/regles-metier/perimetre-de-la-consultation.md)) — #631.
 * **Décision de l'utilisateur** : le troisième état d'un album, sans édition possédée ni intention, se nomme « Catalogué » et non « Non possédé », un album visé n'étant pas possédé non plus ([Appartenance à la collection](fonctionnel/regles-metier/appartenance-a-la-collection.md) et les concepts de `visuel/` qui le citent) (#631).
 * **Choix** : liste des séries de la consultation sur le modèle de celle des albums, sa possession filtrée sur les albums qu'elle contient, ses piles de couvertures parmi les seules éditions possédées sous « Possédé » ; panneau des filtres des séries commun aux deux listes, champ de la possession commun à toutes ([Organisation de l'API](choix-implementation/api/organisation-de-l-api.md), [Frontend](choix-implementation/socle/frontend.md)) (#631).

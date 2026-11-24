@@ -166,9 +166,20 @@ internal static class PurchaseIntentEndpoints
     {
         var albums = filters.OfAlbums;
         var found = await albums.ApplyAsync(context.Albums, context, cancellationToken);
-        var intents = InListOrder(context.PurchaseIntents.AsNoTracking().Where(p => found.Any(a => a.Id == p.AlbumId)));
+        IQueryable<PurchaseIntent> intents = context.PurchaseIntents.AsNoTracking();
+        if (string.IsNullOrWhiteSpace(albums.Text))
+            intents = intents.Where(p => found.Any(a => a.Id == p.AlbumId));
+        else
+        {
+            // Found by the ISBN of the edition it targets too, its album answering the other criteria.
+            var others = await (albums with { Text = null }).ApplyAsync(context.Albums, context, cancellationToken);
+            var targeted = TargetedByIsbn(context, albums.Text);
+            intents = intents.Where(p => found.Any(a => a.Id == p.AlbumId)
+                || (targeted.Any(id => id == p.EditionId) && others.Any(a => a.Id == p.AlbumId)));
+        }
+
         return new PurchaseIntentCatalogList(
-            await intents.ToPageAsync(page, pageSize, ListItem, cancellationToken),
+            await InListOrder(intents).ToPageAsync(page, pageSize, ListItem, cancellationToken),
             await albums.NameAsync(context, cancellationToken));
     }
 
@@ -195,12 +206,26 @@ internal static class PurchaseIntentEndpoints
                 EF.Property<uint>(p.Album, BdthequeDbContext.VersionProperty))), cancellationToken);
 
     // The intents of the list of the administration, found by the title of their album or of its series, part of its label
-    // (fonctionnel/presentation/libelle-d-un-album.md), filed under the entry of the navigation by initial of their album,
-    // in the order of the albums.
-    private static IOrderedQueryable<PurchaseIntent> Found(BdthequeDbContext context, string? q, string? entry) =>
-        InListOrder(context.PurchaseIntents.AsNoTracking()
-            .WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title)
-            .WhereAlbumEntry(p => p.Album, entry));
+    // (fonctionnel/presentation/libelle-d-un-album.md), or by the ISBN of the edition they target, filed under the entry of the
+    // navigation by initial of their album, in the order of the albums.
+    private static IOrderedQueryable<PurchaseIntent> Found(BdthequeDbContext context, string? q, string? entry)
+    {
+        var intents = context.PurchaseIntents.AsNoTracking().WhereAlbumEntry(p => p.Album, entry);
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            var byTitle = context.PurchaseIntents.WhereContains(q, p => p.Album.Title, p => p.Album.Series!.Title).Select(p => p.Id);
+            var targeted = TargetedByIsbn(context, q);
+            intents = intents.Where(p => byTitle.Contains(p.Id) || targeted.Any(id => id == p.EditionId));
+        }
+
+        return InListOrder(intents);
+    }
+
+    // The editions whose ISBN contains the text searched, separators ignored on both sides, as the editions are found
+    // (choix-implementation/api/recherche.md). An edition a purchase intent targets is presented as that intent, never as an
+    // edition: the intent is found by it, as any element of the base is (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+    private static IQueryable<Guid> TargetedByIsbn(BdthequeDbContext context, string text) =>
+        context.Editions.WhereContains(IsbnSearch.Normalize(text), IsbnSearch.Normalized).Select(e => e.Id);
 
     private static IOrderedQueryable<PurchaseIntent> InListOrder(IQueryable<PurchaseIntent> intents) =>
         intents.OrderByAlbum(p => p.Album).ThenBy(p => p.Id);

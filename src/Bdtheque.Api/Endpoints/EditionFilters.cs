@@ -10,8 +10,13 @@ namespace Bdtheque.Api.Endpoints;
 /// the list of the consultation and that of the administration share, bound as a whole from the query of their request
 /// (<c>[AsParameters]</c>): the search is its parameter <c>q</c>, each other criterion that of its name.
 /// </summary>
+/// <param name="InCollection">
+/// Only the editions of the collection, when <c>true</c>: an edition a purchase intent targets is presented as the intent, never
+/// as an edition (fonctionnel/regles-metier/intention-d-acquisition.md), as by the search of the consultation.
+/// </param>
 internal sealed record EditionFilters(
-    [FromQuery(Name = "q")] string? Text, string? Entry, Guid? SeriesId, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId)
+    [FromQuery(Name = "q")] string? Text, string? Entry, Guid? SeriesId, Guid? AlbumId, Guid? PublisherId, Guid? PublisherCollectionId,
+    bool? InCollection)
 {
     /// <summary>
     /// Narrows <paramref name="editions"/>: an edition is found by its ISBN, separators ignored on both sides
@@ -30,6 +35,8 @@ internal sealed record EditionFilters(
             editions = editions.Where(e => e.PublisherId == PublisherId);
         if (PublisherCollectionId is not null)
             editions = editions.Where(e => e.PublisherCollectionId == PublisherCollectionId);
+        if (InCollection is true)
+            editions = editions.Where(CollectionMembership.IsOwned);
         return editions;
     }
 
