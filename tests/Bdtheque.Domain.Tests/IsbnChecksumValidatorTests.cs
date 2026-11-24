@@ -70,4 +70,42 @@ public sealed class IsbnChecksumValidatorTests
     {
         Assert.True(IsbnChecksumValidator.IsValid("097522980x"));
     }
+
+    // fonctionnel/regles-metier/validation-de-l-isbn.md, ISBN corrigé: the digits entered, the check character alone
+    // computed again, in the same format and with the same separators.
+    [Theory]
+    [InlineData("978-2-505-00865-3", "978-2-505-00865-1")]
+    [InlineData("9782505008653", "9782505008651")]
+    [InlineData("979 1234567 89 0", "979 1234567 89 6")]
+    [InlineData("2-8001-0123-4", "2-8001-0123-7")]
+    [InlineData("0-9752298-0-1", "0-9752298-0-X")]
+    [InlineData("0-306-40615-X", "0-306-40615-2")]
+    [InlineData("0-306-40615-x", "0-306-40615-2")]
+    public void Corrected_AnIsbnWithAWrongCheckCharacter_ComputesItAgain(string isbn, string expected)
+    {
+        Assert.Equal(expected, IsbnChecksumValidator.Corrected(isbn));
+    }
+
+    [Theory]
+    [InlineData("978-0-306-40615-7")]
+    [InlineData("0-9752298-0-X")]
+    public void Corrected_AConsistentIsbn_IsTheIsbnItself(string isbn)
+    {
+        Assert.Equal(isbn, IsbnChecksumValidator.Corrected(isbn));
+    }
+
+    // An ISBN the check character alone cannot make consistent: no ISBN can be supposed.
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("2-7234-3451")]
+    [InlineData("12345678901234")]
+    [InlineData("4006381333932")]
+    [InlineData("03064A6152")]
+    [InlineData("030640615A")]
+    [InlineData("978030640615X")]
+    public void Corrected_AnIsbnNoCheckCharacterMakesConsistent_IsNone(string? isbn)
+    {
+        Assert.Null(IsbnChecksumValidator.Corrected(isbn));
+    }
 }

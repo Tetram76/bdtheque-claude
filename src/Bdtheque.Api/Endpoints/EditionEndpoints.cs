@@ -169,7 +169,7 @@ internal static class EditionEndpoints
             await filters.NameAsync(context, cancellationToken));
     }
 
-    private static IOrderedQueryable<Edition> InListOrder(IQueryable<Edition> editions) =>
+    internal static IOrderedQueryable<Edition> InListOrder(IQueryable<Edition> editions) =>
         editions.OrderByAlbum(e => e.Album).ThenBy(e => e.PublicationYear).ThenBy(e => e.Id);
 
     internal static async Task<NewEditionForm> GetNewAsync(Guid rootId, BdthequeDbContext context, CancellationToken cancellationToken)

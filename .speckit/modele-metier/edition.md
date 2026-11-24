@@ -15,6 +15,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 | --- | --- | --- | --- |
 | Année d'édition | entier (année) | non | Année de publication de cette édition. |
 | ISBN | texte | non | Formats **ISBN-10** et **ISBN-13/EAN-13** tous deux supportés. La saisie doit permettre de détecter les erreurs de frappe (contrôle du chiffre de vérification). |
+| ISBN accepté | texte | non | L'ISBN dont l'utilisateur a accepté le chiffre de contrôle incohérent ([Validation de l'ISBN](../fonctionnel/regles-metier/validation-de-l-isbn.md#isbn-au-chiffre-de-contrôle-incohérent)) : l'édition n'est plus une erreur à corriger tant que son ISBN est celui-là. Jamais saisi sur la fiche de l'édition. |
 | Reliure | énuméré | non | `Brochée` / `Cartonnée`. Proposé à la saisie : `Cartonnée`. |
 | Orientation | énuméré | non | `Portrait` / `Italienne`. Proposé à la saisie : `Portrait`. |
 | Sens de lecture | énuméré | non | `Gauche à droite` / `Droite à gauche`. Proposé à la saisie : `Gauche à droite`. |

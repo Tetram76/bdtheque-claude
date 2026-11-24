@@ -424,6 +424,7 @@ erDiagram
 | `PublisherCollectionId` | `uuid` | oui |  |  |
 | `PublicationYear` | `integer` | oui |  |  |
 | `Isbn` | `character varying(20)` | oui |  | `fr-FR-x-icu` |
+| `AcceptedIsbn` | `character varying(20)` | oui |  | `fr-FR-x-icu` |
 | `Binding` | `integer` | oui |  |  |
 | `Orientation` | `integer` | oui |  |  |
 | `ReadingDirection` | `integer` | oui |  |  |

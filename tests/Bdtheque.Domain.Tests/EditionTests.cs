@@ -38,6 +38,107 @@ public sealed class EditionTests
         Assert.NotEqual(Guid.Empty, edition.Id);
     }
 
+    // fonctionnel/regles-metier/validation-de-l-isbn.md, ISBN au chiffre de contrôle incohérent.
+    [Fact]
+    public void CorrectIsbn_PutsTheCorrectedIsbnInPlaceOfTheIsbnEntered()
+    {
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("978-2-505-00865-3");
+
+        edition.CorrectIsbn();
+
+        Assert.Equal("978-2-505-00865-1", edition.Isbn);
+    }
+
+    [Fact]
+    public void CorrectIsbn_AnIsbnNoCheckCharacterMakesConsistent_IsABusinessErrorAndChangesNothing()
+    {
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("2-7234-3451");
+
+        DomainAssert.Violates<Edition>(DomainRules.EditionIsbnNotCorrectable, nameof(Edition.Isbn), edition.CorrectIsbn);
+        Assert.Equal("2-7234-3451", edition.Isbn);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("978-2-505-00865-1")]
+    public void CorrectOrAcceptIsbn_WithoutAnInconsistentIsbn_IsABusinessError(string? isbn)
+    {
+        // A list read before the ISBN was corrected elsewhere: nothing is left to correct or to accept.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn(isbn);
+
+        DomainAssert.Violates<Edition>(DomainRules.EditionIsbnConsistent, nameof(Edition.Isbn), edition.CorrectIsbn);
+        DomainAssert.Violates<Edition>(DomainRules.EditionIsbnConsistent, nameof(Edition.Isbn), edition.AcceptIsbnError);
+        Assert.Null(edition.AcceptedIsbn);
+    }
+
+    [Fact]
+    public void AcceptIsbnError_AcceptsTheIsbnAsItIs()
+    {
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("2-7234-3451");
+
+        edition.AcceptIsbnError();
+
+        Assert.Equal("2-7234-3451", edition.AcceptedIsbn);
+        Assert.Equal("2-7234-3451", edition.Isbn);
+    }
+
+    [Fact]
+    public void RevokeIsbnErrorAcceptance_MakesTheErrorOneToCorrectAgain()
+    {
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("2-7234-3451");
+        edition.AcceptIsbnError();
+
+        edition.RevokeIsbnErrorAcceptance();
+
+        Assert.Null(edition.AcceptedIsbn);
+    }
+
+    [Theory]
+    [InlineData("2-7234-3452")]
+    [InlineData("978-2-505-00865-1")]
+    [InlineData(null)]
+    public void SetIsbn_AnotherIsbn_EndsTheAcceptance(string? isbn)
+    {
+        // The acceptance holds for the ISBN accepted: modified and still inconsistent, it is an error to correct again.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("2-7234-3451");
+        edition.AcceptIsbnError();
+
+        edition.SetIsbn(isbn);
+
+        Assert.Null(edition.AcceptedIsbn);
+    }
+
+    [Fact]
+    public void SetIsbn_TheSameIsbn_KeepsTheAcceptance()
+    {
+        // The form sends the whole edition back, its ISBN unchanged: the acceptance stays.
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("2-7234-3451");
+        edition.AcceptIsbnError();
+
+        edition.SetIsbn(" 2-7234-3451 ");
+
+        Assert.Equal("2-7234-3451", edition.AcceptedIsbn);
+    }
+
+    [Fact]
+    public void CorrectIsbn_AnAcceptedError_EndsTheAcceptance()
+    {
+        var edition = new Edition(CreateAlbum(), CreatePublisher());
+        edition.SetIsbn("978-2-505-00865-3");
+        edition.AcceptIsbnError();
+
+        edition.CorrectIsbn();
+
+        Assert.Null(edition.AcceptedIsbn);
+    }
+
     [Fact]
     public void Constructor_NullAlbum_Throws()
     {

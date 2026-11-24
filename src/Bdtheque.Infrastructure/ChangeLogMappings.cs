@@ -80,6 +80,7 @@ internal static class ChangeLogMappings
                 Reference<PublisherCollection>(ChangeLogAttribute.PublisherCollection, nameof(Edition.PublisherCollectionId)),
                 Number(ChangeLogAttribute.PublicationYear, nameof(Edition.PublicationYear)),
                 Text(ChangeLogAttribute.Isbn, nameof(Edition.Isbn)),
+                Text(ChangeLogAttribute.AcceptedIsbn, nameof(Edition.AcceptedIsbn)),
                 Enum<Edition>(ChangeLogAttribute.Binding, nameof(Edition.Binding)),
                 Enum<Edition>(ChangeLogAttribute.Orientation, nameof(Edition.Orientation)),
                 Enum<Edition>(ChangeLogAttribute.ReadingDirection, nameof(Edition.ReadingDirection)),
