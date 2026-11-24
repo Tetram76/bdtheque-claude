@@ -139,12 +139,15 @@ else if (_universe is { } universe)
 
     // What is attached to a universe of the tree, as its own record says it: its series and its albums, a number at zero left
     // out, or that nothing is, as the facts say it.
-    private string Works(UniverseInTree universe) =>
-        string.Join(" · ", new[]
-        {
-            universe.SeriesCount > 0 ? Counted("Series", universe.SeriesCount) : null,
-            universe.AlbumCount > 0 ? Counted("Albums", universe.AlbumCount) : null,
-        }.OfType<string>()) is { Length: > 0 } works ? works : L["Albums.None"];
+    private string Works(UniverseInTree universe)
+    {
+        var works = new List<string>();
+        if (universe.SeriesCount > 0)
+            works.Add(Counted("Series", universe.SeriesCount));
+        if (universe.AlbumCount > 0)
+            works.Add(Counted("Albums", universe.AlbumCount));
+        return works.Count > 0 ? string.Join(" · ", works) : L["Albums.None"];
+    }
 
     // The universes under a parent, or at the top, each followed by its sub-universes; the API gives them in the order of the
     // hierarchy, siblings by name, each saying its parent. The universe of the record is put forward, without a link to the
