@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et partie 2, consultation et écrans restants de l''administration (v0.2.0), et leurs chantiers ; objet des parties suivantes (recherche avancée, documentation utilisateur, reste éventuel), première version livrable à leur issue, et leurs notes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:00:00Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -68,7 +68,7 @@ Socle du frontend, environnement de validation fonctionnelle, thème de base et 
 
 Les fonctions de la consultation, recherche avancée exceptée ([Structure de l'application](../fonctionnel/structure-de-l-application.md)), et les écrans de l'administration qui restent à réaliser, fusion de deux fiches comprise (décision de l'utilisateur). Objectif : à son issue, l'application est **fonctionnellement complète**, hors recherche avancée et hors recherche d'une édition par son ISBN dans les sources externes, reportée à la partie 5 (décision de l'utilisateur).
 
-La liste des albums de la consultation (#603) est réalisée la première : elle fixe le modèle des listes de la consultation et le filtre qui limite la consultation à la collection, encore à préciser avec l'utilisateur ([Périmètre de la consultation](../fonctionnel/regles-metier/perimetre-de-la-consultation.md)). Les listes des séries, des auteurs et des intentions d'acquisition (#604 à #606), et la fiche d'un univers, avec la liste des albums d'un genre (#607), la suivent ; la recherche simple (#608), après les listes des albums, des séries et des auteurs. Les modalités de la fusion (#614), que rien ne statue encore, sont définies avec l'utilisateur au démarrage de son chantier. Chaque chantier de la partie est soumis à la validation fonctionnelle.
+La liste des albums de la consultation (#603) est réalisée la première : elle fixe le modèle des listes de la consultation et le filtre qui limite la consultation à la collection, encore à préciser avec l'utilisateur ([Périmètre de la consultation](../fonctionnel/regles-metier/perimetre-de-la-consultation.md)). Les listes des séries, des auteurs et des intentions d'acquisition (#604 à #606), et la fiche d'un univers, avec la liste des albums d'un genre (#607), la suivent ; la recherche simple (#608), après les listes des albums, des séries et des auteurs. La fusion de deux fiches d'un même type (ticket parent #614), dont les modalités ont été définies avec l'utilisateur au démarrage de son chantier ([Fusion de deux fiches](../fonctionnel/regles-metier/fusion-des-fiches.md)), est réalisée par six sous-tickets : l'écran et le mécanisme communs, avec les genres et les auteurs (#642), d'abord, puis les éditeurs et leurs collections (#643), les univers et leurs sous-univers (#644), les séries (#645), les albums (#646) et les éditions (#647). Chaque chantier de la partie est soumis à la validation fonctionnelle.
 
 | Ticket | Titre |
 | --- | --- |
@@ -83,7 +83,12 @@ La liste des albums de la consultation (#603) est réalisée la première : elle
 | ~~#611~~ | Indicateurs de la mesure d'audience dans l'administration |
 | ~~#612~~ | Confirmation d'une acquisition et conversion d'une intention d'acquisition |
 | #613 | Éditions dont l'ISBN est à vérifier |
-| #614 | Fusion de deux fiches d'un même type |
+| ~~#642~~ | Fusion de deux genres ou de deux auteurs : écran et mécanisme communs de la fusion |
+| #643 | Fusion de deux éditeurs et de leurs collections |
+| #644 | Fusion de deux univers et de leurs sous-univers |
+| #645 | Fusion de deux séries |
+| #646 | Fusion de deux albums |
+| #647 | Fusion de deux éditions |
 
 ## Parties suivantes
 
