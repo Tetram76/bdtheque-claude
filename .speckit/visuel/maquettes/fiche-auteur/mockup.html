@@ -17,7 +17,6 @@ summary{cursor:pointer}
 .cols>.c-state{justify-self:start}
 .top-row{--cols-end:12px}
 @media (max-width:640px){.cols{flex:1 1 100%;grid-template-columns:minmax(0,1fr) auto auto;margin:0 0 0 50px;--cols-end:0}.top-row{--cols-end:0;margin-left:88px}.cols>.c-state{justify-self:end}.cols>.c-roles{flex-wrap:nowrap}}
-.flat{display:flex;flex-wrap:wrap;align-items:center;gap:4px}.flat>span{display:contents}
 </style>
 <script src="../shared/mockup.js"></script>
 <script src="../shared/couverture-theme.js"></script>
@@ -427,11 +426,10 @@ class View extends Mockup {
       };
     });
     const chip = { bg: 'transparent', fg: t.text, bd: t.tB === '0' ? '2px solid ' + t.line : t.tB };
-    const columns = (this.props.colonnes ?? 'oui') === 'oui';
     return {
       t,
-      cols: columns ? 'cols top-row' : 'flat',
-      colsIn: columns ? 'cols' : 'flat',
+      cols: 'cols top-row',
+      colsIn: 'cols',
       // The scroll hint of the menu fades into what lies behind it: the header, or the page under a transparent one.
       hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
       a: {
@@ -462,7 +460,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "colonnes": {"label": "Colonnes alignées", "editor": "enum", "options": ["oui", "non"], "default": "oui"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}});
 </script>
 </body>
 </html>
