@@ -54,6 +54,12 @@ public sealed partial class AdminStatisticsTests(AudienceApplication application
         // smartphone.
         var album = page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = AlbumRecordName() }) }).First;
         await Assertions.Expect(album.Locator(".audience-usages")).ToContainTextAsync("4");
+        // An unused function is ranked by its name among all those followed, which each screen adds to: it is found by the
+        // search of the page, whatever page it falls on, the criteria kept.
+        var search = page.GetByRole(AriaRole.Searchbox, new() { Name = "Rechercher une fonction" });
+        await search.FillAsync("Liste des albums");
+        await search.PressAsync("Enter");
+        await Assertions.Expect(page).ToHaveURLAsync(VisitorsOnASmartphone());
         await Assertions.Expect(page.Locator(".audience-row", new() { Has = page.Locator(".row-entry", new() { HasTextRegex = AlbumListName() }) }).First)
             .ToHaveAttributeAsync("data-unused", "");
     }
