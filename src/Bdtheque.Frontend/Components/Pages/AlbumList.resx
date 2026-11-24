@@ -30,11 +30,6 @@
   <data name="Count.One" xml:space="preserve"><value>1 album</value></data>
   <data name="Count.Other" xml:space="preserve"><value>{0} albums</value></data>
   <data name="Order" xml:space="preserve"><value>Triés par titre, la série tenant lieu de titre aux albums qui n'en ont pas</value></data>
-  <data name="Column.Cover" xml:space="preserve"><value>Couverture</value></data>
-  <data name="Column.Album" xml:space="preserve"><value>Album</value></data>
-  <data name="Column.Date" xml:space="preserve"><value>Parution</value></data>
-  <data name="Column.Rating" xml:space="preserve"><value>Appréciation</value></data>
-  <data name="Column.State" xml:space="preserve"><value>Possession</value></data>
   <data name="Empty.Text" xml:space="preserve"><value>Aucun album ne correspond à « {0} ».</value></data>
   <data name="Empty.SearchedIn" xml:space="preserve"><value>le titre de l'album et sur celui de sa série</value></data>
   <data name="Empty.Clear" xml:space="preserve"><value>Effacer la recherche</value></data>

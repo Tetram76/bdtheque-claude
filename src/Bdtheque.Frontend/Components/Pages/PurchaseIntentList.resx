@@ -20,14 +20,6 @@
   <data name="Count.One" xml:space="preserve"><value>1 intention</value></data>
   <data name="Count.Other" xml:space="preserve"><value>{0} intentions</value></data>
   <data name="Order" xml:space="preserve"><value>Dans l'ordre des albums</value></data>
-  <data name="Column.Cover" xml:space="preserve"><value>Couverture</value></data>
-  <data name="Column.Album" xml:space="preserve"><value>Album visé</value></data>
-  <data name="Column.Target" xml:space="preserve"><value>Porte sur</value></data>
-  <data name="Column.State" xml:space="preserve"><value>Possession</value></data>
-  <data name="Column.Created" xml:space="preserve"><value>Posée le</value></data>
-  <data name="Target.Album" xml:space="preserve"><value>Album</value></data>
-  <data name="Target.AnyEdition" xml:space="preserve"><value>toute édition</value></data>
-  <data name="Target.Edition" xml:space="preserve"><value>Édition</value></data>
   <data name="Empty.Text" xml:space="preserve"><value>Aucune intention d'acquisition ne correspond à « {0} ».</value></data>
   <data name="Empty.SearchedIn" xml:space="preserve"><value>le titre de l'album et sur celui de sa série</value></data>
   <data name="Empty.Clear" xml:space="preserve"><value>Effacer la recherche</value></data>

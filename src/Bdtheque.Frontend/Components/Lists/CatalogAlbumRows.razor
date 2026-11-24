@@ -1,0 +1,66 @@
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<CatalogAlbumRows> L
+@inject RecordLabels Labels
+@inject DisplayFormatter Format
+
+@* The rows of albums of the consultation (visuel/liste-albums/contenu.md), which its list of the albums and its search present
+   alike (fonctionnel/structure-de-l-application.md, recherche simple): each row leads to the record of its album, its possession
+   shown (fonctionnel/regles-metier/perimetre-de-la-consultation.md). *@
+<div class="album-rows" role="table" aria-label="@Label">
+    <div class="album-row album-row-head" role="row">
+        <span class="album-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
+        <span class="album-main" role="columnheader">@L["Column.Album"]</span>
+        <span class="album-date" role="columnheader">@L["Column.Date"]</span>
+        <span class="album-rating" role="columnheader">@L["Column.Rating"]</span>
+        <span class="album-state" role="columnheader">@L["Column.State"]</span>
+    </div>
+    @foreach (var row in Rows)
+    {
+        <div class="album-row" role="row">
+            <span class="album-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
+            <span class="album-main" role="cell">
+                <RowEntry Detail="@RecordSearch.AuthorNames(row.Authors)">
+                    <a href="@AppPaths.Album(row.Album.Id)">@Labels.Album(row.Album, LabelFormat)</a>
+                </RowEntry>
+            </span>
+            <span class="album-meta">
+                <span class="album-date" role="cell">
+                    @if (row.FirstPublicationYear is { } year)
+                    {
+                        @Format.PartialDate(year, row.FirstPublicationMonth)
+                    }
+                    else
+                    {
+                        <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
+                    }
+                </span>
+                <span class="album-rating" role="cell" data-none="@(row.Rating is null)">
+                    @if (row.Rating is not null)
+                    {
+                        <RatingStars Rating="row.Rating" />
+                    }
+                    else
+                    {
+                        <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
+                    }
+                </span>
+                <span class="album-state" role="cell"><CollectionStateTag State="row.State" /></span>
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The rows, as the list presents them.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<AlbumCatalogListItem> Rows { get; set; } = null!;
+
+    /// <summary>The name of the table, which assistive technologies read.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public AlbumLabelFormat LabelFormat { get; set; }
+}

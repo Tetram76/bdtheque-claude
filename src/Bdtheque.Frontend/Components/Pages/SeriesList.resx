@@ -26,10 +26,6 @@
   <data name="Count.One" xml:space="preserve"><value>1 série</value></data>
   <data name="Count.Other" xml:space="preserve"><value>{0} séries</value></data>
   <data name="Order" xml:space="preserve"><value>Triées par titre</value></data>
-  <data name="Column.Covers" xml:space="preserve"><value>Couvertures</value></data>
-  <data name="Column.Series" xml:space="preserve"><value>Série</value></data>
-  <data name="Column.Albums" xml:space="preserve"><value>Albums</value></data>
-  <data name="Albums.None" xml:space="preserve"><value>Aucun album</value></data>
   <data name="Empty.Text" xml:space="preserve"><value>Aucune série ne correspond à « {0} ».</value></data>
   <data name="Empty.SearchedIn" xml:space="preserve"><value>le titre de la série</value></data>
   <data name="Empty.Clear" xml:space="preserve"><value>Effacer la recherche</value></data>
