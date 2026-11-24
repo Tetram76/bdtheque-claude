@@ -79,8 +79,9 @@ public sealed class AdminInvalidIsbnsTests(ApplicationHost application) : Browse
         await page.GetByRole(AriaRole.Combobox, new() { Name = "État" }).SelectOptionAsync("All");
         await page.GetByRole(AriaRole.Button, new() { Name = "Filtrer" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminInvalidIsbns, $"?state=All&publisherId={publisher.Id}"));
+        // The form of the filters sends its fields as they are, empty ones included, as in every list.
         await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "État" })).ToBeVisibleAsync();
+        await Assertions.Expect(Rows(page).Locator(".isbn-state")).ToHaveTextAsync(["À corriger"]);
         await page.GetByRole(AriaRole.Link, new() { Name = "Retirer « État : Toutes »" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminInvalidIsbns, $"?publisherId={publisher.Id}"));
     }
@@ -108,7 +109,7 @@ public sealed class AdminInvalidIsbnsTests(ApplicationHost application) : Browse
     {
         var publisher = await CreatePublisherAsync($"Les Éditions du Grand Large et des Archipels réunis {_marker}");
         var album = await CreateAlbumAsync($"Les Voyages extraordinaires du capitaine Archibald au-delà des mers {_marker}");
-        await CreateEditionAsync(album, publisher, "978-2-7234-4567-2");
+        await CreateEditionAsync(album, publisher, "978-2-7234-4567-1");
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
         await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminInvalidIsbns}?state=All&publisherId={publisher.Id}");
         await PageReadiness.WaitAsync(page);
