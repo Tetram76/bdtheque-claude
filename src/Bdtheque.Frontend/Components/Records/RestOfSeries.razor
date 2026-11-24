@@ -17,7 +17,7 @@
     <div class="series-albums">
         <p class="series-albums-head">
             <a class="series-albums-title" href="@AppPaths.SeriesRecord(SeriesId)">@SeriesTitle</a>
-            <span class="series-albums-count"><SeriesInCollection Albums="Albums" /></span>
+            <span class="series-albums-count"><SeriesInCollection OwnedCount="SeriesInCollection.Owned(Albums)" AlbumCount="Albums.Count" /></span>
         </p>
         <ol>
             @foreach (var (card, name, far) in Lines)
