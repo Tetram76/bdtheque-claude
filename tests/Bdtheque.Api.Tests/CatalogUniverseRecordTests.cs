@@ -65,7 +65,7 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
     }
 
     [Fact]
-    public async Task Record_ListsTheSeriesAndAlbumsOfItsSubUniversesToo_AndPresentsItsAncestorsAndSubUniverses()
+    public async Task Record_ListsTheSeriesAndAlbumsOfItsSubUniversesToo_AndPresentsItsAncestorsAndItsSubUniversesAtEveryLevel()
     {
         var marvel = await CreateUniverseAsync("Marvel", null, "L'univers partagé de Marvel Comics.");
         var xMen = await CreateUniverseAsync("X-Men", marvel.Id);
@@ -87,8 +87,8 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
         var sub = await GetAsync<UniverseDetail>($"/catalog/universes/{xMen.Id}");
 
         Assert.Equal((marvel.Name, "L'univers partagé de Marvel Comics.", 0), (top.Name, top.Description, top.Ancestors.Count));
-        // Its direct sub-universes, by name.
-        Assert.Equal([asgard.Id, xMen.Id], top.SubUniverses.Select(u => u.Id));
+        // Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name.
+        Assert.Equal([(asgard.Id, (Guid?)marvel.Id), (xMen.Id, marvel.Id), (mutants.Id, xMen.Id)], top.SubUniverses.Select(u => (u.Id, u.ParentId)));
         Assert.Equal(
             [(avengers.Id, (Guid?)null), (daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
             top.Works.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));

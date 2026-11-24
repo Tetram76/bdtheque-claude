@@ -36,16 +36,10 @@ else if (_universe is { } universe)
                 @* Data not set is not shown (visuel/fiche-univers/contenu.md). *@
                 @if (universe.SubUniverses.Count > 0)
                 {
+                    @* Their tree at every level, each under its parent, as in the list of the universes of the administration. *@
                     <dl class="universe-children">
-                        <div>
-                            <dt>@L["SubUniverses"]</dt>
-                            <dd>
-                                @foreach (var child in universe.SubUniverses)
-                                {
-                                    <a href="@AppPaths.UniverseRecord(child.Id)">@child.Name</a>
-                                }
-                            </dd>
-                        </div>
+                        <dt>@L["SubUniverses"]</dt>
+                        <dd>@SubUniverses(universe.Id)</dd>
                     </dl>
                 }
 
@@ -115,8 +109,29 @@ else if (_universe is { } universe)
 
     // The parents of the universe, from the top down, each leading to its record, then the universe itself: a universe has no
     // list to lead back to.
+    // The sub-universes of a universe, each followed by its own; the API gives them in the order of the hierarchy, siblings by
+    // name, each saying its parent.
+    private RenderFragment SubUniverses(Guid parentId) => __builder =>
+    {
+        <ul>
+            @foreach (var child in _universe!.SubUniverses.Where(u => u.ParentId == parentId))
+            {
+                <li>
+                    <a href="@AppPaths.UniverseRecord(child.Id)">@child.Name</a>
+                    @if (_universe.SubUniverses.Any(u => u.ParentId == child.Id))
+                    {
+                        @SubUniverses(child.Id)
+                    }
+                </li>
+            }
+        </ul>
+    };
+
     private IReadOnlyList<BreadcrumbItem> BreadcrumbItems =>
     [
+        // « Univers » leads nowhere, the universes having no list in the consultation, but says from the first level what the
+        // record presents, as « Albums » opens the breadcrumb of an album (visuel/fiche-univers/contenu.md).
+        new(L["Breadcrumb.Universes"]),
         .. _universe!.Ancestors.Select(ancestor => new BreadcrumbItem(ancestor.Name, AppPaths.UniverseRecord(ancestor.Id))),
         new(_universe.Name),
     ];

@@ -30,6 +30,8 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
     private static readonly Guid UniverseId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000e1");
     private static readonly Guid ParentId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000e0");
     private static readonly Guid ChildId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000e2");
+    private static readonly Guid GrandChildId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000e3");
+    private static readonly Guid SecondChildId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000e4");
     private static readonly Guid PhareId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000d1");
     private static readonly Guid PasseursId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000d2");
     private static readonly Guid LivreId = Guid.Parse("0197a0b2-0000-7000-8000-0000000000a1");
@@ -73,13 +75,13 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Breadcrumb_LeadsToItsParents_ThenNamesTheUniverse()
+    public void Breadcrumb_StartsWithUniverses_LeadingNowhere_ThenLeadsToItsParents_ThenNamesTheUniverse()
     {
         _catalog.Universe = Universe();
 
         var page = Open();
 
-        Assert.Equal(["Royaumes d'Ombrelune", "Archipel des Brumes"], page.FindAll("nav.breadcrumb li").Select(l => l.TextContent.Trim()));
+        Assert.Equal(["Univers", "Royaumes d'Ombrelune", "Archipel des Brumes"], page.FindAll("nav.breadcrumb li").Select(l => l.TextContent.Trim()));
         Assert.Equal([AppPaths.UniverseRecord(ParentId)], page.FindAll("nav.breadcrumb a").Select(a => a.GetAttribute("href")));
     }
 
@@ -96,14 +98,20 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Identity_LeadsToItsSubUniverses_AndCountsItsSeriesAndAlbums()
+    public void Identity_LeadsToItsSubUniversesAtEveryLevel_EachUnderItsParent_AndCountsItsSeriesAndAlbums()
     {
         _catalog.Universe = Universe();
 
         var page = Open();
 
-        Assert.Equal([("Phare de Kerdran", AppPaths.UniverseRecord(ChildId))],
-            page.FindAll(".universe-children a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
+        // Their tree, as in the list of the universes of the administration (visuel/fiche-univers/contenu.md).
+        Assert.Equal(
+            [("Phare de Kerdran", AppPaths.UniverseRecord(ChildId)), ("Tour de la Vigie", AppPaths.UniverseRecord(SecondChildId))],
+            page.FindAll(".universe-children dd > ul > li > a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
+        Assert.Equal(
+            [("Ordre des Gardiens", AppPaths.UniverseRecord(GrandChildId))],
+            page.FindAll(".universe-children dd > ul > li > ul > li > a").Select(a => (a.TextContent.Trim(), a.GetAttribute("href"))));
+        Assert.Equal("Phare de Kerdran", page.Find(".universe-children li:has(> ul) > a").TextContent.Trim());
         // Two series, and their three albums with the album without series.
         Assert.Equal(["2 séries", "4 albums"], page.FindAll(".universe-facts li").Select(f => f.TextContent.Trim()));
     }
@@ -236,7 +244,11 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
     private static UniverseDetail Universe() => new(
         UniverseId, "Archipel des Brumes", "Un chapelet d'îles battues par les vents.",
         [new UniverseListItem(ParentId, "Royaumes d'Ombrelune", null, null)],
-        [new UniverseListItem(ChildId, "Phare de Kerdran", UniverseId, "Archipel des Brumes")],
+        [
+            new UniverseListItem(ChildId, "Phare de Kerdran", UniverseId, "Archipel des Brumes"),
+            new UniverseListItem(GrandChildId, "Ordre des Gardiens", ChildId, "Phare de Kerdran"),
+            new UniverseListItem(SecondChildId, "Tour de la Vigie", UniverseId, "Archipel des Brumes"),
+        ],
         [
             new BibliographyEntry(null, Album(LivreId, null, null, null, "Le Grand Livre d'Ombrelune", true, AlbumRating.Good)),
             new BibliographyEntry(Series(PhareId, "Les Gardiens du phare", 2, true,

@@ -17811,7 +17811,7 @@
             "items": {
               "$ref": "#/components/schemas/UniverseListItem"
             },
-            "description": "Its direct sub-universes, by name."
+            "description": "Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name; each says its\nparent, which places it in the tree."
           },
           "works": {
             "type": "array",

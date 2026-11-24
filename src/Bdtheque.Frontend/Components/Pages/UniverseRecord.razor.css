@@ -50,14 +50,10 @@
 }
 
 .universe-children {
-    margin: 0;
-}
-
-.universe-children div {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-xs) var(--space-s);
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin: 0;
 }
 
 .universe-children dt {
@@ -65,10 +61,22 @@
 }
 
 .universe-children dd {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-xs) var(--space-m);
     margin: 0;
+}
+
+/* Each sub-universe indented under its parent, as in the list of the universes of the administration. */
+.universe-children ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.universe-children ul ul {
+    margin-block-start: var(--space-xs);
+    padding-inline-start: var(--space-m);
 }
 
 /* Leading to their records, underlined at all times: a touch screen has no hover. */

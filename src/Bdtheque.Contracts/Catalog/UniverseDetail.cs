@@ -5,7 +5,10 @@ namespace Bdtheque.Contracts.Catalog;
 /// without filter, like every record.
 /// </summary>
 /// <param name="Ancestors">From the top of the hierarchy down to its parent; empty for a universe at the top.</param>
-/// <param name="SubUniverses">Its direct sub-universes, by name.</param>
+/// <param name="SubUniverses">
+/// Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name; each says its
+/// parent, which places it in the tree.
+/// </param>
 /// <param name="Works">
 /// Its series and albums, those of its sub-universes included (fonctionnel/regles-metier/hierarchie-des-univers.md), presented
 /// as the bibliography of an author: the series and the albums without series together, by sort key; a series attached itself

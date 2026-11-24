@@ -90,7 +90,7 @@ internal static class UniverseEndpoints
             cancellationToken);
 
         return new UniverseDetail(
-            id, item.Name, universe.Description, ancestors, tree.Children(id), works, universe.CreatedAt, universe.ModifiedAt);
+            id, item.Name, universe.Description, ancestors, tree.SubUniverses(id), works, universe.CreatedAt, universe.ModifiedAt);
     }
 
     /// <summary>
