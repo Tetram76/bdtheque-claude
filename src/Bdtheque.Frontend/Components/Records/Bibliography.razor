@@ -105,7 +105,8 @@
     {
         RecordType.Author => "Author",
         RecordType.Universe => "Universe",
-        _ => throw new ArgumentOutOfRangeException(nameof(Of), Of, "Only the records of an author and of a universe present a bibliography."),
+        // A parameter of the component, not of a method: a value out of range is an invalid state of the component.
+        _ => throw new InvalidOperationException($"Only the records of an author and of a universe present a bibliography, not {Of}."),
     };
 
     private string Summary
