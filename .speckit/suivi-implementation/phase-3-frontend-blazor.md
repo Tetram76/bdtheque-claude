@@ -77,7 +77,7 @@ La liste des albums de la consultation (#603) est réalisée la première : elle
 | ~~#605~~ | Liste des auteurs de la consultation |
 | ~~#606~~ | Liste publique des intentions d'acquisition |
 | #607 | Séries et albums d'un genre ou d'un univers dans la consultation |
-| #608 | Recherche simple de la consultation |
+| ~~#608~~ | Recherche simple de la consultation |
 | ~~#609~~ | Recherche d'une fiche à modifier depuis l'en-tête de l'administration |
 | ~~#610~~ | Écran du paramétrage de l'application |
 | ~~#611~~ | Indicateurs de la mesure d'audience dans l'administration |
