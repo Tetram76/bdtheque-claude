@@ -201,7 +201,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               </span>
               <span class="lr-meta">
                 <sc-for list="{{r.cells}}" as="c">
-                  <span role="cell" class="{{c.cls}}" style="min-width: 0; font-size: 13px; color: {{c.fg}}; font-variant-numeric: tabular-nums">
+                  <span role="cell" class="{{c.cls}}" style="min-width: 0; font-size: 13px; color: {{c.fg}}; font-weight: {{c.fw}}; font-variant-numeric: tabular-nums">
                     <sc-if value="{{c.badge}}"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{c.badgeB}}; border-radius: {{t.btnR}}; background: {{c.badgeBg}}; color: {{c.badgeFg}}; font-weight: 700; font-size: 12px; white-space: nowrap"><sc-if value="{{c.intent}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4V3z"></path></svg></sc-if>{{c.badge}}</span></sc-if>
                     <sc-if value="{{c.target}}"><span style="display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0"><span style="display: inline-flex; align-items: center; gap: 5px; padding: 1px 9px; border: {{c.targetB}}; border-radius: {{t.btnR}}; background: {{c.targetBg}}; color: {{c.targetFg}}; font-weight: 800; font-size: 12px; white-space: nowrap"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.targetIcon}}"></path></svg>{{c.target}}</span><span style="color: {{c.targetTextFg}}; font-weight: {{c.targetTextW}}; overflow-wrap: anywhere">{{c.targetText}}</span></span></sc-if>
                     <sc-if value="{{c.link}}"><a href="#" style="color: {{t.link}}; font-weight: 700; overflow-wrap: anywhere">{{c.link}}</a></sc-if>
@@ -484,6 +484,31 @@ const ENTITIES = {
       ['Dupuis [1974]', 'Buddy Longway - Tome 2', ['1974', { text: '—', muted: true }, 'Échange', '9 oct. 2026'], { cover: false }]
     ]
   },
+  // The editions to correct, which the entry of the block « À vérifier » of the home page of the administration leads to:
+  // every edition whose ISBN has a check digit that disagrees with it, owned or targeted by an intent, as that entry counts
+  // them, an error accepted excepted. « Corriger » puts the ISBN supposed in place of the ISBN entered; without an ISBN
+  // to suppose (a length or characters that are no ISBN's), the main action is « Modifier ». The setting « acceptees »
+  // shows the errors accepted too, each row then telling its state.
+  isbn: {
+    menu: '', title: 'ISBN au chiffre de contrôle incohérent', total: '5', create: null, kind: 'Contrôles',
+    noCreate: '« Corriger » remplace l\'ISBN saisi par l\'ISBN corrigé.',
+    searchPh: 'ISBN, avec ou sans tirets…', initials: 'Toutes',
+    filters: [{ label: 'État', value: 'À corriger', icon: ICON.chevron }, 'Série', 'Album', 'Éditeur', 'Collection éditeur'],
+    filtersHelp: 'Toute édition dont l\'ISBN a un chiffre de contrôle incohérent, possédée ou visée par une intention d\'acquisition. État : à corriger, acceptées, ou toutes.',
+    count: '5 éditions', countDetail: '', order: 'Dans l\'ordre des albums, puis par année d\'édition',
+    page: 'Éditions 1 à 5 sur 5', pages: [],
+    thumb: 'cover', mainHead: 'Édition',
+    cols: [col('ISBN corrigé', '170px'), col('Acquisition', '130px'), col('Modifiée', '104px', { hideMd: true })],
+    primary: ['Corriger', ICON.swap],
+    rowMenu: menuOf({ label: 'Modifier', icon: ICON.edit }, { label: 'Accepter l\'erreur', icon: ICON.check }, VIEW('Voir l\'album dans la consultation')),
+    rows: [
+      ['Dargaud [2010] - ISBN 978-2-505-00865-3', 'Barracuda - Tome 1', ['978-2-505-00865-1', 'Achat, 2010', '3 sept. 2026'], { cover: true }],
+      ['Casterman [2007] - ISBN 978-2-203-00120-7', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['978-2-203-00120-6', 'Offerte, 2008', 'hier'], { cover: true }],
+      ['Dupuis [1974] - ISBN 2-8001-0123-4', 'Buddy Longway - Tome 2', ['2-8001-0123-7', { badge: 'Intention', dashed: true }, '9 oct. 2026'], { cover: false, intent: true }],
+      ['Glénat [2001] - ISBN 2-7234-3451', 'Les Passagers du vent - Tome 1', [{ text: '—', muted: true }, 'Achat', '2 févr. 2026'], { cover: true, uncorrectable: true }],
+      ['Lombard (Signé) - ISBN 2-8036-1234-X', 'Le Grand Pouvoir du Chninkel', ['2-8036-1234-8', 'Échange', '14 mai 2026'], { cover: false }]
+    ]
+  },
   intentions: {
     menu: "Intentions d'acquisition", title: "Intentions d'acquisition", total: '18', create: null, kind: 'Fiches',
     noCreate: 'Une intention se pose depuis la page des éditions et intentions d\'acquisition de son album.',
@@ -571,6 +596,25 @@ const ENTITIES = {
   }
 };
 
+// The list of the ISBN to check with the errors accepted shown too: each row tells its state, an error to correct in the
+// colour of alert, the only incoherence that has it, an error accepted by a dashed tag; an accepted one is accepted no more
+// from its menu.
+const withAccepted = (e) => {
+  const state = (accepted) => accepted ? { badge: 'Acceptée', dashed: true } : { text: 'À corriger', alert: true };
+  const rows = [
+    ...e.rows.slice(0, 3),
+    ['Delcourt [2015] - ISBN 978-2-7560-1234-0', 'De cape et de crocs - Tome 1', ['978-2-7560-1234-6', 'Achat, 2015', '21 juil. 2026'], { cover: true, accepted: true }],
+    ...e.rows.slice(3)
+  ].map(([title, sub, values, opts]) => [title, sub, [state(Boolean(opts.accepted)), ...values], opts]);
+  return {
+    ...e,
+    filters: [{ label: 'État', value: 'Toutes', icon: ICON.chevron }, ...e.filters.slice(1)],
+    count: '6 éditions', countDetail: 'dont 1 acceptée', page: 'Éditions 1 à 6 sur 6',
+    cols: [col('État', '110px'), ...e.cols],
+    rows
+  };
+};
+
 const PANELS = {
   modification: { title: "Modifier l'univers", name: 'Corto Maltese', parent: 'Univers Hugo Pratt', help: 'Ses albums et séries sont aussi ceux de Univers Hugo Pratt.', desc: 'Les voyages du marin de Hugo Pratt, de Venise aux Antilles.', meta: 'Univers créé le 12 janvier 2026, modifié le 12 janvier 2026.', save: 'Enregistrer' },
   creation: { title: 'Nouvel univers', name: '', parent: '', help: 'Sans parent, l\'univers est de premier niveau.', desc: '', meta: '', save: 'Créer l\'univers' },
@@ -581,7 +625,7 @@ class View extends Mockup {
   renderVals() {
     const t = THEMES[this.props.theme] ?? THEMES.planche;
     const key = ENTITIES[this.props.entite] ? this.props.entite : 'series';
-    const e = ENTITIES[key];
+    const e = key === 'isbn' && this.props.acceptees ? withAccepted(ENTITIES.isbn) : ENTITIES[key];
     const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
     const filtersOpen = this.state?.filtersOpen ?? (this.props.filtres ?? false);
     const rowMenu = this.state?.rowMenu !== undefined ? this.state.rowMenu : (this.props.actions ? 1 : null);
@@ -601,7 +645,10 @@ class View extends Mockup {
     };
     // The columns of a row: its visual, its entry, the entity's own columns, then its actions.
     const thumbW = e.thumb ? '36px ' : '';
-    const act = e.primary[0].length > 9 ? '200px' : '150px';
+    const editLabel = (opts) => opts.intent ? 'Modifier l\'intention' : 'Modifier l\'édition';
+    // The actions take the room of the longest main action of a row.
+    const longest = Math.max(e.primary[0].length, ...e.rows.map(([, , , opts = {}]) => opts.uncorrectable ? editLabel(opts).length : 0));
+    const act = longest > 9 ? '200px' : '150px';
     const desk = thumbW + 'minmax(0,1fr) ' + e.cols.map((c) => c.width).join(' ') + ' ' + act;
     const mid = thumbW + 'minmax(0,1fr) ' + e.cols.filter((c) => !c.hideMd).map((c) => c.width).join(' ') + ' ' + act;
     const hue = (i) => 'hsl(' + ((i * 47 + 200) % 360) + ', 42%, 36%)';
@@ -614,7 +661,8 @@ class View extends Mockup {
         // On a phone a bare number loses its column header: it carries the column's name instead.
         cap: v.text && /^[0-9][0-9 ]*$/.test(v.text) ? c.label : null,
         text: v.text ?? null, link: v.link ?? null, badge: v.badge ?? null, intent: Boolean(v.intent),
-        fg: v.muted ? t.muted : t.text,
+        fg: v.alert ? t.del : (v.muted ? t.muted : t.text),
+        fw: v.alert ? '700' : '400',
         badgeBg: v.full ? t.nBg : 'transparent',
         badgeFg: v.full ? t.nFg : t.text,
         badgeB: v.full ? '2px solid transparent' : '2px dashed ' + t.line,
@@ -645,7 +693,13 @@ class View extends Mockup {
       // An intent on an edition turns into one on the album only when that edition is the album's
       // only one (fonctionnel/regles-metier.md § Intention d'acquisition): otherwise the conversion is not offered.
       const menu = e.rowMenu.filter((m) => !(m.icon === ICON.swap && opts.noSwap))
+        // An ISBN that no correction can suppose is modified by the main action, which its menu then leaves out.
+        .filter((m) => !(opts.uncorrectable && m.icon === ICON.edit))
+        .map((m) => ({ ...m, label: m.icon === ICON.check && opts.accepted ? 'Ne plus accepter l\'erreur' : m.label }))
+        // What « Modifier » opens, named: the edition, or the intent that targets it.
+        .map((m) => ({ ...m, label: m.icon === ICON.edit && key === 'isbn' ? editLabel(opts) : m.label }))
         .map((m) => ({ ...m, label: m.icon === ICON.swap && opts.other ? opts.other : m.label, fg: m.del ? t.del : t.text, sep: Boolean(m.sep) }));
+      const primary = opts.uncorrectable ? [editLabel(opts), ICON.edit] : e.primary;
       return {
         ...thumb,
         id: i, title, sub,
@@ -656,7 +710,7 @@ class View extends Mockup {
         rowBg: editing ? t.tBg : 'transparent',
         editing, reading: !editing,
         cells: values.map((v, k) => cellOf(v, e.cols[k])),
-        primary: e.primary[0], primaryIcon: e.primary[1],
+        primary: primary[0], primaryIcon: primary[1],
         open: (ev) => { ev?.preventDefault?.(); if (e.inline) this.setState({ editRow: i, rowMenu: null }); else if (e.panel) this.setState({ panel: 'modification', rowMenu: null }); },
         cancel: () => this.setState({ editRow: null }),
         menuOpen: rowMenu === i,
@@ -712,7 +766,8 @@ class View extends Mockup {
       filtersBtnBg: filtersOpen ? t.nBg : 'transparent',
       filtersBtnFg: filtersOpen ? t.nFg : t.secText,
       toggleFilters: () => this.setState({ filtersOpen: !filtersOpen }),
-      filters: e.filters.map((label) => ({ label, value: 'Tous', icon: ICON.search })),
+      // A record chosen by typing its name, or a value chosen in a list.
+      filters: e.filters.map((f) => typeof f === 'string' ? { label: f, value: 'Tous', icon: ICON.search } : f),
       entries: [entry('Toutes', '58px'), ...'#ABCDEFGHIJKLMNOPQRSTUVWXYZ@'.split('').map((l) => entry(l, '30px'))],
       rows,
       pages: e.pages.map((p, i) => ({ label: p, current: i === 0 ? 'page' : 'false', bg: i === 0 ? t.acc : 'transparent', fg: i === 0 ? t.onAcc : (p === '…' ? t.muted : t.text) })),
@@ -736,8 +791,9 @@ class View extends Mockup {
 
 Mockup.mount(View, {
   theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
-  entite: { label: 'Liste', editor: 'enum', options: ['series', 'editions', 'intentions', 'auteurs', 'editeurs', 'genres', 'univers'], default: 'series' },
+  entite: { label: 'Liste', editor: 'enum', options: ['series', 'editions', 'isbn', 'intentions', 'auteurs', 'editeurs', 'genres', 'univers'], default: 'series' },
   filtres: { label: 'Filtres ouverts', editor: 'boolean', default: false },
+  acceptees: { label: 'ISBN acceptés affichés', editor: 'boolean', default: false },
   actions: { label: 'Actions d’une ligne', editor: 'boolean', default: false },
   edition: { label: 'Genre en cours de modification', editor: 'boolean', default: false },
   ajout: { label: 'Ajout d’un genre ouvert', editor: 'boolean', default: false },

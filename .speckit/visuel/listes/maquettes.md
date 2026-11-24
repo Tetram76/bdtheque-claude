@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes des listes et leurs réglages.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:33:10Z }
 ---
 
 # Maquettes
@@ -13,8 +13,9 @@ Réglages de la source commune :
 
 | Réglage | Valeurs |
 | --- | --- |
-| `entite` | la liste présentée : `series` (par défaut), `editions`, `intentions`, `auteurs`, `editeurs`, `genres` ou `univers` |
-| `filtres` | panneau des filtres ouvert (séries et éditions) |
+| `entite` | la liste présentée : `series` (par défaut), `editions`, `isbn` (ISBN au chiffre de contrôle incohérent), `intentions`, `auteurs`, `editeurs`, `genres` ou `univers` |
+| `filtres` | panneau des filtres ouvert (séries, éditions et ISBN) |
+| `acceptees` | erreurs acceptées présentées avec celles à corriger (ISBN) |
 | `actions` | menu des autres actions d'une ligne ouvert |
 | `edition` | un genre en cours de modification dans sa ligne |
 | `ajout` | cadre d'ajout d'un genre ouvert |

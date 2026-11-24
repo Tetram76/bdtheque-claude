@@ -314,7 +314,7 @@ public static class AppPaths
     public const string AdminNewUniverse = $"{AdminUniverses}?new=open";
 
     /// <summary>The editions whose ISBN has a check digit that disagrees with it (visuel/administration/contenu.md, À vérifier).</summary>
-    public const string AdminInvalidIsbns = NotYetImplemented;
+    public const string AdminInvalidIsbns = "/admin/invalid-isbns";
 
     /// <summary>
     /// The page that modifies a record of the given type (visuel/administration/contenu.md, Dernières modifications). Every

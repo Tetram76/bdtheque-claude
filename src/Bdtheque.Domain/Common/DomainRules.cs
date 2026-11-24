@@ -47,6 +47,15 @@ public static class DomainRules
     public const string EditionInitialValueAmountPositive = "Edition.InitialValueAmountPositive";
 
     /// <summary>
+    /// An ISBN to correct, or whose error to accept, that has no error (fonctionnel/regles-metier/validation-de-l-isbn.md): no
+    /// ISBN, or one whose check digit agrees with it, corrected since the list was read.
+    /// </summary>
+    public const string EditionIsbnConsistent = "Edition.IsbnConsistent";
+
+    /// <summary>An ISBN to correct that no check character makes consistent: the application supposes no ISBN for it.</summary>
+    public const string EditionIsbnNotCorrectable = "Edition.IsbnNotCorrectable";
+
+    /// <summary>
     /// An acquisition price with none of its reference dates known (acquisition date, edition year,
     /// album's first publication), or a write that would clear the last one (fonctionnel/valorisation/gestion-des-devises.md).
     /// </summary>

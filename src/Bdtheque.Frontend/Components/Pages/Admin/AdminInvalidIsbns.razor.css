@@ -1,0 +1,152 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, as that of the list of the editions: mobile-first, each row
+   holds on two lines, the thumbnail on the left, the edition with its album and the actions, then the state, the ISBN
+   corrected, carrying the name of its column, and the acquisition. A list wide enough is a table; wider still, the table adds
+   the last modification (visuel/listes/principes-communs.md). The state is a column of the table only when the errors
+   accepted are presented with those to correct (visuel/listes/liste-par-liste.md). */
+.isbn-rows {
+    container: isbn-rows / inline-size;
+    /* The column of the actions has a fixed width, the same in the head as in the rows, each row being a grid of its own, so
+       that their columns line up. It holds the longest main action, « Modifier l'intention » of an ISBN no check character
+       corrects, and the « ⋯ » button. */
+    --isbn-actions-width: 14rem;
+}
+
+.isbn-row {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    grid-template-areas: "cover main actions" "cover meta meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.isbn-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.isbn-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+}
+
+.isbn-cover {
+    grid-area: cover;
+    --cover-width: 2.25rem;
+}
+
+.isbn-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.isbn-state {
+    grid-area: state;
+}
+
+/* The only incoherence that bears the color of alert (visuel/administration/contenu.md). */
+.isbn-to-correct {
+    color: var(--color-alert);
+    font-weight: var(--font-weight-strong);
+}
+
+.isbn-corrected {
+    grid-area: corrected;
+}
+
+.isbn-caption {
+    color: var(--color-text-muted);
+}
+
+/* An ISBN is one block, never cut at the end of a line (fonctionnel/presentation/libelle-d-une-edition.md). */
+.isbn-value {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.isbn-acquisition {
+    grid-area: acquisition;
+}
+
+.isbn-modified {
+    display: none;
+    grid-area: modified;
+}
+
+.isbn-row:not(.isbn-row-head) .isbn-modified {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.isbn-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-xs);
+}
+
+/* The form of an action, around its button or its item of the menu, takes no room of its own. */
+.isbn-actions form {
+    display: contents;
+}
+
+@container isbn-rows (min-width: 46rem) {
+    .isbn-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 11rem 8.5rem var(--isbn-actions-width);
+        grid-template-areas: "cover main corrected acquisition actions";
+        align-items: center;
+    }
+
+    .isbn-rows[data-states] .isbn-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 6.5rem 11rem 8.5rem var(--isbn-actions-width);
+        grid-template-areas: "cover main state corrected acquisition actions";
+    }
+
+    .isbn-row-head {
+        display: grid;
+    }
+
+    .isbn-meta {
+        display: contents;
+        font-size: inherit;
+    }
+
+    .isbn-caption {
+        display: none;
+    }
+}
+
+@container isbn-rows (min-width: 62rem) {
+    .isbn-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 11rem 8.5rem 6.75rem var(--isbn-actions-width);
+        grid-template-areas: "cover main corrected acquisition modified actions";
+    }
+
+    .isbn-rows[data-states] .isbn-row {
+        grid-template-columns: 2.25rem minmax(0, 1fr) 6.5rem 11rem 8.5rem 6.75rem var(--isbn-actions-width);
+        grid-template-areas: "cover main state corrected acquisition modified actions";
+    }
+
+    .isbn-modified {
+        display: block;
+    }
+}

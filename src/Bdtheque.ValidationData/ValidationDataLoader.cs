@@ -255,18 +255,21 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             Credit(vanSluys, ContributionRole.Illustrator), Credit(etienne, ContributionRole.Illustrator), Credit(pinceau, ContributionRole.Illustrator),
             Credit(lund, ContributionRole.Illustrator), Credit(lemaire, ContributionRole.Colorist),
         ]));
+        // Its ISBN a digit short, which no check digit makes consistent: no ISBN corrected (fonctionnel/regles-metier/validation-de-l-isbn.md).
         var collectiveEdition = await data.EditionAsync(collective, Owned(bubbles.Id, null, 2019, AcquisitionMode.Won, new DateOnly(2019, 10, 31)) with
         {
-            Category = EditionCategory.SpecialEdition, AcquisitionAmount = 15m, AcquisitionCurrency = "EUR",
+            Isbn = "2-905123-02", Category = EditionCategory.SpecialEdition, AcquisitionAmount = 15m, AcquisitionCurrency = "EUR",
         });
         await data.VisualAsync(collective, collectiveEdition, VisualType.Cover, Images.Portrait(0.85));
 
-        // Bought abroad, in dollars; sorted under its article, under `E`.
+        // Bought abroad, in dollars; sorted under its article, under `E`. Its ISBN, printed with a wrong check digit, is
+        // accepted as it is: an error the home page of the administration no longer counts.
         var summer = await data.AlbumAsync(OneShot("Un été à Port-Grisé", 2021, 6, [adventure], [greyPort], [Credit(etienne, ContributionRole.Illustrator), Credit(arnaud, ContributionRole.Scenarist)]));
         var summerEdition = await data.EditionAsync(summer, Owned(lagoon.Id, lagoon.Collections[1], 2021, AcquisitionMode.Purchase, new DateOnly(2021, 7, 3)) with
         {
-            AcquisitionAmount = 19.99m, AcquisitionCurrency = "USD",
+            Isbn = WrongIsbn("979109123470"), AcquisitionAmount = 19.99m, AcquisitionCurrency = "USD",
         });
+        await data.AcceptIsbnErrorAsync(summer, summerEdition);
         await data.VisualAsync(summer, summerEdition, VisualType.Cover, Images.Portrait(0.48));
         // Owned, and wished for again from a publisher without a website, whose name, in the label of the edition, is no link
         // (fonctionnel/presentation/libelle-d-une-edition.md).
@@ -277,8 +280,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.EditionAsync(fog, Owned(lagoon.Id, null, 2008, AcquisitionMode.Gift, new DateOnly(2008, 12, 24)) with { IsFree = true });
         // Owned, and wished for again from another publisher, which no owned edition names. The edition wished for has a cover:
         // the cover of the album in the list of all the albums, the generic visual in the list of the owned ones, which presents
-        // its owned edition only (fonctionnel/regles-metier/couverture-d-un-album.md).
-        var fogIntents = await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(horizon.Id, null, 2023, null, null, null, null, null, null, null, true));
+        // its owned edition only (fonctionnel/regles-metier/couverture-d-un-album.md). Its ISBN-10 has a wrong check digit: an
+        // intent among the ISBN to check.
+        var fogIntents = await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(horizon.Id, null, 2023, "2-905123-02-4", null, null, null, null, null, null, true));
         await data.VisualAsync(fog, fogIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.3));
 
         // Wished for as a whole, with no edition known yet.
@@ -638,6 +642,16 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             };
             using var response = await client.PostAsync($"/admin/albums/{album.Id}/editions/{edition}/visuals", form, cancellationToken);
             album.Version = (await ReadAsync<EditionVisualsForm>(response)).AlbumVersion;
+        }
+
+        /// <summary>The error of the ISBN of an edition accepted as it is (fonctionnel/regles-metier/validation-de-l-isbn.md).</summary>
+        public async Task AcceptIsbnErrorAsync(AlbumWrite album, Guid edition)
+        {
+            using var response = await client.PostAsJsonAsync(
+                $"/admin/albums/{album.Id}/editions/{edition}/isbn-acceptance", new IsbnActionRequest(album.Version), cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                await ReadAsync<object>(response);
+            album.Version = (await GetAsync<AlbumForm>($"/admin/albums/{album.Id}")).Version;
         }
 
         /// <summary>An intent on the album itself; the intents of the album after it.</summary>

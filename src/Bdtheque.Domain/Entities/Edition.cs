@@ -22,6 +22,12 @@ public sealed class Edition : EntityBase
     public int? PublicationYear { get; private set; }
     public string? Isbn { get; private set; }
 
+    /// <summary>
+    /// The ISBN whose inconsistent check digit the user accepted (modele-metier/edition.md): the edition is no error to correct
+    /// while its ISBN is this one. Never entered on the form of the edition.
+    /// </summary>
+    public string? AcceptedIsbn { get; private set; }
+
     public BindingType? Binding { get; private set; }
     public BookOrientation? Orientation { get; private set; }
     public ReadingDirection? ReadingDirection { get; private set; }
@@ -140,7 +146,46 @@ public sealed class Edition : EntityBase
     /// advisory only (fonctionnel/regles-metier/validation-de-l-isbn.md) — see <see cref="IsbnChecksumValidator"/>
     /// for the non-blocking check a caller should run to warn the user.
     /// </summary>
-    public void SetIsbn(string? isbn) => Isbn = IsbnText.Normalize(isbn);
+    /// <remarks>An acceptance holds for the ISBN accepted: another ISBN ends it.</remarks>
+    public void SetIsbn(string? isbn)
+    {
+        var normalized = IsbnText.Normalize(isbn);
+        if (normalized != Isbn)
+            AcceptedIsbn = null;
+        Isbn = normalized;
+    }
+
+    /// <summary>
+    /// Puts the ISBN the application supposes in place of the ISBN entered (fonctionnel/regles-metier/validation-de-l-isbn.md,
+    /// Corriger): its check character computed again.
+    /// </summary>
+    public void CorrectIsbn()
+    {
+        EnsureIsbnInconsistent();
+        SetIsbn(IsbnChecksumValidator.Corrected(Isbn)
+                ?? throw new DomainRuleViolationException(
+                    DomainRules.EditionIsbnNotCorrectable, "No check character makes the ISBN consistent.", this, nameof(Isbn)));
+    }
+
+    /// <summary>
+    /// Accepts the ISBN as it is, its check digit inconsistent (fonctionnel/regles-metier/validation-de-l-isbn.md, Accepter
+    /// l'erreur): the edition is no longer an error to correct.
+    /// </summary>
+    public void AcceptIsbnError()
+    {
+        EnsureIsbnInconsistent();
+        AcceptedIsbn = Isbn;
+    }
+
+    /// <summary>Makes the error of the ISBN one to correct again (Ne plus accepter l'erreur).</summary>
+    public void RevokeIsbnErrorAcceptance() => AcceptedIsbn = null;
+
+    private void EnsureIsbnInconsistent()
+    {
+        if (IsbnChecksumValidator.IsValid(Isbn) || Isbn is null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionIsbnConsistent, "The ISBN has no inconsistent check digit.", this, nameof(Isbn));
+    }
 
     public void SetPageCount(int? count)
     {

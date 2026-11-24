@@ -10,7 +10,7 @@
 * [Ordre des visuels d'une édition](ordre-des-visuels-d-une-edition.md) - Visuels par type dans un ordre fixe, puis par ordre d'affichage.
 * [Visuel par défaut](visuel-par-defaut.md) - Visuel générique pour toute édition sans couverture.
 * [Couverture d'un album](couverture-d-un-album.md) - Couverture d'un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.
-* [Validation de l'ISBN](validation-de-l-isbn.md) - ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l'enregistrement.
+* [Validation de l'ISBN](validation-de-l-isbn.md) - ISBN-10 et 13, chiffre de contrôle vérifié sans bloquer l'enregistrement, ISBN corrigé que suppose l'application, erreur acceptée pour un ISBN.
 * [Séquence théorique de tomes d'une série](sequence-theorique-de-tomes-d-une-serie.md) - Séquence des tomes attendus d'une série, référence des manquants et des rythmes de parution.
 * [Suppression des entités](suppression-des-entites.md) - Confirmation et sa phrase d'introduction unique, impact par type d'entité (édition visée comptée comme intention d'acquisition), refus ligne par ligne, natures de lien (référence, association, composition) entité par entité.
 * [Fusion de deux fiches](fusion-des-fiches.md) - Fusion de deux fiches d'un même type, depuis la liste de leur type : garder le meilleur des deux fiches, chaque donnée retenue ou écartée, aucune fiche privilégiée, fiches qui les désignent reportées sur celle qui reste, doublons créés par la fusion fusionnés avec elle, ce qui en découle (listes, intentions, univers, confirmation, journal) ; à lire pour toute fusion.

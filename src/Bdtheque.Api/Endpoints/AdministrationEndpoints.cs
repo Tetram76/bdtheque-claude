@@ -37,15 +37,7 @@ internal static class AdministrationEndpoints
             await context.Universes.CountAsync(cancellationToken),
             await context.Universes.CountAsync(u => u.ParentId != null, cancellationToken));
 
-    // The check digit is the domain's to verify (IsbnChecksumValidator), which no SQL translates: the ISBN are read, a few
-    // thousand short texts at most, and checked in memory.
-    private static async Task<AdminChecks> GetChecksAsync(BdthequeDbContext context, CancellationToken cancellationToken)
-    {
-        var isbns = await context.Editions.AsNoTracking()
-            .Where(e => e.Isbn != null)
-            .Select(e => e.Isbn)
-            .ToListAsync(cancellationToken);
-
-        return new AdminChecks(isbns.Count(isbn => !IsbnChecksumValidator.IsValid(isbn)));
-    }
+    // The errors to correct, counted as their list counts them.
+    private static async Task<AdminChecks> GetChecksAsync(BdthequeDbContext context, CancellationToken cancellationToken) =>
+        new(await InvalidIsbnEndpoints.CountToCorrectAsync(context, cancellationToken));
 }

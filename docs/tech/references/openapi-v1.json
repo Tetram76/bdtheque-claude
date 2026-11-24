@@ -4395,6 +4395,155 @@
         }
       }
     },
+    "/admin/editions/invalid-isbns": {
+      "get": {
+        "tags": [
+          "InvalidIsbnEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Entry",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SeriesId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "AlbumId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "PublisherId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "PublisherCollectionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "InCollection",
+            "in": "query",
+            "description": "Only the editions of the collection, when `true`: an edition a purchase intent targets is presented as the intent, never\nas an edition (fonctionnel/regles-metier/intention-d-acquisition.md), as by the search of the consultation.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": {
+              "default": "ToCorrect",
+              "$ref": "#/components/schemas/InvalidIsbnState"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidIsbnList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/purchase-intents": {
       "get": {
         "tags": [
@@ -5475,6 +5624,253 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/admin/albums/{rootId}/editions/{id}/isbn-correction": {
+      "post": {
+        "tags": [
+          "Bdtheque.Api"
+        ],
+        "parameters": [
+          {
+            "name": "rootId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IsbnActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/admin/albums/{rootId}/editions/{id}/isbn-acceptance": {
+      "post": {
+        "tags": [
+          "Bdtheque.Api"
+        ],
+        "parameters": [
+          {
+            "name": "rootId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IsbnActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Bdtheque.Api"
+        ],
+        "parameters": [
+          {
+            "name": "rootId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "uint32"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -10061,7 +10457,7 @@
               "integer",
               "string"
             ],
-            "description": "Editions whose ISBN has a check digit that disagrees with it (fonctionnel/regles-metier/validation-de-l-isbn.md).",
+            "description": "Editions whose ISBN has a check digit that disagrees with it (fonctionnel/regles-metier/validation-de-l-isbn.md), an error\naccepted excepted.",
             "format": "int32"
           }
         },
@@ -11958,7 +12354,8 @@
           "SearchCriteria",
           "SearchVariables",
           "AlbumLabelFormat",
-          "DisplayCulture"
+          "DisplayCulture",
+          "AcceptedIsbn"
         ],
         "description": "Attribute of a record changed by a modification, as the change log names it\n(modele-metier/entree-du-journal-des-modifications.md). The type of the record gives it its\ncontext: the title of\nan album and the title of a series are both ChangeLogAttribute.Title."
       },
@@ -14199,6 +14596,141 @@
         },
         "description": "Number of records of one entity type concerned by a deletion."
       },
+      "InvalidIsbnList": {
+        "required": [
+          "editions",
+          "filters",
+          "acceptedCount"
+        ],
+        "type": "object",
+        "properties": {
+          "editions": {
+            "$ref": "#/components/schemas/PageOfInvalidIsbnListItem"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/EditionListFilters"
+          },
+          "acceptedCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "How many of the editions of the whole list are errors accepted, which its count tells.",
+            "format": "int32"
+          }
+        },
+        "description": "The list of the editions whose ISBN has an inconsistent check digit (visuel/listes/liste-par-liste.md): one page of them, what\nthe list presents of the records it is filtered on, and how many of the editions it finds are errors accepted."
+      },
+      "InvalidIsbnListItem": {
+        "required": [
+          "album",
+          "edition",
+          "cover",
+          "correctedIsbn",
+          "isOwned",
+          "acquisitionMode",
+          "acquisitionYear",
+          "isAccepted",
+          "modifiedAt",
+          "albumVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "album": {
+            "$ref": "#/components/schemas/AlbumSummary"
+          },
+          "edition": {
+            "$ref": "#/components/schemas/EditionSummary"
+          },
+          "cover": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Its first cover; `null` for the generic visual.",
+                "$ref": "#/components/schemas/AlbumCover"
+              }
+            ]
+          },
+          "correctedIsbn": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The ISBN the application supposes; `null` when no check character makes the ISBN consistent."
+          },
+          "isOwned": {
+            "type": "boolean",
+            "description": "Whether the edition is owned; otherwise a purchase intent targets it."
+          },
+          "acquisitionMode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The mode of its acquisition, for an owned edition.",
+                "$ref": "#/components/schemas/AcquisitionMode"
+              }
+            ]
+          },
+          "acquisitionYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "description": "The year of its acquisition date, if known.",
+            "format": "int32"
+          },
+          "isAccepted": {
+            "type": "boolean",
+            "description": "Whether its error is accepted."
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "albumVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Version of its album, sent back by each of its actions: the edition belongs to the aggregate of its album.",
+            "format": "uint32"
+          }
+        },
+        "description": "An edition whose ISBN has an inconsistent check digit, owned or targeted by a purchase intent, as a row of its list presents it\n(fonctionnel/regles-metier/validation-de-l-isbn.md)."
+      },
+      "InvalidIsbnState": {
+        "enum": [
+          "ToCorrect",
+          "Accepted",
+          "All"
+        ],
+        "description": "Which errors the list of the ISBN to check presents (filtre « État »)."
+      },
+      "IsbnActionRequest": {
+        "required": [
+          "albumVersion"
+        ],
+        "type": "object",
+        "properties": {
+          "albumVersion": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "An action on the ISBN of an edition from its list: its correction, or the acceptance of its error, under the version of its\nalbum."
+      },
       "IsbnCheck": {
         "required": [
           "isChecksumValid",
@@ -15309,6 +15841,51 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GenreListItem"
+            }
+          },
+          "number": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of the page, from 1.",
+            "format": "int32"
+          },
+          "size": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Maximum number of items per page.",
+            "format": "int32"
+          },
+          "totalCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "Number of items of the whole list.",
+            "format": "int32"
+          }
+        },
+        "description": "One page of a list of the consultation, paginated by offset\n(choix-implementation/api/organisation-de-l-api.md)."
+      },
+      "PageOfInvalidIsbnListItem": {
+        "required": [
+          "items",
+          "number",
+          "size",
+          "totalCount"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvalidIsbnListItem"
             }
           },
           "number": {
@@ -19033,6 +19610,9 @@
     },
     {
       "name": "EditionEndpoints"
+    },
+    {
+      "name": "InvalidIsbnEndpoints"
     },
     {
       "name": "PurchaseIntentEndpoints"

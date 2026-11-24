@@ -28,6 +28,7 @@ public sealed record RecordCounts(
 /// specification defines.
 /// </summary>
 /// <param name="InvalidIsbnCount">
-/// Editions whose ISBN has a check digit that disagrees with it (fonctionnel/regles-metier/validation-de-l-isbn.md).
+/// Editions whose ISBN has a check digit that disagrees with it (fonctionnel/regles-metier/validation-de-l-isbn.md), an error
+/// accepted excepted.
 /// </param>
 public sealed record AdminChecks(int InvalidIsbnCount);

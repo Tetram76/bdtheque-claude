@@ -44,8 +44,14 @@ public abstract record ListQuery(string? Text, string? Entry, int Page, bool Fil
     /// </summary>
     protected abstract IEnumerable<(string Name, object? Value)> Filters { get; }
 
-    /// <summary>The cross filters chosen: what the button of the filters counts, neither the search nor the entry.</summary>
-    public int ActiveFilterCount => Filters.Count(filter => filter.Value is not null);
+    /// <summary>
+    /// The cross filters applied: what the button of the filters counts and the tags of the list present, neither the search
+    /// nor the entry. Those of its address by default; a list whose address leaves out a filter applied by default counts it too.
+    /// </summary>
+    public virtual int ActiveFilterCount => AddressFilterCount;
+
+    // The filters its address carries, which tell the control used (Action).
+    private int AddressFilterCount => Filters.Count(filter => filter.Value is not null);
 
     /// <summary>
     /// Why the list is empty, when it is (visuel/liste-albums/contenu.md, Liste vide): the most precise of its criteria, the
@@ -142,7 +148,7 @@ public abstract record ListQuery(string? Text, string? Entry, int Page, bool Fil
             {
                 { Page: > 1 } => functions.Page,
                 { Entry: not null } => functions.Initial ?? throw new UnreachableException("An entry in a list without navigation."),
-                { ActiveFilterCount: > 0 } => functions.Filter ?? throw new UnreachableException("A filter in a list without filters."),
+                { AddressFilterCount: > 0 } => functions.Filter ?? throw new UnreachableException("A filter in a list without filters."),
                 _ => functions.Search,
             };
             return (function, Join(criteria));

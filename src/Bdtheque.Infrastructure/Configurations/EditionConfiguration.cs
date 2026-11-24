@@ -12,6 +12,7 @@ internal sealed class EditionConfiguration : IEntityTypeConfiguration<Edition>
         builder.HasKey(e => e.Id);
 
         builder.Property(e => e.Isbn).HasMaxLength(20);
+        builder.Property(e => e.AcceptedIsbn).HasMaxLength(20);
         builder.Property(e => e.PersonalReference).HasMaxLength(200);
         builder.Property(e => e.PersonalNotes);
         builder.Property(e => e.AcquisitionCurrency).HasMaxLength(3);

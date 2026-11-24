@@ -501,6 +501,11 @@ namespace Bdtheque.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AcceptedIsbn")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .UseCollation("fr-FR-x-icu");
+
                     b.Property<decimal?>("AcquisitionAmount")
                         .HasPrecision(14, 4)
                         .HasColumnType("numeric(14,4)");

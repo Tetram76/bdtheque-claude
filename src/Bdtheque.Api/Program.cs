@@ -112,6 +112,7 @@ admin.MapSeries();
 admin.MapAlbums();
 admin.MapTitleSortKeys();
 admin.MapEditions();
+admin.MapInvalidIsbns();
 admin.MapEditionVisuals();
 admin.MapPendingVisuals();
 admin.MapPurchaseIntents();

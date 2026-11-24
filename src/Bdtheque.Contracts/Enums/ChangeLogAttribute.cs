@@ -92,4 +92,7 @@ public enum ChangeLogAttribute
     // Setting of the application
     AlbumLabelFormat = 65,
     DisplayCulture = 66,
+
+    // Edition, continued
+    AcceptedIsbn = 67,
 }
