@@ -484,6 +484,28 @@ const ENTITIES = {
       ['Dupuis [1974]', 'Buddy Longway - Tome 2', ['1974', { text: '—', muted: true }, 'Échange', '9 oct. 2026'], { cover: false }]
     ]
   },
+  // The editions to correct, which the entry of the block « À vérifier » of the home page of the administration leads to:
+  // every edition whose ISBN has a check digit that disagrees with it, owned or targeted by an intent, as that entry counts
+  // them. Each row leads to the entry form of its edition, to correct its ISBN.
+  isbn: {
+    menu: '', title: 'ISBN au chiffre de contrôle incohérent', total: '4', create: null, kind: 'Contrôles',
+    noCreate: 'Une édition se corrige sur sa fiche de saisie, ouverte par « Modifier ».',
+    searchPh: 'ISBN, avec ou sans tirets…', initials: null,
+    filters: ['Série', 'Album', 'Éditeur', 'Collection éditeur'],
+    filtersHelp: 'Toute édition dont l\'ISBN a un chiffre de contrôle incohérent, possédée ou visée par une intention d\'acquisition.',
+    count: '4 éditions', countDetail: '', order: 'Dans l\'ordre des albums, puis par année d\'édition',
+    page: 'Éditions 1 à 4 sur 4', pages: [],
+    thumb: 'cover', mainHead: 'Édition',
+    cols: [col('Année', '64px'), col('Acquisition', '130px'), col('Modifiée', '104px', { hideMd: true })],
+    primary: ['Modifier', ICON.edit],
+    rowMenu: menuOf({ label: 'Éditions et intentions d\'acquisition de l\'album', icon: ICON.album }, VIEW('Voir l\'album dans la consultation')),
+    rows: [
+      ['Dargaud [2010] - ISBN 978-2-505-00865-3', 'Barracuda - Tome 1', ['2010', 'Achat, 2010', '3 sept. 2026'], { cover: true }],
+      ['Casterman [2007] - ISBN 978-2-203-00120-7', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['2007', 'Offerte, 2008', 'hier'], { cover: true }],
+      ['Dupuis [1974] - ISBN 2-8001-0123-4', 'Buddy Longway - Tome 2', ['1974', { badge: 'Intention', dashed: true }, '9 oct. 2026'], { cover: false }],
+      ['Lombard (Signé) - ISBN 2-8036-1234-X', 'Le Grand Pouvoir du Chninkel', [{ text: '—', muted: true }, 'Échange', '14 mai 2026'], { cover: false }]
+    ]
+  },
   intentions: {
     menu: "Intentions d'acquisition", title: "Intentions d'acquisition", total: '18', create: null, kind: 'Fiches',
     noCreate: 'Une intention se pose depuis la page des éditions et intentions d\'acquisition de son album.',
@@ -736,7 +758,7 @@ class View extends Mockup {
 
 Mockup.mount(View, {
   theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
-  entite: { label: 'Liste', editor: 'enum', options: ['series', 'editions', 'intentions', 'auteurs', 'editeurs', 'genres', 'univers'], default: 'series' },
+  entite: { label: 'Liste', editor: 'enum', options: ['series', 'editions', 'isbn', 'intentions', 'auteurs', 'editeurs', 'genres', 'univers'], default: 'series' },
   filtres: { label: 'Filtres ouverts', editor: 'boolean', default: false },
   actions: { label: 'Actions d’une ligne', editor: 'boolean', default: false },
   edition: { label: 'Genre en cours de modification', editor: 'boolean', default: false },
