@@ -187,7 +187,7 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     [Fact]
     public async Task PublicListOfThePurchaseIntents_PresentsEditionsWhosePublisherLeadsToItsSiteOrNot()
     {
-        var intents = (await _client.GetFromJsonAsync<Page<PurchaseIntentListItem>>("/catalog/purchase-intents?pageSize=100"))!.Items;
+        var intents = (await _client.GetFromJsonAsync<PurchaseIntentCatalogList>("/catalog/purchase-intents?pageSize=100"))!.Intents.Items;
 
         // The publisher of an edition targeted leads to its site when it is known, and is otherwise no link
         // (fonctionnel/presentation/libelle-d-une-edition.md); albums of the collection and albums wished for.

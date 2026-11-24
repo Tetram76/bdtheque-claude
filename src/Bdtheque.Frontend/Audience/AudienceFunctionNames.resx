@@ -438,6 +438,9 @@
   <data name="purchase-intents.search" xml:space="preserve">
     <value>Liste des intentions d&apos;acquisition de la consultation · recherche</value>
   </data>
+  <data name="purchase-intents.filter" xml:space="preserve">
+    <value>Liste des intentions d&apos;acquisition de la consultation · filtres</value>
+  </data>
   <data name="purchase-intents.initial" xml:space="preserve">
     <value>Liste des intentions d&apos;acquisition de la consultation · navigation par initiale</value>
   </data>

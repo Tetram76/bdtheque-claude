@@ -107,6 +107,39 @@ public sealed class PurchaseIntentCatalogListTests : IClassFixture<ApiWebApplica
         Assert.Equal([untitled, .. lotusIntents, zorglub], first.Items.Concat(second.Items).Select(r => r.Id));
     }
 
+    [Fact]
+    public async Task Filters_OfTheAlbums_KeepTheIntentsWhoseAlbumAnswersThem_AndAreNamedAsTheListsNameThem()
+    {
+        // The cross filters of the list of the albums, applied to the album of each intent, the possession excepted
+        // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+        var series = await CreateSeriesAsync($"Spirou {_marker}");
+        var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Humour {_marker}"));
+        var inSeries = await CreateAlbumIntentAsync((await CreateAlbumAsync(null, series.Id, 1)).Id);
+        var withGenre = await CreateAlbumIntentAsync((await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
+            $"Gaston {_marker}", null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [genre.Id], [], []))).Id);
+
+        var bySeries = await CatalogListAsync($"q={_marker}&seriesId={series.Id}");
+        var byGenre = await CatalogListAsync($"q={_marker}&genreId={genre.Id}");
+
+        Assert.Equal([inSeries], bySeries.Intents.Items.Select(r => r.Id));
+        Assert.Equal(new SeriesListItem(series.Id, $"Spirou {_marker}"), bySeries.Filters.Series);
+        Assert.Equal([withGenre], byGenre.Intents.Items.Select(r => r.Id));
+        Assert.Equal(genre.Id, byGenre.Filters.Genre!.Id);
+    }
+
+    [Fact]
+    public async Task Possession_IsNoFilterOfTheList()
+    {
+        var owned = await CreateAlbumAsync($"Possédé {_marker}");
+        var publisher = await CreatePublisherAsync($"Dupuis {_marker}", null);
+        await CreateOwnedEditionAsync(owned.Id, publisher.Id, 2000);
+        await CreateIntendedEditionAsync(owned.Id, publisher.Id, 2020);
+        await CreateAlbumIntentAsync((await CreateAlbumAsync($"Visé {_marker}")).Id);
+
+        // An address written by hand with a possession keeps every intent.
+        Assert.Equal(2, (await ListAsync($"q={_marker}&state=PurchaseIntent")).TotalCount);
+    }
+
     [Theory]
     [InlineData("page=0&pageSize=10")]
     [InlineData("page=1&pageSize=0")]
@@ -120,8 +153,9 @@ public sealed class PurchaseIntentCatalogListTests : IClassFixture<ApiWebApplica
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
     }
 
-    private async Task<Page<PurchaseIntentListItem>> ListAsync(string query) =>
-        await GetAsync<Page<PurchaseIntentListItem>>($"/catalog/purchase-intents?{query}");
+    private async Task<Page<PurchaseIntentListItem>> ListAsync(string query) => (await CatalogListAsync(query)).Intents;
+
+    private Task<PurchaseIntentCatalogList> CatalogListAsync(string query) => GetAsync<PurchaseIntentCatalogList>($"/catalog/purchase-intents?{query}");
 
     private async Task<IReadOnlyList<Guid>> IdsAsync(string query) => [.. (await ListAsync(query)).Items.Select(r => r.Id)];
 

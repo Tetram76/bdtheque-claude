@@ -155,14 +155,22 @@ internal static class PurchaseIntentEndpoints
             p.CreatedAt));
 
     /// <summary>
-    /// The public list of the intents (fonctionnel/structure-de-l-application.md), found and ordered as that of the
-    /// administration. It has no filter of the possession (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+    /// The public list of the intents (fonctionnel/structure-de-l-application.md), in the order of the albums: the intents whose
+    /// album the list of the albums would find with the same search, entry and cross filters, which the response names. It has
+    /// no filter of the possession (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
-    private static Task<Page<PurchaseIntentListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
-        int pageSize = Paging.DefaultSize) =>
-        Found(context, q, entry).ToPageAsync(page, pageSize, ListItem, cancellationToken);
+    private static async Task<PurchaseIntentCatalogList> ListAsync(
+        BdthequeDbContext context, [AsParameters] PurchaseIntentFilters filters, CancellationToken cancellationToken, int page = 1,
+        int pageSize = Paging.DefaultSize)
+    {
+        var albums = filters.OfAlbums;
+        var found = await albums.ApplyAsync(context.Albums, context, cancellationToken);
+        var intents = InListOrder(context.PurchaseIntents.AsNoTracking().Where(p => found.Any(a => a.Id == p.AlbumId)));
+        return new PurchaseIntentCatalogList(
+            await intents.ToPageAsync(page, pageSize, ListItem, cancellationToken),
+            await albums.NameAsync(context, cancellationToken));
+    }
 
     /// <summary>
     /// The list of the intents of the administration (visuel/listes/liste-par-liste.md). Each row carries the album and what
@@ -186,7 +194,7 @@ internal static class PurchaseIntentEndpoints
                 p.CreatedAt,
                 EF.Property<uint>(p.Album, BdthequeDbContext.VersionProperty))), cancellationToken);
 
-    // The intents of both lists, found by the title of their album or of its series, part of its label
+    // The intents of the list of the administration, found by the title of their album or of its series, part of its label
     // (fonctionnel/presentation/libelle-d-un-album.md), filed under the entry of the navigation by initial of their album,
     // in the order of the albums.
     private static IOrderedQueryable<PurchaseIntent> Found(BdthequeDbContext context, string? q, string? entry) =>

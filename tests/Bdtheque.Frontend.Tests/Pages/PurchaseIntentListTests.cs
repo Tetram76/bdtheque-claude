@@ -4,6 +4,7 @@ using AngleSharp.Dom;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
@@ -16,8 +17,8 @@ namespace Bdtheque.Frontend.Tests.Pages;
 
 /// <summary>
 /// The public list of the purchase intents: its rows, each an intent leading to the record of the album it targets, with what
-/// it targets, its count, its search and navigation, without any filter, its empty lists and its errors, told apart by role,
-/// link and text, never by appearance.
+/// it targets, its count, its search, navigation and filters, those of the albums without the possession, its empty lists and
+/// its errors, told apart by role, link and text, never by appearance.
 /// </summary>
 public sealed class PurchaseIntentListTests : BunitContext, IDisposable
 {
@@ -48,6 +49,8 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
         PublisherWebsite = null,
     };
 
+    private static readonly AlbumListFilters NoFilters = new(null, null, null, null, null, null);
+
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
     private readonly FakeAdminApi _api;
@@ -61,11 +64,13 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         _api = new FakeAdminApi(_audience);
         _api.AddServices(Services, _request);
+        Services.AddScoped<RecordSearch>();
         Services.AddSingleton(TimeProvider.System);
+        // The choice of a record imports its script once rendered, which these tests do not exercise.
         JSInterop.Mode = JSRuntimeMode.Loose;
         Answer([OnEdition, OnAlbum, WithoutSite], totalCount: 3);
         // The whole list, whose number the heading gives when criteria narrow the list.
-        _api.Answers[CatalogPurchaseIntentListQuery.All.ApiPath(1)] = Page([OnEdition], 12);
+        _api.Answers[CatalogPurchaseIntentListQuery.All.ApiPath(1)] = new PurchaseIntentCatalogList(Page([OnEdition], 12), NoFilters);
     }
 
     void IDisposable.Dispose()
@@ -112,14 +117,32 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void List_HasNoFilter_NorAnyAction()
+    public void Filters_AreThoseOfTheAlbums_WithoutThePossession_NorAnyActionOnTheRows()
     {
-        var page = Open("");
+        var page = Open("filters=open");
 
-        // Neither the button of the filters nor their panel, and no row has a button: the consultation has no action.
-        Assert.Empty(page.FindAll(".list-search [aria-controls], .list-search-panel, .active-filters, select"));
+        var labels = page.FindAll(".list-search-panel label").Select(Text).ToList();
+        Assert.Contains("Série", labels);
+        Assert.Contains("Genre", labels);
+        Assert.DoesNotContain("Possession", labels);
+        Assert.Empty(page.FindAll("select[name='state']"));
+        // The consultation has no action on a row.
         Assert.Empty(page.FindAll(".intent-row button"));
         Assert.Equal(AppPaths.PurchaseIntents, page.Find("form.list-search").GetAttribute("action"));
+    }
+
+    [Fact]
+    public void Filter_Chosen_IsAnActiveFilter_WhichTheNavigationAndThePagesKeep()
+    {
+        var seriesId = Guid.Parse("01900000-0000-7000-8000-0000000000a1");
+        _api.Answers["/catalog/purchase-intents"] = new PurchaseIntentCatalogList(
+            Page([OnEdition], 120), NoFilters with { Series = new SeriesListItem(seriesId, "Tintin") });
+
+        var page = Open($"seriesId={seriesId}");
+
+        Assert.Contains("Série : Tintin", Text(page.Find(".active-filters")));
+        Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.PurchaseIntents}?entry=B&seriesId={seriesId}");
+        Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.PurchaseIntents}?seriesId={seriesId}&page=2");
     }
 
     [Fact]
@@ -146,6 +169,7 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
 
     [Theory]
     [InlineData("q=zorglub", "Aucune intention d'acquisition ne correspond à « zorglub ».", "Effacer la recherche", AppPaths.PurchaseIntents)]
+    [InlineData("genreId=01900000-0000-7000-8000-0000000000a2", "Aucune intention d'acquisition ne correspond à ces critères.", "Effacer les filtres", AppPaths.PurchaseIntents)]
     [InlineData("entry=Q", "Aucune intention d'acquisition sous cette entrée.", "Toutes les intentions d'acquisition", AppPaths.PurchaseIntents)]
     public void EmptyList_SaysWhyAndOffersToClearWhatNarrowsIt(string criteria, string message, string action, string href)
     {
@@ -184,6 +208,7 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
     [InlineData("", new[] { "purchase-intents" })]
     [InlineData("q=tintin", new[] { "purchase-intents.search", "purchase-intents" })]
     [InlineData("entry=B", new[] { "purchase-intents.initial", "purchase-intents" })]
+    [InlineData("genreId=01900000-0000-7000-8000-0000000000a2", new[] { "purchase-intents.filter", "purchase-intents" })]
     [InlineData("page=2", new[] { "purchase-intents.page", "purchase-intents" })]
     public void Audience_TheActionOfItsCriteria_ThenTheScreen(string criteria, string[] functions)
     {
@@ -207,7 +232,7 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
     private static IReadOnlyList<IElement> Rows(IRenderedComponent<PurchaseIntentList> page) => page.FindAll(".intent-row:not(.intent-row-head)");
 
     private void Answer(IReadOnlyList<PurchaseIntentListItem> items, int totalCount) =>
-        _api.Answers["/catalog/purchase-intents"] = Page(items, totalCount);
+        _api.Answers["/catalog/purchase-intents"] = new PurchaseIntentCatalogList(Page(items, totalCount), NoFilters);
 
     private static Page<PurchaseIntentListItem> Page(IReadOnlyList<PurchaseIntentListItem> items, int totalCount) =>
         new(items, 1, ListQuery.PageSize, totalCount);

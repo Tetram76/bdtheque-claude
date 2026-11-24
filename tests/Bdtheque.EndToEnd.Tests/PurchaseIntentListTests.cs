@@ -49,6 +49,28 @@ public sealed class PurchaseIntentListTests(ApplicationHost application) : Brows
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.Album(lotus)));
     }
 
+    [Theory, InEachTheme]
+    public async Task Filter_OfTheAlbums_NarrowsTheList_AndTheMenuKeepsIt(string theme)
+    {
+        var series = await PostAsync<SeriesForm>("/admin/series", new SeriesContent(
+            $"Spirou {_marker}", null, null, null, false, false, false, null, null,
+            new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [], []));
+        var inSeries = await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
+            $"Le Prisonnier du Bouddha {_marker}", null, series.Id, AlbumType.Regular, false, 14, null, null, null, null, null, null, null, [], [], []));
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{inSeries.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, inSeries.Version));
+        await CreateAlbumIntentAsync($"Zorglub {_marker}");
+        var page = await NewPageAsync(theme);
+        await PageReadiness.GotoAsync(page, $"{AppPaths.PurchaseIntents}?q={_marker}&seriesId={series.Id}");
+
+        await Assertions.Expect(Labels(page)).ToHaveTextAsync([$"Le Prisonnier du Bouddha {_marker} (Spirou {_marker} - T. 14)"]);
+        await Assertions.Expect(page.Locator(".active-filters")).ToContainTextAsync($"Série : Spirou {_marker}");
+        await page.GetByRole(AriaRole.Navigation, new() { Name = "Menu de la consultation" })
+            .GetByRole(AriaRole.Link, new() { Name = "Intentions d'acquisition" }).ClickAsync();
+
+        // From its start, within the filters chosen (fonctionnel/structure-de-l-application.md, Retour à une liste).
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.PurchaseIntents, $"?seriesId={series.Id}"));
+    }
+
     [Theory]
     [InEachTheme(414)]
     [InEachTheme(768)]

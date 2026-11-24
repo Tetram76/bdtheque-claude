@@ -57,10 +57,12 @@ public static class AudienceFunctions
     /// <summary>The public list of the purchase intents, entry « Intentions d'acquisition » of the menu of the consultation.</summary>
     public static readonly AudienceFunction PurchaseIntents = new("purchase-intents", AudienceFunctionKind.Screen);
 
-    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogPurchaseIntentListQuery.cs);
-    // without filters, it has no function of a filter (choix-implementation/mesure-audience/releve-par-le-frontend.md).
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/CatalogPurchaseIntentListQuery.cs).
 
     public static readonly AudienceFunction PurchaseIntentsSearch = new("purchase-intents.search", AudienceFunctionKind.Action);
+
+    /// <summary>The cross filters of the albums, applied to the album of each intent.</summary>
+    public static readonly AudienceFunction PurchaseIntentsFilter = new("purchase-intents.filter", AudienceFunctionKind.Action);
 
     public static readonly AudienceFunction PurchaseIntentsInitial = new("purchase-intents.initial", AudienceFunctionKind.Action);
 
@@ -497,7 +499,7 @@ public static class AudienceFunctions
         AlbumRecord, AlbumRecordVisual,
         Albums, AlbumsSearch, AlbumsFilter, AlbumsInitial, AlbumsPage,
         SeriesRecord, AuthorRecord,
-        PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsInitial, PurchaseIntentsPage,
+        PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsFilter, PurchaseIntentsInitial, PurchaseIntentsPage,
         AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated, AdminAlbumSeriesCreated,

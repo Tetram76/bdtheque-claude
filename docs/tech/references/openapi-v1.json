@@ -8068,10 +8068,58 @@
             }
           },
           {
-            "name": "entry",
+            "name": "Entry",
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "SeriesId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "AuthorId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "PublisherId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "PublisherCollectionId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "GenreId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "UniverseId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -8127,7 +8175,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfPurchaseIntentListItem"
+                  "$ref": "#/components/schemas/PurchaseIntentCatalogList"
                 }
               }
             }
@@ -15495,6 +15543,22 @@
           }
         },
         "description": "A purchase intent as a row of the list of the administration presents it (visuel/listes/liste-par-liste.md): the album it\ntargets, with its membership of the collection, and what it targets, the whole album or one of its editions."
+      },
+      "PurchaseIntentCatalogList": {
+        "required": [
+          "intents",
+          "filters"
+        ],
+        "type": "object",
+        "properties": {
+          "intents": {
+            "$ref": "#/components/schemas/PageOfPurchaseIntentListItem"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/AlbumListFilters"
+          }
+        },
+        "description": "A page of the public list of the purchase intents, and the records its filters designate, named as the lists name them, for\nthe screen to present them without another request."
       },
       "PurchaseIntentEditionContent": {
         "required": [

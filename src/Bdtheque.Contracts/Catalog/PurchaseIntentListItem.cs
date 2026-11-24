@@ -26,3 +26,9 @@ public sealed record PurchaseIntentListItem(
     string? PublisherWebsite,
     AlbumCover? Cover,
     DateTimeOffset CreatedAt);
+
+/// <summary>
+/// A page of the public list of the purchase intents, and the records its filters designate, named as the lists name them, for
+/// the screen to present them without another request.
+/// </summary>
+public sealed record PurchaseIntentCatalogList(Page<PurchaseIntentListItem> Intents, AlbumListFilters Filters);
