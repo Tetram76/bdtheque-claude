@@ -567,4 +567,16 @@
   <data name="admin.purchase-intent-conversion.visual-deleted" xml:space="preserve">
     <value>Conversion d&apos;une intention vers une édition · suppression d&apos;un visuel confirmée</value>
   </data>
+  <data name="admin.genre-merge" xml:space="preserve">
+    <value>Fusion de deux genres</value>
+  </data>
+  <data name="admin.genre-merge.merged" xml:space="preserve">
+    <value>Fusion de deux genres · fusion faite</value>
+  </data>
+  <data name="admin.author-merge" xml:space="preserve">
+    <value>Fusion de deux auteurs</value>
+  </data>
+  <data name="admin.author-merge.merged" xml:space="preserve">
+    <value>Fusion de deux auteurs · fusion faite</value>
+  </data>
 </root>

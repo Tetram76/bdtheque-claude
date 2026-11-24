@@ -1,0 +1,58 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<MergeLinks> L
+
+@* What passes to the record, in the order of the entity types (visuel/fusion/fusion-de-deux-fiches.md): a line per type of
+   linked records, its total after the merge, then where it comes from. What was linked to both is counted once and said
+   common to both records, never a duplicate removed: nothing of it is lost (decision of the user). *@
+<Block Title="@L["Title"]" Kicker="@L["Kicker"]">
+    @if (Links.Any(l => l.Total > 0))
+    {
+        <ul class="merge-links">
+            @foreach (var link in Links.Where(l => l.Total > 0))
+            {
+                <li><strong>@Count(link)</strong> <span class="merge-links-detail">@Detail(link)</span></li>
+            }
+        </ul>
+    }
+    else
+    {
+        <p class="merge-links-none">@L["None"]</p>
+    }
+</Block>
+
+@code {
+    /// <summary>The records linked to the merged records, by type, in the order of the entity types.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<MergeLinkCount> Links { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public string FirstName { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string SecondName { get; set; } = null!;
+
+    /// <summary>The total of a type, as the page says it (« Crédité sur 26 albums », « 55 albums »).</summary>
+    [Parameter, EditorRequired]
+    public Func<MergeLinkCount, string> Count { get; set; } = null!;
+
+    // « les 24 de Gotlib et celle de Marcel Gotlib, dont 1 commune aux deux fiches »: a record with nothing of the type is not
+    // named, one record is « celui » or « celle », as the type is said.
+    private string Detail(MergeLinkCount link)
+    {
+        var parts = new[] { Part(link.Kind, link.First, FirstName), Part(link.Kind, link.Second, SecondName) }.OfType<string>();
+        var common = link.Common switch
+        {
+            0 => "",
+            1 => L[$"Common.One.{link.Kind}"].Value,
+            var count => L[$"Common.Other.{link.Kind}", count].Value,
+        };
+        return string.Join(L["And"].Value, parts) + common;
+    }
+
+    private string? Part(Bdtheque.Contracts.Enums.EntityKind kind, int count, string name) => count switch
+    {
+        0 => null,
+        1 => L[$"Part.One.{kind}", name].Value,
+        _ => L["Part.Other", count, name].Value,
+    };
+}

@@ -23,7 +23,9 @@
     background: rgb(0 0 0 / 0.45);
 }
 
-.dialog[data-tone="deletion"] {
+/* A merge deletes one of its two records, definitively: it warns as a deletion does. */
+.dialog[data-tone="deletion"],
+.dialog[data-tone="merge"] {
     --tone-color: var(--color-delete);
     --tone-text-color: var(--color-text-on-delete);
 }

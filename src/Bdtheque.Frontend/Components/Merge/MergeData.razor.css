@@ -1,0 +1,47 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). The frame is the container the rows are laid
+   out by (MergeChoice): its own width, not the screen's, which the margins of each theme make misleading. */
+.merge-data-frame {
+    container: merge-data / inline-size;
+}
+
+.merge-data-grid {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-s) var(--space-m);
+    align-items: stretch;
+}
+
+.merge-data-head {
+    display: flex;
+    flex-direction: column;
+    padding-block-end: var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+    overflow-wrap: anywhere;
+}
+
+.merge-data-head-detail {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
+.merge-data-result {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-l);
+    margin: var(--space-m) 0 0;
+    padding: var(--space-s) var(--space-m);
+    border: var(--border-width-control) dashed var(--color-rule);
+    border-radius: var(--radius-tile);
+    font-size: var(--font-size-small);
+}
+
+@container merge-data (max-width: 40rem) {
+    .merge-data-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .merge-data-corner,
+    .merge-data-head {
+        display: none;
+    }
+}
