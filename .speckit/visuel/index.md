@@ -8,6 +8,7 @@
 * [Fiche d'album](fiche-album/index.md)
 * [Fiche d'auteur](fiche-auteur/index.md)
 * [Fiche de série](fiche-serie/index.md)
+* [Fiche d'univers](fiche-univers/index.md)
 * [Liste des albums](liste-albums/index.md)
 * [Listes de l'administration](listes/index.md)
 * [Saisie d'un album](saisie-album/index.md)

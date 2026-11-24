@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Contrôle de cohérence fonctionnelle'
 description: 'Contrôle hebdomadaire de la cohérence de toute l''application, au sein des familles d''écrans et de points d''entrée de même nature et pour chaque règle transversale : sources confrontées, classement des écarts, suites, trace ; à lire quand le contrôle est dû ou demandé.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T08:12:26Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T13:10:00Z }
 ---
 
 # Contrôle de cohérence fonctionnelle
@@ -14,7 +14,7 @@ Chaque Pull Request vérifie qu'un écran ou un point d'entrée est conforme à 
 
 ## Ce qui est confronté
 
-- **Au sein d'une famille** : les éléments de même nature, comparés entre eux sur chaque axe qui les concerne. Exemples de familles : fiches de la consultation ; listes d'un genre ou d'un univers, présentées comme la bibliographie d'un auteur ; recherche simple et recherche avancée ; fiches de saisie en page, panneaux latéraux, saisie dans la ligne ([Saisie selon l'entité](../../visuel/listes/saisie-selon-l-entite.md)) ; listes et dialogues de l'administration ; points d'entrée de l'API et de l'outil pour agents IA de même nature (lecture, écriture sous version, suppression avec impact). Exemples d'axes : modification concurrente (réponse, actions offertes) ; erreur métier (champ en cause, message, focus) ; mentions obligatoire ou facultatif ; unicité sans tenir compte de la casse ni des accents ; texte trop long ; création sur place ; enregistrement, annulation et retour ; dates de la fiche ; suppression et son impact.
+- **Au sein d'une famille** : les éléments de même nature, comparés entre eux sur chaque axe qui les concerne. Exemples de familles : fiches de la consultation ; listes présentées comme la bibliographie d'un auteur (fiches d'un auteur et d'un univers) ; recherche simple et recherche avancée ; fiches de saisie en page, panneaux latéraux, saisie dans la ligne ([Saisie selon l'entité](../../visuel/listes/saisie-selon-l-entite.md)) ; listes et dialogues de l'administration ; points d'entrée de l'API et de l'outil pour agents IA de même nature (lecture, écriture sous version, suppression avec impact). Exemples d'axes : modification concurrente (réponse, actions offertes) ; erreur métier (champ en cause, message, focus) ; mentions obligatoire ou facultatif ; unicité sans tenir compte de la casse ni des accents ; texte trop long ; création sur place ; enregistrement, annulation et retour ; dates de la fiche ; suppression et son impact.
 - **Transversalement** : une même donnée ou une même règle partout où elle apparaît, quelle que soit la partie. Exemples : libellé d'un album ou d'une édition et ISBN présenté ; ordres de présentation ; appartenance à la collection ; données absentes ; présentation des erreurs ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)) ; règles d'accès, communes à l'interface web et à l'outil pour agents IA ; mesure d'audience ; déclinaison par thème ; aide contextuelle au regard de ce que fait l'écran.
 
 Familles et axes ne sont pas une liste close : un écran ou un point d'entrée nouveau rejoint la famille de sa nature, et un élément appartient à autant de familles que d'axes le concernent.

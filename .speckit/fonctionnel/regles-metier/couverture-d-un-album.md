@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Couverture d''un album'
 description: 'Couverture d''un album : première couverture de sa plus ancienne édition illustrée, parmi ses éditions possédées dans un contexte de collection, parmi toutes ses éditions dans un contexte de base documentaire.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-23T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T13:10:00Z }
 ---
 
 # Couverture d'un album
@@ -12,6 +12,6 @@ Un album n'a pas de couverture propre : sa couverture est celle de l'une de ses 
 Les éditions prises en compte sont **celles que présente le contexte** où figure l'album (décision de l'utilisateur, #603) :
 
 - **contexte de collection** (ex. statistiques ; liste de la consultation filtrée sur « Possédé », qui ne présente de ses albums que leurs éditions possédées, cf. [Périmètre de la consultation](perimetre-de-la-consultation.md)) : seules les éditions **possédées** ;
-- **contexte de base documentaire**, où tout est consultable, l'appartenance à la collection y étant signalée ([Périmètre de la consultation](perimetre-de-la-consultation.md)) — ex. fiche d'un album, fiches de série et d'auteur, et les cartes d'album qu'elles présentent : toutes les éditions de l'album, possédées ou visées par une intention d'acquisition.
+- **contexte de base documentaire**, où tout est consultable, l'appartenance à la collection y étant signalée ([Périmètre de la consultation](perimetre-de-la-consultation.md)) — ex. fiche d'un album, fiches de série, d'auteur et d'univers, et les cartes d'album qu'elles présentent : toutes les éditions de l'album, possédées ou visées par une intention d'acquisition.
 
 Un album dont aucune des éditions prises en compte n'a de couverture (y compris un album sans édition) est représenté par le visuel générique (cf. [Visuel par défaut](visuel-par-defaut.md)).

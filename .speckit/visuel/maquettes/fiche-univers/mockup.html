@@ -387,7 +387,9 @@ class View extends Mockup {
       }));
       const inCollection = owned === 0 ? 'aucun dans la collection' : owned + ' dans la collection';
       const credited = e.attached
-        ? e.seriesSize + (e.seriesSize > 1 ? ' albums' : ' album') + ' · ' + inCollection
+        // Attached itself: its albums in the collection out of all of them, « 0 sur X » included
+        // (charte-graphique/convivialite-et-efficacite.md).
+        ? owned + (owned > 1 ? ' albums' : ' album') + ' sur ' + e.seriesSize + ' dans la collection'
         : e.albums.length + (e.albums.length > 1 ? ' albums rattachés' : ' album rattaché') + ' sur ' + e.seriesSize + ' · ' + inCollection;
       return {
         ...base, isAlbum: false, isSeries: true, canOpen: hasAlbums, noOpen: !hasAlbums, open: isOpen, rated: false,
