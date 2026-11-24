@@ -424,9 +424,9 @@ const EXAMPLES = {
     },
     pending: (v) => v.last == null,
     moved: [
-      { count: '26 contributions', detail: '24 de Gotlib et 3 de Marcel Gotlib, dont 1 présente dans les deux fiches, gardée une fois' }
+      { count: 'Crédité sur 26 albums', detail: 'les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches' }
     ],
-    impact: (name) => ['Les deux fiches n\'en font plus qu\'une : ' + name + '.', '26 contributions passent à ' + name + '.', '1 contribution en double est retirée.']
+    impact: (name) => ['Les deux fiches n\'en font plus qu\'une : ' + name + '.', name + ' est crédité sur les 26 albums des deux fiches.']
   },
   genre: {
     list: 'Genres', heading: 'Fusionner deux genres', confirmTitle: 'Fusionner les deux genres ?', noun: 'le genre',
@@ -438,10 +438,10 @@ const EXAMPLES = {
     result: (v) => [{ label: 'Libellé', value: v.label ?? '—' }],
     pending: () => false,
     moved: [
-      { count: '15 séries', detail: '12 de Science-fiction et 3 de SF' },
-      { count: '55 albums', detail: '48 de Science-fiction et 9 de SF, dont 2 rattachés aux deux genres, gardés une fois' }
+      { count: '15 séries', detail: 'les 12 de Science-fiction et les 3 de SF' },
+      { count: '55 albums', detail: 'les 48 de Science-fiction et les 9 de SF, dont 2 communs aux deux fiches' }
     ],
-    impact: (name) => ['Les deux fiches n\'en font plus qu\'une : ' + name + '.', '15 séries et 55 albums passent à ' + name + '.']
+    impact: (name) => ['Les deux fiches n\'en font plus qu\'une : ' + name + '.', name + ' classe les 15 séries et les 55 albums des deux fiches.']
   }
 };
 
