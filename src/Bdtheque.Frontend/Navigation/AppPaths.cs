@@ -43,7 +43,8 @@ public static class AppPaths
 
     public const string Authors = NotYetImplemented;
 
-    public const string PurchaseIntents = NotYetImplemented;
+    /// <summary>The public list of the purchase intents, each leading to the record of its album (fonctionnel/structure-de-l-application.md).</summary>
+    public const string PurchaseIntents = "/acquisition-intents";
 
     public const string AdvancedSearch = NotYetImplemented;
 

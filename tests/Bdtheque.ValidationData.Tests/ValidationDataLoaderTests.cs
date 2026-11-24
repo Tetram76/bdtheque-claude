@@ -197,6 +197,19 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task PublicListOfThePurchaseIntents_PresentsEditionsWhosePublisherLeadsToItsSiteOrNot()
+    {
+        var intents = (await _client.GetFromJsonAsync<PurchaseIntentCatalogList>("/catalog/purchase-intents?pageSize=100"))!.Intents.Items;
+
+        // The publisher of an edition targeted leads to its site when it is known, and is otherwise no link
+        // (fonctionnel/presentation/libelle-d-une-edition.md); albums of the collection and albums wished for.
+        Assert.Contains(intents, intent => intent is { Edition: not null, PublisherWebsite: not null });
+        Assert.Contains(intents, intent => intent is { Edition: not null, PublisherWebsite: null });
+        Assert.Contains(intents, intent => intent.State == Bdtheque.Contracts.Admin.AlbumCollectionState.InCollection);
+        Assert.Contains(intents, intent => intent.State == Bdtheque.Contracts.Admin.AlbumCollectionState.PurchaseIntent);
+    }
+
+    [Fact]
     public async Task AlbumOnlyWishedFor_HasTheCoverOfTheEditionItTargets()
     {
         var album = await AlbumAsync(ValidationDataLoader.WishedForOnlyTitle);

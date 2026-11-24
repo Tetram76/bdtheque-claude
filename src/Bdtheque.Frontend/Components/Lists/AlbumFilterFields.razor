@@ -4,8 +4,10 @@
 
 @* The panel of the filters of a list of the albums, the same in the consultation and in the administration
    (visuel/liste-albums/contenu.md): each record chosen by typing its name, interactive, a collection and its publisher linked,
-   and the possession chosen in a list (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album). The names
-   of its fields are those of the criteria in the address, shared by both lists. *@
+   and the possession chosen in a list (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album). The public
+   list of the purchase intents takes it for the albums of its intents, without the possession, of no interest there
+   (fonctionnel/regles-metier/perimetre-de-la-consultation.md). The names of its fields are those of the criteria in the
+   address, shared by these lists. *@
 <ListFilters Note="@L["Note"]">
     <Field Id="filter-series" Label="@L["Series"]" Context="control">
         <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Series" Name="@AlbumListQuery.SeriesName"
@@ -31,13 +33,20 @@
         <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Universe" Name="@AlbumListQuery.UniverseName"
                       Value="@Option(Filters.Universe, u => new(u.Id, u.Name, u.ParentName))" Placeholder="@L["Any"]" />
     </Field>
-    <PossessionFilterField Name="@AlbumListQuery.StateName" State="@State" AllLabel="@L["State.All"]" />
+    @if (WithPossession)
+    {
+        <PossessionFilterField Name="@AlbumListQuery.StateName" State="@State" AllLabel="@L["State.All"]" />
+    }
 </ListFilters>
 
 @code {
     /// <summary>The records the list is filtered on, as the API names them.</summary>
     [Parameter, EditorRequired]
     public AlbumListFilters Filters { get; set; } = null!;
+
+    /// <summary>Whether the possession is one of the filters: not for the list of the purchase intents.</summary>
+    [Parameter]
+    public bool WithPossession { get; set; } = true;
 
     /// <summary>The possession chosen; <c>null</c> for all the albums.</summary>
     [Parameter]
