@@ -88,6 +88,29 @@ public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactor
     }
 
     [Fact]
+    public async Task Possession_KeepsTheSeriesThatContainAnAlbumOfTheStateChosen_AllWithoutIt()
+    {
+        var publisher = await CreatePublisherAsync($"Casterman {_marker}");
+        // An album of each state: the series is found under each of them.
+        var mixed = await CreateSeriesAsync($"A mêlée {_marker}");
+        await CreateOwnedEditionAsync((await CreateAlbumAsync(null, mixed.Id, 1)).Id, publisher.Id);
+        await CreateIntendedEditionAsync((await CreateAlbumAsync(null, mixed.Id, 2)).Id, publisher.Id);
+        await CreateAlbumAsync(null, mixed.Id, 3);
+        var intended = await CreateSeriesAsync($"B visée {_marker}");
+        await CreateIntendedEditionAsync((await CreateAlbumAsync(null, intended.Id, 1)).Id, publisher.Id);
+        var outside = await CreateSeriesAsync($"C cataloguée {_marker}");
+        await CreateAlbumAsync(null, outside.Id, 1);
+        // A series without album contains no album of any state.
+        var empty = await CreateSeriesAsync($"D sans album {_marker}");
+
+        Assert.Equal([mixed.Id, intended.Id, outside.Id, empty.Id], await IdsAsync($"q={_marker}"));
+        Assert.Equal([mixed.Id], await IdsAsync($"q={_marker}&state=InCollection"));
+        Assert.Equal([mixed.Id, intended.Id], await IdsAsync($"q={_marker}&state=PurchaseIntent"));
+        Assert.Equal([mixed.Id, outside.Id], await IdsAsync($"q={_marker}&state=OutsideCollection"));
+        Assert.Equal([mixed.Id], await CatalogIdsAsync($"q={_marker}&state=InCollection"));
+    }
+
+    [Fact]
     public async Task Filters_NameTheRecordsTheListIsFilteredOn()
     {
         var author = await CreateAuthorAsync($"Auteur {_marker}");
@@ -133,7 +156,7 @@ public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactor
     private async Task<IReadOnlyList<Guid>> IdsAsync(string query) => [.. (await ListAsync(query)).Series.Items.Select(r => r.Id)];
 
     private async Task<IReadOnlyList<Guid>> CatalogIdsAsync(string query) =>
-        [.. (await GetAsync<Page<SeriesListItem>>($"/catalog/series?{query}")).Items.Select(s => s.Id)];
+        [.. (await GetAsync<SeriesCatalogList>($"/catalog/series?{query}")).Series.Items.Select(s => s.Id)];
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
 

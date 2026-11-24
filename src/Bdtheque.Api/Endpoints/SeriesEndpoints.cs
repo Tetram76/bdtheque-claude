@@ -156,17 +156,35 @@ internal static class SeriesEndpoints
             .Include(s => s.TemplateContributions).ThenInclude(c => c.Author)
             .SingleOrDefaultAsync(s => s.Id == id, cancellationToken);
 
-    /// <summary>The series found by their title, narrowed by the cross filters (choix-implementation/api/recherche.md).</summary>
-    private static async Task<Page<SeriesListItem>> ListAsync(
+    /// <summary>
+    /// The list of the series of the consultation: the series found by their title, narrowed by the cross filters
+    /// (choix-implementation/api/recherche.md) and the possession of their albums
+    /// (fonctionnel/regles-metier/perimetre-de-la-consultation.md). Each row carries the pile of covers and the number of albums
+    /// of the series, its covers among the editions the list presents, and its albums in the collection.
+    /// </summary>
+    private static async Task<SeriesCatalogList> ListAsync(
         BdthequeDbContext context, [AsParameters] SeriesFilters filters, CancellationToken cancellationToken, int page = 1,
         int pageSize = Paging.DefaultSize)
     {
         var series = await filters.ApplyAsync(context.Series.AsNoTracking(), context, cancellationToken);
-        return await series
+        var rows = await series
             .OrderByEntry(s => s.NavigationEntry)
             .ThenBy(s => s.SortKey)
             .ThenBy(s => s.Id)
-            .ToPageAsync(page, pageSize, s => new SeriesListItem(s.Id, s.Title), cancellationToken);
+            .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Series s) => new
+            {
+                s.Id,
+                s.Title,
+                AlbumsInCollectionCount = context.Albums.Count(a => a.SeriesId == s.Id && a.Editions.Any(e => e.IsOwned())),
+            }), cancellationToken);
+        var overviews = await CatalogWorks.OverviewsAsync(
+            context, [.. rows.Items.Select(r => r.Id)], cancellationToken, ownedEditionsOnly: filters.PresentsOwnedEditionsOnly);
+
+        return new SeriesCatalogList(
+            new Page<SeriesCatalogListItem>(
+                [.. rows.Items.Select(r => new SeriesCatalogListItem(r.Id, r.Title, overviews[r.Id], r.AlbumsInCollectionCount))],
+                rows.Number, rows.Size, rows.TotalCount),
+            await filters.NameAsync(context, cancellationToken));
     }
 
     /// <summary>

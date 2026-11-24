@@ -200,7 +200,7 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
 
         await ProblemAssert.IsBusinessProblemAsync(response, DomainRules.AuthorLastNameOrPseudonymRequired, ["/newRecords/authors/0/lastName"]);
         Assert.Empty((await _client.GetFromJsonAsync<Page<GenreListItem>>($"/catalog/genres?q={label}"))!.Items);
-        Assert.Empty((await _client.GetFromJsonAsync<Page<SeriesListItem>>($"/catalog/series?q={Uri.EscapeDataString(title)}"))!.Items);
+        Assert.Empty((await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/series?q={Uri.EscapeDataString(title)}"))!.Series.Items);
     }
 
     [Fact]

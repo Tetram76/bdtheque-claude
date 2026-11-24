@@ -325,21 +325,31 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
     [InlineData("universes")]
     public async Task List_IsPaginatedWithinTheBoundsOfAPage(string list)
     {
-        // The list of the albums carries its page with the records of its filters (AlbumCatalogList).
-        var page = list == "albums"
-            ? NumberAndSize((await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/{list}?page=2&pageSize=3"))!.Albums)
-            : NumberAndSize((await _client.GetFromJsonAsync<Page<object>>($"/catalog/{list}?page=2&pageSize=3"))!);
+        // The lists of the albums and of the series carry their page with the records of their filters (AlbumCatalogList,
+        // SeriesCatalogList).
+        var page = list switch
+        {
+            "albums" => NumberAndSize((await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/{list}?page=2&pageSize=3"))!.Albums),
+            "series" => NumberAndSize((await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/{list}?page=2&pageSize=3"))!.Series),
+            _ => NumberAndSize((await _client.GetFromJsonAsync<Page<object>>($"/catalog/{list}?page=2&pageSize=3"))!),
+        };
         var outOfBounds = await _client.GetAsync($"/catalog/{list}?pageSize=101");
 
         Assert.Equal((2, 3), page);
         await ProblemAssert.IsProblemAsync(outOfBounds, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
     }
 
-    // The list of the albums carries its rows with the records of its filters (AlbumCatalogList): its albums are read from it.
-    private async Task<IReadOnlyList<T>> ListAsync<T>(string list, string query) =>
-        typeof(T) == typeof(AlbumSummary)
-            ? (IReadOnlyList<T>)(await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/{list}?{query}"))!.Albums.Items.Select(r => r.Album).ToList()
-            : (await _client.GetFromJsonAsync<Page<T>>($"/catalog/{list}?{query}"))!.Items;
+    // The lists of the albums and of the series carry their rows with the records of their filters (AlbumCatalogList,
+    // SeriesCatalogList): their albums, or their series as the lists name them, are read from them.
+    private async Task<IReadOnlyList<T>> ListAsync<T>(string list, string query)
+    {
+        if (typeof(T) == typeof(AlbumSummary))
+            return (IReadOnlyList<T>)(await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/{list}?{query}"))!.Albums.Items.Select(r => r.Album).ToList();
+        if (typeof(T) == typeof(SeriesListItem))
+            return (IReadOnlyList<T>)(await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/{list}?{query}"))!.Series.Items
+                .Select(r => new SeriesListItem(r.Id, r.Title)).ToList();
+        return (await _client.GetFromJsonAsync<Page<T>>($"/catalog/{list}?{query}"))!.Items;
+    }
 
     private static (int Number, int Size) NumberAndSize<T>(Page<T> page) => (page.Number, page.Size);
 

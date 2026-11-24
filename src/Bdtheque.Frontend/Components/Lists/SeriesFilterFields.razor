@@ -1,0 +1,53 @@
+@using Bdtheque.Contracts.Admin
+@inject IStringLocalizer<SeriesFilterFields> L
+
+@* The panel of the filters of a list of the series, the same in the consultation and in the administration
+   (visuel/listes/liste-par-liste.md): each record chosen by typing its name, interactive, a collection and its publisher linked;
+   in the consultation, the possession too, by which the list limits itself to the collection
+   (fonctionnel/regles-metier/perimetre-de-la-consultation.md). The names of its fields are those of the criteria in the address,
+   shared by both lists. *@
+<ListFilters Note="@L["Note"]">
+    <Field Id="filter-author" Label="@L["Author"]" Context="control">
+        <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Author" Name="@SeriesListQuery.AuthorName"
+                      Value="@Option(Filters.Author, a => new(a.Id, RecordSearch.AuthorName(a.LastName, a.FirstName, a.Pseudonym), null))"
+                      Placeholder="@L["Any"]" />
+    </Field>
+    @* A collection belongs to its publisher: the pair linked. *@
+    <LinkedFilters @rendermode="InteractiveServer"
+                   ParentKind="RecordKind.Publisher" ParentId="filter-publisher" ParentName="@SeriesListQuery.PublisherName"
+                   ParentLabel="@L["Publisher"]" Parent="@Option(Filters.Publisher, p => new(p.Id, p.Name, null))"
+                   ChildKind="RecordKind.PublisherCollection" ChildId="filter-collection" ChildName="@SeriesListQuery.PublisherCollectionName"
+                   ChildLabel="@L["PublisherCollection"]" Child="@Option(Filters.PublisherCollection, RecordSearch.CollectionOption)"
+                   Placeholder="@L["Any"]" />
+    <Field Id="filter-genre" Label="@L["Genre"]" Context="control">
+        <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Genre" Name="@SeriesListQuery.GenreName"
+                      Value="@Option(Filters.Genre, g => new(g.Id, g.Label, null))" Placeholder="@L["Any"]" />
+    </Field>
+    <Field Id="filter-universe" Label="@L["Universe"]" Context="control">
+        <RecordPicker @rendermode="InteractiveServer" Id="@control.Id" Kind="RecordKind.Universe" Name="@SeriesListQuery.UniverseName"
+                      Value="@Option(Filters.Universe, u => new(u.Id, u.Name, u.ParentName))" Placeholder="@L["Any"]" />
+    </Field>
+    @if (OffersPossession)
+    {
+        <PossessionFilterField Name="@CatalogSeriesListQuery.StateName" State="@State" AllLabel="@L["State.All"]" OfAlbums="true" />
+    }
+</ListFilters>
+
+@code {
+    /// <summary>The records the list is filtered on, as the API names them.</summary>
+    [Parameter, EditorRequired]
+    public SeriesListFilters Filters { get; set; } = null!;
+
+    /// <summary>
+    /// Whether the list offers the filter of the possession: that of the consultation, and not that of the administration
+    /// (visuel/listes/liste-par-liste.md).
+    /// </summary>
+    [Parameter]
+    public bool OffersPossession { get; set; }
+
+    /// <summary>The possession chosen; <c>null</c> for all the series.</summary>
+    [Parameter]
+    public AlbumCollectionState? State { get; set; }
+
+    private static RecordOption? Option<T>(T? item, Func<T, RecordOption> option) where T : class => item is null ? null : option(item);
+}

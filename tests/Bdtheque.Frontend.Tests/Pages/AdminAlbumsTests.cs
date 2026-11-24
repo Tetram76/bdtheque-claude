@@ -108,7 +108,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
                 ("Blacksad - INT. [1 à 5]", "Juan Díaz Canales · Juanjo Guarnido", "octobre 2023", "1 intention", "Intention"),
                 // No edition nor intent: a zero is not shown, but the dash of a missing data, said to a screen reader. No author:
                 // nothing under the label, a column of a card (visuel/charte-graphique/convivialite-et-efficacite.md, #476).
-                ("Le Bleu est une couleur chaude", null, "—Non renseignée", "—Aucune édition", "Non possédé"),
+                ("Le Bleu est une couleur chaude", null, "—Non renseignée", "—Aucune édition", "Catalogué"),
             ],
             rows);
     }
@@ -210,7 +210,7 @@ public sealed class AdminAlbumsTests : BunitContext, IDisposable
             form.QuerySelectorAll(".list-filters input[type='hidden']").Select(input => input.GetAttribute("name")));
         Assert.Equal(Genre.ToString(), form.QuerySelector(".list-filters input[name='genreId']")!.GetAttribute("value"));
         Assert.Equal(
-            [("", "Tous les albums"), ("InCollection", "Possédé"), ("PurchaseIntent", "Intention"), ("OutsideCollection", "Non possédé")],
+            [("", "Tous les albums"), ("InCollection", "Possédé"), ("PurchaseIntent", "Intention"), ("OutsideCollection", "Catalogué")],
             form.QuerySelectorAll("select[name='state'] option").Select(option => (option.GetAttribute("value"), Text(option))));
         Assert.Equal("PurchaseIntent", form.QuerySelector("select[name='state'] option[selected]")!.GetAttribute("value"));
         Assert.Equal("Filtrer", Text(form.QuerySelector(".list-filters-foot button[type='submit']")!));

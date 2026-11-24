@@ -1,0 +1,80 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the page
+   being that of every list (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines, the pile of covers on the left: the title of the series, then its albums in the collection. A list
+   wide enough for its columns, the fixed one and at least 12rem for the title, is a table. */
+.series-rows {
+    container: series-rows / inline-size;
+}
+
+.series-row {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-template-areas: "pile main" "pile albums";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.series-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* The pile of covers, a step wider than a cover of the list of the albums for the covers behind the first one. */
+.series-pile {
+    grid-area: pile;
+    --cover-width: 2.25rem;
+}
+
+.series-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+/* The way to the record of the series: underlined at all times, a touch screen having no hover (visuel/fiche-auteur/contenu.md). */
+.series-main a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.1875rem;
+}
+
+.series-albums {
+    grid-area: albums;
+    font-size: var(--font-size-small);
+}
+
+@container series-rows (min-width: 36rem) {
+    .series-row {
+        grid-template-columns: 2.75rem minmax(12rem, 1fr) 16rem;
+        grid-template-areas: "pile main albums";
+        align-items: center;
+    }
+
+    .series-row-head {
+        display: grid;
+    }
+
+    .series-albums {
+        font-size: inherit;
+    }
+}
+
+/* On two lines, the row has no columns any more: a zero, which its dash stands for in a table, says nothing and is withdrawn
+   (visuel/charte-graphique/convivialite-et-efficacite.md, nombre nul). */
+@container series-rows (width < 36rem) {
+    .series-albums[data-zero] {
+        display: none;
+    }
+}

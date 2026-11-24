@@ -42,12 +42,6 @@
   <data name="Filter.Universe" xml:space="preserve">
     <value>Univers</value>
   </data>
-  <data name="Filter.Any" xml:space="preserve">
-    <value>Tous</value>
-  </data>
-  <data name="Filters.Note" xml:space="preserve">
-    <value>Auteur, éditeur, collection, genre et univers se choisissent en tapant leur nom. Auteur, éditeur et collection sont ceux de la série ou de l'un de ses albums ; un univers retient aussi les séries de ses sous-univers.</value>
-  </data>
   <data name="Count.None" xml:space="preserve">
     <value>Aucune série</value>
   </data>

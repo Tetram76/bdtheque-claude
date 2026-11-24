@@ -11,8 +11,12 @@
     vertical-align: middle;
 }
 
+/* Every card is moved, the first one by nothing: a card moved by `translate` is painted after those that are not, so that
+   the first volume, left in place, went behind the others (CSS Transforms, stacking context). All moved, they are painted
+   in the order of the pile, the first volume last, in front. */
 .cover-pile ::deep .cover-slot {
     grid-area: 1 / 1;
+    translate: 0 0;
 }
 
 .cover-pile ::deep .cover-slot:nth-child(1) {

@@ -25,7 +25,7 @@
   <data name="Filter.State" xml:space="preserve"><value>Possession</value></data>
   <data name="State.InCollection" xml:space="preserve"><value>Possédé</value></data>
   <data name="State.PurchaseIntent" xml:space="preserve"><value>Intention</value></data>
-  <data name="State.OutsideCollection" xml:space="preserve"><value>Non possédé</value></data>
+  <data name="State.OutsideCollection" xml:space="preserve"><value>Catalogué</value></data>
   <data name="Count.None" xml:space="preserve"><value>Aucun album</value></data>
   <data name="Count.One" xml:space="preserve"><value>1 album</value></data>
   <data name="Count.Other" xml:space="preserve"><value>{0} albums</value></data>

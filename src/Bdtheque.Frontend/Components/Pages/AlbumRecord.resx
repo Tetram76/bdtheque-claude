@@ -34,7 +34,7 @@
     <value>Intention</value>
   </data>
   <data name="Membership.OutOfCollection" xml:space="preserve">
-    <value>Non possédé</value>
+    <value>Catalogué</value>
   </data>
   <data name="Story.Title" xml:space="preserve">
     <value>Ça raconte quoi ?</value>

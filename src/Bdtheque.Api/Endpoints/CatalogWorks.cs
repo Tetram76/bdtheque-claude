@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
@@ -74,22 +75,21 @@ internal static class CatalogWorks
     /// of its albums, and the covers of its first regular volumes, in its order — the pile of covers of the
     /// mockups, where neither an omnibus nor a special issue stands in for a volume (visuel/fiche-serie/).
     /// </summary>
+    /// <param name="ownedEditionsOnly">
+    /// Whether the context presents the owned editions of the albums only, among which their covers are then taken
+    /// (fonctionnel/regles-metier/couverture-d-un-album.md): a list limited to the collection; all of them otherwise.
+    /// </param>
     /// <remarks>
     /// Every album of these series is read, rather than its first volumes only: a series counts a few dozen
     /// albums at most, and the count needs them all anyway.
     /// </remarks>
     public static async Task<Dictionary<Guid, SeriesOverview>> OverviewsAsync(
-        BdthequeDbContext context, IReadOnlyCollection<Guid> seriesIds, CancellationToken cancellationToken)
+        BdthequeDbContext context, IReadOnlyCollection<Guid> seriesIds, CancellationToken cancellationToken, bool ownedEditionsOnly = false)
     {
         var albums = (await context.Albums.AsNoTracking()
                 .Where(a => a.SeriesId != null && seriesIds.Contains(a.SeriesId.Value))
                 .OrderInSeries()
-                .Select(CatalogExpressions.Expand((Album a) => new
-                {
-                    SeriesId = a.SeriesId!.Value,
-                    IsRegularVolume = a.Type == AlbumType.Regular && !a.IsSpecialIssue,
-                    CoverVisual = a.CoverVisualOf(),
-                }))
+                .Select(ownedEditionsOnly ? SeriesAlbumOfOwnedEditions : SeriesAlbum)
                 .ToListAsync(cancellationToken))
             .ToLookup(a => a.SeriesId);
         return seriesIds.ToDictionary(
@@ -102,4 +102,15 @@ internal static class CatalogWorks
                     .Select(a => CatalogExpressions.ToCover(a.CoverVisual))
                     .ToList()));
     }
+
+    // An album of a series, with its cover among all its editions, or among its owned ones only.
+    private static readonly Expression<Func<Album, SeriesAlbumCover>> SeriesAlbum =
+        CatalogExpressions.Expand((Album a) => new SeriesAlbumCover(
+            a.SeriesId!.Value, a.Type == AlbumType.Regular && !a.IsSpecialIssue, a.CoverVisualOf()));
+
+    private static readonly Expression<Func<Album, SeriesAlbumCover>> SeriesAlbumOfOwnedEditions =
+        CatalogExpressions.Expand((Album a) => new SeriesAlbumCover(
+            a.SeriesId!.Value, a.Type == AlbumType.Regular && !a.IsSpecialIssue, a.Editions.Where(e => e.IsOwned()).CoverVisualAmong()));
+
+    private sealed record SeriesAlbumCover(Guid SeriesId, bool IsRegularVolume, CatalogExpressions.CoverVisual? CoverVisual);
 }

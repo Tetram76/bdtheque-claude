@@ -6,14 +6,21 @@ using Microsoft.AspNetCore.Mvc;
 namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
-/// The search, navigation by initial and cross filters of a list of series (choix-implementation/api/recherche.md), which
+/// The search, navigation by initial and cross filters of a list of series (choix-implementation/api/recherche.md), the
+/// possession included (fonctionnel/regles-metier/perimetre-de-la-consultation.md), which
 /// the list of the consultation and that of the administration share, bound as a whole from the query of their request
 /// (<c>[AsParameters]</c>): the search is its parameter <c>q</c>, each other criterion that of its name.
 /// </summary>
 internal sealed record SeriesFilters(
     [FromQuery(Name = "q")] string? Text, string? Entry, Guid? AuthorId, Guid? PublisherId, Guid? PublisherCollectionId, Guid? GenreId,
-    Guid? UniverseId)
+    Guid? UniverseId, AlbumCollectionState? State)
 {
+    /// <summary>
+    /// Whether the list presents the owned editions of the albums of its series only, among which their covers are taken
+    /// (fonctionnel/regles-metier/couverture-d-un-album.md): limited to the series of the collection.
+    /// </summary>
+    public bool PresentsOwnedEditionsOnly => State == AlbumCollectionState.InCollection;
+
     /// <summary>
     /// Narrows <paramref name="series"/>: a series is found by its title, and is credited, published or collected on itself —
     /// its contributions, publisher and collection are data of the series as much as a template
@@ -46,6 +53,10 @@ internal sealed record SeriesFilters(
             series = series.WhereUniverse(universeIds);
         }
 
+        if (State is { } state)
+            // A series that contains an album of the state chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+            series = series.Where(CatalogExpressions.Expand(
+                (Series s) => context.Albums.Any(a => a.SeriesId == s.Id && a.CollectionState() == state)));
         return series;
     }
 

@@ -23,7 +23,7 @@ public sealed class RecordPickerTests : BunitContext
     private TaskCompletionSource _nextRequest = NewRequestSignal();
     // A response still awaited, until the test gives it; none, the answer is immediate.
     private Task<HttpResponseMessage>? _pending;
-    private Func<HttpRequestMessage, HttpResponseMessage> _answer = _ => Json(
+    private Func<HttpRequestMessage, HttpResponseMessage> _answer = _ => SeriesJson(
         $$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}""");
 
 
@@ -222,7 +222,7 @@ public sealed class RecordPickerTests : BunitContext
         Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
         await picker.KeyDownAsync("input", "ArrowDown");
 
-        answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
+        answer.SetResult(SeriesJson($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
         await search.EndAsync("The search of the text typed");
         Assert.Single(picker.FindAll("[role=option]"));
         Assert.Null(picker.Find("input").GetAttribute("aria-activedescendant"));
@@ -244,11 +244,11 @@ public sealed class RecordPickerTests : BunitContext
         _pending = earlier.Task;
         var earlierSearch = await TypeUntilSentAsync(picker, "ti");
         _pending = null;
-        _answer = _ => Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}""");
+        _answer = _ => SeriesJson($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}""");
         await TypeAsync(picker, "tin");
         Assert.Equal(["Tintin"], picker.FindAll("[role=option]").Select(option => option.TextContent.Trim()));
 
-        earlier.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}"""));
+        earlier.SetResult(SeriesJson($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"},{"id":"{{Titeuf}}","title":"Titeuf"}],"number":1,"size":10,"totalCount":2}"""));
         await earlierSearch.EndAsync("The search of the earlier text");
 
         Assert.Equal(["Tintin"], picker.FindAll("[role=option]").Select(option => option.TextContent.Trim()));
@@ -321,7 +321,7 @@ public sealed class RecordPickerTests : BunitContext
         var search = await TypeUntilSentAsync(picker, "ti");
 
         await picker.BlurAsync("input");
-        answer.SetResult(Json($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
+        answer.SetResult(SeriesJson($$"""{"items":[{"id":"{{Tintin}}","title":"Tintin"}],"number":1,"size":10,"totalCount":1}"""));
         await search.EndAsync("The search of the text left");
         await picker.KeyDownAsync("input", "ArrowDown");
 
@@ -382,7 +382,7 @@ public sealed class RecordPickerTests : BunitContext
     [Fact]
     public async Task NoSuggestion_SaysSo()
     {
-        _answer = _ => Json("""{"items":[],"number":1,"size":10,"totalCount":0}""");
+        _answer = _ => SeriesJson("""{"items":[],"number":1,"size":10,"totalCount":0}""");
         var picker = Render<RecordPicker>(parameters => parameters.Add(p => p.Id, "f-series").Add(p => p.Kind, RecordKind.Series));
 
         await TypeAsync(picker, "zz");
@@ -418,6 +418,11 @@ public sealed class RecordPickerTests : BunitContext
         Assert.Empty(_requests);
         Assert.Equal("false", picker.Find("input").GetAttribute("aria-expanded"));
     }
+
+    // The list of the series of the consultation, with the records of its filters (SeriesCatalogList), around a page of its rows:
+    // a row carries what the choice reads, its identifier and its title.
+    private static HttpResponseMessage SeriesJson(string page) =>
+        Json($$$"""{"series":{{{page}}},"filters":{"author":null,"publisher":null,"publisherCollection":null,"genre":null,"universe":null}}""");
 
     private static HttpResponseMessage Json(string body) =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
