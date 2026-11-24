@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Périmètre de la consultation'
-description: 'Base documentaire et inventaire : tout est consultable, l''appartenance est signalée, les statistiques ne portent que sur la collection, chaque liste se limite à la collection par son propre filtre de possession, de même sens dans toutes, un élément qui n''est pas un album prenant l''état de ses albums.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:00:00Z }
+description: 'Base documentaire et inventaire : tout est consultable, l''appartenance est signalée, les statistiques ne portent que sur la collection, chaque liste se limite à la collection par son propre filtre de possession, de même sens dans toutes, un élément qui n''est pas un album prenant l''état de ses albums, ceux du filtre des auteurs nommés d''après ses albums.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:10:00Z }
 ---
 
 # Périmètre de la consultation
@@ -15,3 +15,4 @@ La base est à la fois l'**inventaire de la collection** et une **base documenta
 - Les **statistiques** portent exclusivement sur la **collection** (albums et éditions possédés), jamais sur l'ensemble de la base.
 - La consultation se limite à la collection **liste par liste** : chaque liste de la consultation propose, parmi ses propres filtres, celui de la **possession** (« Possession », [États d'un album](appartenance-a-la-collection.md#états-dun-album)), qui ne vaut que pour elle ; aucun réglage commun à toute la consultation ne la limite d'une liste à l'autre (décision de l'utilisateur, #603). Une liste filtrée sur « Possédé » est limitée à la collection : c'en est un contexte de collection ([Couverture d'un album](couverture-d-un-album.md)).
   - **Même filtre dans toute liste, jamais redemandé** (décision de l'utilisateur, #604) : le filtre « Possession » a les mêmes états et le même sens dans toutes les listes de la consultation. Une liste d'autre chose que des albums (séries, auteurs…) retient chaque élément d'après la possession de ses albums : **Possédé** s'il en a au moins un possédé, **Intention** si aucun ne l'est et que l'un fait l'objet d'une intention d'acquisition, **Non possédé** sinon, un élément sans album compris. La règle vaut pour toute liste, présente ou à venir : elle n'est pas soumise de nouveau à l'utilisateur.
+  - **Libellés du filtre de la liste des auteurs** (décision de l'utilisateur, #605) : on ne possède pas un auteur ; les états d'un album, « Possédé », « Intention », « Non possédé », ne nomment donc pas les choix de son filtre, qui disent ce qu'il retient d'après les albums de l'auteur : « Tous les auteurs », « Avec un album possédé », « Avec un album en intention, aucun possédé » et « Sans album possédé ni en intention » ; le filtre garde son intitulé « Possession ».

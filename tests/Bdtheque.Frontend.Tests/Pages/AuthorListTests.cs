@@ -125,12 +125,15 @@ public sealed class AuthorListTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Possession_IsItsOnlyFilter_ChosenInAListOfTheStatesOfAnAlbum()
+    public void Possession_IsItsOnlyFilter_ItsChoicesNamedAfterTheAlbumsOfTheAuthor()
     {
         var page = Open("filters=open&state=PurchaseIntent");
 
         var select = page.Find("select[name='state']");
-        Assert.Equal(["Tous les auteurs", "Possédé", "Intention", "Non possédé"], select.QuerySelectorAll("option").Select(Text));
+        // An author is not owned (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+        Assert.Equal(
+            ["Tous les auteurs", "Avec un album possédé", "Avec un album en intention, aucun possédé", "Sans album possédé ni en intention"],
+            select.QuerySelectorAll("option").Select(Text));
         Assert.Equal("PurchaseIntent", select.QuerySelector("option[selected]")!.GetAttribute("value"));
         Assert.Single(page.FindAll(".list-filters select, .list-filters input:not([type=hidden])"));
         Assert.Equal(AppPaths.Authors, page.Find("form.list-search").GetAttribute("action"));
@@ -143,7 +146,7 @@ public sealed class AuthorListTests : BunitContext, IDisposable
 
         var page = Open("state=InCollection");
 
-        Assert.Contains("Possession : Possédé", Text(page.Find(".active-filters")));
+        Assert.Contains("Possession : Avec un album possédé", Text(page.Find(".active-filters")));
         Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.Authors}?entry=B&state=InCollection");
         Assert.Contains(page.FindAll("a"), a => a.GetAttribute("href") == $"{AppPaths.Authors}?state=InCollection&page=2");
     }

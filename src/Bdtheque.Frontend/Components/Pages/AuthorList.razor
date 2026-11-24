@@ -2,7 +2,6 @@
 @using Bdtheque.Contracts.Admin
 @using Bdtheque.Contracts.Catalog
 @inject IStringLocalizer<AuthorList> L
-@inject IStringLocalizer<CollectionStateTag> States
 @inject ApiClient Api
 @inject ValueLabels Values
 @inject DisplayFormatter Format
@@ -187,14 +186,18 @@
             : L["Albums.InCollection", albums, Format.Number(row.CreditedAlbumsInCollectionCount)];
     }
 
+    // An author is not owned: each state says what the filter keeps from its albums
+    // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+    private string StateLabel(AlbumCollectionState state) => L[$"State.{state}"];
+
     // The possession chosen, with the list without it.
     private IReadOnlyList<ActiveFilters.ActiveFilter> ActiveFilterTags() =>
         _query.State is { } state
-            ? [new(L["Filter.State"].Value, States[state.ToString()].Value, (_query with { State = null, Page = 1 }).Href())]
+            ? [new(L["Filter.State"].Value, StateLabel(state), (_query with { State = null, Page = 1 }).Href())]
             : [];
 
     private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
-        <PossessionFilterField Name="@CatalogAuthorListQuery.StateName" State="_query.State" AllLabel="@L["State.All"]" />
+        <PossessionFilterField Name="@CatalogAuthorListQuery.StateName" State="_query.State" AllLabel="@L["State.All"]" StateLabel="StateLabel" />
     </ListFilters>;
 
     // The filters chosen, kept by the search while their panel is folded.

@@ -23,9 +23,16 @@
     [Parameter, EditorRequired]
     public string AllLabel { get; set; } = null!;
 
+    /// <summary>
+    /// The name of each state, when the elements of the list are no albums: an author is not owned, its states say what the
+    /// filter keeps from its albums (fonctionnel/regles-metier/perimetre-de-la-consultation.md); those of an album by default.
+    /// </summary>
+    [Parameter]
+    public Func<AlbumCollectionState, string>? StateLabel { get; set; }
+
     private IReadOnlyList<FilterSelect.FilterOption> Options =>
     [
         new("", AllLabel),
-        .. Enum.GetValues<AlbumCollectionState>().Select(state => new FilterSelect.FilterOption(state.ToString(), States[state.ToString()])),
+        .. Enum.GetValues<AlbumCollectionState>().Select(state => new FilterSelect.FilterOption(state.ToString(), StateLabel?.Invoke(state) ?? States[state.ToString()])),
     ];
 }
