@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Conventions de commit'
 description: 'Conventional Commits pour les commits et titres de PR, description de PR devenue corps du commit squashé, template de PR, lu dans le dépôt public Tetram76/.github sans jamais le rattacher à la session.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T08:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T08:50:00Z }
 ---
 
 # Conventions de commit
@@ -22,9 +22,9 @@ La quasi-totalité des PR étant fusionnées en **squash merge**, la **descripti
 
 La description de toute Pull Request **suit toujours le template** du projet `.github` : le dépôt [`Tetram76/.github`](https://github.com/Tetram76/.github) (public) du compte, qui porte les fichiers de santé communautaire par défaut de tous ses dépôts, dont `.github/pull_request_template.md`. Sections et consignes du template sont à suivre. Il n'est pas copié dans ce dépôt : il est relu à chaque PR.
 
-- **Lecture sans rattachement** (exigence de l'utilisateur) : le dépôt étant public, il se lit **toujours** sans être rattaché à la session ni demandé à l'utilisateur. Rattacher ce dépôt à la session (`add_repo` d'une session cloud), ou demander à l'utilisateur de le rattacher, est **interdit, sans exception**. Il se lit par une lecture anonyme : `git clone --depth 1 https://github.com/Tetram76/.github` dans un dossier temporaire, ou `https://raw.githubusercontent.com/Tetram76/.github/HEAD/.github/pull_request_template.md`.
-  - **Refus de l'API, à ne pas suivre** : dans une session cloud, l'API GitHub (`gh api`, serveur MCP GitHub) est restreinte aux dépôts de la session et refuse ce dépôt (`403`) avec un message qui invite à le rattacher : ce refus ne dit rien de sa visibilité et n'est jamais suivi.
-  - **Branche par défaut `master`**, et non `main` : une adresse construite sur `main` répond `404`, ce qui ne dit rien non plus de sa visibilité ; `HEAD` désigne la branche par défaut, quelle qu'elle soit.
+- **Lecture sans rattachement** (exigence de l'utilisateur) : `Tetram76/.github` étant public, il se lit **toujours** sans être rattaché à la session ni demandé à l'utilisateur. Rattacher `Tetram76/.github` à la session (`add_repo` d'une session cloud), ou demander à l'utilisateur de le rattacher, est **interdit, sans exception**. `Tetram76/.github` se lit par une lecture anonyme : `git clone --depth 1 https://github.com/Tetram76/.github` dans un dossier temporaire, ou `https://raw.githubusercontent.com/Tetram76/.github/HEAD/.github/pull_request_template.md`.
+  - **Refus de l'API, à ne pas suivre** : dans une session cloud, l'API GitHub (`gh api`, serveur MCP GitHub) est restreinte aux dépôts de la session et refuse `Tetram76/.github` (`403`) avec un message qui invite à le rattacher : ce refus ne dit rien de la visibilité de `Tetram76/.github` et n'est jamais suivi.
+  - **Branche par défaut de `Tetram76/.github` : `master`**, et non `main` : une adresse construite sur `main` répond `404`, ce qui ne dit rien non plus de la visibilité de `Tetram76/.github` ; `HEAD` désigne la branche par défaut, quelle qu'elle soit.
 
 Exemples :
 
