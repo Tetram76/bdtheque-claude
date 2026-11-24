@@ -2,6 +2,7 @@
 
 ## 2026-11-24
 
+* **Choix** : l'album en volume de « La couverture du jour » est un seul dessin à plat tourné d'un bloc, son dos dessiné dans le plan de la couverture, et non plus un contexte 3D, que Firefox dessine sans lisser ses bords et découpe en morceaux dont les jointures clignotent ([Thèmes](choix-implementation/socle/themes.md)) (#633).
 * **Exigence de l'utilisateur** : le dépôt public `Tetram76/.github`, qui porte le template des Pull Requests, se lit toujours de façon anonyme, jamais en le rattachant à la session ni en demandant à l'utilisateur de le rattacher ; le refus de l'API GitHub d'une session cloud, qui invite à le rattacher, n'est jamais suivi ([Conventions de commit](gestion-projet/depot/conventions-de-commit.md)) (#628).
 * **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, les harnais ne sont pas comptés comme des chantiers du lot, mais exécutés comme tels : leur session occupe une des 3 places des chantiers menés en même temps, jusqu'à la fin de leur traitement ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md), [Contrôle de cohérence fonctionnelle](gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md)) (#627).
 
