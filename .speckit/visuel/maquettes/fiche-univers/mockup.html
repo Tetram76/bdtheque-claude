@@ -69,12 +69,6 @@ summary{cursor:pointer}
           <div style="display: flex; flex-direction: column; gap: 6px">
             <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">{{a.name}}</h1>
             </div>
-          <!-- Its sub-universes at every level, each indented under its parent and followed by its own, as in the list of the
-               universes of the administration (visuel/listes/liste-par-liste.md). -->
-          <sc-if value="{{a.hasChildren}}" hint-placeholder-val="{{false}}"><dl style="margin: 0; display: flex; flex-direction: column; gap: 4px">
-              <dt style="font-weight: 700">Sous-univers</dt>
-              <dd style="margin: 0"><ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px"><sc-for list="{{children}}" as="c" hint-placeholder-count="2"><li style="padding-left: {{c.indent}}"><a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline">{{c.name}}</a></li></sc-for></ul></dd>
-          </dl></sc-if>
           <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
             <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
               <li style="display: inline-flex; align-items: center; min-height: 26px; padding: 0 11px; box-sizing: border-box; border: {{f.bd}}; border-radius: {{t.btnR}}; background: {{f.bg}}; color: {{f.fg}}; font-weight: 700; font-size: 13px">{{f.label}}</li>
@@ -88,6 +82,30 @@ summary{cursor:pointer}
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.bio}}</span>
         <h2 id="a-bio" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>De quoi s'agit-il ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
         <p style="margin: 0; max-width: 80ch; font-size: 15px">{{a.description}}</p>
+      </section></sc-if>
+
+      <!-- Its sub-universes, a block of their own between its description and its series and albums: their tree at every
+           level, drawn by its branches, each with what is attached to it, its own sub-universes included. -->
+      <sc-if value="{{a.hasChildren}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-subs" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+        <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.subs}}</span>
+        <h2 id="a-subs" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Quels sous-univers ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+        <p style="margin: 0; font-size: 13px; color: {{t.muted}}">{{subsSummary}}</p>
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+          <sc-for list="{{subs}}" as="r" hint-placeholder-count="5">
+            <li style="display: flex; align-items: stretch; min-height: 48px">
+              <sc-for list="{{r.guides}}" as="g" hint-placeholder-count="1"><span aria-hidden="true" style="flex: none; width: 34px; position: relative"><span style="position: absolute; left: 16px; top: 0; bottom: 0; border-left: {{g.bd}}"></span></span></sc-for>
+              <span aria-hidden="true" style="flex: none; width: 34px; position: relative"><span style="position: absolute; left: 16px; top: 0; height: {{r.stem}}; border-left: 2px solid {{t.line}}"></span><span style="position: absolute; left: 16px; top: 22px; width: 18px; border-top: 2px solid {{t.line}}"></span></span>
+              <span style="position: relative; flex: 1 1 0; min-width: 0; display: flex; align-items: flex-start; gap: 10px; padding-block: 6px">
+                <sc-if value="{{r.hasKids}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="position: absolute; left: 16px; top: 40px; bottom: 0; border-left: 2px solid {{t.line}}"></span></sc-if>
+                <span aria-hidden="true" style="flex: none; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border: {{t.cvB}}; border-radius: {{mono.r}}; background: {{mono.bg}}; color: {{mono.fg}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14a4 4 0 0 1-1-7.9A5 5 0 0 1 15.5 5a4.5 4.5 0 0 1 2.5 9zM7.5 18.2a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0-4.4 0M3 21.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0-3 0"></path></svg></span>
+                <span style="min-width: 0; display: flex; flex-direction: column; gap: 1px">
+                  <a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline; text-underline-offset: .2em">{{r.name}}</a>
+                  <span style="font-size: 13px; color: {{t.muted}}">{{r.meta}}</span>
+                </span>
+              </span>
+            </li>
+          </sc-for>
+        </ul>
       </section></sc-if>
 
       <section aria-labelledby="a-biblio" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 10px">
@@ -365,6 +383,36 @@ class View extends Mockup {
     const loneCount = BIBLIOGRAPHY.length - seriesCount;
     // An author may be in the base without any credit yet: every count reads right at zero and at one.
     const count = (n, one, many, none) => (n === 0 ? none : n + ' ' + (n > 1 ? many : one));
+    // The sub-universes of the universe, at every level, siblings by name; what each counts includes its own sub-universes.
+    const TREE = [
+      { name: 'Cité de Vélis', series: 1, albums: 4, children: [
+        { name: 'Quartier des Lanternes', series: 0, albums: 1, children: [] }
+      ] },
+      { name: 'Phare de Kerdran', series: 2, albums: 7, children: [
+        { name: 'Ordre des Gardiens', series: 1, albums: 3, children: [
+          { name: 'Tour de la Vigie', series: 0, albums: 0, children: [] }
+        ] }
+      ] }
+    ];
+    // Flattened in the order of the hierarchy, each row with the branches that pass beside it: one per ancestor that still
+    // has siblings to come below, then its own, which stops at it when it is the last of its siblings.
+    const subs = [];
+    let depth = 0;
+    const walk = (nodes, guides) => nodes.forEach((n, i) => {
+      const last = i === nodes.length - 1;
+      depth = Math.max(depth, guides.length + 1);
+      const what = [n.series > 0 ? count(n.series, 'série', 'séries', '') : '', n.albums > 0 ? count(n.albums, 'album', 'albums', '') : '']
+        .filter(Boolean).join(' · ');
+      subs.push({
+        name: n.name,
+        meta: what || 'Aucun album rattaché',
+        guides: guides.map((more) => ({ bd: more ? '2px solid ' + t.line : '0' })),
+        stem: last ? '23px' : '100%',
+        hasKids: n.children.length > 0
+      });
+      walk(n.children, [...guides, !last]);
+    });
+    walk(TREE, []);
     const albumTotal = BIBLIOGRAPHY.reduce((n, e) => n + (e.album ? 1 : e.albums.length), 0);
     // Every album, in a series or not, is shown by its cover: only a series has a pile of covers.
     // A cover belongs to the album itself (entry, and volume within its series), never to its rank in this list.
@@ -431,19 +479,22 @@ class View extends Mockup {
           + 'derniers feux.'
       },
       ancestors: [{ name: 'Royaumes d\'Ombrelune' }],
-      children: [{ name: 'Cité de Vélis', indent: '0' }, { name: 'Phare de Kerdran', indent: '0' }, { name: 'Ordre des Gardiens', indent: '20px' }, { name: 'Tour de la Vigie', indent: '40px' }],
+      subs,
+      subsSummary: count(subs.length, 'sous-univers', 'sous-univers', 'Aucun sous-univers') + ', sur ' + count(depth, 'niveau', 'niveaux', '')
+        + ', chacun sous son parent, frères par ordre alphabétique.',
       mono: { bg: t.pal[0][0], fg: t.pal[0][1], r: t.cvR === '0' ? '50%' : t.cvR },
       // The albums of an unfolded series sit in a tinted box, so that the next entry, outside it, cannot pass for one of them.
       nest: {
         bg: t.tBg !== 'transparent' && t.tBg !== t.cBg ? t.tBg : 'rgba(127,127,127,.10)',
         r: t.tR === '0' ? '0' : '12px'
       },
-      k: { bio: kick(1, 'Présentation'), biblio: kick(2, 'Œuvres') },
+      k: { bio: kick(1, 'Présentation'), subs: kick(2, 'Arborescence'), biblio: kick(3, 'Œuvres') },
       // A universe has no entry in the menu: none is current.
       nav: [navItem('Accueil', false), navItem('Albums', false), navItem('Séries', false), navItem('Auteurs', false), navItem("Intentions d'acquisition", false)],
       facts: [
         { label: count(seriesCount, 'série', 'séries', 'Aucune série'), bg: t.acc, fg: t.onAcc, bd: '2px solid ' + t.acc },
-        { label: count(albumTotal, 'album', 'albums', 'Aucun album'), ...chip }
+        { label: count(albumTotal, 'album', 'albums', 'Aucun album'), ...chip },
+        { label: count(subs.length, 'sous-univers', 'sous-univers', 'Aucun sous-univers'), ...chip }
       ],
       biblioSummary: BIBLIOGRAPHY.length === 0
         ? 'Aucune série ni aucun album rattaché pour l\'instant.'
