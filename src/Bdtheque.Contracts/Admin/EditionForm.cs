@@ -113,7 +113,8 @@ public sealed record UpdateEditionRequest(EditionContent Content, uint AlbumVers
 /// </summary>
 /// <param name="Content">The whole edition, whose acquisition mode is required.</param>
 /// <param name="AlbumVersion">Version of the album the form was read at.</param>
-public sealed record AcquireEditionRequest(EditionContent Content, uint AlbumVersion);
+/// <param name="Visuals">The visuals of the edition as entered (<see cref="EditionVisualEntry"/>); none, its visuals left as they are.</param>
+public sealed record AcquireEditionRequest(EditionContent Content, uint AlbumVersion, IReadOnlyList<EditionVisualEntry>? Visuals = null);
 
 /// <summary>Result of the check of an ISBN during entry (fonctionnel/regles-metier/validation-de-l-isbn.md).</summary>
 /// <param name="IsChecksumValid">Whether the check digit is consistent: a warning only, never a refusal.</param>

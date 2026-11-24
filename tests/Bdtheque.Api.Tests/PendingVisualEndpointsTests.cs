@@ -177,6 +177,52 @@ public sealed class PendingVisualEndpointsTests : IClassFixture<ApiWebApplicatio
     }
 
     [Fact]
+    public async Task AcquireEdition_WithItsVisuals_KeepsAddsAndRemovesThem_TheRemovedFilesGone()
+    {
+        // The confirmation of a purchase saves the whole form of the edition, its visuals included.
+        var album = await CreateAlbumAsync();
+        var publisher = await CreatePublisherAsync();
+        var intents = await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(publisher, null, 2018, null, null, null, null, null, null, null, true),
+            album.Version, [new(null, (await UploadPendingAsync(SKColors.SteelBlue)).Id, VisualType.Cover),
+                new(null, (await UploadPendingAsync(SKColors.Wheat)).Id, VisualType.Plate)]));
+        var editionId = Assert.Single(intents.Intents).EditionId!.Value;
+        var targeted = await _client.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}");
+        var (cover, plate) = ((await GetVisualsAsync(targeted!)).Visuals[0], (await GetVisualsAsync(targeted!)).Visuals[1]);
+        var removedFile = VolumePath(VisualStorage.OriginalPath(await MediaReferenceOfVisualAsync(plate.Id)));
+        var added = await UploadPendingAsync(SKColors.Bisque);
+
+        await PostAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}/acquisition", new AcquireEditionRequest(
+            Content(publisher) with { PublicationYear = 2018 }, intents.AlbumVersion,
+            [new(cover.Id, null, VisualType.Cover), new(null, added.Id, VisualType.Dedication)]));
+
+        var visuals = (await GetVisualsAsync(targeted!)).Visuals;
+        Assert.Equal([(cover.Id, VisualType.Cover)], visuals.Where(v => v.Id == cover.Id).Select(v => (v.Id, v.Type)));
+        Assert.Equal([VisualType.Cover, VisualType.Dedication], visuals.Select(v => v.Type));
+        Assert.False(File.Exists(removedFile));
+        Assert.Equal(0, await PendingCountAsync(added.Id));
+    }
+
+    [Fact]
+    public async Task ConvertPurchaseIntentToEdition_WithPendingVisuals_MakesThemTheVisualsOfTheNewEdition()
+    {
+        var album = await CreateAlbumAsync();
+        var intents = await PostAsync<PurchaseIntentsForm>(
+            $"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, album.Version));
+        var pending = await UploadPendingAsync(SKColors.SteelBlue);
+
+        var converted = await PostAsync<PurchaseIntentsForm>(
+            $"/admin/albums/{album.Id}/purchase-intents/{Assert.Single(intents.Intents).Id}/to-edition",
+            new ConvertPurchaseIntentToEditionRequest(
+                new PurchaseIntentEditionContent(await CreatePublisherAsync(), null, 2018, null, null, null, null, null, null, null, true),
+                intents.AlbumVersion, [new(null, pending.Id, VisualType.Cover)]));
+
+        var editionId = Assert.Single(converted.Intents).EditionId!.Value;
+        Assert.Single((await _client.GetFromJsonAsync<EditionVisualsForm>($"/admin/albums/{album.Id}/editions/{editionId}/visuals"))!.Visuals);
+        Assert.Equal(0, await PendingCountAsync(pending.Id));
+    }
+
+    [Fact]
     public async Task Reconciliation_RemovesThePendingVisualsNoLongerKept_WithTheirFiles_AndKeepsTheOthers()
     {
         _factory.Clock.UtcNow = new DateTimeOffset(2026, 11, 11, 9, 0, 0, TimeSpan.Zero);

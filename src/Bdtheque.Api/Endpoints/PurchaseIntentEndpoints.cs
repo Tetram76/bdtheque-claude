@@ -111,7 +111,7 @@ internal static class PurchaseIntentEndpoints
 
     private static async Task<PurchaseIntentsForm> ConvertToEditionAsync(
         Guid rootId, Guid id, ConvertPurchaseIntentToEditionRequest request, BdthequeDbContext context, ContentFields fields,
-        CancellationToken cancellationToken)
+        TimeProvider clock, CancellationToken cancellationToken)
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
         var album = await context.LoadAggregateForWriteAsync<Album>(rootId, request.AlbumVersion, cancellationToken: cancellationToken);
@@ -119,6 +119,8 @@ internal static class PurchaseIntentEndpoints
 
         var edition = await AddEditionAsync(context, fields, album, request.Edition, cancellationToken);
         context.PurchaseIntents.Add(album.ConvertPurchaseIntentToEdition(intent, edition));
+        // A new edition has no visual to remove: its pending visuals become its own.
+        await EditionVisualEntries.ApplyAsync(context, edition, request.Visuals, clock, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
