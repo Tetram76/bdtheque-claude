@@ -84,21 +84,23 @@ summary{cursor:pointer}
         <p style="margin: 0; max-width: 80ch; font-size: 15px">{{a.description}}</p>
       </section></sc-if>
 
-      <!-- Its sub-universes, a block of their own between its description and its series and albums: their tree at every
-           level, drawn by its branches, each with what is attached to it, its own sub-universes included; no icon, which
+      <!-- Its whole branch, a block of its own between its description and its series and albums: its ancestors, the universe,
+           then its sub-universes at every level, drawn by its branches, each with what is attached to it, its own sub-universes included; no icon, which
            would say nothing the block does not already say. -->
-      <sc-if value="{{a.hasChildren}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-subs" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+      <sc-if value="{{a.inBranch}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-subs" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.subs}}</span>
-        <h2 id="a-subs" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Quels sous-univers ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
+        <h2 id="a-subs" style="position: relative; align-self: flex-start; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}; transform: rotate({{t.h2rot}})"><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Où se situe-t-il ?<sc-if value="{{t.tail}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" data-tail="" style="position: absolute; left: 26px; bottom: -8px; width: 16px; height: 16px; border-radius: 0 0 14px 0; transform: skewX(-25deg); background: {{t.h2bg}}"></span></sc-if></h2>
         <p style="margin: 0; font-size: 13px; color: {{t.muted}}">{{subsSummary}}</p>
         <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
           <sc-for list="{{subs}}" as="r" hint-placeholder-count="5">
             <li style="display: flex; align-items: stretch">
               <sc-for list="{{r.guides}}" as="g" hint-placeholder-count="1"><span aria-hidden="true" style="flex: none; width: 24px; position: relative"><span style="position: absolute; left: 6px; top: 0; bottom: 0; border-left: {{g.bd}}"></span></span></sc-for>
-              <span aria-hidden="true" style="flex: none; width: 24px; position: relative"><span style="position: absolute; left: 6px; top: 0; height: {{r.stem}}; border-left: 2px solid {{t.line}}"></span><span style="position: absolute; left: 6px; top: 15px; width: 12px; border-top: 2px solid {{t.line}}"></span></span>
+              <sc-if value="{{r.branch}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="flex: none; width: 24px; position: relative"><span style="position: absolute; left: 6px; top: 0; height: {{r.stem}}; border-left: 2px solid {{t.line}}"></span><span style="position: absolute; left: 6px; top: 15px; width: 12px; border-top: 2px solid {{t.line}}"></span></span></sc-if>
               <span style="flex: 1 1 0; min-width: 0; display: flex; padding-block: 5px">
                 <span style="min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; line-height: 1.3">
-                  <a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline; text-underline-offset: .2em">{{r.name}}</a>
+                  <sc-if value="{{r.isLink}}" hint-placeholder-val="{{true}}"><a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline; text-underline-offset: .2em">{{r.name}}</a></sc-if>
+                  <!-- The universe of the record: neither a link to the page shown, nor lost in the branch. -->
+                  <sc-if value="{{r.isCurrent}}" hint-placeholder-val="{{false}}"><strong aria-current="page" style="padding: 0 8px; border-radius: {{t.btnR}}; background: {{t.acc}}; color: {{t.onAcc}}; font-weight: 700">{{r.name}}</strong></sc-if>
                   <span style="font-size: 13px; color: {{t.muted}}">{{r.meta}}</span>
                 </span>
               </span>
@@ -383,7 +385,7 @@ class View extends Mockup {
     // An author may be in the base without any credit yet: every count reads right at zero and at one.
     const count = (n, one, many, none) => (n === 0 ? none : n + ' ' + (n > 1 ? many : one));
     // The sub-universes of the universe, at every level, siblings by name; what each counts includes its own sub-universes.
-    const TREE = [
+    const CHILDREN = [
       { name: 'Cité de Vélis', series: 1, albums: 4, children: [
         { name: 'Quartier des Lanternes', series: 0, albums: 1, children: [] }
       ] },
@@ -393,24 +395,38 @@ class View extends Mockup {
         ] }
       ] }
     ];
+    const SUB_COUNT = 5;
+    // Its whole branch: its ancestors from the top of the hierarchy, each the only one shown at its level, then the universe,
+    // then its sub-universes.
+    const TREE = [
+      { name: 'Royaumes d\'Ombrelune', series: 9, albums: 34, children: [
+        { name: 'Archipel des Brumes', current: true, series: 3, albums: 13, children: CHILDREN }
+      ] }
+    ];
     // Flattened in the order of the hierarchy, each row with the branches that pass beside it: one per ancestor that still
-    // has siblings to come below, then its own, which stops at it when it is the last of its siblings.
+    // has siblings to come below, then its own, which stops at it when it is the last of its siblings; the top of the
+    // hierarchy has no branch leading to it.
     const subs = [];
     let depth = 0;
-    const walk = (nodes, guides) => nodes.forEach((n, i) => {
+    let below = -1;
+    const walk = (nodes, guides, top) => nodes.forEach((n, i) => {
       const last = i === nodes.length - 1;
-      depth = Math.max(depth, guides.length + 1);
+      if (below >= 0) depth = Math.max(depth, guides.length + 1 - below);
       const what = [n.series > 0 ? count(n.series, 'série', 'séries', '') : '', n.albums > 0 ? count(n.albums, 'album', 'albums', '') : '']
         .filter(Boolean).join(' · ');
       subs.push({
         name: n.name,
         meta: what || 'Aucun album rattaché',
+        isCurrent: !!n.current,
+        isLink: !n.current,
+        branch: !top,
         guides: guides.map((more) => ({ bd: more ? '2px solid ' + t.line : '0' })),
         stem: last ? '16px' : '100%'
       });
-      walk(n.children, [...guides, !last]);
+      if (n.current) below = guides.length + (top ? 0 : 1);
+      walk(n.children, top ? guides : [...guides, !last], false);
     });
-    walk(TREE, []);
+    walk(TREE, [], true);
     const albumTotal = BIBLIOGRAPHY.reduce((n, e) => n + (e.album ? 1 : e.albums.length), 0);
     // Every album, in a series or not, is shown by its cover: only a series has a pile of covers.
     // A cover belongs to the album itself (entry, and volume within its series), never to its rank in this list.
@@ -471,6 +487,7 @@ class View extends Mockup {
       a: {
         name: 'Archipel des Brumes',
         hasChildren: true,
+        inBranch: true,
         hasDescription: true,
         description: 'Un chapelet d\'îles battues par les vents, à l\'ouest des Royaumes d\'Ombrelune, où les phares sont tenus par des '
           + 'ordres de gardiens rivaux. Les récits s\'y déroulent sur près de trois siècles, de la fondation de Vélis à l\'extinction des '
@@ -478,8 +495,8 @@ class View extends Mockup {
       },
       ancestors: [{ name: 'Royaumes d\'Ombrelune' }],
       subs,
-      subsSummary: count(subs.length, 'sous-univers', 'sous-univers', 'Aucun sous-univers') + ', sur ' + count(depth, 'niveau', 'niveaux', '')
-        + ', chacun sous son parent, frères par ordre alphabétique.',
+      subsSummary: 'Sa branche, de son univers de premier niveau à ses ' + count(SUB_COUNT, 'sous-univers', 'sous-univers', '') + ', sur '
+        + count(depth, 'niveau', 'niveaux', '') + ', chacun sous son parent, frères par ordre alphabétique.',
       mono: { bg: t.pal[0][0], fg: t.pal[0][1], r: t.cvR === '0' ? '50%' : t.cvR },
       // The albums of an unfolded series sit in a tinted box, so that the next entry, outside it, cannot pass for one of them.
       nest: {
@@ -492,7 +509,7 @@ class View extends Mockup {
       facts: [
         { label: count(seriesCount, 'série', 'séries', 'Aucune série'), bg: t.acc, fg: t.onAcc, bd: '2px solid ' + t.acc },
         { label: count(albumTotal, 'album', 'albums', 'Aucun album'), ...chip },
-        { label: count(subs.length, 'sous-univers', 'sous-univers', 'Aucun sous-univers'), ...chip }
+        { label: count(SUB_COUNT, 'sous-univers', 'sous-univers', 'Aucun sous-univers'), ...chip }
       ],
       biblioSummary: BIBLIOGRAPHY.length === 0
         ? 'Aucune série ni aucun album rattaché pour l\'instant.'
