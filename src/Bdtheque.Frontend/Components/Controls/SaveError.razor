@@ -25,7 +25,11 @@
                     else
                     {
                         <Button Label="@L["Reload"]" Icon="IconName.Reload" OnClick="OnReload" />
-                        <Button Label="@L["ShowChanges"]" OnClick="OnShowChanges" />
+                        @* None where there is nothing to enter again (a merge, whose choices the reload leaves). *@
+                        @if (OnShowChanges.HasDelegate)
+                        {
+                            <Button Label="@L["ShowChanges"]" OnClick="OnShowChanges" />
+                        }
                     }
                 }
             </Actions>

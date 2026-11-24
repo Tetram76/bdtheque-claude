@@ -246,9 +246,12 @@ else
         }
     }
 
+    // The authors as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
     private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
-                      CanReload="true" StaticForm="true" ReloadHref="@Navigation.Uri" OnRetry="MergeAsync" />;
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
 
     /// <summary>The record each data of an author is kept from, none while the user has not chosen.</summary>
     public sealed class AuthorMergeChoices
