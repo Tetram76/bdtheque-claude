@@ -198,6 +198,30 @@
   <data name="admin.editions.merge" xml:space="preserve">
     <value>Liste des éditions · dialogue de fusion ouvert</value>
   </data>
+  <data name="admin.invalid-isbns" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent</value>
+  </data>
+  <data name="admin.invalid-isbns.search" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · recherche</value>
+  </data>
+  <data name="admin.invalid-isbns.initial" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · navigation par initiale</value>
+  </data>
+  <data name="admin.invalid-isbns.filter" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · filtres</value>
+  </data>
+  <data name="admin.invalid-isbns.page" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · changement de page</value>
+  </data>
+  <data name="admin.invalid-isbns.corrected" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · ISBN corrigé</value>
+  </data>
+  <data name="admin.invalid-isbns.accepted" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · erreur acceptée</value>
+  </data>
+  <data name="admin.invalid-isbns.revoked" xml:space="preserve">
+    <value>Liste des ISBN au chiffre de contrôle incohérent · erreur plus acceptée</value>
+  </data>
   <data name="admin.album-editions" xml:space="preserve">
     <value>Éditions et intentions d&apos;un album</value>
   </data>

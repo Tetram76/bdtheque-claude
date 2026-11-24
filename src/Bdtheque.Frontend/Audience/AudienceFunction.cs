@@ -337,6 +337,31 @@ public static class AudienceFunctions
     /// <summary>The dialog of the merge of an edition, opened from its row, with the search of the other edition.</summary>
     public static readonly AudienceFunction AdminEditionsMerge = new("admin.editions.merge", AudienceFunctionKind.Action);
 
+    /// <summary>
+    /// The list of the editions whose ISBN has an inconsistent check digit (visuel/listes/liste-par-liste.md), from the block
+    /// « À vérifier » of the home page of the administration.
+    /// </summary>
+    public static readonly AudienceFunction AdminInvalidIsbns = new("admin.invalid-isbns", AudienceFunctionKind.Screen);
+
+    // The actions of the list, each a request of the list whose parameters are its criteria (Lists/InvalidIsbnListQuery.cs).
+
+    public static readonly AudienceFunction AdminInvalidIsbnsSearch = new("admin.invalid-isbns.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminInvalidIsbnsInitial = new("admin.invalid-isbns.initial", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminInvalidIsbnsFilter = new("admin.invalid-isbns.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminInvalidIsbnsPage = new("admin.invalid-isbns.page", AudienceFunctionKind.Action);
+
+    /// <summary>The ISBN of an edition corrected from its row, once done.</summary>
+    public static readonly AudienceFunction AdminInvalidIsbnCorrected = new("admin.invalid-isbns.corrected", AudienceFunctionKind.Action);
+
+    /// <summary>The error of the ISBN of an edition accepted from its row, once done.</summary>
+    public static readonly AudienceFunction AdminInvalidIsbnAccepted = new("admin.invalid-isbns.accepted", AudienceFunctionKind.Action);
+
+    /// <summary>The error of the ISBN of an edition accepted no more, from its row, once done.</summary>
+    public static readonly AudienceFunction AdminInvalidIsbnRevoked = new("admin.invalid-isbns.revoked", AudienceFunctionKind.Action);
+
     /// <summary>The list of the purchase intents of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminPurchaseIntents = new("admin.purchase-intents", AudienceFunctionKind.Screen);
 
@@ -656,7 +681,8 @@ public static class AudienceFunctions
         AdminAuthorsMerge, AdminAuthorsEdit, AdminAuthorsNew, AdminAuthorSaved, AdminAuthorCreated, AdminPublishers, AdminPublishersSearch, AdminPublishersInitial, AdminPublishersPage, AdminPublishersDeletion, AdminPublishersDeleted,
         AdminPublishersMerge, AdminPublisherForm, AdminNewPublisherForm, AdminPublisherCreated, AdminPublisherSaved, AdminPublisherChanges,
         AdminEditions, AdminEditionsSearch, AdminEditionsInitial, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
-        AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsInitial, AdminPurchaseIntentsPage,
+        AdminEditionsDeleted, AdminEditionsMerge, AdminInvalidIsbns, AdminInvalidIsbnsSearch, AdminInvalidIsbnsInitial, AdminInvalidIsbnsFilter,
+        AdminInvalidIsbnsPage, AdminInvalidIsbnCorrected, AdminInvalidIsbnAccepted, AdminInvalidIsbnRevoked, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsInitial, AdminPurchaseIntentsPage,
         AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminPurchaseIntentsConversion, AdminPurchaseIntentsConverted, AdminGenres, AdminGenresSearch, AdminGenresInitial, AdminGenresPage, AdminGenresDeletion,
         AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,
         AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,

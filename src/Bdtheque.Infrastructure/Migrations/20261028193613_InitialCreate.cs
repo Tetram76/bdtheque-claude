@@ -535,6 +535,7 @@ namespace Bdtheque.Infrastructure.Migrations
                     PublisherCollectionId = table.Column<Guid>(type: "uuid", nullable: true),
                     PublicationYear = table.Column<int>(type: "integer", nullable: true),
                     Isbn = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true, collation: "fr-FR-x-icu"),
+                    AcceptedIsbn = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true, collation: "fr-FR-x-icu"),
                     Binding = table.Column<int>(type: "integer", nullable: true),
                     Orientation = table.Column<int>(type: "integer", nullable: true),
                     ReadingDirection = table.Column<int>(type: "integer", nullable: true),
