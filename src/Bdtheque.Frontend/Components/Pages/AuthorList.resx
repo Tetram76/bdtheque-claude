@@ -23,8 +23,8 @@
   <data name="State.PurchaseIntent" xml:space="preserve"><value>Avec un album en intention, aucun possédé</value></data>
   <data name="State.OutsideCollection" xml:space="preserve"><value>Sans album possédé ni en intention</value></data>
   <data name="Count.None" xml:space="preserve"><value>Aucun auteur</value></data>
-  <data name="Count.One" xml:space="preserve"><value>1 auteur</value></data>
-  <data name="Count.Other" xml:space="preserve"><value>{0} auteurs</value></data>
+  <data name="Count.One" xml:space="preserve"><value>1 auteur</value></data>
+  <data name="Count.Other" xml:space="preserve"><value>{0} auteurs</value></data>
   <data name="Order" xml:space="preserve"><value>Triés par nom, le pseudonyme tenant lieu de nom</value></data>
   <data name="Column.Monogram" xml:space="preserve"><value>Monogramme</value></data>
   <data name="Column.Author" xml:space="preserve"><value>Auteur</value></data>
@@ -32,10 +32,10 @@
   <data name="Column.Albums" xml:space="preserve"><value>Crédité sur</value></data>
   <data name="Column.Roles" xml:space="preserve"><value>Rôles</value></data>
   <data name="Albums.None" xml:space="preserve"><value>Aucun album</value></data>
-  <data name="Albums.One" xml:space="preserve"><value>1 album</value></data>
-  <data name="Albums.Other" xml:space="preserve"><value>{0} albums</value></data>
-  <data name="Albums.InCollection" xml:space="preserve"><value>{0} dont {1} dans la collection</value></data>
-  <data name="Albums.AllInCollection" xml:space="preserve"><value>{0} dans la collection</value></data>
+  <data name="Albums.One" xml:space="preserve"><value>1 album</value></data>
+  <data name="Albums.Other" xml:space="preserve"><value>{0} albums</value></data>
+  <data name="Albums.InCollection" xml:space="preserve"><value>{0} dont {1} dans la collection</value></data>
+  <data name="Albums.AllInCollection" xml:space="preserve"><value>{0} dans la collection</value></data>
   <data name="Roles.None" xml:space="preserve"><value>Aucun rôle</value></data>
   <data name="Empty.Text" xml:space="preserve"><value>Aucun auteur ne correspond à « {0} ».</value></data>
   <data name="Empty.SearchedIn" xml:space="preserve"><value>le nom, le prénom et le pseudonyme de l'auteur</value></data>
