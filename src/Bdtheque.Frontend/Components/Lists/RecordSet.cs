@@ -16,4 +16,7 @@ public enum RecordSet
 
     /// <summary>The purchase intents, which have no record of their own.</summary>
     Acquisitions,
+
+    /// <summary>The records to correct or complete: the block « À vérifier » and its lists (the ISBN to check).</summary>
+    Checks,
 }

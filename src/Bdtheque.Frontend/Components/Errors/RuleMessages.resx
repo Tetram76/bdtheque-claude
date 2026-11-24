@@ -72,6 +72,12 @@
   <data name="Edition.PageCountPositive" xml:space="preserve">
     <value>Le nombre de pages doit être supérieur à zéro.</value>
   </data>
+  <data name="Edition.IsbnConsistent" xml:space="preserve">
+    <value>L&apos;ISBN de cette édition n&apos;a pas, ou plus, de chiffre de contrôle incohérent : il n&apos;y a rien à corriger ni à accepter.</value>
+  </data>
+  <data name="Edition.IsbnNotCorrectable" xml:space="preserve">
+    <value>Aucun chiffre de contrôle ne rend cet ISBN cohérent : corrigez-le sur la fiche de l&apos;édition.</value>
+  </data>
   <data name="Edition.AcquisitionModeRequired" xml:space="preserve">
     <value>Le mode d&apos;acquisition est obligatoire pour une édition de la collection.</value>
   </data>

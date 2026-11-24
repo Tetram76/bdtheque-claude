@@ -21,4 +21,7 @@
   <data name="Acquisitions" xml:space="preserve">
     <value>Acquisitions</value>
   </data>
+  <data name="Checks" xml:space="preserve">
+    <value>Contrôles</value>
+  </data>
 </root>

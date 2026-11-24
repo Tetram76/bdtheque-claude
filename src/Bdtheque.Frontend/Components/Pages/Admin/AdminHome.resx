@@ -132,9 +132,6 @@
   <data name="Checks.Title" xml:space="preserve">
     <value>À vérifier</value>
   </data>
-  <data name="Checks.Kicker" xml:space="preserve">
-    <value>Contrôles</value>
-  </data>
   <data name="Checks.InvalidIsbn" xml:space="preserve">
     <value>ISBN au chiffre de contrôle incohérent</value>
   </data>
