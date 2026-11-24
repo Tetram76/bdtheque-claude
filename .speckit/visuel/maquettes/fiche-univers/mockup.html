@@ -52,7 +52,7 @@ summary{cursor:pointer}
 
   <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
     <nav aria-label="Fil d'Ariane" style="margin-bottom: 12px; font-size: 13px; color: {{t.muted}}">
-      <sc-for list="{{ancestors}}" as="p" hint-placeholder-count="1"><a href="#" style="color: {{t.link}}; font-weight: 700">{{p.name}}</a> <span aria-hidden="true">›</span> </sc-for><span>{{a.name}}</span>
+      <span>Univers</span> <span aria-hidden="true">›</span> <sc-for list="{{ancestors}}" as="p" hint-placeholder-count="1"><a href="#" style="color: {{t.link}}; font-weight: 700">{{p.name}}</a> <span aria-hidden="true">›</span> </sc-for><span>{{a.name}}</span>
     </nav>
 
     <main style="display: flex; flex-direction: column; gap: 22px">
@@ -69,11 +69,11 @@ summary{cursor:pointer}
           <div style="display: flex; flex-direction: column; gap: 6px">
             <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">{{a.name}}</h1>
             </div>
-          <sc-if value="{{a.hasChildren}}" hint-placeholder-val="{{false}}"><dl style="margin: 0; display: flex; flex-wrap: wrap; gap: 8px 32px">
-            <div style="display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline">
+          <!-- Its sub-universes at every level, each indented under its parent and followed by its own, as in the list of the
+               universes of the administration (visuel/listes/liste-par-liste.md). -->
+          <sc-if value="{{a.hasChildren}}" hint-placeholder-val="{{false}}"><dl style="margin: 0; display: flex; flex-direction: column; gap: 4px">
               <dt style="font-weight: 700">Sous-univers</dt>
-              <dd style="margin: 0; display: flex; flex-wrap: wrap; gap: 4px 12px"><sc-for list="{{children}}" as="c" hint-placeholder-count="2"><a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline">{{c.name}}</a></sc-for></dd>
-            </div>
+              <dd style="margin: 0"><ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px"><sc-for list="{{children}}" as="c" hint-placeholder-count="2"><li style="padding-left: {{c.indent}}"><a href="#" style="color: {{t.link}}; font-weight: 700; text-decoration: underline">{{c.name}}</a></li></sc-for></ul></dd>
           </dl></sc-if>
           <ul aria-label="En bref" style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px">
             <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
@@ -431,7 +431,7 @@ class View extends Mockup {
           + 'derniers feux.'
       },
       ancestors: [{ name: 'Royaumes d\'Ombrelune' }],
-      children: [{ name: 'Phare de Kerdran' }, { name: 'Cité de Vélis' }],
+      children: [{ name: 'Cité de Vélis', indent: '0' }, { name: 'Phare de Kerdran', indent: '0' }, { name: 'Ordre des Gardiens', indent: '20px' }, { name: 'Tour de la Vigie', indent: '40px' }],
       mono: { bg: t.pal[0][0], fg: t.pal[0][1], r: t.cvR === '0' ? '50%' : t.cvR },
       // The albums of an unfolded series sit in a tinted box, so that the next entry, outside it, cannot pass for one of them.
       nest: {
