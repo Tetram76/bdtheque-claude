@@ -125,7 +125,7 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
     }
 
     [Theory, InEachTheme]
-    public async Task ConversionToAnEdition_FromTheList_EntersTheEditionTargeted_AndLeadsToTheEditionsOfTheAlbum(string theme)
+    public async Task ConversionToAnEdition_FromTheList_EntersTheEditionTargeted_AndLeadsBackToTheList(string theme)
     {
         var album = await CreateAlbumAsync(null, (await CreateSeriesWithPublisherAsync()).Id, 5);
         await CreateAlbumIntentAsync(album);
@@ -137,7 +137,8 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
         await page.GetByLabel("Année d'édition").FillAsync("2012");
         await page.GetByRole(AriaRole.Button, new() { Name = "Viser cette édition" }).ClickAsync();
 
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
+        // Back where the action was opened (decision of the user, #612), without its criteria, as after any record saved.
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPurchaseIntents));
         var intent = Assert.Single((await EditionsPageAsync(album.Id)).PurchaseIntents);
         Assert.Equal(2012, intent.Edition!.PublicationYear);
     }

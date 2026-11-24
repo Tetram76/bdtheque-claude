@@ -108,7 +108,7 @@
                                 {
                                     @* One on the whole album turns into one on a new edition, entered on its form; one on the only edition
                                        of its album into one on the album, which deletes the edition, once confirmed in a dialog. *@
-                                    <MenuItem Href="@(row.Edition is null ? AppPaths.AdminConvertPurchaseIntentToEdition(row.Album.Id, row.Id) : (ListOnly with { ToAlbum = row.Id }).Href())"
+                                    <MenuItem Href="@(row.Edition is null ? AppPaths.AdminConvertPurchaseIntentToEditionFromIntents(row.Album.Id, row.Id) : (ListOnly with { ToAlbum = row.Id }).Href())"
                                               Icon="IconName.Swap" Label="@(row.Edition is null ? L["Menu.ToEdition"] : L["Menu.ToAlbum"])" />
                                 }
                                 <MenuSeparator />

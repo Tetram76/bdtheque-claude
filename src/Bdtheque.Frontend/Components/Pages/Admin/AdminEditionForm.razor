@@ -333,22 +333,36 @@ else
         _ => L["Save"],
     };
 
+    /// <summary>The page the form was opened from, when it can be opened from several (<see cref="AppPaths.FromParameter"/>).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.FromParameter)]
+    public string? From { get; set; }
+
+    // Whether the page was opened from the list of the intents, which it leads back to (decision of the user, #612): a
+    // confirmation always, only asked from there (visuel/editions-album/contenu.md); a conversion when asked from there rather
+    // than from the page of the editions of the album.
+    private bool OpenedFromIntents => Purpose switch
+    {
+        EditionPage.Confirmation => true,
+        EditionPage.Conversion => string.Equals(From, AppPaths.FromPurchaseIntents, StringComparison.Ordinal),
+        _ => false,
+    };
+
     // The list the page comes from, and leads back to, as every breadcrumb of the administration leads back to a list: the
-    // intents for the confirmation of a purchase, asked from their list (visuel/listes/saisie-selon-l-entite.md); the albums
-    // otherwise, by the page of the editions of the album.
-    private BreadcrumbItem ListOfThePage => Purpose is EditionPage.Confirmation
+    // intents for an action asked from their list (visuel/listes/saisie-selon-l-entite.md); the albums otherwise, by the page
+    // of the editions of the album.
+    private BreadcrumbItem ListOfThePage => OpenedFromIntents
         ? new(L["PurchaseIntents"], AppPaths.AdminPurchaseIntents)
         : new(L["Albums"], AppPaths.AdminAlbums);
 
-    // Where a record saved, or cancelled, leads (visuel/saisie-album/contenu.md, decision of the user): the list of the intents
-    // for a purchase confirmed, where the next one is; the page of the editions of the album otherwise, to which the breadcrumb
-    // leads.
-    private string ReturnHref => Purpose is EditionPage.Confirmation ? AppPaths.AdminPurchaseIntents : AppPaths.AdminAlbumEditions(AlbumId);
+    // Where a record saved, or cancelled, leads (visuel/saisie-album/contenu.md, decision of the user): back where the action
+    // was opened (decision of the user, #612), the list of the intents, where the next one is, or the page of the editions of
+    // the album, to which the breadcrumb then leads.
+    private string ReturnHref => OpenedFromIntents ? AppPaths.AdminPurchaseIntents : AppPaths.AdminAlbumEditions(AlbumId);
 
-    // A confirmation names the intent it realizes (its album, and the edition it targets) after the list of the intents; any
-    // other page, the album, by the page of its editions, then the edition by its full label, ISBN included
-    // (visuel/saisie-edition/contenu.md, #470), or what the page does for a new one.
-    private IReadOnlyList<BreadcrumbItem> Breadcrumb => Purpose is EditionPage.Confirmation
+    // An action asked from the list of the intents names the intent it realizes or converts (its album, and the edition it
+    // targets) after that list; any other page, the album, by the page of its editions, then the edition by its full label,
+    // ISBN included (visuel/saisie-edition/contenu.md, #470), or what the page does for a new one.
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => OpenedFromIntents
         ?
         [
             new(L["Administration"], AppPaths.AdminHome),

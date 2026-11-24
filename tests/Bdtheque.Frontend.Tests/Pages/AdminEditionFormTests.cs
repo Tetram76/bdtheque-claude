@@ -735,6 +735,32 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Conversion_AskedFromTheListOfTheIntents_LeadsBackToIt()
+    {
+        // Back where the action was opened (decision of the user, #612): the list of the intents, which the breadcrumb names.
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents"] = new PurchaseIntentsForm(AlbumId, [new(IntentId, null)], 12);
+        var page = OpenConversion(IntentId, fromIntents: true);
+
+        Assert.Equal(["Administration", "Intentions d'acquisition", "Les Bijoux de la Castafiore (Tintin - T. 21)"],
+            page.FindAll(".breadcrumb li").Select(item => item.TextContent.Trim()));
+        Assert.Equal(AppPaths.AdminPurchaseIntents, page.Find(".save-bar a").GetAttribute("href"));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [new PurchaseIntentForm(IntentId, WishedId)], 13));
+
+        await page.SubmitAsync("form");
+
+        Assert.Equal(AppPaths.AdminPurchaseIntents, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+    }
+
+    [Fact]
+    public void Conversion_AskedFromThePageOfTheAlbum_LeadsBackToIt()
+    {
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents"] = new PurchaseIntentsForm(AlbumId, [new(IntentId, null)], 12);
+        var page = OpenConversion(IntentId);
+
+        Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), page.Find(".save-bar a").GetAttribute("href"));
+    }
+
+    [Fact]
     public void Conversion_OfAnIntentOnAnEdition_IsNoConversionToAnEdition()
     {
         // Only an intent on the whole album turns into one on an edition: the address of another one leads to no form.
@@ -1247,9 +1273,11 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     private IRenderedComponent<AdminEditionForm> OpenConfirmation(Guid intent) =>
         Open(AppPaths.AdminConfirmPurchase(AlbumId, intent), null, intent);
 
-    private IRenderedComponent<AdminEditionForm> OpenConversion(Guid intent) =>
-        Open(AppPaths.AdminConvertPurchaseIntentToEdition(AlbumId, intent), null, intent);
+    private IRenderedComponent<AdminEditionForm> OpenConversion(Guid intent, bool fromIntents = false) => Open(fromIntents
+        ? AppPaths.AdminConvertPurchaseIntentToEditionFromIntents(AlbumId, intent)
+        : AppPaths.AdminConvertPurchaseIntentToEdition(AlbumId, intent), null, intent);
 
+    // The page at its address, the parameters of its route given, those of its query read from the address.
     private IRenderedComponent<AdminEditionForm> Open(string path, Guid? id, Guid? intent = null)
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(path);

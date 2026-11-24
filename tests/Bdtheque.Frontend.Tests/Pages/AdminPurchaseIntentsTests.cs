@@ -171,7 +171,8 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("Éditions et intentions d'acquisition", AppPaths.AdminAlbumEditions(Blacksad.Id)),
-                ("Viser plutôt une édition…", AppPaths.AdminConvertPurchaseIntentToEdition(Blacksad.Id, id)),
+                // Asked from this list, the conversion leads back to it (decision of the user, #612).
+                ("Viser plutôt une édition…", AppPaths.AdminConvertPurchaseIntentToEditionFromIntents(Blacksad.Id, id)),
                 ("Retirer l'intention…", $"{AppPaths.AdminPurchaseIntents}?q=Bla&delete={id}"),
             ],
             Items(rows[0]));

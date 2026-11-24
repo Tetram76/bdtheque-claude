@@ -182,6 +182,19 @@ public static class AppPaths
     /// </summary>
     public static string AdminConvertPurchaseIntentToEdition(Guid albumId, Guid id) => $"{AdminAlbums}/{albumId}/acquisition-intents/{id}/edition";
 
+    /// <summary>
+    /// The same conversion, asked from the list of the intents, which it leads back to once saved or cancelled, instead of the
+    /// page of the editions of the album (decision of the user, #612).
+    /// </summary>
+    public static string AdminConvertPurchaseIntentToEditionFromIntents(Guid albumId, Guid id) =>
+        $"{AdminConvertPurchaseIntentToEdition(albumId, id)}?{FromParameter}={FromPurchaseIntents}";
+
+    /// <summary>The parameter of the address of an entry form that tells the page it was opened from, when it has several.</summary>
+    public const string FromParameter = "from";
+
+    /// <summary>The value of <see cref="FromParameter"/> for the list of the purchase intents.</summary>
+    public const string FromPurchaseIntents = "acquisition-intents";
+
     /// <summary>Whether a path is that of the conversion of an intent into one on a new edition, which shares its page with the editions.</summary>
     public static bool IsPurchaseIntentConversion(string path) => IsOfAnIntent(path, "/edition");
 
