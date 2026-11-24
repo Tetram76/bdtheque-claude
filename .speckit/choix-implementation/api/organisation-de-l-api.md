@@ -5,7 +5,7 @@ description: 'Minimal API, familles /admin, /catalog et /audience, DTO, modifica
 applies_to:
   - 'src/Bdtheque.Api/Endpoints/**'
   - 'src/Bdtheque.Contracts/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T15:00:00Z }
 ---
 
 # Organisation de l'API
@@ -50,8 +50,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:30:00Z }
 - **Fiches réservées aux albums, aux séries et aux auteurs** ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)). Une fiche porte tout ce qui est connu de l'entité, les entités sans fiche propre qu'elle présente, et les entrées qui mènent aux fiches liées : c'est la navigation inter-entités.
   - Elle porte en entier les fiches liées en **nombre borné** ; celles en **nombre non borné** se lisent par les listes filtrées, paginées ([Recherche](recherche.md)).
   - **Alternative écartée (fiche portant toutes ses fiches liées)** : des centaines de fiches liées non paginées (ex. les éditions d'un éditeur), que les listes filtrées paginent déjà.
-  - Les lectures assemblées l'une dans l'autre (bibliographie, éditions et univers d'une fiche, œuvres d'un genre ou d'un univers) partagent un **même instantané**, pour qu'une écriture concurrente ne laisse jamais une entrée sans sa série, son album ou son univers.
-- **Bibliographie d'un auteur et œuvres d'un genre ou d'un univers : une liste unique**, séries et albums sans série rangés ensemble par clé de tri, calculée par la base, construites par le même mécanisme et paginées pour les œuvres.
+  - Les lectures assemblées l'une dans l'autre (bibliographie, éditions et univers d'une fiche, séries et albums d'un univers) partagent un **même instantané**, pour qu'une écriture concurrente ne laisse jamais une entrée sans sa série, son album ou son univers.
+- **Bibliographie d'un auteur et séries et albums d'un univers : une liste unique**, séries et albums sans série rangés ensemble par clé de tri, calculée par la base, construites par le même mécanisme, entières comme toute fiche : chaque série dit si elle est créditée, ou rattachée, elle-même, ce qui décide de ce que la fiche d'un univers en dit ([Contenu](../../visuel/fiche-univers/contenu.md)). Un univers n'a jamais que quelques dizaines de séries et d'albums.
+  - **Alternative écartée (liste paginée, comme les listes de la consultation)** : une fiche n'a ni filtre ni pagination ; elle présente tout ce qui est rattaché à l'univers (décision de l'utilisateur, #607).
   - **Alternative écartée (listes séparées des albums et des séries)** : ni les séries avec leurs albums, ni les deux ensemble par clé de tri ; le frontend devrait tout reconstituer en lisant toutes les pages des deux listes.
 - **Reste de la série porté par la fiche d'un album** ([`visuel/fiche-album/`](../../visuel/fiche-album/index.md)) : tous les albums de sa série, lui compris, en cartes, dans l'ordre de la série, lus comme ceux de la fiche de la série, dans l'instantané de la fiche ; une série compte au plus quelques dizaines d'albums.
   - **Alternative écartée (fiche de la série lue en plus par le frontend)** : une seconde requête, sans instantané commun, qui lirait aussi les auteurs, les univers et l'aperçu de la série, dont la fiche de l'album ne présente rien.

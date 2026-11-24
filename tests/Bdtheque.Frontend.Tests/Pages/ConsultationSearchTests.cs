@@ -139,8 +139,8 @@ public sealed class ConsultationSearchTests : BunitContext, IDisposable
         Assert.Contains(links, link => link.Item1.StartsWith("Astéroïde", StringComparison.Ordinal) && link.Item2 == "https://asteroide.example");
         Assert.Contains(("Dargaud [1965] - ISBN 9782012101340", AppPaths.Album(Album.Id)), links);
         Assert.Contains(("Astrid", AppPaths.AuthorRecord(AuthorId)), links);
-        Assert.Contains(("Aventure astrale", AppPaths.GenreWorks(GenreId)), links);
-        Assert.Contains(("Astres", AppPaths.UniverseWorks(UniverseId)), links);
+        Assert.Contains(("Aventure astrale", AppPaths.AlbumsOfGenre(GenreId)), links);
+        Assert.Contains(("Astres", AppPaths.UniverseRecord(UniverseId)), links);
         // A collection leads nowhere, named with its publisher.
         var collection = page.FindAll(".search-group")[3];
         Assert.Null(collection.QuerySelector("a"));

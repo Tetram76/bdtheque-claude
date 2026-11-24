@@ -343,13 +343,12 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
     }
 
     // fonctionnel/structure-de-l-application.md: the editions are presented by the record of their
-    // album; the publishers, their collections, the genres and the universes have no record.
+    // album; the publishers, their collections and the genres have no record (a universe has its own, CatalogUniverseRecordTests).
     [Theory]
     [InlineData("editions")]
     [InlineData("publishers")]
     [InlineData("publisher-collections")]
     [InlineData("genres")]
-    [InlineData("universes")]
     public async Task EntityWithoutRecord_HasNoRoute(string resource)
     {
         var response = await _client.GetAsync($"/catalog/{resource}/{Guid.NewGuid()}");
