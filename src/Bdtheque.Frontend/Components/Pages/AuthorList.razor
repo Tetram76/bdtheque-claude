@@ -4,7 +4,6 @@
 @inject IStringLocalizer<AuthorList> L
 @inject IStringLocalizer<PossessionFilterField> Possession
 @inject ApiClient Api
-@inject ValueLabels Values
 @inject DisplayFormatter Format
 @inject AudienceRecorder Recorder
 @inject ListMemory Memory
@@ -68,55 +67,7 @@
         }
         else
         {
-            <div class="author-rows" role="table" aria-label="@L["Title"]">
-                <div class="author-row author-row-head" role="row">
-                    <span class="author-monogram" role="columnheader"><span class="visually-hidden">@L["Column.Monogram"]</span></span>
-                    <span class="author-main" role="columnheader">@L["Column.Author"]</span>
-                    <span class="author-nationality" role="columnheader">@L["Column.Nationality"]</span>
-                    <span class="author-albums" role="columnheader">@L["Column.Albums"]</span>
-                    <span class="author-roles" role="columnheader">@L["Column.Roles"]</span>
-                </div>
-                @foreach (var row in _list.Items)
-                {
-                    <div class="author-row" role="row">
-                        <span class="author-monogram" role="cell">
-                            <Monogram LastName="@row.LastName" FirstName="@row.FirstName" Pseudonym="@row.Pseudonym" />
-                        </span>
-                        <span class="author-main" role="cell">
-                            <RowEntry Detail="@RecordSearch.AuthorIdentity(row.LastName, row.FirstName, row.Pseudonym)">
-                                <a href="@AppPaths.AuthorRecord(row.Id)">@RecordSearch.AuthorName(row.LastName, row.FirstName, row.Pseudonym)</a>
-                            </RowEntry>
-                        </span>
-                        <span class="author-meta">
-                            <span class="author-nationality" role="cell" data-none="@(row.Nationality is null)">
-                                @if (row.Nationality is { } nationality)
-                                {
-                                    @nationality
-                                }
-                                else
-                                {
-                                    <NotSet Gender="GrammaticalGender.Feminine" Brief="true" />
-                                }
-                            </span>
-                            @* No album credited: a zero, which says nothing (visuel/charte-graphique/convivialite-et-efficacite.md,
-                               nombre nul); the roles held on a series alone remain. *@
-                            <span class="author-albums" role="cell" data-zero="@(row.CreditedAlbumCount == 0)">
-                                <ListCount Value="row.CreditedAlbumCount" None="@L["Albums.None"]">@AlbumsText(row)</ListCount>
-                            </span>
-                            <span class="author-roles" role="cell" data-none="@(row.Roles.Count == 0)">
-                                @if (row.Roles.Count == 0)
-                                {
-                                    <NotSet Brief="true" Mention="@L["Roles.None"]" />
-                                }
-                                else
-                                {
-                                    @string.Join(" · ", row.Roles.Select(Values.Of))
-                                }
-                            </span>
-                        </span>
-                    </div>
-                }
-            </div>
+            <CatalogAuthorRows Rows="_list.Items" Label="@L["Title"]" />
 
             <Pagination Number="_list.Number" Size="_list.Size" TotalCount="_list.TotalCount"
                         ItemsLabel="@L["Title"]" PageHref="@(page => (_query with { Page = page }).Href())" />
@@ -174,18 +125,6 @@
         var count => L["Count.Other", Format.Number(count)],
     };
 
-    // The albums credited and, of them, those in the collection, in one phrase, as the series of the administration say it
-    // (visuel/listes/liste-par-liste.md): « 7 albums dans la collection » when all are, « 9 albums dont 4 dans la collection »
-    // when some are, « 9 albums » when none is.
-    private string AlbumsText(AuthorCatalogListItem row)
-    {
-        var albums = row.CreditedAlbumCount == 1 ? L["Albums.One"].Value : L["Albums.Other", Format.Number(row.CreditedAlbumCount)].Value;
-        if (row.CreditedAlbumsInCollectionCount == 0)
-            return albums;
-        return row.CreditedAlbumsInCollectionCount == row.CreditedAlbumCount
-            ? L["Albums.AllInCollection", albums]
-            : L["Albums.InCollection", albums, Format.Number(row.CreditedAlbumsInCollectionCount)];
-    }
 
     // An author is not owned: the filter names the albums of the author it looks for, one of which is enough, as its options do
     // (fonctionnel/regles-metier/perimetre-de-la-consultation.md).

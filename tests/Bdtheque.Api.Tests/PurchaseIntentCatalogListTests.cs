@@ -72,6 +72,22 @@ public sealed class PurchaseIntentCatalogListTests : IClassFixture<ApiWebApplica
         Assert.Equal([titled], await IdsAsync($"q={Uri.EscapeDataString($"vieux fourneaux {_marker}")}"));
     }
 
+    // An edition a purchase intent targets is found by its ISBN, as any element of the base, and presented as that intent
+    // (fonctionnel/regles-metier/perimetre-de-la-consultation.md), its album still answering the other criteria.
+    [Fact]
+    public async Task Search_FindsTheIsbnOfTheTargetedEdition_WhateverTheSeparators()
+    {
+        var isbn = $"978{Random.Shared.NextInt64(1_000_000_000, 9_999_999_999)}";
+        var publisher = await CreatePublisherAsync($"Dupuis {_marker}", null);
+        var album = await CreateAlbumAsync($"Spirou {_marker}");
+        await CreateIntendedEditionAsync(album.Id, publisher.Id, 2001, isbn);
+        var intent = Assert.Single(await IdsAsync($"q={_marker}"));
+
+        Assert.Equal([intent], await IdsAsync($"q={Uri.EscapeDataString($"{isbn[..3]}-{isbn[3..]}")}"));
+        Assert.Equal([intent], await IdsAsync($"q={isbn}&entry=S"));
+        Assert.Empty(await IdsAsync($"q={isbn}&entry=A"));
+    }
+
     [Fact]
     public async Task List_FollowsTheNavigationByInitialOfTheAlbums()
     {
@@ -189,13 +205,13 @@ public sealed class PurchaseIntentCatalogListTests : IClassFixture<ApiWebApplica
     }
 
     /// <returns>The edition targeted by the new intent, not owned.</returns>
-    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? year)
+    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? year, string? isbn = null)
     {
         var before = (await GetAsync<PurchaseIntentsForm>($"/admin/albums/{albumId}/purchase-intents")).Intents.Select(i => i.Id).ToHashSet();
         var form = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{albumId}/purchase-intents",
             new CreatePurchaseIntentRequest(
-                new PurchaseIntentEditionContent(publisherId, null, year, null, null, null, null, null, null, null, true),
+                new PurchaseIntentEditionContent(publisherId, null, year, isbn, null, null, null, null, null, null, true),
                 await GetAlbumVersionAsync(albumId)));
         return form.Intents.Single(i => !before.Contains(i.Id)).EditionId!.Value;
     }

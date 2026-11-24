@@ -1,0 +1,36 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the heading, the search, then a block per
+   type of record found, its rows those of the list of the type (Components/Lists), or, for a type without a list of the
+   consultation, its entries, one per line as a row of a list. */
+.consultation-search-page {
+    display: grid;
+    gap: var(--admin-gap);
+}
+
+.search-hits {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.search-hit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+/* The way to what the entry designates: underlined at all times, a touch screen having no hover, as in the rows of a list. */
+.search-hit a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.1875rem;
+}
+
+.search-more {
+    margin: var(--space-s) 0 0;
+    padding-inline: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}

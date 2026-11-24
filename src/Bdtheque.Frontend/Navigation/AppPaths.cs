@@ -31,9 +31,13 @@ public static class AppPaths
     /// <summary>Contextual help (a later part of the Phase 3).</summary>
     public const string Help = NotYetImplemented;
 
-    // Consultation (#210 to #212 for the records; the lists and the search, a later part of the Phase 3).
+    // Consultation (#210 to #212 for the records, #603 to #606 for the lists, #608 for the search).
 
-    public const string Search = NotYetImplemented;
+    /// <summary>
+    /// The simple search of the consultation, from its header (fonctionnel/structure-de-l-application.md): the records found,
+    /// whatever their type, each leading where the consultation leads it.
+    /// </summary>
+    public const string Search = "/search";
 
     /// <summary>The list of the albums of the consultation, under which the record of an album is.</summary>
     public const string Albums = AlbumsSection;

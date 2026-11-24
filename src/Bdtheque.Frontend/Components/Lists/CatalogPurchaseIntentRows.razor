@@ -1,0 +1,61 @@
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@inject IStringLocalizer<CatalogPurchaseIntentRows> L
+@inject RecordLabels Labels
+
+@* The rows of purchase intents of the consultation, which its public list of the intents and its search present alike: each
+   row leads to the record of the album it targets, with what it targets and the possession of the album. *@
+<div class="intent-rows" role="table" aria-label="@Label">
+    <div class="intent-row intent-row-head" role="row">
+        <span class="intent-cover" role="columnheader"><span class="visually-hidden">@L["Column.Cover"]</span></span>
+        <span class="intent-main" role="columnheader">@L["Column.Album"]</span>
+        <span class="intent-target" role="columnheader">@L["Column.Target"]</span>
+        <span class="intent-state" role="columnheader">@L["Column.State"]</span>
+        <span class="intent-created" role="columnheader">@L["Column.Created"]</span>
+    </div>
+    @foreach (var row in Rows)
+    {
+        <div class="intent-row" role="row">
+            <span class="intent-cover" role="cell"><Cover VisualId="row.Cover?.VisualId" /></span>
+            <span class="intent-main" role="cell">
+                <RowEntry><a href="@AppPaths.Album(row.Album.Id)">@Labels.Album(row.Album, LabelFormat)</a></RowEntry>
+            </span>
+            <span class="intent-meta">
+                @* What the intent targets, told apart at first glance: the whole album, any edition doing, or one
+                   edition, named beside it, its publisher leading to its site. *@
+                <span class="intent-target" role="cell">
+                    @if (row.Edition is { } edition)
+                    {
+                        <Tag Text="@L["Target.Edition"]" Variant="TagVariant.Outlined" Icon="IconName.Edition" />
+                        <span class="intent-target-detail intent-target-edition">
+                            <EditionLabelText Edition="edition" PublisherWebsite="@row.PublisherWebsite" />
+                        </span>
+                    }
+                    else
+                    {
+                        <Tag Text="@L["Target.Album"]" Variant="TagVariant.Accent" Icon="IconName.Album" />
+                        <span class="intent-target-detail">@L["Target.AnyEdition"]</span>
+                    }
+                </span>
+                <span class="intent-state" role="cell"><CollectionStateTag State="row.State" /></span>
+                <span class="intent-created" role="cell">
+                    <span class="intent-caption">@L["Column.Created"]</span> <LocalDateTime Value="row.CreatedAt" DateOnly="true" />
+                </span>
+            </span>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>The rows, as the list presents them.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<PurchaseIntentListItem> Rows { get; set; } = null!;
+
+    /// <summary>The name of the table, which assistive technologies read.</summary>
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public AlbumLabelFormat LabelFormat { get; set; }
+}

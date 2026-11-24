@@ -91,6 +91,19 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
         Assert.Equal([intendedTitled], await IdsAsync($"vieux fourneaux {_marker}"));
     }
 
+    // The search of a record to modify finds the edition an intent targets by its ISBN, through the intent.
+    [Fact]
+    public async Task Search_FindsTheIsbnOfTheTargetedEdition()
+    {
+        var isbn = $"978{Random.Shared.NextInt64(1_000_000_000, 9_999_999_999)}";
+        var publisher = await CreatePublisherAsync($"Dupuis {_marker}");
+        var album = await CreateAlbumAsync($"Spirou {_marker}");
+        await CreateIntendedEditionAsync(album.Id, publisher.Id, 2001, isbn);
+        var intent = await SingleIntentAsync(album.Id);
+
+        Assert.Equal([intent], await IdsAsync($"{isbn[..3]} {isbn[3..]}"));
+    }
+
     [Fact]
     public async Task List_IsInTheOrderOfTheAlbums()
     {
@@ -165,12 +178,12 @@ public sealed class PurchaseIntentAdminListTests : IClassFixture<ApiWebApplicati
     }
 
     // The edition targeted by the new intent: the one the intents of the album did not target yet.
-    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? year = null)
+    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? year = null, string? isbn = null)
     {
         var form = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{albumId}/purchase-intents",
             new CreatePurchaseIntentRequest(
-                new PurchaseIntentEditionContent(publisherId, null, year, null, null, null, null, null, null, null, true),
+                new PurchaseIntentEditionContent(publisherId, null, year, isbn, null, null, null, null, null, null, true),
                 await GetAlbumVersionAsync(albumId)));
         return Assert.Single(form.Intents).EditionId!.Value;
     }

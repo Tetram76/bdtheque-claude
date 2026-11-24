@@ -100,6 +100,15 @@ public static class AudienceFunctions
     public static readonly AudienceFunction PurchaseIntentsPage = new("purchase-intents.page", AudienceFunctionKind.Action);
 
     /// <summary>
+    /// The simple search of the consultation, from its header (fonctionnel/structure-de-l-application.md): the page of its
+    /// results, every type of record found.
+    /// </summary>
+    public static readonly AudienceFunction Search = new("search", AudienceFunctionKind.Screen);
+
+    /// <summary>A search launched, from the header or from the page of its results, with its text.</summary>
+    public static readonly AudienceFunction SearchQuery = new("search.query", AudienceFunctionKind.Action);
+
+    /// <summary>
     /// The search of a record to modify, from the header of the administration (visuel/administration/en-tete-et-menu.md): the
     /// page of its results.
     /// </summary>
@@ -631,7 +640,7 @@ public static class AudienceFunctions
         SeriesRecord, SeriesList, SeriesListSearch, SeriesListFilter, SeriesListInitial, SeriesListPage, AuthorRecord,
         Authors, AuthorsSearch, AuthorsFilter, AuthorsInitial, AuthorsPage,
         PurchaseIntents, PurchaseIntentsSearch, PurchaseIntentsFilter, PurchaseIntentsInitial, PurchaseIntentsPage,
-        AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
+        Search, SearchQuery, AdminSearch, AdminSearchQuery, AdminLogin, AdminSignedIn, AdminSignedOut, AudienceInformation, AudienceOppositionWithdrawn, AdminAlbums,
         AdminAlbumsSearch, AdminAlbumsFilter, AdminAlbumsInitial, AdminAlbumsPage, AdminAlbumsDeletion, AdminAlbumsDeleted, AdminAlbumsMerge,
         AdminAlbum, AdminNewAlbum, AdminAlbumCreated, AdminAlbumSaved, AdminAlbumAuthorCreated, AdminAlbumGenreCreated, AdminAlbumUniverseCreated, AdminAlbumSeriesCreated,
         AdminAlbumChanges,

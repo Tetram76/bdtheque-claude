@@ -54,6 +54,12 @@
   <data name="admin.signed-out" xml:space="preserve">
     <value>Administration · déconnexion</value>
   </data>
+  <data name="search" xml:space="preserve">
+    <value>Recherche</value>
+  </data>
+  <data name="search.query" xml:space="preserve">
+    <value>Recherche · recherche lancée</value>
+  </data>
   <data name="admin.search" xml:space="preserve">
     <value>Recherche d&apos;une fiche à modifier</value>
   </data>

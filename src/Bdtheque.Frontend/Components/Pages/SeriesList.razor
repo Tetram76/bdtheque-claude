@@ -66,29 +66,7 @@
         }
         else
         {
-            <div class="series-rows" role="table" aria-label="@L["Title"]">
-                <div class="series-row series-row-head" role="row">
-                    <span class="series-pile" role="columnheader"><span class="visually-hidden">@L["Column.Covers"]</span></span>
-                    <span class="series-main" role="columnheader">@L["Column.Series"]</span>
-                    <span class="series-albums" role="columnheader">@L["Column.Albums"]</span>
-                </div>
-                @foreach (var row in _list.Series.Items)
-                {
-                    <div class="series-row" role="row">
-                        <span class="series-pile" role="cell"><CoverPile Covers="row.Overview.FirstVolumeCovers" /></span>
-                        <span class="series-main" role="cell">
-                            <RowEntry><a href="@AppPaths.SeriesRecord(row.Id)">@row.Title</a></RowEntry>
-                        </span>
-                        @* Its albums in the collection, out of all of them, as its record says it; a series without album has nothing
-                           to say there, its zero taking the dash of a list (visuel/charte-graphique/convivialite-et-efficacite.md). *@
-                        <span class="series-albums" role="cell" data-zero="@(row.Overview.AlbumCount == 0)">
-                            <ListCount Value="row.Overview.AlbumCount" None="@L["Albums.None"]">
-                                <SeriesInCollection OwnedCount="row.AlbumsInCollectionCount" AlbumCount="row.Overview.AlbumCount" />
-                            </ListCount>
-                        </span>
-                    </div>
-                }
-            </div>
+            <CatalogSeriesRows Rows="_list.Series.Items" Label="@L["Title"]" />
 
             <Pagination Number="_list.Series.Number" Size="_list.Series.Size" TotalCount="_list.Series.TotalCount"
                         ItemsLabel="@L["Title"]" PageHref="@(page => (_query with { Page = page }).Href())" />

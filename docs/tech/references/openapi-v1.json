@@ -3864,6 +3864,14 @@
             }
           },
           {
+            "name": "InCollection",
+            "in": "query",
+            "description": "Only the editions of the collection, when `true`: an edition a purchase intent targets is presented as the intent, never\nas an edition (fonctionnel/regles-metier/intention-d-acquisition.md), as by the search of the consultation.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -7404,6 +7412,14 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "InCollection",
+            "in": "query",
+            "description": "Only the editions of the collection, when `true`: an edition a purchase intent targets is presented as the intent, never\nas an edition (fonctionnel/regles-metier/intention-d-acquisition.md), as by the search of the consultation.",
+            "schema": {
+              "type": "boolean"
             }
           },
           {
