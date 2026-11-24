@@ -84,8 +84,8 @@ summary{cursor:pointer}
         <p style="margin: 0; max-width: 80ch; font-size: 15px">{{a.description}}</p>
       </section></sc-if>
 
-      <!-- Its whole branch, a block of its own between its description and its series and albums: its ancestors, the universe,
-           then its sub-universes at every level, drawn by its branches, each with what is attached to it, its own sub-universes included; no icon, which
+      <!-- The whole tree of its universe at the top of the hierarchy, a block of its own between its description and its series
+           and albums, the universe of the record put forward: drawn by its branches, each with what is attached to it, its own sub-universes included; no icon, which
            would say nothing the block does not already say. -->
       <sc-if value="{{a.inBranch}}" hint-placeholder-val="{{false}}"><section aria-labelledby="a-subs" style="position: relative; margin-top: {{t.cTop}}; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
         <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.subs}}</span>
@@ -396,11 +396,15 @@ class View extends Mockup {
       ] }
     ];
     const SUB_COUNT = 5;
-    // Its whole branch: its ancestors from the top of the hierarchy, each the only one shown at its level, then the universe,
-    // then its sub-universes.
+    // The whole tree of its universe at the top of the hierarchy: the universe among its siblings, its parents among theirs,
+    // and every sub-universe of each.
     const TREE = [
       { name: 'Royaumes d\'Ombrelune', series: 9, albums: 34, children: [
-        { name: 'Archipel des Brumes', current: true, series: 3, albums: 13, children: CHILDREN }
+        { name: 'Archipel des Brumes', current: true, series: 3, albums: 13, children: CHILDREN },
+        { name: 'Forêt de Sombrelin', series: 2, albums: 6, children: [
+          { name: 'Clairière des Fées', series: 1, albums: 2, children: [] }
+        ] },
+        { name: 'Monts de Cendre', series: 1, albums: 3, children: [] }
       ] }
     ];
     // Flattened in the order of the hierarchy, each row with the branches that pass beside it: one per ancestor that still
@@ -408,10 +412,9 @@ class View extends Mockup {
     // hierarchy has no branch leading to it.
     const subs = [];
     let depth = 0;
-    let below = -1;
     const walk = (nodes, guides, top) => nodes.forEach((n, i) => {
       const last = i === nodes.length - 1;
-      if (below >= 0) depth = Math.max(depth, guides.length + 1 - below);
+      depth = Math.max(depth, guides.length + 1);
       const what = [n.series > 0 ? count(n.series, 'série', 'séries', '') : '', n.albums > 0 ? count(n.albums, 'album', 'albums', '') : '']
         .filter(Boolean).join(' · ');
       subs.push({
@@ -423,7 +426,6 @@ class View extends Mockup {
         guides: guides.map((more) => ({ bd: more ? '2px solid ' + t.line : '0' })),
         stem: last ? '16px' : '100%'
       });
-      if (n.current) below = guides.length + (top ? 0 : 1);
       walk(n.children, top ? guides : [...guides, !last], false);
     });
     walk(TREE, [], true);
@@ -495,7 +497,7 @@ class View extends Mockup {
       },
       ancestors: [{ name: 'Royaumes d\'Ombrelune' }],
       subs,
-      subsSummary: 'Sa branche, de son univers de premier niveau à ses ' + count(SUB_COUNT, 'sous-univers', 'sous-univers', '') + ', sur '
+      subsSummary: 'L\'arborescence de son univers de premier niveau : ' + count(subs.length, 'univers', 'univers', '') + ', sur '
         + count(depth, 'niveau', 'niveaux', '') + ', chacun sous son parent, frères par ordre alphabétique.',
       mono: { bg: t.pal[0][0], fg: t.pal[0][1], r: t.cvR === '0' ? '50%' : t.cvR },
       // The albums of an unfolded series sit in a tinted box, so that the next entry, outside it, cannot pass for one of them.
