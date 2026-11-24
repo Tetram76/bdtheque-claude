@@ -65,7 +65,7 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
     }
 
     [Fact]
-    public async Task Record_ListsTheSeriesAndAlbumsOfItsSubUniversesToo_AndPresentsItsAncestorsAndItsSubUniversesAtEveryLevel()
+    public async Task Record_ListsTheSeriesAndAlbumsOfItsSubUniversesToo_AndPresentsItsAncestorsAndTheWholeTreeOfItsTopUniverse()
     {
         var marvel = await CreateUniverseAsync("Marvel", null, "L'univers partagé de Marvel Comics.");
         var xMen = await CreateUniverseAsync("X-Men", marvel.Id);
@@ -87,12 +87,12 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
         var sub = await GetAsync<UniverseDetail>($"/catalog/universes/{xMen.Id}");
 
         Assert.Equal((marvel.Name, "L'univers partagé de Marvel Comics.", 0), (top.Name, top.Description, top.Ancestors.Count));
-        // Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name, each with
-        // what is attached to it, its own sub-universes included, as its own record presents it: Daredevil through one of its
-        // albums.
+        // The whole tree of its universe at the top, itself included, in the order of the hierarchy: each followed by its own,
+        // siblings by name, each with what is attached to it, its own sub-universes included, as its own record presents it:
+        // Daredevil through one of its albums.
         Assert.Equal(
-            [(asgard.Id, marvel.Id, 0, 0), (xMen.Id, marvel.Id, 2, 2), (mutants.Id, xMen.Id, 1, 0)],
-            top.SubUniverses.Select(u => (u.Id, u.ParentId, u.SeriesCount, u.AlbumCount)));
+            [(marvel.Id, (Guid?)null, 3, 2), (asgard.Id, marvel.Id, 0, 0), (xMen.Id, marvel.Id, 2, 2), (mutants.Id, xMen.Id, 1, 0)],
+            top.Tree.Select(u => (u.Id, u.ParentId, u.SeriesCount, u.AlbumCount)));
         Assert.Equal(
             [(avengers.Id, (Guid?)null), (daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
             top.Works.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));
@@ -103,7 +103,8 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
 
         Assert.Null(sub.Description);
         Assert.Equal([new UniverseListItem(marvel.Id, marvel.Name, null, null)], sub.Ancestors);
-        Assert.Equal([mutants.Id], sub.SubUniverses.Select(u => u.Id));
+        // A sub-universe is presented in the same tree, that of its universe at the top.
+        Assert.Equal([marvel.Id, asgard.Id, xMen.Id, mutants.Id], sub.Tree.Select(u => u.Id));
         // The series and albums of the parent are not those of its sub-universe.
         Assert.Equal(
             [(daredevil.Id, (Guid?)null), (null, hulk.Id), (wolverine.Id, null)],

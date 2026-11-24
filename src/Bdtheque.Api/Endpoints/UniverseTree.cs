@@ -76,10 +76,11 @@ internal sealed class UniverseTree
     }
 
     /// <summary>
-    /// The sub-universes of a universe at every level, in the order of the hierarchy: each followed by its own, siblings by
+    /// The universe and its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by
     /// name; each says its parent, which places it in the tree.
     /// </summary>
-    public IReadOnlyList<UniverseListItem> SubUniverses(Guid id) => [.. InHierarchyOrder(id).Select(subId => _universes[subId])];
+    public IReadOnlyList<UniverseListItem> WithSubUniverses(Guid id) =>
+        [_universes[id], .. InHierarchyOrder(id).Select(subId => _universes[subId])];
 
     /// <summary>The most ancestors a universe has: the depth of the hierarchy below its top.</summary>
     public int MaxAncestorCount => _universes.Values.Select(u => InHierarchy(u).Ancestors.Count).DefaultIfEmpty().Max();

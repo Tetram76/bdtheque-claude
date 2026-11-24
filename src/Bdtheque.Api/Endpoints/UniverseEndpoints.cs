@@ -87,11 +87,12 @@ internal static class UniverseEndpoints
                 a.ToCard(), new List<ContributionRole>(), a.FirstPublicationYear, a.FirstPublicationMonth)),
             cancellationToken);
 
-        var subUniverses = tree.SubUniverses(id);
-        var counts = await CountWorksAsync(context, tree, subUniverses, cancellationToken);
+        // The whole tree of its universe at the top, where it stands (visuel/fiche-univers/contenu.md).
+        var whole = tree.WithSubUniverses(ancestors.Count > 0 ? ancestors[0].Id : id);
+        var counts = await CountWorksAsync(context, tree, whole, cancellationToken);
         return new UniverseDetail(
             id, item.Name, universe.Description, ancestors,
-            [.. subUniverses.Select(u => new SubUniverse(u.Id, u.Name, u.ParentId!.Value, counts[u.Id].Series, counts[u.Id].Albums))],
+            [.. whole.Select(u => new UniverseInTree(u.Id, u.Name, u.ParentId, counts[u.Id].Series, counts[u.Id].Albums))],
             works, universe.CreatedAt, universe.ModifiedAt);
     }
 
@@ -108,8 +109,8 @@ internal static class UniverseEndpoints
     }
 
     /// <summary>
-    /// The numbers of series and albums the record of each sub-universe presents (<see cref="WorksOf"/>), so that its line on
-    /// the record of its ancestor says what its own record says; in a single query, one count per universe joined by
+    /// The numbers of series and albums the record of each universe of a tree presents (<see cref="WorksOf"/>), so that its line
+    /// in the tree on another record says what its own record says; in a single query, one count per universe joined by
     /// <c>UNION ALL</c>.
     /// </summary>
     private static async Task<Dictionary<Guid, (int Series, int Albums)>> CountWorksAsync(

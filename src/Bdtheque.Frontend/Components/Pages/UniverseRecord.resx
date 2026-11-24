@@ -21,14 +21,20 @@
   <data name="SubUniverses.Count" xml:space="preserve">
     <value>{0} sous-univers</value>
   </data>
-  <data name="SubUniverses.Title" xml:space="preserve">
-    <value>Quels sous-univers ?</value>
+  <data name="Tree.Title" xml:space="preserve">
+    <value>Où se situe-t-il ?</value>
   </data>
-  <data name="SubUniverses.Kicker" xml:space="preserve">
+  <data name="Tree.Kicker" xml:space="preserve">
     <value>Arborescence</value>
   </data>
-  <data name="SubUniverses.Summary" xml:space="preserve">
-    <value>{0}, sur {1}, chacun sous son parent, frères par ordre alphabétique.</value>
+  <data name="Tree.Summary" xml:space="preserve">
+    <value>L'arborescence de son univers de premier niveau : {0}, sur {1}, chacun sous son parent, frères par ordre alphabétique.</value>
+  </data>
+  <data name="Universes.One" xml:space="preserve">
+    <value>{0} univers</value>
+  </data>
+  <data name="Universes.Other" xml:space="preserve">
+    <value>{0} univers</value>
   </data>
   <data name="Levels.One" xml:space="preserve">
     <value>{0} niveau</value>

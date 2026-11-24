@@ -34,8 +34,11 @@ public sealed class UniverseRecordTests(RecordsApplication application) : Browse
         var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.UniverseRecord(Application.UniverseId));
 
-        await page.Locator(".sub-universes").GetByRole(AriaRole.Link, new() { Name = "Corto Maltese" }).ClickAsync();
+        await page.Locator(".universe-tree").GetByRole(AriaRole.Link, new() { Name = "Corto Maltese" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/universes/{Application.SubUniverseId}$"));
+        // The same tree, that of its universe at the top, puts it forward without a link.
+        await Assertions.Expect(page.Locator(".universe-tree [aria-current='page']")).ToHaveTextAsync("Corto Maltese");
+        await Assertions.Expect(page.Locator(".universe-tree").GetByRole(AriaRole.Link, new() { Name = "Univers Hugo Pratt" })).ToBeVisibleAsync();
 
         await page.GetByRole(AriaRole.Navigation, new() { Name = "Fil d'Ariane" }).GetByRole(AriaRole.Link, new() { Name = "Univers Hugo Pratt" }).ClickAsync();
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/universes/{Application.UniverseId}$"));

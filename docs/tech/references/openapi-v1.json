@@ -17679,46 +17679,6 @@
         },
         "description": "The owned edition in the spotlight of the day, the same for every display of the day."
       },
-      "SubUniverse": {
-        "required": [
-          "id",
-          "name",
-          "parentId",
-          "seriesCount",
-          "albumCount"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "parentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "seriesCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "albumCount": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          }
-        },
-        "description": "A sub-universe on the record of a universe (visuel/fiche-univers/contenu.md): its place in the tree, by its parent, and the\nnumbers of series and albums its own record presents, its own sub-universes included."
-      },
       "TitleSortKey": {
         "required": [
           "sortKey"
@@ -17819,7 +17779,7 @@
           "name",
           "description",
           "ancestors",
-          "subUniverses",
+          "tree",
           "works",
           "createdAt",
           "modifiedAt"
@@ -17846,12 +17806,12 @@
             },
             "description": "From the top of the hierarchy down to its parent; empty for a universe at the top."
           },
-          "subUniverses": {
+          "tree": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SubUniverse"
+              "$ref": "#/components/schemas/UniverseInTree"
             },
-            "description": "Its sub-universes at every level, in the order of the hierarchy: each followed by its own, siblings by name; each says its\nparent, which places it in the tree, and what is attached to it as its own record presents it."
+            "description": "The whole tree of its universe at the top of the hierarchy, itself included, in the order of the hierarchy: each universe\nfollowed by its sub-universes, siblings by name; each says its parent, which places it in the tree, and what is attached\nto it as its own record presents it."
           },
           "works": {
             "type": "array",
@@ -17954,6 +17914,49 @@
           }
         },
         "description": "A universe with the chain of its ancestors, each leading, like the universe itself, to its record\n(fonctionnel/structure-de-l-application.md)."
+      },
+      "UniverseInTree": {
+        "required": [
+          "id",
+          "name",
+          "parentId",
+          "seriesCount",
+          "albumCount"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "seriesCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "albumCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "A universe of the tree on the record of a universe (visuel/fiche-univers/contenu.md): its place in the tree, by its parent,\nnone at the top, and the numbers of series and albums its own record presents, its own sub-universes included."
       },
       "UniverseListItem": {
         "required": [

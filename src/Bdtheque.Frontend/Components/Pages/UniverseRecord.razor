@@ -7,8 +7,9 @@
 @inject DisplayFormatter Format
 
 @* The record of a universe in the consultation (visuel/fiche-univers/contenu.md): its parents in the breadcrumb, a universe having
-   neither list nor entry in the menu; the thought bubble of the universes under the mention of its kind; its name, its
-   sub-universes and the number of its series and albums; its description; its series and albums, those of its sub-universes
+   neither list nor entry in the menu; the thought bubble of the universes under the mention of its kind; its name and the
+   number of its series, albums and sub-universes; its description; the tree of its universe at the top, where it stands; its
+   series and albums, those of its sub-universes
    included, presented as the bibliography of an author, without roles (Records/Bibliography.razor), whole, a record having no
    filter; its dates. Its styles read the contracts of the base theme only (visuel/fiche-univers/declinaison-par-theme.md). *@
 <PageTitle>@(_universe?.Name ?? L["Title"])</PageTitle>
@@ -49,10 +50,10 @@ else if (_universe is { } universe)
                             <li class="universe-fact" data-fact="@(_seriesCount == 0 ? "main" : null)">@Counted("Albums", _albumCount)</li>
                         }
                     }
-                    @* Its sub-universes at every level, which their block presents; data not set is not shown. *@
-                    @if (universe.SubUniverses.Count > 0)
+                    @* Its sub-universes at every level, which the tree presents; data not set is not shown. *@
+                    @if (_subUniverseCount > 0)
                     {
-                        <li class="universe-fact">@L["SubUniverses.Count", Format.Number(universe.SubUniverses.Count)]</li>
+                        <li class="universe-fact">@L["SubUniverses.Count", Format.Number(_subUniverseCount)]</li>
                     }
                 </ul>
             </div>
@@ -65,13 +66,14 @@ else if (_universe is { } universe)
             </Block>
         }
 
-        @* Its sub-universes, a block of their own (visuel/fiche-univers/contenu.md): their tree at every level, drawn by its
-           branches, each leading to its record with what is attached to it on the same line; no block without any. *@
-        @if (universe.SubUniverses.Count > 0)
+        @* The whole tree of its universe at the top, a block of its own (visuel/fiche-univers/contenu.md): drawn by its branches,
+           each universe leading to its record with what is attached to it on the same line, that of the record put forward
+           without a link; no block for a universe at the top without sub-universes, which would show it alone. *@
+        @if (universe.Tree.Count > 1)
         {
-            <Block Title="@L["SubUniverses.Title"]" Kicker="@L["SubUniverses.Kicker"]" data-part="sub-universes">
-                <p class="sub-universes-summary">@SubUniversesSummary</p>
-                @SubUniverses(universe.Id, "sub-universes")
+            <Block Title="@L["Tree.Title"]" Kicker="@L["Tree.Kicker"]" data-part="tree">
+                <p class="universe-tree-summary">@TreeSummary</p>
+                @Tree(null, "universe-tree")
             </Block>
         }
 
@@ -92,6 +94,7 @@ else if (_universe is { } universe)
     private ApiProblem? _problem;
     private int _seriesCount;
     private int _albumCount;
+    private int _subUniverseCount;
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,50 +111,64 @@ else if (_universe is { } universe)
         _seriesCount = _universe.Works.Count(e => e.Series is not null);
         // Every album attached, in a series or not: a series attached itself presents all of them.
         _albumCount = _universe.Works.Sum(e => e.Series?.Albums.Count ?? 1);
+        // Its sub-universes at every level: those of the tree it is an ancestor of.
+        _subUniverseCount = _universe.Tree.Count(u => u.Id != Id && Ancestry(u).Contains(Id));
+    }
+
+    // The ancestors of a universe of the tree, from its parent up.
+    private IEnumerable<Guid> Ancestry(UniverseInTree universe)
+    {
+        for (var parentId = universe.ParentId; parentId is { } id; parentId = _universe!.Tree.First(u => u.Id == id).ParentId)
+            yield return id;
     }
 
     private string Counted(string key, int count) => L[count > 1 ? $"{key}.Other" : $"{key}.One", Format.Number(count)];
 
-    // Their number, that of the levels they span, and their order.
-    private string SubUniversesSummary
+    // The number of universes of the tree, that of the levels it spans, and their order.
+    private string TreeSummary
     {
         get
         {
-            var subUniverses = _universe!.SubUniverses;
-            var levels = subUniverses.Max(u => Depth(u.ParentId));
-            return L["SubUniverses.Summary",
-                L["SubUniverses.Count", Format.Number(subUniverses.Count)],
+            var tree = _universe!.Tree;
+            var levels = tree.Max(u => Ancestry(u).Count() + 1);
+            return L["Tree.Summary",
+                L[tree.Count > 1 ? "Universes.Other" : "Universes.One", Format.Number(tree.Count)],
                 L[levels > 1 ? "Levels.Other" : "Levels.One", Format.Number(levels)]];
-
-            // A sub-universe is on the first level under the universe, or one below its parent.
-            int Depth(Guid parentId) => parentId == _universe.Id ? 1 : 1 + Depth(subUniverses.First(u => u.Id == parentId).ParentId);
         }
     }
 
-    // What is attached to a sub-universe, as its own record says it: its series and its albums, a number at zero left out, or
-    // that nothing is, as the facts say it.
-    private string Works(SubUniverse universe) =>
+    // What is attached to a universe of the tree, as its own record says it: its series and its albums, a number at zero left
+    // out, or that nothing is, as the facts say it.
+    private string Works(UniverseInTree universe) =>
         string.Join(" · ", new[]
         {
             universe.SeriesCount > 0 ? Counted("Series", universe.SeriesCount) : null,
             universe.AlbumCount > 0 ? Counted("Albums", universe.AlbumCount) : null,
         }.OfType<string>()) is { Length: > 0 } works ? works : L["Albums.None"];
 
-    // The sub-universes of a universe, each followed by its own; the API gives them in the order of the hierarchy, siblings by
-    // name, each saying its parent.
-    private RenderFragment SubUniverses(Guid parentId, string? listClass = null) => __builder =>
+    // The universes under a parent, or at the top, each followed by its sub-universes; the API gives them in the order of the
+    // hierarchy, siblings by name, each saying its parent. The universe of the record is put forward, without a link to the
+    // page shown.
+    private RenderFragment Tree(Guid? parentId, string? listClass = null) => __builder =>
     {
         <ul class="@listClass">
-            @foreach (var child in _universe!.SubUniverses.Where(u => u.ParentId == parentId))
+            @foreach (var universe in _universe!.Tree.Where(u => u.ParentId == parentId))
             {
                 <li>
-                    <span class="sub-universe">
-                        <a href="@AppPaths.UniverseRecord(child.Id)">@child.Name</a>
-                        <span class="sub-universe-works">@Works(child)</span>
+                    <span class="tree-universe">
+                        @if (universe.Id == Id)
+                        {
+                            <strong class="tree-current" aria-current="page">@universe.Name</strong>
+                        }
+                        else
+                        {
+                            <a href="@AppPaths.UniverseRecord(universe.Id)">@universe.Name</a>
+                        }
+                        <span class="tree-universe-works">@Works(universe)</span>
                     </span>
-                    @if (_universe.SubUniverses.Any(u => u.ParentId == child.Id))
+                    @if (_universe.Tree.Any(u => u.ParentId == universe.Id))
                     {
-                        @SubUniverses(child.Id)
+                        @Tree(universe.Id)
                     }
                 </li>
             }
