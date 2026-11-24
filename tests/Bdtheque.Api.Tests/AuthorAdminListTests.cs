@@ -91,7 +91,7 @@ public sealed class AuthorAdminListTests : IClassFixture<ApiWebApplicationFactor
     private async Task<IReadOnlyList<Guid>> IdsAsync(string query) => [.. (await ListAsync(query)).Select(r => r.Id)];
 
     private async Task<IReadOnlyList<Guid>> CatalogIdsAsync(string query) =>
-        [.. (await GetAsync<Page<AuthorListItem>>($"/catalog/authors?{query}")).Items.Select(a => a.Id)];
+        [.. (await GetAsync<Page<AuthorCatalogListItem>>($"/catalog/authors?{query}")).Items.Select(a => a.Id)];
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;
 

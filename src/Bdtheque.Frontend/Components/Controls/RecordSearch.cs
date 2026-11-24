@@ -25,7 +25,7 @@ public sealed class RecordSearch(ApiClient api, RecordLabels labels)
         return kind switch
         {
             RecordKind.Series => await FindAsync<SeriesListItem>("series", query, s => new(s.Id, s.Title, null), cancellationToken),
-            RecordKind.Author => await FindAsync<AuthorListItem>(
+            RecordKind.Author => await FindAsync<AuthorCatalogListItem>(
                 "authors", query, a => new(a.Id, AuthorName(a.LastName, a.FirstName, a.Pseudonym), null), cancellationToken),
             RecordKind.Publisher => await FindAsync<PublisherListItem>("publishers", query, p => new(p.Id, p.Name, null), cancellationToken),
             RecordKind.PublisherCollection => await FindAsync<PublisherCollectionListItem>(

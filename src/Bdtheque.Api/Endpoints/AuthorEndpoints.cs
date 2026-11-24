@@ -102,12 +102,21 @@ internal static class AuthorEndpoints
             author.ModifiedAt);
     }
 
-    /// <summary>The authors of the consultation, found by their name (<see cref="Search"/>).</summary>
-    private static Task<Page<AuthorListItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
-        int pageSize = Paging.DefaultSize) =>
-        Search(context, q, entry)
-            .ToPageAsync(page, pageSize, a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym), cancellationToken);
+    /// <summary>
+    /// The list of the authors of the consultation, that of the administration without its actions: its search and navigation,
+    /// in the same order, and the possession, its own filter, by which it limits itself to the collection
+    /// (fonctionnel/regles-metier/perimetre-de-la-consultation.md). The choice of an author by their name reads it too.
+    /// </summary>
+    private static async Task<Page<AuthorCatalogListItem>> ListAsync(
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null,
+        AlbumCollectionState? state = null, int page = 1, int pageSize = Paging.DefaultSize)
+    {
+        var rows = await RowsAsync(context, q, entry, state, page, pageSize, cancellationToken);
+        return new Page<AuthorCatalogListItem>(
+            [.. rows.Items.Select(r => new AuthorCatalogListItem(
+                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.CreditedAlbumsInCollectionCount, r.Roles))],
+            rows.Number, rows.Size, rows.TotalCount);
+    }
 
     /// <summary>
     /// The list of the authors of the administration (visuel/listes/liste-par-liste.md): the search and navigation of the list
@@ -119,7 +128,19 @@ internal static class AuthorEndpoints
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
         int pageSize = Paging.DefaultSize)
     {
-        var rows = await Search(context, q, entry).ToPageAsync(page, pageSize, a => new
+        var rows = await RowsAsync(context, q, entry, state: null, page, pageSize, cancellationToken);
+        return new Page<AuthorAdminListItem>(
+            [.. rows.Items.Select(r => new AuthorAdminListItem(
+                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.Roles, r.ModifiedAt, r.Version))],
+            rows.Number, rows.Size, rows.TotalCount);
+    }
+
+    // A page of the authors as both lists read them, each list keeping what it presents.
+    private static async Task<Page<AuthorRow>> RowsAsync(
+        BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state, int page, int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var rows = await Search(context, text, entry, state).ToPageAsync(page, pageSize, CatalogExpressions.Expand((Author a) => new
         {
             a.Id,
             a.LastName,
@@ -127,33 +148,42 @@ internal static class AuthorEndpoints
             a.Pseudonym,
             a.Nationality,
             // An album credited with several roles of the author counts once.
-            CreditedAlbumCount = context.Contributions.Where(c => c.AuthorId == a.Id && c.AlbumId != null).Select(c => c.AlbumId).Distinct().Count(),
+            CreditedAlbumCount = context.Albums.Count(album => album.Contributions.Any(c => c.AuthorId == a.Id)),
+            CreditedAlbumsInCollectionCount = context.Albums.Count(album =>
+                album.Contributions.Any(c => c.AuthorId == a.Id) && album.Editions.Any(e => e.IsOwned())),
             Roles = context.Contributions.Where(c => c.AuthorId == a.Id).Select(c => c.Role).Distinct().OrderBy(r => r).ToList(),
             a.ModifiedAt,
             Version = EF.Property<uint>(a, BdthequeDbContext.VersionProperty),
-        }, cancellationToken);
+        }), cancellationToken);
 
-        var items = rows.Items
-            .Select(r => new AuthorAdminListItem(
-                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount,
-                [.. r.Roles.Select(role => EnumMapping.Map<ContractEnums.ContributionRole>(role)!.Value)], r.ModifiedAt, r.Version))
-            .ToList();
-        return new Page<AuthorAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount);
+        return new Page<AuthorRow>(
+            [.. rows.Items.Select(r => new AuthorRow(
+                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.CreditedAlbumsInCollectionCount,
+                [.. r.Roles.Select(role => EnumMapping.Map<ContractEnums.ContributionRole>(role)!.Value)], r.ModifiedAt, r.Version))],
+            rows.Number, rows.Size, rows.TotalCount);
     }
+
+    private sealed record AuthorRow(
+        Guid Id, string? LastName, string? FirstName, string? Pseudonym, string? Nationality, int CreditedAlbumCount,
+        int CreditedAlbumsInCollectionCount, IReadOnlyList<ContractEnums.ContributionRole> Roles, DateTimeOffset ModifiedAt, uint Version);
 
     /// <summary>
     /// The authors found by any part of their name: last name, first name, pseudonym, or full name, as
     /// displayed ("First Last") or as sorted ("Last First",
-    /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), under the entry of the navigation, by sort key.
+    /// fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), under the entry of the navigation, in the possession
+    /// they take from the albums they are credited on (fonctionnel/regles-metier/perimetre-de-la-consultation.md), by sort key.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
-    private static IOrderedQueryable<Author> Search(BdthequeDbContext context, string? text, string? entry)
+    private static IOrderedQueryable<Author> Search(BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state)
     {
         CatalogFilters.EnsureNavigationEntry(entry);
         var authors = context.Authors.AsNoTracking()
             .WhereContains(text, a => a.LastName, a => a.FirstName, a => a.Pseudonym, a => a.FirstName + " " + a.LastName, a => a.SortKey);
         if (entry is not null)
             authors = authors.Where(a => a.NavigationEntry == entry);
+        if (state is { } wanted)
+            authors = authors.Where(CatalogExpressions.Expand((Author a) =>
+                context.Albums.Where(album => album.Contributions.Any(c => c.AuthorId == a.Id)).CollectionStateOfAlbums() == wanted));
         return authors.OrderByEntry(a => a.NavigationEntry).ThenBy(a => a.SortKey).ThenBy(a => a.Id);
     }
 

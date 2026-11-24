@@ -130,6 +130,10 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var ferraz = await data.AuthorAsync("Ferraz", "Inès");
         var benali = await data.AuthorAsync("Benali", "Malik");
         var lemaire = await data.AuthorAsync("Lemaire");
+        // Credited on an album only wished for, and on a series without album: the list of the authors of the consultation has an
+        // author under each possession, and one without album, yet with a role (fonctionnel/regles-metier/perimetre-de-la-consultation.md).
+        var mareuil = await data.AuthorAsync("Mareuil", "Lise", nationality: "Suisse");
+        var vasseur = await data.AuthorAsync("Vasseur", "Hugo");
         // An author credited on nothing yet, without nationality: the list of the authors says so, and its deletion is accepted.
         await data.AuthorAsync(UncreditedAuthorLastName, "Sacha");
 
@@ -208,7 +212,7 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         // form proposes nothing to its new editions, and leaves it out of the computations.
         await data.SeriesAsync(Series(SeriesWithoutAlbumTitle, SeriesStatus.InProgress,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [fantasy], [],
-            [Credit(rambert, ContributionRole.Scenarist)]) with
+            [Credit(rambert, ContributionRole.Scenarist), Credit(vasseur, ContributionRole.Illustrator)]) with
         {
             ExcludeFromMissingVolumes = true, ExcludeFromReleaseEstimates = true,
         });
@@ -272,7 +276,7 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.VisualAsync(fog, fogIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.3));
 
         // Wished for as a whole, with no edition known yet.
-        var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist)]));
+        var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist), Credit(mareuil, ContributionRole.Colorist)]));
         await data.IntentOnAlbumAsync(convoy);
 
         // The cases of the entry form of an album (visuel/saisie-album/contenu.md): a sort key entered by hand, a universe

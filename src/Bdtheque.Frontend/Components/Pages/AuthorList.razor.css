@@ -1,0 +1,109 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the list, the rest of the page
+   being that of every list (Components/Lists). */
+/* The layout of the rows follows the width of the list itself, not that of the screen, as for the albums: mobile-first, each
+   row holds on two lines, the monogram on the left: the name, then the albums and the roles. A list wide enough for these
+   columns, the fixed ones and at least 12rem for the name, is a table; wider still, the table adds the nationality, its
+   secondary column (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
+.author-rows {
+    container: author-rows / inline-size;
+}
+
+.author-row {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-template-areas: "monogram main" "monogram meta";
+    align-items: start;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.author-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.author-meta {
+    grid-area: meta;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-s);
+    font-size: var(--font-size-small);
+}
+
+.author-monogram {
+    grid-area: monogram;
+}
+
+.author-main {
+    grid-area: main;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+/* The way to the record of the author: underlined at all times, a touch screen having no hover (visuel/fiche-auteur/contenu.md). */
+.author-main a {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 0.1875rem;
+}
+
+.author-nationality {
+    display: none;
+    grid-area: nationality;
+}
+
+.author-albums {
+    grid-area: albums;
+}
+
+.author-roles {
+    grid-area: roles;
+}
+
+@container author-rows (min-width: 44rem) {
+    .author-row {
+        grid-template-columns: 2.75rem minmax(12rem, 1fr) 14.5rem 11.875rem;
+        grid-template-areas: "monogram main albums roles";
+        align-items: center;
+    }
+
+    .author-row-head {
+        display: grid;
+    }
+
+    .author-meta {
+        display: contents;
+        font-size: inherit;
+    }
+}
+
+@container author-rows (min-width: 54rem) {
+    .author-row {
+        grid-template-columns: 2.75rem minmax(12rem, 1fr) 6.875rem 14.5rem 11.875rem;
+        grid-template-areas: "monogram main nationality albums roles";
+    }
+
+    .author-nationality {
+        display: block;
+    }
+}
+
+/* On two lines, the row has no columns any more: a zero, or a data absent, which its dash stands for in a table, says nothing
+   and is withdrawn, as a data absent from a list of cards (visuel/charte-graphique/convivialite-et-efficacite.md). */
+@container author-rows (width < 44rem) {
+    .author-meta [data-zero],
+    .author-meta [data-none] {
+        display: none;
+    }
+}

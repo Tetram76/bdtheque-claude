@@ -40,7 +40,8 @@ public static class AppPaths
 
     public const string Series = NotYetImplemented;
 
-    public const string Authors = NotYetImplemented;
+    /// <summary>The list of the authors of the consultation, under which the record of an author is.</summary>
+    public const string Authors = AuthorsSection;
 
     public const string PurchaseIntents = NotYetImplemented;
 
@@ -74,7 +75,7 @@ public static class AppPaths
     public static string SeriesRecord(Guid id) => $"{SeriesSection}/{id}";
 
     /// <summary>
-    /// The path of the list of the authors once implemented, under which the record of an author is: where the entry
+    /// The path of the list of the authors, under which the record of an author is: where the entry
     /// « Auteurs » of the menu is current.
     /// </summary>
     public const string AuthorsSection = "/authors";
