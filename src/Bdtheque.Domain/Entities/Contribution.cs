@@ -94,18 +94,30 @@ public sealed class Contribution : EntityBase
 
     /// <summary>
     /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> in every role the latter holds, as the merge of two
-    /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md): a role both of them hold is credited once.
+    /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md): each contribution keeps its identity, which a saved search may
+    /// designate, and a role both of them hold is credited once, by the contribution of <paramref name="kept"/>.
     /// </summary>
-    /// <param name="create">Creates a contribution of the owner, for a role <paramref name="kept"/> does not hold yet.</param>
+    /// <returns>Each contribution removed as a duplicate, with the one that replaces it.</returns>
     /// <exception cref="ArgumentException">The same author twice.</exception>
-    internal static void Transfer(
-        List<Contribution> contributions, Author merged, Author kept, Func<Author, ContributionRole, Contribution> create)
+    internal static IReadOnlyList<(Guid Removed, Guid Kept)> Transfer(List<Contribution> contributions, Author merged, Author kept)
     {
         MergeGuard.EnsureDistinct(merged, kept);
 
-        var roles = contributions.Where(c => c.AuthorId == merged.Id).Select(c => c.Role).ToList();
-        contributions.RemoveAll(c => c.AuthorId == merged.Id);
-        foreach (var role in roles.Where(role => !contributions.Exists(c => c.AuthorId == kept.Id && c.Role == role)))
-            contributions.Add(create(kept, role));
+        var replaced = new List<(Guid Removed, Guid Kept)>();
+        foreach (var contribution in contributions.Where(c => c.AuthorId == merged.Id).ToList())
+        {
+            if (contributions.Find(c => c.AuthorId == kept.Id && c.Role == contribution.Role) is { } held)
+            {
+                contributions.Remove(contribution);
+                replaced.Add((contribution.Id, held.Id));
+            }
+            else
+            {
+                contribution.Author = kept;
+                contribution.AuthorId = kept.Id;
+            }
+        }
+
+        return replaced;
     }
 }

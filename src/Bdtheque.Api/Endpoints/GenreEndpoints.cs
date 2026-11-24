@@ -83,6 +83,9 @@ internal static class GenreEndpoints
                 await context.Entry(album).Collection(a => a.Genres).LoadAsync(cancellationToken);
                 album.TransferGenre(pair.Merged, pair.Kept);
             }
+
+            // A genre is associated, never duplicated: nothing but the merged genre is removed.
+            return [];
         }, cancellationToken);
 
     public static void MapGenreCatalog(this RouteGroupBuilder catalog)

@@ -102,20 +102,24 @@ internal static class AuthorEndpoints
             },
             async pair =>
             {
+                // The contributions removed as duplicates, which a saved search may designate (contributions are searched).
+                var removed = new List<(Guid Removed, Guid Kept)>();
                 foreach (var series in await RecordMerge.LoadLinkedForWriteAsync<Series>(
                              context,
                              context.Contributions.Where(c => c.AuthorId == pair.Merged.Id && c.SeriesId != null).Select(c => c.SeriesId!.Value),
                              cancellationToken))
                 {
                     await context.Entry(series).Collection(s => s.TemplateContributions).LoadAsync(cancellationToken);
-                    series.TransferAuthor(pair.Merged, pair.Kept);
+                    removed.AddRange(series.TransferAuthor(pair.Merged, pair.Kept));
                 }
 
                 foreach (var album in await RecordMerge.LoadLinkedForWriteAsync<Album>(
                              context,
                              context.Contributions.Where(c => c.AuthorId == pair.Merged.Id && c.AlbumId != null).Select(c => c.AlbumId!.Value),
                              cancellationToken))
-                    album.TransferAuthor(pair.Merged, pair.Kept);
+                    removed.AddRange(album.TransferAuthor(pair.Merged, pair.Kept));
+
+                return [.. removed.Select(r => new MergeReplacement(EntityKind.Contribution, r.Removed, r.Kept))];
             },
             cancellationToken);
 

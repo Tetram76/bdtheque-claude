@@ -52,13 +52,16 @@ internal static class RecordMerge
     /// </summary>
     /// <param name="keepFirst">Whether the first record remains (<see cref="KeepsFirst"/>).</param>
     /// <param name="assign">Gives the record that remains its data, of the one or the other, both read and locked.</param>
-    /// <param name="transfer">Transfers to the record that remains what designated the other one.</param>
+    /// <param name="transfer">
+    /// Transfers to the record that remains what designated the other one, and tells the records it removed as duplicates
+    /// (e.g. a contribution both authors held), each with the one that replaces it.
+    /// </param>
     /// <returns>The record that remains.</returns>
     /// <exception cref="ArgumentException">The same record twice.</exception>
     /// <exception cref="EntityNotFoundException">One of the records no longer exists.</exception>
     /// <exception cref="DbUpdateConcurrencyException">One of the records was modified since its data were read.</exception>
     public static async Task<MergeResult> MergeAsync<TRoot>(
-        BdthequeDbContext context, MergedRecord first, MergedRecord second, bool keepFirst, Action<MergePair<TRoot>> assign, Func<MergePair<TRoot>, Task> transfer,
+        BdthequeDbContext context, MergedRecord first, MergedRecord second, bool keepFirst, Action<MergePair<TRoot>> assign, Func<MergePair<TRoot>, Task<IReadOnlyList<MergeReplacement>>> transfer,
         CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
     {
@@ -71,9 +74,10 @@ internal static class RecordMerge
         // its owners (e.g. the contributions of the merged author on an album) is only deleted by the save, before which it
         // still designates the merged record, whose deletion would refuse it. The merged record is deleted next, so that the
         // data the kept record takes from it last are free (e.g. the display name of an author, unique).
-        await transfer(pair);
+        var replaced = (await transfer(pair)).ToList();
         if (AdvancedSearchSchema.KindOf(typeof(TRoot)) is { } kind)
-            await TransferSavedSearchesAsync(context, kind, pair.Merged.Id, pair.Kept.Id, cancellationToken);
+            replaced.Add(new MergeReplacement(kind, pair.Merged.Id, pair.Kept.Id));
+        await TransferSavedSearchesAsync(context, replaced, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
         context.Remove(pair.Merged);
@@ -102,21 +106,22 @@ internal static class RecordMerge
     }
 
     /// <summary>
-    /// The saved searches designating the record <paramref name="merged"/> designate <paramref name="kept"/> instead, at the
-    /// same places of their criteria: their variables keep their constants, and their designations follow.
+    /// The saved searches designating a record the merge removes designate the one that replaces it instead, at the same places
+    /// of their criteria: their variables keep their constants, and their designations follow.
     /// </summary>
     private static async Task TransferSavedSearchesAsync(
-        BdthequeDbContext context, EntityKind kind, Guid merged, Guid kept, CancellationToken cancellationToken)
+        BdthequeDbContext context, IReadOnlyList<MergeReplacement> replaced, CancellationToken cancellationToken)
     {
-        var designated = EnumMapping.Map<DomainEnums.EntityKind>(kind)!.Value;
+        var removed = replaced.Select(r => r.Merged).ToList();
         var searches = await LoadLinkedForWriteAsync<SavedSearch>(
             context,
-            context.SavedSearches.IgnoreAutoIncludes().Where(s => s.Designations.Any(d => d.Kind == designated && d.RecordId == merged)).Select(s => s.Id),
+            context.SavedSearches.IgnoreAutoIncludes().Where(s => s.Designations.Any(d => removed.Contains(d.RecordId))).Select(s => s.Id),
             cancellationToken);
         foreach (var search in searches)
         {
             var entity = AdvancedSearchSchema.Of(EnumMapping.Map<EntityKind>(search.Entity)!.Value);
-            var criteria = SearchDesignations.Replace(entity, SearchCriteriaJson.Deserialize(search.Criteria), kind, merged, kept);
+            var criteria = replaced.Aggregate(
+                SearchCriteriaJson.Deserialize(search.Criteria), (current, r) => SearchDesignations.Replace(entity, current, r.Kind, r.Merged, r.Kept));
             search.SetSearch(
                 search.Entity, SearchCriteriaJson.Serialize(criteria), search.Variables,
                 SearchDesignations.Of(entity, criteria).Select(r => new DesignatedRecord(EnumMapping.Map<DomainEnums.EntityKind>(r.Kind)!.Value, r.Id)));
@@ -124,6 +129,8 @@ internal static class RecordMerge
     }
 }
 
+/// <summary>A record a merge removes, of <paramref name="Kind"/>, and the one that replaces it, which every designation follows.</summary>
+internal sealed record MergeReplacement(EntityKind Kind, Guid Merged, Guid Kept);
 /// <summary>The two records of a merge, read and locked: the one that remains, and the one the merge deletes.</summary>
 internal sealed class MergePair<TRoot>(TRoot first, TRoot second, bool keepFirst)
 {

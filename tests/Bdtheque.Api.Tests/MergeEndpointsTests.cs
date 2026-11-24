@@ -214,6 +214,48 @@ public sealed class MergeEndpointsTests : IClassFixture<ApiWebApplicationFactory
         Assert.Equal(pseudonym, (await _client.GetFromJsonAsync<AuthorForm>($"/admin/authors/{first.Id}"))!.Pseudonym);
     }
 
+    // A saved search may designate a contribution (the contributions are searched by the advanced search): the merge keeps the
+    // contribution it credits to the remaining author, and redirects a search designating a duplicate to the one that replaces it.
+    [Fact]
+    public async Task AuthorMerge_KeepsTheContributionsSavedSearchesDesignate_AndRedirectsThoseOfDuplicates()
+    {
+        var first = await CreateAuthorAsync(pseudonym: null);
+        var second = await CreateAuthorAsync(pseudonym: null);
+        await SeedAsync(context => CreditedOn(context, [first.Id, second.Id], albums: 1, series: 0));
+        var onlySecond = await SeedAsync(context => CreditedOn(context, [second.Id], albums: 1, series: 0));
+        Guid kept, duplicate, credited;
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+            kept = await context.Contributions.Where(c => c.AuthorId == first.Id).Select(c => c.Id).SingleAsync();
+            duplicate = await context.Contributions.Where(c => c.AuthorId == second.Id && c.AlbumId != onlySecond.Albums[0]).Select(c => c.Id).SingleAsync();
+            credited = await context.Contributions.Where(c => c.AlbumId == onlySecond.Albums[0]).Select(c => c.Id).SingleAsync();
+        }
+
+        var ofDuplicate = await CreateContributionSearchAsync(duplicate);
+        var ofCredited = await CreateContributionSearchAsync(credited);
+
+        var response = await _client.PostAsJsonAsync("/admin/authors/merge", new AuthorMergeRequest(
+            new MergedRecord(first.Id, first.Version), new MergedRecord(second.Id, second.Version),
+            MergeSide.First, MergeSide.First, MergeSide.First, MergeSide.First, MergeSide.First));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal([kept], await DesignatedAsync(ofDuplicate.Id));
+        Assert.Equal([credited], await DesignatedAsync(ofCredited.Id));
+        await using (var scope = _factory.Services.CreateAsyncScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+            Assert.Equal(first.Id, (await context.Contributions.SingleAsync(c => c.Id == credited)).AuthorId);
+            // The album records its contribution credited to the other author, from the one to the other.
+            var entry = await context.ChangeLog.Where(e => e.RecordId == onlySecond.Albums[0] && e.Operation == ChangeLogOperation.Modification)
+                .SingleAsync();
+            var change = Assert.Single(entry.Changes!);
+            Assert.Equal(
+                (second.Id, first.Id),
+                (Assert.IsType<Domain.Entities.ContributionValue>(change.Before).AuthorId, Assert.IsType<Domain.Entities.ContributionValue>(change.After).AuthorId));
+        }
+    }
+
     [Fact]
     public async Task AuthorMerge_WithoutLastNameNorPseudonym_IsABusinessErrorAndMergesNothing()
     {
@@ -250,6 +292,22 @@ public sealed class MergeEndpointsTests : IClassFixture<ApiWebApplicationFactory
             $"Recherche {Guid.NewGuid():N}", EntityKind.Album, criteria, []));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<SavedSearchForm>())!;
+    }
+
+    private async Task<SavedSearchForm> CreateContributionSearchAsync(Guid contribution)
+    {
+        var response = await _client.PostAsJsonAsync("/admin/saved-searches", new SavedSearchContent(
+            $"Recherche {Guid.NewGuid():N}", EntityKind.Contribution,
+            new SearchCriterion("record", SearchComparison.Is, [contribution.ToString()]), []));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<SavedSearchForm>())!;
+    }
+
+    private async Task<List<Guid>> DesignatedAsync(Guid search)
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+        return (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId).ToList();
     }
 
     private async Task<(List<Guid> Albums, List<Guid> Series)> SeedAsync(Func<BdthequeDbContext, Task<(List<Guid>, List<Guid>)>> seed)

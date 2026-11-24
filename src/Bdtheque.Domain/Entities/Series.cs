@@ -140,9 +140,10 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> on the series, in the same roles, as the merge of two
     /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md); a role both of them hold is credited once.
     /// </summary>
+    /// <returns>Each contribution removed as a duplicate, with the one that replaces it, which a saved search designating it designates instead.</returns>
     /// <exception cref="ArgumentException">The same author twice.</exception>
-    public void TransferAuthor(Author merged, Author kept) =>
-        Contribution.Transfer(_templateContributions, merged, kept, (author, role) => Contribution.ForSeriesTemplate(this, author, role));
+    public IReadOnlyList<(Guid Removed, Guid Kept)> TransferAuthor(Author merged, Author kept) =>
+        Contribution.Transfer(_templateContributions, merged, kept);
 
     public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
 

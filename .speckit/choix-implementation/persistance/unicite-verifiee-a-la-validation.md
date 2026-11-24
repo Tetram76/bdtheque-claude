@@ -7,7 +7,7 @@ applies_to:
   - 'src/Bdtheque.Infrastructure/BdthequeMigrationsSqlGenerator.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/PublisherCollectionConfiguration.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/UniverseConfiguration.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 ---
 
 # Unicité vérifiée à la validation
@@ -24,5 +24,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
   - **Alternative écartée (nom provisoire écrit en base, puis le nom voulu)** : deux enregistrements pour une seule modification de l'utilisateur, que le journal des modifications présenterait comme deux ([Journal des modifications : mise en œuvre](../domaine/journal-des-modifications-mise-en-oeuvre.md)).
 - **Les autres unicités restent des index uniques**, vérifiés ligne par ligne, aucune saisie ne pouvant les permuter en un enregistrement :
   - celles des racines (libellé d'un genre, nom affiché d'un auteur, nom d'un éditeur, nom d'une recherche enregistrée) : un enregistrement n'en écrit qu'une, ou n'en crée d'autres sur place que sans en modifier aucune ;
-  - les contributions d'un album ou d'une série : remplacées en bloc, elles ne sont jamais modifiées, seulement ajoutées ou retirées, ce qu'EF Core ordonne (retraits d'abord) ;
+  - les contributions d'un album ou d'une série : remplacées en bloc, elles ne sont qu'ajoutées ou retirées, ce qu'EF Core ordonne (retraits d'abord) ; seule la fusion de deux auteurs en modifie, en créditant l'auteur qui reste dans un rôle qu'il ne tient pas encore, une contribution en double étant retirée ([Fusion de deux fiches : mise en œuvre](../ecritures/fusion-des-fiches-mise-en-oeuvre.md)) ;
   - les intentions d'acquisition : leur cible ne change jamais, une conversion retirant l'intention pour en créer une autre.

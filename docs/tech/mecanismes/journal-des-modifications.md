@@ -34,7 +34,7 @@ Les entrées sont ajoutées avant que les dates ne soient posées : elles reçoi
 Plusieurs règles déterminent quelles entrées sont produites :
 
 - Une fiche modifiée ne reçoit une entrée que si l'un de ses attributs a réellement changé de valeur. C'est important parce que toute écriture sur un agrégat marque sa racine comme modifiée, pour en changer la version ; sans cette règle, chaque écriture laisserait une entrée vide sur la racine.
-- Les éléments qu'une fiche porte, comme un genre ou un univers rattaché, une contribution ou un visuel, ne sont pas journalisés pour eux-mêmes : en ajouter, en retirer ou en réarranger un est enregistré comme un changement de la fiche qui le porte.
+- Les éléments qu'une fiche porte, comme un genre ou un univers rattaché, une contribution ou un visuel, ne sont pas journalisés pour eux-mêmes : en ajouter, en retirer ou en réarranger un est enregistré comme un changement de la fiche qui le porte, de même qu'une contribution que la fusion de deux auteurs crédite à l'auteur qui reste, avec son auteur avant et après.
 - Chaque fiche supprimée reçoit sa propre entrée, y compris quand elle disparaît avec une autre, comme l'édition supprimée avec son album. Le recorder doit donc la voir, ce qui suppose qu'elle soit chargée. Il refuse pour cette raison un enregistrement dont une suppression emporterait par cascade, dans la base, une fiche que le suivi ne connaît pas : elle disparaîtrait sans laisser de trace.
 
 ## Correspondance des attributs

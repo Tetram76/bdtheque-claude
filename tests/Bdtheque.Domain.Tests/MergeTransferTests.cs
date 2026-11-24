@@ -94,6 +94,41 @@ public sealed class MergeTransferTests
         Assert.All(album.Contributions, c => Assert.Same(album, c.Album));
     }
 
+    // A contribution keeps its identity, which a saved search may designate: it is credited to the kept author, not replaced.
+    [Fact]
+    public void AlbumTransferAuthor_KeepsTheContributionsTheyAre_AndSaysWhichOneReplacesADuplicate()
+    {
+        var merged = new Author("Gotlib", "Marcel", null);
+        var kept = new Author("Gotlieb", "Marcel", "Gotlib");
+        var album = new Album("Rubrique-à-brac", null,
+            [(kept, ContributionRole.Illustrator), (merged, ContributionRole.Illustrator), (merged, ContributionRole.Colorist)]);
+        var keptIllustrator = album.Contributions.Single(c => c.AuthorId == kept.Id).Id;
+        var duplicate = album.Contributions.Single(c => c.AuthorId == merged.Id && c.Role == ContributionRole.Illustrator).Id;
+        var colorist = album.Contributions.Single(c => c.Role == ContributionRole.Colorist).Id;
+
+        var replaced = album.TransferAuthor(merged, kept);
+
+        Assert.Equivalent(new[] { keptIllustrator, colorist }, album.Contributions.Select(c => c.Id));
+        Assert.Same(kept, album.Contributions.Single(c => c.Id == colorist).Author);
+        Assert.Equal([(duplicate, keptIllustrator)], replaced);
+    }
+
+    [Fact]
+    public void SeriesTransferAuthor_KeepsTheContributionItCredits()
+    {
+        var merged = new Author("Gotlib", "Marcel", null);
+        var kept = new Author("Gotlieb", "Marcel", "Gotlib");
+        var series = new Series("Gai-Luron");
+        series.SetTemplateContributions([(merged, ContributionRole.Scenarist)]);
+        var contribution = Assert.Single(series.TemplateContributions).Id;
+
+        var replaced = series.TransferAuthor(merged, kept);
+
+        Assert.Equal(contribution, Assert.Single(series.TemplateContributions).Id);
+        Assert.Equal(kept.Id, series.TemplateContributions.Single().AuthorId);
+        Assert.Empty(replaced);
+    }
+
     [Fact]
     public void SeriesTransferAuthor_CreditsTheKeptAuthorOnTheSeries()
     {
