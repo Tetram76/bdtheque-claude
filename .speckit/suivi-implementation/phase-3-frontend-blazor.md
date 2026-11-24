@@ -2,7 +2,7 @@
 type: Plan d'implémentation
 title: 'Phase 3 — Frontend Blazor'
 description: 'Phase 3, frontend Blazor : partie 1 (v0.1.0) et partie 2, consultation et écrans restants de l''administration (v0.2.0), et leurs chantiers ; objet des parties suivantes (recherche avancée, documentation utilisateur, reste éventuel), première version livrable à leur issue, et leurs notes.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T18:44:22Z }
 ---
 
 # Phase 3 — Frontend Blazor
@@ -82,7 +82,7 @@ La liste des albums de la consultation (#603) est réalisée la première : elle
 | ~~#610~~ | Écran du paramétrage de l'application |
 | ~~#611~~ | Indicateurs de la mesure d'audience dans l'administration |
 | ~~#612~~ | Confirmation d'une acquisition et conversion d'une intention d'acquisition |
-| #613 | Éditions dont l'ISBN est à vérifier |
+| ~~#613~~ | Éditions dont l'ISBN est à vérifier |
 | #614 | Fusion de deux fiches d'un même type |
 
 ## Parties suivantes
