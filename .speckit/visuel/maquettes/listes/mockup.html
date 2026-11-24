@@ -500,11 +500,11 @@ const ENTITIES = {
     thumb: 'cover', mainHead: 'Édition',
     cols: [col('ISBN corrigé', '170px'), col('Acquisition', '130px'), col('Modifiée', '104px', { hideMd: true })],
     primary: ['Corriger', ICON.swap],
-    rowMenu: menuOf({ label: 'Modifier', icon: ICON.edit }, { label: 'Accepter', icon: ICON.check }, VIEW('Voir l\'album dans la consultation')),
+    rowMenu: menuOf({ label: 'Modifier', icon: ICON.edit }, { label: 'Accepter l\'erreur', icon: ICON.check }, VIEW('Voir l\'album dans la consultation')),
     rows: [
       ['Dargaud [2010] - ISBN 978-2-505-00865-3', 'Barracuda - Tome 1', ['978-2-505-00865-1', 'Achat, 2010', '3 sept. 2026'], { cover: true }],
       ['Casterman [2007] - ISBN 978-2-203-00120-7', 'Les Bijoux de la Castafiore (Tintin - T. 21)', ['978-2-203-00120-6', 'Offerte, 2008', 'hier'], { cover: true }],
-      ['Dupuis [1974] - ISBN 2-8001-0123-4', 'Buddy Longway - Tome 2', ['2-8001-0123-7', { badge: 'Intention', dashed: true }, '9 oct. 2026'], { cover: false }],
+      ['Dupuis [1974] - ISBN 2-8001-0123-4', 'Buddy Longway - Tome 2', ['2-8001-0123-7', { badge: 'Intention', dashed: true }, '9 oct. 2026'], { cover: false, intent: true }],
       ['Glénat [2001] - ISBN 2-7234-3451', 'Les Passagers du vent - Tome 1', [{ text: '—', muted: true }, 'Achat', '2 févr. 2026'], { cover: true, uncorrectable: true }],
       ['Lombard (Signé) - ISBN 2-8036-1234-X', 'Le Grand Pouvoir du Chninkel', ['2-8036-1234-8', 'Échange', '14 mai 2026'], { cover: false }]
     ]
@@ -645,7 +645,10 @@ class View extends Mockup {
     };
     // The columns of a row: its visual, its entry, the entity's own columns, then its actions.
     const thumbW = e.thumb ? '36px ' : '';
-    const act = e.primary[0].length > 9 ? '200px' : '150px';
+    const editLabel = (opts) => opts.intent ? 'Modifier l\'intention' : 'Modifier l\'édition';
+    // The actions take the room of the longest main action of a row.
+    const longest = Math.max(e.primary[0].length, ...e.rows.map(([, , , opts = {}]) => opts.uncorrectable ? editLabel(opts).length : 0));
+    const act = longest > 9 ? '200px' : '150px';
     const desk = thumbW + 'minmax(0,1fr) ' + e.cols.map((c) => c.width).join(' ') + ' ' + act;
     const mid = thumbW + 'minmax(0,1fr) ' + e.cols.filter((c) => !c.hideMd).map((c) => c.width).join(' ') + ' ' + act;
     const hue = (i) => 'hsl(' + ((i * 47 + 200) % 360) + ', 42%, 36%)';
@@ -692,9 +695,11 @@ class View extends Mockup {
       const menu = e.rowMenu.filter((m) => !(m.icon === ICON.swap && opts.noSwap))
         // An ISBN that no correction can suppose is modified by the main action, which its menu then leaves out.
         .filter((m) => !(opts.uncorrectable && m.icon === ICON.edit))
-        .map((m) => ({ ...m, label: m.icon === ICON.check && opts.accepted ? 'Ne plus accepter' : m.label }))
+        .map((m) => ({ ...m, label: m.icon === ICON.check && opts.accepted ? 'Ne plus accepter l\'erreur' : m.label }))
+        // What « Modifier » opens, named: the edition, or the intent that targets it.
+        .map((m) => ({ ...m, label: m.icon === ICON.edit && key === 'isbn' ? editLabel(opts) : m.label }))
         .map((m) => ({ ...m, label: m.icon === ICON.swap && opts.other ? opts.other : m.label, fg: m.del ? t.del : t.text, sep: Boolean(m.sep) }));
-      const primary = opts.uncorrectable ? ['Modifier', ICON.edit] : e.primary;
+      const primary = opts.uncorrectable ? [editLabel(opts), ICON.edit] : e.primary;
       return {
         ...thumb,
         id: i, title, sub,
