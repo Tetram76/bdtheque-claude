@@ -37,7 +37,7 @@ Le job `Report` procède en quatre temps :
 1. Il retrouve le ticket de suivi par ses deux étiquettes, `quality-audit` ou `security-audit` d'une part, et `harness` d'autre part, qu'il crée au besoin. Il ne se fie jamais au titre du ticket, que l'utilisateur peut changer.
 2. Il lit les entrées déjà connues, que la description du ticket porte entre des marqueurs HTML invisibles (`<!-- list -->` … `<!-- end -->`, et pour la qualité `<!-- critical -->` et `<!-- to-treat -->`). Une entrée actuelle absente de cette liste est une entrée nouvelle.
 3. Il réécrit la description en entier, avec la ligne `Dernier contrôle : <date>`. Cette réécriture fait disparaître la ligne `Dernière prise en compte` que l'agent ajoute après chaque traitement, ce qui signale qu'un nouveau traitement est dû ([Traitement du contrôle qualité à la reprise du travail](../../../.speckit/gestion-projet/depot/traitement-du-controle-qualite-a-la-reprise-du-travail.md), [Relevé des versions à la reprise du travail](../../../.speckit/gestion-projet/depot/releve-des-versions-a-la-reprise-du-travail.md)).
-4. Il crée le ticket s'il n'existe pas, le rouvre tant qu'une entrée reste, et le ferme quand il n'en reste plus. Le ticket qu'il crée reçoit, en plus de ses deux étiquettes, l'étiquette `agent`, que porte tout ticket créé sans demande de l'utilisateur ; le workflow crée lui-même ses trois étiquettes, avec leur description, si elles manquent.
+4. Il crée le ticket s'il n'existe pas, le rouvre tant qu'une entrée reste, et le ferme quand il n'en reste plus. Le ticket qu'il crée reçoit, en plus de ses deux étiquettes, l'étiquette `agent`, que porte tout ticket créé sans demande de l'utilisateur ; le workflow crée lui-même ses trois étiquettes, avec leur description, si elles manquent. Il reçoit aussi dès sa création le type `Task`, celui de tout ticket de suivi : le workflow le crée donc par l'API REST de GitHub, car `gh issue create` ne sait pas poser de type.
 
 Ces workflows n'échouent pas parce qu'une étape s'est mal passée, mais pour prévenir : GitHub notifie l'échec d'un workflow planifié à l'utilisateur qui l'a créé. Les conditions d'échec, propres à chaque contrôle, sont décrites plus bas. Chaque workflow ne s'exécute qu'une fois à la fois, grâce à un groupe de concurrence qui fait attendre une exécution plutôt que de l'annuler, et chacun peut aussi être lancé à la demande (`workflow_dispatch`).
 
@@ -58,7 +58,7 @@ Le job `Report` range chaque entrée dans l'une des trois sections de la descrip
 - La section **Prioritaire** reçoit tous les autres problèmes de SonarQube Cloud, problèmes ou points sensibles.
 - La section **Au fil de l'eau** reçoit le reste, c'est-à-dire les écarts de style et les mutants.
 
-Le contrôle échoue à chaque exécution tant qu'une entrée critique demeure, et une seule fois pour chaque entrée prioritaire nouvelle ; il n'échoue jamais pour une entrée au fil de l'eau. Lors de la toute première exécution, faute de ticket, aucune entrée n'est tenue pour nouvelle. Le ticket que crée ce contrôle reçoit le type `Task`.
+Le contrôle échoue à chaque exécution tant qu'une entrée critique demeure, et une seule fois pour chaque entrée prioritaire nouvelle ; il n'échoue jamais pour une entrée au fil de l'eau. Lors de la toute première exécution, faute de ticket, aucune entrée n'est tenue pour nouvelle.
 
 ## Le contrôle de sécurité quotidien
 
