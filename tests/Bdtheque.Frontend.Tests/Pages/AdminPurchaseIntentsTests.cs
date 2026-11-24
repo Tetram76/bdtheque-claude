@@ -171,13 +171,14 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         Assert.Equal(
             [
                 ("Éditions et intentions d'acquisition", AppPaths.AdminAlbumEditions(Blacksad.Id)),
-                ("Viser plutôt une édition…", AppPaths.AdminConvertPurchaseIntent(Blacksad.Id, id)),
+                ("Viser plutôt une édition…", AppPaths.AdminConvertPurchaseIntentToEdition(Blacksad.Id, id)),
                 ("Retirer l'intention…", $"{AppPaths.AdminPurchaseIntents}?q=Bla&delete={id}"),
             ],
             Items(rows[0]));
         // An intent on an edition turns into one on the album only when that edition is the only one of its album.
         Assert.DoesNotContain(Items(rows[1]), item => item.Text.StartsWith("Viser", StringComparison.Ordinal));
-        Assert.Contains(("Viser plutôt l'album…", AppPaths.AdminConvertPurchaseIntent(Longway.Id, OnOnlyEdition.Id)), Items(rows[2]));
+        // One on the only edition of its album, by a dialog of the list, the conversion deleting the edition.
+        Assert.Contains(("Viser plutôt l'album…", $"{AppPaths.AdminPurchaseIntents}?q=Bla&to-album={OnOnlyEdition.Id}"), Items(rows[2]));
     }
 
     [Theory]
@@ -259,6 +260,47 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
         Assert.Equal("Suppression impossible", Text(dialog.QuerySelector(".dialog-title")!));
         Assert.Equal("L'intention est encore désignée par :", Text(dialog.QuerySelector(".dialog-body > p")!));
         Assert.Equal(["1 recherche enregistrée : retirez l'intention de ses critères."], dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
+    }
+
+    [Fact]
+    public void ConversionToAlbum_ADialogThatSaysTheEditionTargetedIsDeleted_WithTheImpactOfTheRemoval_AndTheVersionOfTheAlbum()
+    {
+        var id = OnOnlyEdition.Id;
+        _api.Answers[$"/admin/albums/{Longway.Id}/purchase-intents/{id}/deletion-impact"] = new DeletionImpact(
+            [], [], [new ImpactCount(EntityKind.EditionVisual, 1)], [], "f1");
+
+        var dialog = Open($"to-album={id}", recorded: true).Find("dialog");
+
+        Assert.Equal(("Viser plutôt l'album ?", "Buddy Longway - T. 2 · Dupuis [1974]"),
+            (Text(dialog.QuerySelector(".dialog-title")!), Text(dialog.QuerySelector(".dialog-subject")!)));
+        Assert.Equal("La conversion est définitive : l'édition visée est supprimée.", Text(dialog.QuerySelector(".dialog-body > p")!));
+        Assert.Equal(["Suppression aussi de 1 visuel"], dialog.QuerySelectorAll(".deletion-impact li").Select(Text));
+        var form = dialog.QuerySelector("form[method='post']")!;
+        Assert.Equal("Viser l'album", Text(form.QuerySelector("button[type='submit']")!));
+        Assert.Equal(
+            [("Version", "43"), ("Fingerprint", "f1")],
+            form.QuerySelectorAll("input[type='hidden']").Where(input => input.GetAttribute("name") is "Version" or "Fingerprint")
+                .Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
+        Assert.Equal(["admin.purchase-intents.conversion", "admin.purchase-intents"], _audience.Functions);
+    }
+
+    [Fact]
+    public void ConversionToAlbum_OfAnIntentTheListDoesNotOfferToConvert_OpensNoDialog()
+    {
+        // Another edition of its album is targeted: an address written by hand opens nothing.
+        Assert.Empty(Open($"to-album={OnEdition.Id}").FindAll("dialog"));
+    }
+
+    [Fact]
+    public void ConversionToAlbum_RefusedWhileASavedSearchDesignatesTheEdition_SaysWhatToDo()
+    {
+        _api.Answers[$"/admin/albums/{Longway.Id}/purchase-intents/{OnOnlyEdition.Id}/deletion-impact"] = new DeletionImpact(
+            [new ImpactCount(EntityKind.SavedSearch, 1)], [], [], [], "f3");
+
+        var dialog = Open($"to-album={OnOnlyEdition.Id}").Find("dialog");
+
+        Assert.Equal("Conversion impossible", Text(dialog.QuerySelector(".dialog-title")!));
+        Assert.Equal("L'édition visée est encore désignée par :", Text(dialog.QuerySelector(".dialog-body > p")!));
     }
 
     [Fact]

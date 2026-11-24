@@ -340,6 +340,12 @@ public static class AudienceFunctions
     /// <summary>The removal of an intent, once confirmed and done.</summary>
     public static readonly AudienceFunction AdminPurchaseIntentsRemoved = new("admin.purchase-intents.removed", AudienceFunctionKind.Action);
 
+    /// <summary>The dialog of the conversion of an intent on an edition into one on the whole album, opened from its row.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentsConversion = new("admin.purchase-intents.conversion", AudienceFunctionKind.Action);
+
+    /// <summary>The conversion of an intent on an edition into one on the whole album, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentsConverted = new("admin.purchase-intents.converted", AudienceFunctionKind.Action);
+
     /// <summary>The list of the genres of the administration (visuel/listes/liste-par-liste.md).</summary>
     public static readonly AudienceFunction AdminGenres = new("admin.genres", AudienceFunctionKind.Screen);
 
@@ -423,6 +429,14 @@ public static class AudienceFunctions
 
     /// <summary>The removal of an intent, once confirmed and done.</summary>
     public static readonly AudienceFunction AdminAlbumEditionsIntentRemoved = new("admin.album-editions.intent-removed", AudienceFunctionKind.Action);
+
+    /// <summary>The dialog of the conversion of an intent on an edition into one on the whole album, opened from its row.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsIntentConversion =
+        new("admin.album-editions.intent-conversion", AudienceFunctionKind.Action);
+
+    /// <summary>The conversion of an intent on an edition into one on the whole album, once confirmed and done.</summary>
+    public static readonly AudienceFunction AdminAlbumEditionsIntentConverted =
+        new("admin.album-editions.intent-converted", AudienceFunctionKind.Action);
 
     /// <summary>A new intent on the whole album, set at once from the choice of the new intents.</summary>
     public static readonly AudienceFunction AdminAlbumEditionsAlbumIntentSet = new("admin.album-editions.album-intent-set", AudienceFunctionKind.Action);
@@ -511,6 +525,91 @@ public static class AudienceFunctions
         new("admin.purchase-intent-form.visual-deleted", AudienceFunctionKind.Action);
 
     /// <summary>
+    /// The confirmation of the purchase that realizes a purchase intent, with the intent it presents
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention).
+    /// </summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmation = new("admin.purchase-confirmation", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page.
+
+    /// <summary>The purchase confirmed, with the intent it realizes.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmed = new("admin.purchase-confirmation.confirmed", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the album of the intent modified meanwhile, with the intent.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationChanges = new("admin.purchase-confirmation.changes", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a publisher on the spot, from the confirmation of a purchase.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationPublisherCreated =
+        new("admin.purchase-confirmation.publisher-created", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a collection of the publisher on the spot, from the confirmation of a purchase.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationCollectionCreated =
+        new("admin.purchase-confirmation.collection-created", AudienceFunctionKind.Action);
+
+    /// <summary>A visual added to the edition acquired, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationVisualAdded =
+        new("admin.purchase-confirmation.visual-added", AudienceFunctionKind.Action);
+
+    /// <summary>The visuals of the edition acquired ordered anew, with the edition.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationVisualsArranged =
+        new("admin.purchase-confirmation.visuals-arranged", AudienceFunctionKind.Action);
+
+    /// <summary>The type of a visual of the edition acquired changed, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationVisualTypeChanged =
+        new("admin.purchase-confirmation.visual-type-changed", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of the edition acquired asked, its confirmation shown, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationVisualDeletion =
+        new("admin.purchase-confirmation.visual-deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of the edition acquired, once confirmed and done, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseConfirmationVisualDeleted =
+        new("admin.purchase-confirmation.visual-deleted", AudienceFunctionKind.Action);
+
+    /// <summary>
+    /// The conversion of a purchase intent on the whole album into an intent on a new edition, with the intent it presents
+    /// (fonctionnel/regles-metier/intention-d-acquisition.md).
+    /// </summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversion = new("admin.purchase-intent-conversion", AudienceFunctionKind.Screen);
+
+    // The actions of the form, interactive, each recorded in the visit of the prerendering of its page.
+
+    /// <summary>The intent converted into an intent on the new edition, with the intent converted.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConverted = new("admin.purchase-intent-conversion.converted", AudienceFunctionKind.Action);
+
+    /// <summary>The changes of the user shown, the album of the intent modified meanwhile, with the intent.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionChanges =
+        new("admin.purchase-intent-conversion.changes", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a publisher on the spot, from the conversion of an intent into one on an edition.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionPublisherCreated =
+        new("admin.purchase-intent-conversion.publisher-created", AudienceFunctionKind.Action);
+
+    /// <summary>The creation of a collection of the publisher on the spot, from the conversion of an intent into one on an edition.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionCollectionCreated =
+        new("admin.purchase-intent-conversion.collection-created", AudienceFunctionKind.Action);
+
+    /// <summary>A visual added to the new edition targeted, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionVisualAdded =
+        new("admin.purchase-intent-conversion.visual-added", AudienceFunctionKind.Action);
+
+    /// <summary>The visuals of the new edition targeted ordered anew.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionVisualsArranged =
+        new("admin.purchase-intent-conversion.visuals-arranged", AudienceFunctionKind.Action);
+
+    /// <summary>The type of a visual of the new edition targeted changed, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionVisualTypeChanged =
+        new("admin.purchase-intent-conversion.visual-type-changed", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of the new edition targeted asked, its confirmation shown, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionVisualDeletion =
+        new("admin.purchase-intent-conversion.visual-deletion", AudienceFunctionKind.Action);
+
+    /// <summary>The deletion of a visual of the new edition targeted, once confirmed and done, with the visual.</summary>
+    public static readonly AudienceFunction AdminPurchaseIntentConversionVisualDeleted =
+        new("admin.purchase-intent-conversion.visual-deleted", AudienceFunctionKind.Action);
+
+    /// <summary>
     /// The entry form of the setting of the application (modele-metier/parametrage-de-l-application.md), a single record, which
     /// it presents without designating it.
     /// </summary>
@@ -543,11 +642,12 @@ public static class AudienceFunctions
         AdminPublishersMerge, AdminPublisherForm, AdminNewPublisherForm, AdminPublisherCreated, AdminPublisherSaved, AdminPublisherChanges,
         AdminEditions, AdminEditionsSearch, AdminEditionsInitial, AdminEditionsFilter, AdminEditionsPage, AdminEditionsDeletion,
         AdminEditionsDeleted, AdminEditionsMerge, AdminPurchaseIntents, AdminPurchaseIntentsSearch, AdminPurchaseIntentsInitial, AdminPurchaseIntentsPage,
-        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminGenres, AdminGenresSearch, AdminGenresInitial, AdminGenresPage, AdminGenresDeletion,
+        AdminPurchaseIntentsRemoval, AdminPurchaseIntentsRemoved, AdminPurchaseIntentsConversion, AdminPurchaseIntentsConverted, AdminGenres, AdminGenresSearch, AdminGenresInitial, AdminGenresPage, AdminGenresDeletion,
         AdminGenresDeleted, AdminGenresMerge, AdminGenresEdit, AdminGenresNew, AdminGenreSaved, AdminGenreCreated, AdminUniverses,
         AdminUniversesSearch, AdminUniversesPage, AdminUniversesDeletion, AdminUniversesDeleted, AdminUniversesMerge, AdminUniversesEdit,
         AdminUniversesNew, AdminUniverseSaved, AdminUniverseCreated, AdminUniverseParentCreated, AdminAlbumEditions, AdminAlbumEditionsEditionDeletion,
-        AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved,
+        AdminAlbumEditionsEditionDeleted, AdminAlbumEditionsIntentRemoval, AdminAlbumEditionsIntentRemoved, AdminAlbumEditionsIntentConversion,
+        AdminAlbumEditionsIntentConverted,
         AdminAlbumEditionsAlbumIntentSet, AdminEditionForm, AdminNewEditionForm, AdminEditionCreated, AdminEditionSaved, AdminEditionChanges,
         AdminEditionPublisherCreated, AdminEditionCollectionCreated, AdminPurchaseIntentForm, AdminNewPurchaseIntentForm,
         AdminPurchaseIntentCreated, AdminPurchaseIntentSaved, AdminPurchaseIntentChanges, AdminPurchaseIntentPublisherCreated,
@@ -555,6 +655,13 @@ public static class AudienceFunctions
         AdminEditionVisualAdded, AdminEditionVisualsArranged, AdminEditionVisualTypeChanged, AdminEditionVisualDeletion, AdminEditionVisualDeleted,
         AdminPurchaseIntentVisualAdded, AdminPurchaseIntentVisualsArranged, AdminPurchaseIntentVisualTypeChanged, AdminPurchaseIntentVisualDeletion,
         AdminPurchaseIntentVisualDeleted,
+        AdminPurchaseConfirmation, AdminPurchaseConfirmed, AdminPurchaseConfirmationChanges, AdminPurchaseConfirmationPublisherCreated,
+        AdminPurchaseConfirmationCollectionCreated, AdminPurchaseConfirmationVisualAdded, AdminPurchaseConfirmationVisualsArranged,
+        AdminPurchaseConfirmationVisualTypeChanged, AdminPurchaseConfirmationVisualDeletion, AdminPurchaseConfirmationVisualDeleted,
+        AdminPurchaseIntentConversion, AdminPurchaseIntentConverted, AdminPurchaseIntentConversionChanges,
+        AdminPurchaseIntentConversionPublisherCreated, AdminPurchaseIntentConversionCollectionCreated, AdminPurchaseIntentConversionVisualAdded,
+        AdminPurchaseIntentConversionVisualsArranged, AdminPurchaseIntentConversionVisualTypeChanged, AdminPurchaseIntentConversionVisualDeletion,
+        AdminPurchaseIntentConversionVisualDeleted,
         AdminSettings, AdminSettingsSaved, AdminSettingsChanges,
     ];
 }

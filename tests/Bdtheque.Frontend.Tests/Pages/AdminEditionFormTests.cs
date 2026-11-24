@@ -138,6 +138,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         _api.Answers["/admin/visuals/limits"] = new VisualLimits(30 * 1024 * 1024, TimeSpan.FromHours(24));
         _api.Answers[$"/admin/albums/{AlbumId}/editions/new"] = NewOwned;
         _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents/new"] = NewIntent;
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents"] = new PurchaseIntentsForm(AlbumId, [new(IntentId, WishedId)], 12);
         _api.Answers[$"/admin/publishers/{Casterman}/collections"] = new List<PublisherCollectionForm>
         {
             new(FacSimile, Casterman, "Fac-similé", 3), new(Pastiches, Casterman, "Pastiches", 3),
@@ -617,6 +618,130 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(NewIntent.Edition with { PublicationYear = 2013 }, request.Edition);
         Assert.Equal(12u, request.AlbumVersion);
         Assert.Contains("admin.purchase-intent-form.created", _audience.Functions);
+    }
+
+    [Fact]
+    public void Confirmation_OfAnIntentOnAnEdition_PresentsTheWholeEdition_ItsCopyProposedAsForANewEdition()
+    {
+        var page = OpenConfirmation(IntentId);
+
+        Assert.Equal("Confirmer l'acquisition", page.Find("h1").TextContent.Trim());
+        // Asked from the list of the intents, to which its breadcrumb leads back, naming the intent it realizes.
+        Assert.Equal(
+            ["Administration", "Intentions d'acquisition", "Les Bijoux de la Castafiore (Tintin - T. 21) · Casterman (Fac-similé) [2013] - ISBN\u00a0978-2-203-03312-4"],
+            page.FindAll(".breadcrumb li").Select(item => item.TextContent.Trim()));
+        Assert.Equal(AppPaths.AdminPurchaseIntents, page.Find(".breadcrumb a[href$='acquisition-intents']").GetAttribute("href"));
+        Assert.Equal(["L'édition", "Fabrication", "L'exemplaire", "Valeur", "Les visuels"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
+        // The edition as targeted, its copy to enter, its condition the one proposed to any new edition (modele-metier/edition.md).
+        Assert.Equal("Fac-similé", page.Find("#edition-collection").TextContent.Trim());
+        Assert.Equal("", page.Find("#edition-mode").GetAttribute("value"));
+        Assert.Equal("Excellent", page.Find("#edition-condition").GetAttribute("value"));
+        Assert.Equal(["edition-publisher", "edition-mode"], page.FindAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
+        Assert.Equal("Intention d'acquisition posée le 08/10/2026 12:00, modifiée le 12/10/2026 12:00.", page.Find(".entry-form-dates").TextContent.Trim());
+        Assert.Equal("Acquisition à confirmer", page.Find(".save-bar-state-long").TextContent);
+        Assert.Equal("Confirmer l'acquisition", page.Find(".save-bar button[type=submit]").TextContent.Trim());
+        Assert.Equal(AppPaths.AdminPurchaseIntents, page.Find(".save-bar a").GetAttribute("href"));
+    }
+
+    [Fact]
+    public async Task Confirmation_OfAnIntentOnAnEdition_AcquiresItWithTheWholeForm_AndLeadsBackToTheIntents()
+    {
+        var page = OpenConfirmation(IntentId);
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Wished);
+
+        await page.ChangeAsync("#edition-mode", "Purchase");
+        await page.ChangeAsync("#edition-date", "2026-11-20");
+        await page.SubmitAsync("form");
+
+        var navigation = Services.GetRequiredService<NavigationManager>();
+        Assert.Equal(AppPaths.AdminPurchaseIntents, new Uri(navigation.Uri).AbsolutePath);
+        var (method, path, body) = Assert.Single(_api.Written);
+        Assert.Equal((HttpMethod.Post, $"/admin/albums/{AlbumId}/editions/{WishedId}/acquisition"), (method, path));
+        var request = body.Deserialize<AcquireEditionRequest>(JsonSerializerOptions.Web)!;
+        Assert.Equal(12u, request.AlbumVersion);
+        Assert.Equal(Wished.Content with
+        {
+            AcquisitionMode = AcquisitionMode.Purchase, AcquisitionDate = new DateOnly(2026, 11, 20), Condition = EditionCondition.Excellent,
+        }, request.Content);
+        Assert.Equal([], request.Visuals);
+        Assert.Contains("admin.purchase-confirmation.confirmed", _audience.Functions);
+    }
+
+    [Fact]
+    public async Task Confirmation_OfAnIntentOnTheWholeAlbum_CreatesItsFirstEdition_PreFilledAsAnyNewEdition()
+    {
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents"] = new PurchaseIntentsForm(AlbumId, [new(IntentId, null)], 12);
+        var page = OpenConfirmation(IntentId);
+
+        Assert.Equal("Confirmer l'acquisition", page.Find("h1").TextContent.Trim());
+        Assert.Equal("Les Bijoux de la Castafiore (Tintin - T. 21)", page.FindAll(".breadcrumb li")[^1].TextContent.Trim());
+        Assert.Contains("Pré-remplie d'après la série Tintin", page.Find(".edition-preset").TextContent);
+        Assert.Empty(page.FindAll(".entry-form-dates"));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned, HttpStatusCode.Created);
+
+        await page.ChangeAsync("#edition-mode", "Gift");
+        await page.SubmitAsync("form");
+
+        var (method, path, body) = Assert.Single(_api.Written);
+        Assert.Equal((HttpMethod.Post, $"/admin/albums/{AlbumId}/editions"), (method, path));
+        Assert.Equal(NewOwned.Content with { AcquisitionMode = AcquisitionMode.Gift }, body.Deserialize<CreateEditionRequest>(JsonSerializerOptions.Web)!.Content);
+        Assert.Equal(AppPaths.AdminPurchaseIntents, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+        Assert.Contains("admin.purchase-confirmation.confirmed", _audience.Functions);
+    }
+
+    [Fact]
+    public void Confirmation_OfAnIntentRealizedOrRemovedMeanwhile_SaysTheRecordWasDeleted()
+    {
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents"] = new PurchaseIntentsForm(AlbumId, [], 13);
+
+        var page = OpenConfirmation(IntentId);
+
+        Assert.Equal("functional", page.Find("[role=alert]").GetAttribute("data-error-category"));
+        Assert.Contains("Fiche supprimée entre-temps", page.Find("[role=alert]").TextContent);
+        Assert.Empty(page.FindAll("form"));
+    }
+
+    [Fact]
+    public void Confirmation_Screen_IsRecordedWithTheIntentItRealizes()
+    {
+        OpenConfirmation(IntentId);
+
+        Assert.Equal(new FunctionUse("admin.purchase-confirmation", new PresentedRecord(RecordType.PurchaseIntent, IntentId), null), FirstUse());
+    }
+
+    [Fact]
+    public async Task Conversion_OfAnIntentOnTheWholeAlbum_EntersANewEditionTargeted_AndConvertsTheIntent()
+    {
+        _api.Answers[$"/admin/albums/{AlbumId}/purchase-intents"] = new PurchaseIntentsForm(AlbumId, [new(IntentId, null)], 12);
+        var page = OpenConversion(IntentId);
+
+        Assert.Equal("Viser une édition plutôt que l'album", page.Find("h1").TextContent.Trim());
+        Assert.Equal(["Administration", "Albums", "Les Bijoux de la Castafiore (Tintin - T. 21)", "Viser une édition plutôt que l'album"],
+            page.FindAll(".breadcrumb li").Select(item => item.TextContent.Trim()));
+        Assert.Equal(["L'édition", "Fabrication", "Les visuels"], page.FindAll(".block-title").Select(title => title.TextContent.Trim()));
+        Assert.Equal("Viser cette édition", page.Find(".save-bar button[type=submit]").TextContent.Trim());
+        Assert.Equal(new FunctionUse("admin.purchase-intent-conversion", new PresentedRecord(RecordType.PurchaseIntent, IntentId), null), FirstUse());
+        _api.Write = (_, _, _) => FakeAdminApi.Json(new PurchaseIntentsForm(AlbumId, [new PurchaseIntentForm(IntentId, WishedId)], 13));
+
+        await page.ChangeAsync("#edition-year", "2013");
+        await page.SubmitAsync("form");
+
+        var (method, path, body) = Assert.Single(_api.Written);
+        Assert.Equal((HttpMethod.Post, $"/admin/albums/{AlbumId}/purchase-intents/{IntentId}/to-edition"), (method, path));
+        var request = body.Deserialize<ConvertPurchaseIntentToEditionRequest>(JsonSerializerOptions.Web)!;
+        Assert.Equal((NewIntent.Edition with { PublicationYear = 2013 }, 12u), (request.Edition, request.AlbumVersion));
+        Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+        Assert.Contains("admin.purchase-intent-conversion.converted", _audience.Functions);
+    }
+
+    [Fact]
+    public void Conversion_OfAnIntentOnAnEdition_IsNoConversionToAnEdition()
+    {
+        // Only an intent on the whole album turns into one on an edition: the address of another one leads to no form.
+        var page = OpenConversion(IntentId);
+
+        Assert.Equal("functional", page.Find("[role=alert]").GetAttribute("data-error-category"));
+        Assert.Empty(page.FindAll("form"));
     }
 
     [Theory]
@@ -1119,12 +1244,19 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
     private IRenderedComponent<AdminEditionForm> OpenNewIntent() => Open(AppPaths.AdminNewPurchaseIntent(AlbumId), null);
 
-    private IRenderedComponent<AdminEditionForm> Open(string path, Guid? id)
+    private IRenderedComponent<AdminEditionForm> OpenConfirmation(Guid intent) =>
+        Open(AppPaths.AdminConfirmPurchase(AlbumId, intent), null, intent);
+
+    private IRenderedComponent<AdminEditionForm> OpenConversion(Guid intent) =>
+        Open(AppPaths.AdminConvertPurchaseIntentToEdition(AlbumId, intent), null, intent);
+
+    private IRenderedComponent<AdminEditionForm> Open(string path, Guid? id, Guid? intent = null)
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(path);
         return Render<AdminEditionForm>(parameters => parameters
             .Add(p => p.AlbumId, AlbumId)
             .Add(p => p.Id, id)
+            .Add(p => p.IntentId, intent)
             .AddCascadingValue(_request.Context));
     }
 

@@ -6,10 +6,12 @@
    which sends the version of the record and the fingerprint of the impact shown
    (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md); a refused deletion says, one line per entity type
    blocking it, how many records and what to do, without any other button than « Fermer ». The page receives the form
-   (VersionName, FingerprintName) and deletes. *@
+   (VersionName, FingerprintName) and deletes. The conversion of an intent on an edition into one on the whole album, which
+   deletes the edition targeted, is confirmed by the same dialog, with the same impact
+   (choix-implementation/api/organisation-de-l-api.md, Écritures). *@
 @if (Impact is { BlockedBy.Count: > 0 })
 {
-    <Dialog Id="@Id" Title="@L["Refusal.Title"]" Subject="@Subject" Tone="DialogTone.Refusal" CloseHref="@CloseHref" CloseLabel="@L["Close"]">
+    <Dialog Id="@Id" Title="@L[$"{Kind}.Refusal.Title"]" Subject="@Subject" Tone="DialogTone.Refusal" CloseHref="@CloseHref" CloseLabel="@L["Close"]">
         <p>@RefusalLead</p>
         <RefusalLines Impact="Impact" Hint="RefusalHint" />
     </Dialog>
@@ -18,7 +20,7 @@ else if (Impact is not null)
 {
     <Dialog Id="@Id" Title="@Title" Subject="@Subject" Tone="DialogTone.Deletion" CloseHref="@CloseHref">
         <ChildContent>
-            <p>@L[Removal ? "Removal.Lead" : "Lead"]</p>
+            <p>@L[$"{Kind}.Lead"]</p>
             <DeletionImpactSummary Impact="Impact" />
             @if (Problem is not null)
             {
@@ -30,7 +32,7 @@ else if (Impact is not null)
                 <AntiforgeryToken />
                 <input type="hidden" name="@VersionName" value="@Version" />
                 <input type="hidden" name="@FingerprintName" value="@Impact.Fingerprint" />
-                <Button Type="submit" Variant="ButtonVariant.Delete" Label="@L["Confirm"]" />
+                <Button Type="submit" Variant="ButtonVariant.Delete" Label="@L[$"{Kind}.Confirm"]" />
             </form>
         </Actions>
     </Dialog>
@@ -68,12 +70,12 @@ else if (Problem is not null)
     public string CloseHref { get; set; } = null!;
 
     /// <summary>
-    /// Whether the record is removed rather than deleted (an intent of acquisition): the confirmation opens on the same sentence
-    /// for every list, the lines of the impact alone telling what goes with the record
-    /// (fonctionnel/regles-metier/suppression-des-entites.md).
+    /// Whether the record is deleted, removed (an intent of acquisition) or converted (an intent on an edition into one on the
+    /// whole album, which deletes the edition): the confirmation opens on the same sentence for every list, the lines of the
+    /// impact alone telling what goes with the record (fonctionnel/regles-metier/suppression-des-entites.md).
     /// </summary>
     [Parameter]
-    public bool Removal { get; set; }
+    public DeletionKind Kind { get; set; }
 
     /// <summary>What the record is still used by, before the lines of what blocks its deletion (« L'éditeur est encore utilisé par : »).</summary>
     [Parameter, EditorRequired]

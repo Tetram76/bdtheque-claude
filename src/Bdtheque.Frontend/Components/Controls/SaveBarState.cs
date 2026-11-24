@@ -14,4 +14,7 @@ public enum SaveBarState
 
     /// <summary>A record whose form waits for files still being sent, which it is not saved without.</summary>
     Sending,
+
+    /// <summary>A purchase whose form confirms it, not yet confirmed.</summary>
+    ToConfirm,
 }

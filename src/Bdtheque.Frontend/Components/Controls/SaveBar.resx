@@ -39,4 +39,10 @@
   <data name="Unsaved.Short" xml:space="preserve">
     <value>Non enregistré</value>
   </data>
+  <data name="ToConfirm.Long" xml:space="preserve">
+    <value>Acquisition à confirmer</value>
+  </data>
+  <data name="ToConfirm.Short" xml:space="preserve">
+    <value>À confirmer</value>
+  </data>
 </root>

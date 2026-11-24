@@ -12,17 +12,32 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Lead" xml:space="preserve">
+  <data name="Deletion.Lead" xml:space="preserve">
     <value>La suppression est définitive.</value>
   </data>
   <data name="Removal.Lead" xml:space="preserve">
     <value>Le retrait est définitif.</value>
   </data>
-  <data name="Confirm" xml:space="preserve">
+  <data name="ConversionToAlbum.Lead" xml:space="preserve">
+    <value>La conversion est définitive : l&apos;édition visée est supprimée.</value>
+  </data>
+  <data name="Deletion.Confirm" xml:space="preserve">
     <value>Supprimer définitivement</value>
   </data>
-  <data name="Refusal.Title" xml:space="preserve">
+  <data name="Removal.Confirm" xml:space="preserve">
+    <value>Supprimer définitivement</value>
+  </data>
+  <data name="ConversionToAlbum.Confirm" xml:space="preserve">
+    <value>Viser l&apos;album</value>
+  </data>
+  <data name="Deletion.Refusal.Title" xml:space="preserve">
     <value>Suppression impossible</value>
+  </data>
+  <data name="Removal.Refusal.Title" xml:space="preserve">
+    <value>Suppression impossible</value>
+  </data>
+  <data name="ConversionToAlbum.Refusal.Title" xml:space="preserve">
+    <value>Conversion impossible</value>
   </data>
   <data name="Close" xml:space="preserve">
     <value>Fermer</value>

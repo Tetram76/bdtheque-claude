@@ -117,4 +117,10 @@
   <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
     <value>retirez l'intention de leurs critères</value>
   </data>
+  <data name="Conversion.Title" xml:space="preserve">
+    <value>Viser plutôt l&apos;album ?</value>
+  </data>
+  <data name="Conversion.Refusal.Lead" xml:space="preserve">
+    <value>L&apos;édition visée est encore désignée par :</value>
+  </data>
 </root>

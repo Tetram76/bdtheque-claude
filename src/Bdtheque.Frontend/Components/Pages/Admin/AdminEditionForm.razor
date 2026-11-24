@@ -1,6 +1,8 @@
 @attribute [Route(AppPaths.AdminNewAlbumEditionRoute)]
 @attribute [Route(AppPaths.AdminNewPurchaseIntentRoute)]
 @attribute [Route(AppPaths.AdminEditEditionRoute)]
+@attribute [Route(AppPaths.AdminConfirmPurchaseRoute)]
+@attribute [Route(AppPaths.AdminConvertPurchaseIntentToEditionRoute)]
 @rendermode InteractiveServer
 @using Bdtheque.Contracts.Admin
 @using Bdtheque.Contracts.Catalog
@@ -23,8 +25,10 @@
    (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention). It applies no rule of the edition, which the
    domain alone holds (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md): the error of its saving
    says what to correct, and points to the field concerned. Neither deletion, nor confirmation of a purchase, nor removal of an
-   intent: those are the page of the editions of the album's. Its styles read the contracts of the base theme only
-   (visuel/saisie-edition/declinaison-par-theme.md). *@
+   intent: those are the page of the editions of the album's. The same form confirms a purchase, the copy entered then
+   (fonctionnel/regles-metier/intention-d-acquisition.md#réalisation-dune-intention): the edition an intent targets, or the first
+   edition of an album targeted as a whole; and converts an intent on the whole album into one on a new edition, entered as a
+   new intent. Its styles read the contracts of the base theme only (visuel/saisie-edition/declinaison-par-theme.md). *@
 <PageTitle>@PageTitle</PageTitle>
 <AudienceScreen Function="ScreenFunction" Record="ScreenRecord" />
 
@@ -32,14 +36,14 @@
 {
     @if (_loadProblem is not null)
     {
-        <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(L["Breadcrumb.Unknown"])])" />
+        <Breadcrumb Items="@([new(L["Administration"], AppPaths.AdminHome), ListOfThePage, new(L["Breadcrumb.Unknown"])])" />
         <ErrorMessage Problem="_loadProblem" />
     }
 }
 else
 {
     <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@Title" Subject="@Subject" State="State" Saving="_saving"
-               SaveLabel="@SaveLabel" CancelHref="@AppPaths.AdminAlbumEditions(Entry.AlbumId)" OnSave="SaveAsync" Problem="@SaveProblem"
+               SaveLabel="@SaveLabel" CancelHref="@ReturnHref" OnSave="SaveAsync" Problem="@SaveProblem"
                Dates="@Dates">
         <Status>
             <p class="edition-album">@L["OfTheAlbum"] <a href="@AppPaths.AdminEditAlbum(Entry.AlbumId)">@AlbumLabel</a></p>
@@ -210,6 +214,10 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>The intent whose purchase the form confirms, or which it converts into one on a new edition.</summary>
+    [Parameter]
+    public Guid? IntentId { get; set; }
+
     /// <summary>The edition as the form holds it, read once, by the prerendering.</summary>
     [PersistentState]
     public EditionEntry? Entry { get; set; }
@@ -240,27 +248,48 @@ else
     [PersistentState]
     public VisualLimits? Limits { get; set; }
 
-    // Whether the page creates a purchase intent on a new edition, which it tells by its address.
-    private bool IsNewPurchaseIntent => Id is null && AppPaths.IsNewPurchaseIntent(new Uri(Navigation.Uri).AbsolutePath);
+    // What the page does, which its address tells: an intent of its own for a confirmation or a conversion, the edition
+    // for a modification; a new edition, owned or targeted by a new intent, without either.
+    private EditionPage Purpose
+    {
+        get
+        {
+            var path = new Uri(Navigation.Uri).AbsolutePath;
+            return (Id, IntentId) switch
+            {
+                (_, { }) when AppPaths.IsPurchaseConfirmation(path) => EditionPage.Confirmation,
+                (_, { }) => EditionPage.Conversion,
+                (null, _) when AppPaths.IsNewPurchaseIntent(path) => EditionPage.NewPurchaseIntent,
+                (null, _) => EditionPage.NewEdition,
+                _ => EditionPage.Edition,
+            };
+        }
+    }
+
+    private bool IsNewPurchaseIntent => Purpose is EditionPage.NewPurchaseIntent or EditionPage.Conversion;
 
     private bool IsPurchaseIntent => Entry?.IsPurchaseIntent ?? IsNewPurchaseIntent;
 
     private bool IsPurchase => Entry!.AcquisitionMode == AcquisitionMode.Purchase;
 
-    private AudienceFunction ScreenFunction => (Id, IsPurchaseIntent) switch
+    private AudienceFunction ScreenFunction => (Purpose, IsPurchaseIntent) switch
     {
-        (null, true) => AudienceFunctions.AdminNewPurchaseIntentForm,
-        (null, false) => AudienceFunctions.AdminNewEditionForm,
+        (EditionPage.Confirmation, _) => AudienceFunctions.AdminPurchaseConfirmation,
+        (EditionPage.Conversion, _) => AudienceFunctions.AdminPurchaseIntentConversion,
+        (EditionPage.NewPurchaseIntent, _) => AudienceFunctions.AdminNewPurchaseIntentForm,
+        (EditionPage.NewEdition, _) => AudienceFunctions.AdminNewEditionForm,
         (_, true) => AudienceFunctions.AdminPurchaseIntentForm,
         _ => AudienceFunctions.AdminEditionForm,
     };
 
-    // A new edition presents the album it is added to; an intent, the intent itself; an edition, the edition.
-    private PresentedRecord ScreenRecord => (Id, Entry?.PurchaseIntentId) switch
+    // A confirmation or a conversion presents the intent it realizes or converts; a new edition, the album it is added to; an
+    // intent, the intent itself; an edition, the edition.
+    private PresentedRecord ScreenRecord => (IntentId, Id, Entry?.PurchaseIntentId) switch
     {
-        (null, _) => new PresentedRecord(RecordType.Album, AlbumId),
-        (_, { } intent) => new PresentedRecord(RecordType.PurchaseIntent, intent),
-        ({ } id, _) => new PresentedRecord(RecordType.Edition, id),
+        ({ } realized, _, _) => new PresentedRecord(RecordType.PurchaseIntent, realized),
+        (_, null, _) => new PresentedRecord(RecordType.Album, AlbumId),
+        (_, _, { } intent) => new PresentedRecord(RecordType.PurchaseIntent, intent),
+        (_, { } id, _) => new PresentedRecord(RecordType.Edition, id),
     };
 
     // The label of the edition as entered (fonctionnel/presentation/libelle-d-une-edition.md), from a publisher to choose.
@@ -278,43 +307,72 @@ else
 
     private string AlbumLabel => Labels.Album(Entry!.Album, AlbumFormat);
 
-    private string Title => (Entry!.Id, Entry.IsPurchaseIntent) switch
+    private string Title => (Purpose, Entry!.Id, Entry.IsPurchaseIntent) switch
     {
-        (null, true) => L["New.PurchaseIntent"],
-        (null, false) => L["New.Edition"],
-        (_, true) => L["Edit.PurchaseIntent"],
+        (EditionPage.Confirmation, _, _) => L["Confirm.Title"],
+        (EditionPage.Conversion, _, _) => L["Convert.Title"],
+        (_, null, true) => L["New.PurchaseIntent"],
+        (_, null, false) => L["New.Edition"],
+        (_, _, true) => L["Edit.PurchaseIntent"],
         _ => L["Edit.Edition"],
     };
 
     private string PageTitle => Entry switch
     {
         null => L["Breadcrumb.Unknown"],
-        { Id: null } => Title,
+        { Id: null } when Purpose is not EditionPage.Confirmation => Title,
         _ => L["PageTitle", Title, Subject],
     };
 
-    private string SaveLabel => (Entry!.Id, Entry.IsPurchaseIntent) switch
+    private string SaveLabel => (Purpose, Entry!.Id, Entry.IsPurchaseIntent) switch
     {
-        (null, true) => L["Create.PurchaseIntent"],
-        (null, false) => L["Create.Edition"],
+        (EditionPage.Confirmation, _, _) => L["Confirm.Save"],
+        (EditionPage.Conversion, _, _) => L["Convert.Save"],
+        (_, null, true) => L["Create.PurchaseIntent"],
+        (_, null, false) => L["Create.Edition"],
         _ => L["Save"],
     };
 
-    // The page of the editions of the album, to which the album of the breadcrumb leads, as every breadcrumb of the
-    // administration leads back to a list; then the edition by its full label, ISBN included (visuel/saisie-edition/contenu.md,
-    // #470).
-    private IReadOnlyList<BreadcrumbItem> Breadcrumb =>
-    [
-        new(L["Administration"], AppPaths.AdminHome),
-        new(L["Albums"], AppPaths.AdminAlbums),
-        new(AlbumLabel, AppPaths.AdminAlbumEditions(Entry!.AlbumId)),
-        new(Entry.Id is null ? Title : Subject),
-    ];
+    // The list the page comes from, and leads back to, as every breadcrumb of the administration leads back to a list: the
+    // intents for the confirmation of a purchase, asked from their list (visuel/listes/saisie-selon-l-entite.md); the albums
+    // otherwise, by the page of the editions of the album.
+    private BreadcrumbItem ListOfThePage => Purpose is EditionPage.Confirmation
+        ? new(L["PurchaseIntents"], AppPaths.AdminPurchaseIntents)
+        : new(L["Albums"], AppPaths.AdminAlbums);
 
-    private SaveBarState State => Entry!.Id switch
+    // Where a record saved, or cancelled, leads (visuel/saisie-album/contenu.md, decision of the user): the list of the intents
+    // for a purchase confirmed, where the next one is; the page of the editions of the album otherwise, to which the breadcrumb
+    // leads.
+    private string ReturnHref => Purpose is EditionPage.Confirmation ? AppPaths.AdminPurchaseIntents : AppPaths.AdminAlbumEditions(AlbumId);
+
+    // A confirmation names the intent it realizes (its album, and the edition it targets) after the list of the intents; any
+    // other page, the album, by the page of its editions, then the edition by its full label, ISBN included
+    // (visuel/saisie-edition/contenu.md, #470), or what the page does for a new one.
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => Purpose is EditionPage.Confirmation
+        ?
+        [
+            new(L["Administration"], AppPaths.AdminHome),
+            ListOfThePage,
+            new(Entry!.Id is null ? AlbumLabel : Labels.PurchaseIntent(Entry.Album, ReadSummary(), AlbumFormat)),
+        ]
+        :
+        [
+            new(L["Administration"], AppPaths.AdminHome),
+            ListOfThePage,
+            new(AlbumLabel, AppPaths.AdminAlbumEditions(Entry!.AlbumId)),
+            new(Entry.Id is null ? Title : Subject),
+        ];
+
+    // The edition as it was read, which the intent targets: the breadcrumb names the intent, not what is being entered.
+    private EditionSummary ReadSummary() => new(
+        ReadEntry!.Id ?? Guid.Empty, ReadEntry.Publisher?.Id ?? Guid.Empty, ReadEntry.Publisher?.Label ?? "", ReadEntry.PublisherCollection?.Id,
+        ReadEntry.PublisherCollection?.Label, ReadEntry.PublicationYear, ReadEntry.Isbn);
+
+    private SaveBarState State => (Purpose, Entry!.Id) switch
     {
         _ when _sendingVisuals => SaveBarState.Sending,
-        null => SaveBarState.New,
+        (EditionPage.Confirmation, _) => SaveBarState.ToConfirm,
+        (_, null) => SaveBarState.New,
         _ when Entry.Fingerprint() == _savedFingerprint => SaveBarState.Unchanged,
         _ => SaveBarState.Unsaved,
     };
@@ -337,13 +395,7 @@ else
             try
             {
                 var format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
-                var entry = Id switch
-                {
-                    { } id => EditionEntry.Of(await Api.GetAsync<EditionForm>($"/admin/albums/{AlbumId}/editions/{id}")),
-                    _ when IsNewPurchaseIntent => EditionEntry.NewPurchaseIntent(
-                        await Api.GetAsync<NewPurchaseIntentForm>($"/admin/albums/{AlbumId}/purchase-intents/new")),
-                    _ => EditionEntry.New(await Api.GetAsync<NewEditionForm>($"/admin/albums/{AlbumId}/editions/new")),
-                };
+                var entry = await ReadEntryAsync();
                 // Read after the edition: a write between both readings leaves the form the older version of the album, which its
                 // saving sends, refused as a conflict rather than writing over what it did not read.
                 if (entry.Id is { } edition)
@@ -367,6 +419,39 @@ else
 
         _savedFingerprint = ReadEntry!.Fingerprint();
     }
+
+    // The form as the page enters it, read from the API.
+    private async Task<EditionEntry> ReadEntryAsync()
+    {
+        switch (Purpose)
+        {
+            case EditionPage.Confirmation:
+                // The edition the intent targets, its copy proposed as that of any new edition; or, for an intent on the whole
+                // album, its first edition, new.
+                var proposed = await Api.GetAsync<NewEditionForm>($"/admin/albums/{AlbumId}/editions/new");
+                return await IntentAsync() is { EditionId: { } targeted }
+                    ? EditionEntry.ToAcquire(await Api.GetAsync<EditionForm>($"/admin/albums/{AlbumId}/editions/{targeted}"), proposed.Content)
+                    : EditionEntry.New(proposed);
+            case EditionPage.Conversion:
+                // Only an intent on the whole album converts into one on an edition (fonctionnel/regles-metier/intention-d-acquisition.md).
+                if (await IntentAsync() is { EditionId: not null })
+                    throw new ApiProblemException(IntentGone);
+                return EditionEntry.NewPurchaseIntent(await Api.GetAsync<NewPurchaseIntentForm>($"/admin/albums/{AlbumId}/purchase-intents/new"));
+            case EditionPage.NewPurchaseIntent:
+                return EditionEntry.NewPurchaseIntent(await Api.GetAsync<NewPurchaseIntentForm>($"/admin/albums/{AlbumId}/purchase-intents/new"));
+            case EditionPage.NewEdition:
+                return EditionEntry.New(await Api.GetAsync<NewEditionForm>($"/admin/albums/{AlbumId}/editions/new"));
+            default:
+                return EditionEntry.Of(await Api.GetAsync<EditionForm>($"/admin/albums/{AlbumId}/editions/{Id}"));
+        }
+    }
+
+    // The intent of the page among those of its album; one realized or removed meanwhile is a record deleted meanwhile.
+    private async Task<PurchaseIntentForm> IntentAsync() =>
+        (await Api.GetAsync<PurchaseIntentsForm>($"/admin/albums/{AlbumId}/purchase-intents")).Intents.FirstOrDefault(intent => intent.Id == IntentId)
+        ?? throw new ApiProblemException(IntentGone);
+
+    private static readonly ApiProblem IntentGone = new(ProblemCategory.Functional, StatusCodes.Status404NotFound, null, null);
 
     // A list of the values of an enumeration, « — » leaving the data empty, sized to its longest choice.
     private RenderFragment EnumList<TEnum>(string id, string label, Func<TEnum?> get, Action<TEnum?> set) where TEnum : struct, Enum =>
@@ -438,9 +523,13 @@ else
         _publisherCreation = null;
         Entry!.NewPublishers.Add(publisher);
         await ChoosePublisherAsync(new RecordOption(publisher.Key, publisher.Name, null));
-        await Recorder.RecordActionAsync(Entry.IsPurchaseIntent
-            ? AudienceFunctions.AdminPurchaseIntentPublisherCreated
-            : AudienceFunctions.AdminEditionPublisherCreated);
+        await Recorder.RecordActionAsync(Purpose switch
+        {
+            EditionPage.Confirmation => AudienceFunctions.AdminPurchaseConfirmationPublisherCreated,
+            EditionPage.Conversion => AudienceFunctions.AdminPurchaseIntentConversionPublisherCreated,
+            _ when Entry.IsPurchaseIntent => AudienceFunctions.AdminPurchaseIntentPublisherCreated,
+            _ => AudienceFunctions.AdminEditionPublisherCreated,
+        });
     }
 
     // Suggested again once replaced, rather than created twice, as the search does not know them.
@@ -471,9 +560,13 @@ else
         _collectionCreation = false;
         Entry!.NewPublisherCollections.Add(collection);
         Entry.PublisherCollection = new RecordOption(collection.Key, collection.Name, null);
-        await Recorder.RecordActionAsync(Entry.IsPurchaseIntent
-            ? AudienceFunctions.AdminPurchaseIntentCollectionCreated
-            : AudienceFunctions.AdminEditionCollectionCreated);
+        await Recorder.RecordActionAsync(Purpose switch
+        {
+            EditionPage.Confirmation => AudienceFunctions.AdminPurchaseConfirmationCollectionCreated,
+            EditionPage.Conversion => AudienceFunctions.AdminPurchaseIntentConversionCollectionCreated,
+            _ when Entry.IsPurchaseIntent => AudienceFunctions.AdminPurchaseIntentCollectionCreated,
+            _ => AudienceFunctions.AdminEditionCollectionCreated,
+        });
     }
 
     private async Task SaveAsync()
@@ -486,7 +579,18 @@ else
         _sentRecords = entry.Added();
         try
         {
-            if (entry.Id is { } id)
+            if (Purpose is EditionPage.Confirmation)
+            {
+                await ConfirmAsync(entry);
+            }
+            else if (Purpose is EditionPage.Conversion)
+            {
+                await Api.PostAsync<ConvertPurchaseIntentToEditionRequest, PurchaseIntentsForm>(
+                    $"/admin/albums/{entry.AlbumId}/purchase-intents/{IntentId}/to-edition",
+                    new ConvertPurchaseIntentToEditionRequest(entry.ToPurchaseIntentContent(), entry.AlbumVersion, entry.VisualEntries()));
+                await Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentConverted, $"purchase-intent={IntentId}");
+            }
+            else if (entry.Id is { } id)
             {
                 await Api.PutAsync<UpdateEditionRequest, EditionForm>(
                     $"/admin/albums/{entry.AlbumId}/editions/{id}", new UpdateEditionRequest(entry.ToContent(), entry.AlbumVersion, entry.VisualEntries()));
@@ -508,9 +612,7 @@ else
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminEditionCreated, $"edition={created.Id}");
             }
 
-            // A record saved, created or modified, leads back to its list (visuel/saisie-album/contenu.md, decision of the user):
-            // for an edition, the page of the editions of its album, to which its breadcrumb leads.
-            Navigation.NavigateTo(AppPaths.AdminAlbumEditions(entry.AlbumId));
+            Navigation.NavigateTo(ReturnHref);
         }
         catch (ApiProblemException exception)
         {
@@ -521,6 +623,20 @@ else
         {
             _saving = false;
         }
+    }
+
+    // The acquisition of the edition the intent targets, its whole form applied; or, for an intent on the whole album, the creation
+    // of its first edition, owned, whose acquisition realizes the intent (choix-implementation/api/organisation-de-l-api.md).
+    private async Task ConfirmAsync(EditionEntry entry)
+    {
+        var request = entry.Id is { } targeted
+            ? Api.PostAsync<AcquireEditionRequest, EditionForm>(
+                $"/admin/albums/{entry.AlbumId}/editions/{targeted}/acquisition",
+                new AcquireEditionRequest(entry.ToContent(), entry.AlbumVersion, entry.VisualEntries()))
+            : Api.PostAsync<CreateEditionRequest, EditionForm>(
+                $"/admin/albums/{entry.AlbumId}/editions", new CreateEditionRequest(entry.ToContent(), entry.AlbumVersion, entry.VisualEntries()));
+        await request;
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseConfirmed, $"purchase-intent={IntentId}");
     }
 
     // Once the error of a saving is rendered, what is to correct is brought into view.
@@ -540,6 +656,10 @@ else
         var entry = Entry!;
         await (entry switch
         {
+            _ when Purpose is EditionPage.Confirmation =>
+                Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseConfirmationChanges, $"purchase-intent={IntentId}"),
+            _ when Purpose is EditionPage.Conversion =>
+                Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentConversionChanges, $"purchase-intent={IntentId}"),
             { IsPurchaseIntent: true, PurchaseIntentId: { } intent } =>
                 Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentChanges, $"purchase-intent={intent}"),
             { IsPurchaseIntent: true } => Recorder.RecordActionAsync(AudienceFunctions.AdminPurchaseIntentChanges, $"album={entry.AlbumId}"),
@@ -549,13 +669,31 @@ else
     }
 
 
-    private EditionVisualsEditor.VisualFunctions VisualFunctions => Entry!.IsPurchaseIntent
-        ? new(AudienceFunctions.AdminPurchaseIntentVisualAdded, AudienceFunctions.AdminPurchaseIntentVisualsArranged,
+    private EditionVisualsEditor.VisualFunctions VisualFunctions => Purpose switch
+    {
+        EditionPage.Confirmation => new(AudienceFunctions.AdminPurchaseConfirmationVisualAdded, AudienceFunctions.AdminPurchaseConfirmationVisualsArranged,
+            AudienceFunctions.AdminPurchaseConfirmationVisualTypeChanged, AudienceFunctions.AdminPurchaseConfirmationVisualDeletion,
+            AudienceFunctions.AdminPurchaseConfirmationVisualDeleted),
+        EditionPage.Conversion => new(AudienceFunctions.AdminPurchaseIntentConversionVisualAdded,
+            AudienceFunctions.AdminPurchaseIntentConversionVisualsArranged, AudienceFunctions.AdminPurchaseIntentConversionVisualTypeChanged,
+            AudienceFunctions.AdminPurchaseIntentConversionVisualDeletion, AudienceFunctions.AdminPurchaseIntentConversionVisualDeleted),
+        _ when Entry!.IsPurchaseIntent => new(AudienceFunctions.AdminPurchaseIntentVisualAdded, AudienceFunctions.AdminPurchaseIntentVisualsArranged,
             AudienceFunctions.AdminPurchaseIntentVisualTypeChanged, AudienceFunctions.AdminPurchaseIntentVisualDeletion,
-            AudienceFunctions.AdminPurchaseIntentVisualDeleted)
-        : new(AudienceFunctions.AdminEditionVisualAdded, AudienceFunctions.AdminEditionVisualsArranged,
+            AudienceFunctions.AdminPurchaseIntentVisualDeleted),
+        _ => new(AudienceFunctions.AdminEditionVisualAdded, AudienceFunctions.AdminEditionVisualsArranged,
             AudienceFunctions.AdminEditionVisualTypeChanged, AudienceFunctions.AdminEditionVisualDeletion,
-            AudienceFunctions.AdminEditionVisualDeleted);
+            AudienceFunctions.AdminEditionVisualDeleted),
+    };
+
+    // What the page does with the edition it enters.
+    private enum EditionPage
+    {
+        Edition,
+        NewEdition,
+        NewPurchaseIntent,
+        Confirmation,
+        Conversion,
+    }
 
     // The record as it is now, the changes of the form left behind: a navigation that loads the page anew, the same page, which
     // reads anew the edition or, for a new one, the album and what the series pre-fills.

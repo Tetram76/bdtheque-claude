@@ -270,4 +270,19 @@
   <data name="Changes.Unchecked" xml:space="preserve">
     <value>Décochée</value>
   </data>
+  <data name="PurchaseIntents" xml:space="preserve">
+    <value>Intentions d&apos;acquisition</value>
+  </data>
+  <data name="Confirm.Title" xml:space="preserve">
+    <value>Confirmer l&apos;acquisition</value>
+  </data>
+  <data name="Confirm.Save" xml:space="preserve">
+    <value>Confirmer l&apos;acquisition</value>
+  </data>
+  <data name="Convert.Title" xml:space="preserve">
+    <value>Viser une édition plutôt que l&apos;album</value>
+  </data>
+  <data name="Convert.Save" xml:space="preserve">
+    <value>Viser cette édition</value>
+  </data>
 </root>
