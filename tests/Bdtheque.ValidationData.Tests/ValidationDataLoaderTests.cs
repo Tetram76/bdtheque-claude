@@ -61,6 +61,18 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     }
 
     [Fact]
+    public async Task CatalogSeriesList_PresentsEachPossession_AndASeriesOnlyWishedForWithTheCoverOfItsEdition()
+    {
+        foreach (var state in Enum.GetValues<Bdtheque.Contracts.Admin.AlbumCollectionState>())
+            Assert.NotEmpty((await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/series?state={state}"))!.Series.Items);
+
+        // Nothing owned, one album wished for in an edition with a cover: « Intention », its pile showing that cover.
+        var search = $"q={Uri.EscapeDataString(ValidationDataLoader.IntendedSeriesTitle)}";
+        var intended = Assert.Single((await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/series?{search}&state=PurchaseIntent"))!.Series.Items);
+        Assert.NotNull(intended.Overview.FirstVolumeCovers[0]);
+    }
+
+    [Fact]
     public async Task AlbumList_CountsMoreThanAPage_AndAnAlbumWhoseDeletionASavedSearchBlocks()
     {
         var list = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.AlbumAdminList>("/admin/albums");
@@ -260,10 +272,11 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
     public async Task NavigationEntries_OutsideTheLetters_AndUnderAnArticle_AreCovered(string list, string entry)
     {
         var path = $"/catalog/{list}?entry={Uri.EscapeDataString(entry)}";
-        // The list of the albums carries its page with the records of its filters (AlbumCatalogList).
+        // The lists of the albums and of the series carry their page with the records of their filters (AlbumCatalogList,
+        // SeriesCatalogList).
         var items = list == "albums"
             ? (await _client.GetFromJsonAsync<AlbumCatalogList>(path))!.Albums.Items.Cast<object>()
-            : (await _client.GetFromJsonAsync<Page<object>>(path))!.Items;
+            : (await _client.GetFromJsonAsync<SeriesCatalogList>(path))!.Series.Items;
 
         Assert.NotEmpty(items);
     }
