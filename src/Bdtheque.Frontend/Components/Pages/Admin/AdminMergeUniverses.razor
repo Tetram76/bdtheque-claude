@@ -123,8 +123,12 @@ else
             .Count(c => c is null);
 
     // The parent that would make the universe that remains its own ancestor, which the API says.
-    private MergeSide? ImpossibleParent =>
-        !Preview!.First.ParentChoosable ? MergeSide.First : !Preview.Second.ParentChoosable ? MergeSide.Second : null;
+    private MergeSide? ImpossibleParent => (Preview!.First.ParentChoosable, Preview.Second.ParentChoosable) switch
+    {
+        (false, _) => MergeSide.First,
+        (_, false) => MergeSide.Second,
+        _ => null,
+    };
 
     // The name the universe keeps, that the confirmation names it by.
     private string KeptName => Choices!.Name == MergeSide.Second ? Preview!.Second.Name : Preview!.First.Name;
@@ -185,10 +189,18 @@ else
     private string PairPath(UniverseMergePair pair) => string.Join(L["Separator"].Value, pair.Path);
 
     // What the universe becomes: where it is classed, once its name and its parent are chosen.
-    private RenderFragment? Result => Choices!.Name is null || Choices.Parent is null ? null
-        : (Choices.Parent == MergeSide.Second ? Preview!.Second.Parent : Preview!.First.Parent) is { } parent
-            ? @<span>@L["Result.Classed"] : <strong>@($"{Path(parent)}{L["Separator"]}{KeptName}")</strong></span>
-            : @<span>@L["Result.Classed"] : <strong>@L["Result.Top", KeptName]</strong></span>;
+    private RenderFragment? Result
+    {
+        get
+        {
+            if (Choices!.Name is null || Choices.Parent is null)
+                return null;
+            var parent = Choices.Parent == MergeSide.Second ? Preview!.Second.Parent : Preview!.First.Parent;
+            if (parent is null)
+                return @<span>@L["Result.Classed"] : <strong>@L["Result.Top", KeptName]</strong></span>;
+            return @<span>@L["Result.Classed"] : <strong>@($"{Path(parent)}{L["Separator"]}{KeptName}")</strong></span>;
+        }
+    }
 
     private MergeRecordHead Head(UniverseMergeRecord record)
     {
