@@ -23,3 +23,9 @@
     content: "− ";
     color: var(--color-alert);
 }
+
+.merge-removals-title ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+}

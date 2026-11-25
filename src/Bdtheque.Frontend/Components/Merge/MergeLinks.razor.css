@@ -25,7 +25,16 @@
     margin: 0;
 }
 
-/* A record the merge deletes besides the other one: said apart, in the alert color, never counted with what passes. */
-.merge-links-withdrawn {
-    color: var(--color-alert);
+/* A record the merge deletes besides the other one: said apart, after the alert mark, never counted with what passes; in the
+   color of the text, the alert color not being read on the colored surface a theme may give the block. */
+.merge-links .merge-links-withdrawn {
+    flex-wrap: nowrap;
+    align-items: baseline;
+}
+
+.merge-links-withdrawn ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    align-self: center;
 }

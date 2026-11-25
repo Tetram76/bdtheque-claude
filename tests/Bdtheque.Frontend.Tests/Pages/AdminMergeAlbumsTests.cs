@@ -134,7 +134,7 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
     public async Task Result_TheLabelAndTheSortKeyTheDataChosenGive()
     {
         var page = Open();
-        Assert.DoesNotContain("Affiché", page.Find(".merge-data-result").TextContent);
+        Assert.Empty(page.FindAll(".merge-data-result"));
 
         await page.ChangeAsync("input[name=merge-title][value=First]", true);
         await page.ChangeAsync("input[name=merge-type][value=First]", true);

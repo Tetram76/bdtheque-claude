@@ -358,7 +358,7 @@ else
 
     // What the data chosen make of the album, as its entry form says it: its label and its sort key, or the failure to compute
     // the sort key; nothing of a part left to choose.
-    private RenderFragment? Result => @<span class="merge-album-result">
+    private RenderFragment? Result => !KeptLabelChosen && _sortKey is null && _sortKeyProblem is null ? null : @<span class="merge-album-result">
         @if (KeptLabelChosen)
         {
             <span>@L["Result.Label"] : <strong><LabelText Text="@KeptLabel" /></strong></span>
@@ -385,8 +385,10 @@ else
         if (!detailed)
             return new MergeRecordHead(name, null, null);
         var side = record == Preview!.First ? MergeSide.First : MergeSide.Second;
+        // The intent the merge withdraws is linked to the album all the same, which its head says.
+        var withdrawn = Preview.WithdrawnPurchaseIntents.Contains(side) ? 1 : 0;
         var parts = Preview.Links
-            .Select(l => (l.Kind, Count: side == MergeSide.First ? l.First : l.Second))
+            .Select(l => (l.Kind, Count: (side == MergeSide.First ? l.First : l.Second) + (l.Kind == EntityKind.PurchaseIntent ? withdrawn : 0)))
             .Where(l => l.Count > 0)
             .Select(l => L[$"Head.{l.Kind}.{(l.Count == 1 ? "One" : "Other")}", l.Count].Value)
             .ToList();
