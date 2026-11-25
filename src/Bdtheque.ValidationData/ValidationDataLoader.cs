@@ -314,6 +314,16 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.AlbumAsync(OneShot("Les Phares jumeaux", 2023, 5, [scienceFiction, sf], [],
             [Credit(arnaud, ContributionRole.Scenarist), Credit(arnautTwin, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));
         await data.AlbumAsync(OneShot("Orbite basse", 2024, 2, [sf], [], [Credit(arnautTwin, ContributionRole.Scenarist)]));
+        // A series saved again under its title in words, to merge with « 13 Lunes »: the same scenarist, a colourist instead of
+        // its illustrator, another publisher with its collection, another format and status, a genre and a universe of its own,
+        // a summary, and the next volume, which passes to the series that remains.
+        var moonsTwin = await data.SeriesAsync(Series(TwinSeriesTitle, SeriesStatus.InProgress,
+            Template(lagoon.Id, lagoon.Collections[1], EditionFormat.Large), [scienceFiction, fantasy], [archipelago],
+            [Credit(brume, ContributionRole.Scenarist), Credit(ostrova, ContributionRole.Colorist)]) with
+        {
+            Summary = "Trois lunes se lèvent sur l'archipel, puis une quatrième.",
+        });
+        await data.AlbumAsync(Album("Lune noire", moonsTwin, 4, 1993));
 
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
         // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
@@ -374,6 +384,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
     /// <summary>The genre « Science-fiction » saved again under its abbreviation, to merge with it.</summary>
     public const string TwinGenre = "SF";
+
+    /// <summary>The series « 13 Lunes » saved again under its title in words, to merge with it.</summary>
+    public const string TwinSeriesTitle = "Treize Lunes";
 
     /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
     public const string DeletedGenre = "Genre supprimé";

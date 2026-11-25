@@ -1,0 +1,377 @@
+@attribute [Route(AppPaths.AdminMergeSeries)]
+@rendermode InteractiveServer
+@using System.Globalization
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@inject IStringLocalizer<AdminMergeSeries> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject ValueLabels Values
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two series (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the series, which
+   gives the series and the other one: each data the series keeps, of the one or the other, in the order of its entry form; each
+   genre, universe and contribution held by one series only, retained or discarded; the sort key the data chosen give; the albums
+   that pass to it; then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor of
+   a series, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
+   title gives. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminTwoSeriesMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Title, Preview.Second.Title]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminSeries" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)" Result="@Result">
+            @foreach (var row in Rows)
+            {
+                <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
+                             SecondRecord="@Preview.Second.Title" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
+                             SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+            }
+        </MergeData>
+        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Title" SecondName="@Preview.Second.Title" Count="Count" />
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(KeptTitle)</li>
+                    @if (Merge.Linked(Preview.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Albums", KeptTitle, linked]</li>
+                    }
+                </ul>
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    // The keys of the data of a series, each the key of its row and of the choice made for it.
+    private const string TitleKey = "title";
+    private const string SortKeyKey = "sort-key";
+    private const string StatusKey = "status";
+    private const string VolumesKey = "volumes";
+    private const string CompleteKey = "complete";
+    private const string ExcludeFromMissingKey = "exclude-from-missing";
+    private const string ExcludeFromEstimatesKey = "exclude-from-estimates";
+    private const string PublisherKey = "publisher";
+    private const string SummaryKey = "summary";
+    private const string NotesKey = "notes";
+    private const string CategoryKey = "category";
+    private const string ConditionKey = "condition";
+    private const string BindingKey = "binding";
+    private const string FormatKey = "format";
+    private const string OrientationKey = "orientation";
+    private const string ReadingDirectionKey = "reading-direction";
+    private const string ColorKey = "color";
+
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private ApiProblem? _sortKeyProblem;
+    private string? _sortKey;
+    private int _sortKeyNumber;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The series the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "series")]
+    public Guid? SeriesId { get; set; }
+
+    /// <summary>The other series, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two series as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public SeriesMergePreview? Preview { get; set; }
+
+    /// <summary>The record each data, and each element held by one series only, is kept from, by its row; none while the user has not chosen.</summary>
+    [PersistentState]
+    public Dictionary<string, MergeSide?>? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Series"], AppPaths.AdminSeries), new(L["Breadcrumb"])];
+
+    private int Pending => Choices!.Values.Count(c => c is null);
+
+    // The title the series keeps, that the confirmation names it by, once chosen.
+    private string KeptTitle => Choices![TitleKey] is { } side ? Of(side).Title : Preview!.First.Title;
+
+    /// <summary>
+    /// A row of the merge: a data, or an element held by one series only (<paramref name="Element"/>, of the series
+    /// <paramref name="Holder"/>), or by both, the same value on both sides.
+    /// </summary>
+    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null);
+
+    // In the order of the entry form of a series (visuel/saisie-serie/contenu.md).
+    private IEnumerable<Row> Rows
+    {
+        get
+        {
+            var (first, second) = (Preview!.First, Preview.Second);
+            yield return new(TitleKey, L["Data.Title"], first.Title, second.Title);
+            yield return new(SortKeyKey, L["Data.SortKey"], SortKeyText(first), SortKeyText(second));
+            yield return new(StatusKey, L["Data.Status"], Named(first.Status), Named(second.Status));
+            yield return new(VolumesKey, L["Data.Volumes"], first.TheoreticalVolumeCount?.ToString(CultureInfo.CurrentCulture),
+                second.TheoreticalVolumeCount?.ToString(CultureInfo.CurrentCulture));
+            yield return new(CompleteKey, L["Data.Complete"], YesNo(first.IsComplete), YesNo(second.IsComplete));
+            yield return new(ExcludeFromMissingKey, L["Data.ExcludeFromMissingVolumes"], YesNo(first.ExcludeFromMissingVolumes),
+                YesNo(second.ExcludeFromMissingVolumes));
+            yield return new(ExcludeFromEstimatesKey, L["Data.ExcludeFromReleaseEstimates"], YesNo(first.ExcludeFromReleaseEstimates),
+                YesNo(second.ExcludeFromReleaseEstimates));
+            foreach (var row in ContributionRows())
+                yield return row;
+            yield return new(PublisherKey, L["Data.Publisher"], PublisherText(first), PublisherText(second));
+            foreach (var row in ElementRows("genre", L["Data.Genre"], s => s.Genres.Select(g => (g.Id, g.Label))))
+                yield return row;
+            foreach (var row in ElementRows("universe", L["Data.Universe"], s => s.Universes.Select(u => (u.Universe.Id, UniverseText(u)))))
+                yield return row;
+            yield return new(SummaryKey, L["Data.Summary"], first.Summary, second.Summary, Long: true);
+            yield return new(NotesKey, L["Data.Notes"], first.PersonalNotes, second.PersonalNotes, Long: true);
+            yield return new(CategoryKey, L["Data.Category"], Named(first.EditionTemplate.Category), Named(second.EditionTemplate.Category));
+            yield return new(ConditionKey, L["Data.Condition"], Named(first.EditionTemplate.Condition), Named(second.EditionTemplate.Condition));
+            yield return new(BindingKey, L["Data.Binding"], Named(first.EditionTemplate.Binding), Named(second.EditionTemplate.Binding));
+            yield return new(FormatKey, L["Data.Format"], Named(first.EditionTemplate.Format), Named(second.EditionTemplate.Format));
+            yield return new(OrientationKey, L["Data.Orientation"], Named(first.EditionTemplate.Orientation), Named(second.EditionTemplate.Orientation));
+            yield return new(ReadingDirectionKey, L["Data.ReadingDirection"], Named(first.EditionTemplate.ReadingDirection),
+                Named(second.EditionTemplate.ReadingDirection));
+            yield return new(ColorKey, L["Data.Color"], ColorText(first.EditionTemplate.IsColor), ColorText(second.EditionTemplate.IsColor));
+        }
+    }
+
+    // A genre or a universe of both series, by its identifier: once, the same on both sides; of one series only, retained or not.
+    private IEnumerable<Row> ElementRows(string kind, string label, Func<SeriesMergeRecord, IEnumerable<(Guid Id, string Text)>> elements)
+    {
+        var (first, second) = (elements(Preview!.First).ToList(), elements(Preview.Second).ToList());
+        foreach (var (id, text) in first.Concat(second.Where(e => !first.Exists(f => f.Id == e.Id))))
+        {
+            var (inFirst, inSecond) = (first.Exists(e => e.Id == id), second.Exists(e => e.Id == id));
+            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null,
+                Element: inFirst && inSecond ? null : id, Holder: inFirst && inSecond ? null : inFirst ? MergeSide.First : MergeSide.Second);
+        }
+    }
+
+    // A credit of both series, by its author and role: once, the same on both sides; of one series only, retained or not. A row
+    // per credit, its role named, in the order of the roles.
+    private IEnumerable<Row> ContributionRows()
+    {
+        var credits = Preview!.First.Contributions.Select(c => (Contribution: c, Side: MergeSide.First))
+            .Concat(Preview.Second.Contributions.Select(c => (Contribution: c, Side: MergeSide.Second)))
+            .GroupBy(c => (c.Contribution.Author.Id, c.Contribution.Role))
+            .OrderBy(g => g.Key.Role).ThenBy(g => AuthorName(g.First().Contribution.Author), StringComparer.CurrentCulture);
+        foreach (var credit in credits)
+        {
+            var name = AuthorName(credit.First().Contribution.Author);
+            var only = credit.Count() == 1 ? credit.Single() : ((SeriesMergeContribution, MergeSide)?)null;
+            yield return new($"contribution-{credit.Key.Id}-{credit.Key.Role}", Values.Of(credit.Key.Role),
+                only is { Item2: MergeSide.Second } ? null : name, only is { Item2: MergeSide.First } ? null : name,
+                Element: only?.Item1.Id, Holder: only?.Item2);
+        }
+    }
+
+    private static string AuthorName(Bdtheque.Contracts.Catalog.AuthorListItem author) =>
+        RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym);
+
+    private string SortKeyText(SeriesMergeRecord series) => series.ManualSortKey ?? L["Data.SortKey.Auto"].Value;
+
+    private string? Named<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } named ? Values.Of(named) : null;
+
+    private string YesNo(bool value) => value ? L["Data.Yes"].Value : L["Data.No"].Value;
+
+    private string? ColorText(bool? isColor) => isColor switch
+    {
+        true => L["Data.Color.Color"].Value,
+        false => L["Data.Color.BlackAndWhite"].Value,
+        null => null,
+    };
+
+    // The publisher and its collection, together, of the same series (modele-metier/relations-et-cardinalites.md).
+    private static string? PublisherText(SeriesMergeRecord series) =>
+        (series.Publisher, series.PublisherCollection) switch
+        {
+            (null, _) => null,
+            ({ } publisher, null) => publisher.Name,
+            ({ } publisher, { } collection) => $"{publisher.Name} · {collection.Name}",
+        };
+
+    // A universe with its ancestors, as the entry form of a series presents it.
+    private static string UniverseText(Bdtheque.Contracts.Catalog.UniverseInHierarchy universe) =>
+        string.Join(" › ", universe.Ancestors.Select(a => a.Name).Append(universe.Universe.Name));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is null)
+        {
+            if (SeriesId is not { } first || OtherId is not { } second)
+            {
+                Navigation.NavigateTo(AppPaths.AdminSeries);
+                return;
+            }
+
+            try
+            {
+                Preview = await Api.GetAsync<SeriesMergePreview>($"/admin/series/merge?first={first}&second={second}");
+            }
+            catch (ApiProblemException exception)
+            {
+                _loadProblem = exception.Problem;
+                return;
+            }
+
+            // A value set on one side only, or the same on both, is retained at once; two different values wait for the user's
+            // choice: no record is favoured (fonctionnel/regles-metier/fusion-des-fiches.md). A sort key following the title is
+            // no value of its own: one entered by hand is retained against it.
+            Choices = Rows.ToDictionary(row => row.Key, row => row.Key == SortKeyKey
+                ? Initial(Preview.First.ManualSortKey, Preview.Second.ManualSortKey)
+                : Initial(row.First, row.Second));
+        }
+
+        await ReadSortKeyAsync();
+    }
+
+    private static MergeSide? Initial(string? first, string? second) =>
+        (first, second) switch
+        {
+            _ when first == second => MergeSide.First,
+            (_, null) => MergeSide.First,
+            (null, _) => MergeSide.Second,
+            _ => null,
+        };
+
+    private async Task Choose(string key, MergeSide? side)
+    {
+        Choices![key] = side;
+        if (key is TitleKey or SortKeyKey)
+            await ReadSortKeyAsync();
+    }
+
+    // The sort key the data chosen give: the one entered by hand, or the one the domain computes from the title, asked to the API
+    // (choix-implementation/socle/frontend.md, no rule of entry in the frontend), numbered, so that only the answer for the last
+    // choice is presented.
+    private async Task ReadSortKeyAsync()
+    {
+        var number = ++_sortKeyNumber;
+        _sortKey = null;
+        _sortKeyProblem = null;
+        if (Choices![SortKeyKey] is not { } sortKeySide || Choices[TitleKey] is not { } titleSide)
+            return;
+        if (Of(sortKeySide).ManualSortKey is { } manual)
+        {
+            _sortKey = manual;
+            return;
+        }
+
+        try
+        {
+            var key = await Api.GetAsync<TitleSortKey>($"/admin/sort-keys/title?title={Uri.EscapeDataString(Of(titleSide).Title)}");
+            if (number == _sortKeyNumber)
+                _sortKey = key.SortKey;
+        }
+        catch (ApiProblemException exception)
+        {
+            if (number == _sortKeyNumber)
+                _sortKeyProblem = exception.Problem;
+        }
+    }
+
+    private SeriesMergeRecord Of(MergeSide side) => side == MergeSide.First ? Preview!.First : Preview!.Second;
+
+    // The sort key the data chosen give, the failure to compute it, or nothing while the title or the sort key is left to choose.
+    private RenderFragment? Result => (_sortKey, _sortKeyProblem) switch
+    {
+        ({ } sortKey, _) => @<span>@L["Result.SortKey"] : <strong>@sortKey</strong></span>,
+        (null, { } problem) => @<ErrorMessage Problem="problem" Compact="true" TechnicalText="@L["Result.Failed"]" />,
+        _ => null,
+    };
+
+    private MergeRecordHead Head(SeriesMergeRecord record)
+    {
+        var albums = Preview!.Links.Where(l => l.Kind == EntityKind.Album).Sum(l => record == Preview.First ? l.First : l.Second);
+        return new MergeRecordHead(record.Title, albums == 0 ? null : L[$"Head.Album.{(albums == 1 ? "One" : "Other")}", albums].Value, record.ModifiedAt);
+    }
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<SeriesMergeRequest, MergeResult>("/admin/series/merge", Request());
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminTwoSeriesMerged);
+            Navigation.NavigateTo(AppPaths.AdminSeries);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    private SeriesMergeRequest Request()
+    {
+        MergeSide Side(string key) => Choices![key]!.Value;
+        List<MergeElement> Elements(string kind) =>
+            [.. Rows.Where(r => r.Key.StartsWith(kind + "-", StringComparison.Ordinal) && r.Element is not null).Select(r => new MergeElement(r.Element!.Value, Side(r.Key)))];
+
+        return new SeriesMergeRequest(
+            new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+            Side(TitleKey), Side(SortKeyKey), Side(StatusKey), Side(VolumesKey), Side(CompleteKey), Side(ExcludeFromMissingKey),
+            Side(ExcludeFromEstimatesKey), Side(SummaryKey), Side(NotesKey), Side(PublisherKey), Side(CategoryKey), Side(ConditionKey),
+            Side(BindingKey), Side(FormatKey), Side(OrientationKey), Side(ReadingDirectionKey), Side(ColorKey),
+            Elements("genre"), Elements("universe"), Elements("contribution"));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The series as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+}

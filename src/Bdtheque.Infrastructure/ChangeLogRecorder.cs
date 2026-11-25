@@ -106,37 +106,45 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
 
             var carried = entry.Entity switch
             {
-                Contribution => ContributionChange(entry),
-                EditionVisual => VisualChange(entry),
-                _ when entry.Metadata.IsPropertyBag => AssociationChange(entry),
-                _ => null,
+                Contribution => ContributionChanges(entry),
+                EditionVisual => [VisualChange(entry)],
+                _ when entry.Metadata.IsPropertyBag && AssociationChange(entry) is { } association => [association],
+                _ => [],
             };
-            if (carried is not null)
-                yield return carried;
+            foreach (var change in carried)
+                yield return change;
         }
     }
 
     // A contribution is added or removed, its owner then being known from its original values only for a removed one, deleted on
-    // save (BdthequeDbContext); or credited to another author by the merge of two authors, which keeps it, as a saved search may
-    // designate it: a change from the one to the other (fonctionnel/regles-metier/fusion-des-fiches.md).
-    private CarriedChange? ContributionChange(EntityEntry entry)
+    // save (BdthequeDbContext); or, kept by a merge, as a saved search may designate it (fonctionnel/regles-metier/fusion-des-fiches.md),
+    // credited to another author (the merge of two authors), a change from the one to the other, or passed to another owner (the
+    // merge of two series), removed from the one and added to the other.
+    private IEnumerable<CarriedChange> ContributionChanges(EntityEntry entry)
     {
-        if (entry.State == EntityState.Modified)
-            return CreditChange(entry);
+        if (entry.State != EntityState.Modified)
+            return [CreditOf(entry.State == EntityState.Added ? entry.CurrentValues : entry.OriginalValues, entry.State == EntityState.Added)];
+        if (OwnerOf(entry.OriginalValues) != OwnerOf(entry.CurrentValues))
+            return [CreditOf(entry.OriginalValues, added: false), CreditOf(entry.CurrentValues, added: true)];
+        return CreditChange(entry) is { } credit ? [credit] : [];
+    }
 
-        var values = entry.State == EntityState.Added ? entry.CurrentValues : entry.OriginalValues;
-        var ownerId = (values.GetValue<Guid?>(nameof(Contribution.AlbumId)) ?? values.GetValue<Guid?>(nameof(Contribution.SeriesId)))!.Value;
+    private static Guid OwnerOf(PropertyValues values) =>
+        (values.GetValue<Guid?>(nameof(Contribution.AlbumId)) ?? values.GetValue<Guid?>(nameof(Contribution.SeriesId)))!.Value;
+
+    // The credit of a contribution, as its owner gains it or loses it.
+    private CarriedChange CreditOf(PropertyValues values, bool added)
+    {
         var authorId = values.GetValue<Guid>(nameof(Contribution.AuthorId));
         var role = values.GetValue<ContributionRole>(nameof(Contribution.Role));
-
-        return new CarriedChange(ownerId, async cancellationToken =>
+        return new CarriedChange(OwnerOf(values), async cancellationToken =>
         {
             ChangeLogValue value = new ContributionValue(authorId, await _labels.AuthorAsync(authorId, cancellationToken), role);
-            return Added(entry, ChangeLogAttribute.Contribution, value);
+            return added ? new ChangeLogChange(ChangeLogAttribute.Contribution, null, value) : new ChangeLogChange(ChangeLogAttribute.Contribution, value, null);
         });
     }
 
-    // The only change a contribution undergoes: its author. Its owner and its role never change.
+    // A change of the author of a contribution, which keeps its owner and its role.
     private CarriedChange? CreditChange(EntityEntry entry)
     {
         var before = entry.OriginalValues.GetValue<Guid>(nameof(Contribution.AuthorId));

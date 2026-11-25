@@ -145,10 +145,10 @@ public static class AppPaths
     public static string AdminEditSeries(Guid id) => $"{AdminSeries}/{id}";
 
     /// <summary>
-    /// The next step of the merge of two series, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the series and the other one, <c>series</c> and <c>other</c>.
+    /// The merge of two series (visuel/fusion/fusion-de-deux-fiches.md): it receives the series and the other one, <c>series</c>
+    /// and <c>other</c>.
     /// </summary>
-    public const string AdminMergeSeries = NotYetImplemented;
+    public const string AdminMergeSeries = AdminSeries + "/merge";
 
     /// <summary>The list of the editions of the administration (visuel/listes/).</summary>
     public const string AdminEditions = "/admin/editions";

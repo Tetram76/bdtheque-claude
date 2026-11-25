@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="Breadcrumb" xml:space="preserve">
+    <value>Fusion</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Fusionner deux séries</value>
+  </data>
+  <data name="Subject" xml:space="preserve">
+    <value>{0} et {1}</value>
+  </data>
+  <data name="Merge" xml:space="preserve">
+    <value>Fusionner…</value>
+  </data>
+  <data name="Data.Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Data.SortKey" xml:space="preserve">
+    <value>Clé de tri</value>
+  </data>
+  <data name="Data.SortKey.Auto" xml:space="preserve">
+    <value>Auto, calculée à partir du titre</value>
+  </data>
+  <data name="Data.Status" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Data.Volumes" xml:space="preserve">
+    <value>Tomes numérotés prévus</value>
+  </data>
+  <data name="Data.Complete" xml:space="preserve">
+    <value>Complète dans la collection</value>
+  </data>
+  <data name="Data.ExcludeFromMissingVolumes" xml:space="preserve">
+    <value>Exclure des albums manquants</value>
+  </data>
+  <data name="Data.ExcludeFromReleaseEstimates" xml:space="preserve">
+    <value>Exclure des estimations de sortie</value>
+  </data>
+  <data name="Data.Yes" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="Data.No" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="Data.Publisher" xml:space="preserve">
+    <value>Éditeur et collection</value>
+  </data>
+  <data name="Data.Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="Data.Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Data.Summary" xml:space="preserve">
+    <value>Résumé</value>
+  </data>
+  <data name="Data.Notes" xml:space="preserve">
+    <value>Notes personnelles</value>
+  </data>
+  <data name="Data.Category" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Data.Condition" xml:space="preserve">
+    <value>État</value>
+  </data>
+  <data name="Data.Binding" xml:space="preserve">
+    <value>Reliure</value>
+  </data>
+  <data name="Data.Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Data.Orientation" xml:space="preserve">
+    <value>Orientation</value>
+  </data>
+  <data name="Data.ReadingDirection" xml:space="preserve">
+    <value>Sens de lecture</value>
+  </data>
+  <data name="Data.Color" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="Data.Color.Color" xml:space="preserve">
+    <value>En couleur</value>
+  </data>
+  <data name="Data.Color.BlackAndWhite" xml:space="preserve">
+    <value>Noir et blanc</value>
+  </data>
+  <data name="Result.SortKey" xml:space="preserve">
+    <value>Classé à</value>
+  </data>
+  <data name="Result.Failed" xml:space="preserve">
+    <value>La clé de tri n&apos;a pas pu être calculée.</value>
+  </data>
+  <data name="Head.Album.One" xml:space="preserve">
+    <value>1 album</value>
+  </data>
+  <data name="Head.Album.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Links.Album.One" xml:space="preserve">
+    <value>1 album</value>
+  </data>
+  <data name="Links.Album.Other" xml:space="preserve">
+    <value>{0} albums</value>
+  </data>
+  <data name="Confirm.Title" xml:space="preserve">
+    <value>Fusionner les deux séries ?</value>
+  </data>
+  <data name="Confirm.Albums" xml:space="preserve">
+    <value>{0} regroupera {1}.</value>
+  </data>
+  <data name="Problem.Conflict" xml:space="preserve">
+    <value>L&apos;une des deux séries a été modifiée depuis l&apos;ouverture de la fusion. Rechargez-la pour choisir de nouveau.</value>
+  </data>
+  <data name="Problem.NotFound" xml:space="preserve">
+    <value>L&apos;une des deux séries a été supprimée entre-temps.</value>
+  </data>
+  <data name="Problem.Technical" xml:space="preserve">
+    <value>La fusion n&apos;a pas pu aboutir. Réessayez dans un instant.</value>
+  </data>
+</root>

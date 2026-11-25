@@ -603,4 +603,10 @@
   <data name="admin.author-merge.merged" xml:space="preserve">
     <value>Fusion de deux auteurs · fusion faite</value>
   </data>
+  <data name="admin.series-merge" xml:space="preserve">
+    <value>Fusion de deux séries</value>
+  </data>
+  <data name="admin.series-merge.merged" xml:space="preserve">
+    <value>Fusion de deux séries · fusion faite</value>
+  </data>
 </root>

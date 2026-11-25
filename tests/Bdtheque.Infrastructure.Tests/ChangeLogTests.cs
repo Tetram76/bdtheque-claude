@@ -245,6 +245,27 @@ public sealed class ChangeLogTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ContributionPassedToAnotherSeries_IsAddedToTheSeriesThatReceivesIt_AndRemovedFromTheOther()
+    {
+        // The merge of two series passes a contribution of the one to the other with its identity
+        // (fonctionnel/regles-metier/fusion-des-fiches.md): a change of both series, the one gaining it, the other losing it.
+        var goscinny = new Author(null, null, "Goscinny");
+        var kept = new Series("Astérix");
+        var merged = new Series("Asterix");
+        merged.SetTemplateContributions([(goscinny, ContributionRole.Scenarist)]);
+        Context.AddRange(goscinny, kept, merged);
+        await Context.SaveChangesAsync();
+
+        kept.MergeTemplateContributions(merged, [Assert.Single(merged.TemplateContributions).Id]);
+        await Context.SaveChangesAsync();
+
+        var credit = new ContributionValue(goscinny.Id, new AuthorLabel(null, null, "Goscinny"), ContributionRole.Scenarist);
+        var entries = (await EntriesAsync()).Where(e => e.Operation == ChangeLogOperation.Modification).ToList();
+        Assert.Equal([new ChangeLogChange(ChangeLogAttribute.Contribution, null, credit)], entries.Single(e => e.RecordId == kept.Id).Changes);
+        Assert.Equal([new ChangeLogChange(ChangeLogAttribute.Contribution, credit, null)], entries.Single(e => e.RecordId == merged.Id).Changes);
+    }
+
+    [Fact]
     public async Task VisualsAddedThenRearranged_AreChangesOfTheirEdition()
     {
         var (album, edition) = await CreateOwnedEditionAsync();
