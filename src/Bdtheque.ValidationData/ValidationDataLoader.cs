@@ -348,6 +348,7 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var ashMoon = await data.UniverseAsync("Lune cendrée", null, ombreluneTwin);
         await data.AlbumAsync(OneShot("La Marée rousse", 2022, 9, [], [ashMoon, archipelagoTwin], [Credit(arnaud, ContributionRole.Scenarist)]));
         await data.UniverseAsync(NestedTwinUniverse, "Ombrelune avant sa refonte.", watchersCity);
+
         // An album saved again under its title in figures, to merge with « Le Phare aux mille lanternes »: published the
         // same year, without its month, another rating and summary, the same scenarist with a colourist of its own, a genre of its
         // own, and a third edition, owned, which passes to the album that remains with an edition targeted by an intent.
