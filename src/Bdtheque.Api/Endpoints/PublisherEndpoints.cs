@@ -155,12 +155,11 @@ internal static class PublisherEndpoints
                 foreach (var publisher in new[] { pair.First, pair.Second })
                     await context.Entry(publisher).Collection(p => p.Collections).LoadAsync(cancellationToken);
                 var collections = pair.First.Collections.Concat(pair.Second.Collections).ToDictionary(c => c.Id);
-                var homonyms = (await HomonymsAsync(context, pair.First.Id, pair.Second.Id, cancellationToken))
-                    .Select(h => (collections[h.First], collections[h.Second], Name: ChosenName(request, h)))
-                    .Select(h => h.Name == MergeSide.First ? (Remaining: h.Item1, Removed: h.Item2) : (Remaining: h.Item2, Removed: h.Item1))
+                var homonyms = KeptOfHomonyms(request, await HomonymsAsync(context, pair.First.Id, pair.Second.Id, cancellationToken))
+                    .Select(h => h.Name == MergeSide.First
+                        ? (Remaining: collections[h.Homonyms.First], Removed: collections[h.Homonyms.Second])
+                        : (Remaining: collections[h.Homonyms.Second], Removed: collections[h.Homonyms.First]))
                     .ToList();
-                if (request.Collections.Count != homonyms.Count)
-                    throw new ArgumentException("A collection chosen is not one of the homonyms of the two publishers.", nameof(request));
 
                 var removed = homonyms.Select(h => h.Removed.Id).ToList();
                 var series = await RecordMerge.LoadLinkedForWriteAsync<Series>(
@@ -185,10 +184,20 @@ internal static class PublisherEndpoints
             },
             cancellationToken);
 
-    // The name two homonymous collections keep, as the request chooses it.
-    private static MergeSide ChosenName(PublisherMergeRequest request, PublisherCollectionHomonyms homonyms) =>
-        request.Collections.SingleOrDefault(c => c.First == homonyms.First && c.Second == homonyms.Second)?.Name
-        ?? throw new ArgumentException($"The name of the collections {homonyms.First} and {homonyms.Second} is not chosen.", nameof(request));
+    /// <summary>The name each pair of homonymous collections keeps, as the request chooses it.</summary>
+    /// <exception cref="ArgumentException">
+    /// The request does not choose the name of each pair, and of them only: the client sends back the homonyms it read, which the
+    /// versions of the publishers guarantee unchanged.
+    /// </exception>
+    private static List<(PublisherCollectionHomonyms Homonyms, MergeSide Name)> KeptOfHomonyms(
+        PublisherMergeRequest request, IReadOnlyList<PublisherCollectionHomonyms> homonyms)
+    {
+        if (request.Collections.Count != homonyms.Count)
+            throw new ArgumentException("A collection chosen is not one of the homonyms of the two publishers.", nameof(request));
+        return homonyms.Select(h => (h, request.Collections.SingleOrDefault(c => c.First == h.First && c.Second == h.Second)?.Name
+            ?? throw new ArgumentException($"The name of the collections {h.First} and {h.Second} is not chosen.", nameof(request))))
+            .ToList();
+    }
 
     // A publisher and its collections have no record (fonctionnel/structure-de-l-application.md): a
     // publisher leads to its website, its editions are listed by the cross filters of the lists.
