@@ -1,0 +1,480 @@
+@attribute [Route(AppPaths.AdminMergeAlbums)]
+@rendermode InteractiveServer
+@using System.Globalization
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@inject IStringLocalizer<AdminMergeAlbums> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject ValueLabels Values
+@inject RecordLabels Labels
+@inject DisplayFormatter Display
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two albums (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the albums, which gives
+   the album and the other one: each data the album keeps, of the one or the other, in the blocks of its entry form; each genre,
+   universe and contribution held by one album only, retained or discarded; the label and the sort key the data chosen give; the
+   editions and purchase intents that pass to it, and the intent on the whole album the merge withdraws; then the confirmation,
+   which sets apart what the merge will delete. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor
+   of an album, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
+   title gives. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminAlbumMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", FirstName, SecondName]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminAlbums" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
+        {
+            <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == 0)"
+                       Second="Head(Preview.Second, index == 0)" Result="@(block.Key == AlbumBlock ? Result : null)">
+                @foreach (var row in block.Rows)
+                {
+                    <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@FirstName"
+                                 SecondRecord="@SecondName" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
+                                 SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+                }
+            </MergeData>
+        }
+        <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count"
+                    Withdrawn="@([.. Preview.WithdrawnPurchaseIntents.Select(side => L["Links.Withdrawn", NameOf(side)].Value)])" />
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(KeptLabel)</li>
+                    @if (Merge.Linked(Preview.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Linked", KeptLabel, linked]</li>
+                    }
+                </ul>
+                <MergeRemovals Lines="Removals" />
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    // The keys of the data of an album, each the key of its row and of the choice made for it.
+    private const string SeriesKey = "series";
+    private const string TitleKey = "title";
+    private const string SortKeyKey = "sort-key";
+    private const string VolumeKey = "volume";
+    private const string TypeKey = "type";
+    private const string SpecialIssueKey = "special-issue";
+    private const string PublicationKey = "publication";
+    private const string SummaryKey = "summary";
+    private const string NotesKey = "notes";
+    private const string RatingKey = "rating";
+    private const string ContributionKind = "contribution";
+    private const string GenreKind = "genre";
+    private const string UniverseKind = "universe";
+
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private ApiProblem? _sortKeyProblem;
+    private string? _sortKey;
+    private int _sortKeyNumber;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The album the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "album")]
+    public Guid? AlbumId { get; set; }
+
+    /// <summary>The other album, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two albums as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public AlbumMergePreview? Preview { get; set; }
+
+    /// <summary>The format of the labels of the albums, a setting of the application.</summary>
+    [PersistentState]
+    public AlbumLabelFormat Format { get; set; }
+
+    /// <summary>The record each data, and each element held by one album only, is kept from, by its row; none while the user has not chosen.</summary>
+    [PersistentState]
+    public Dictionary<string, MergeSide?>? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(L["Breadcrumb"])];
+
+    private int Pending => Choices!.Values.Count(c => c is null);
+
+    // Each album is named by its label, its series included: the merge presents two albums side by side, which their series
+    // does not always tell apart (fonctionnel/presentation/libelle-d-un-album.md).
+    private string FirstName => LabelOf(Preview!.First);
+
+    private string SecondName => LabelOf(Preview!.Second);
+
+    private string NameOf(MergeSide side) => side == MergeSide.First ? FirstName : SecondName;
+
+    private string LabelOf(AlbumMergeRecord album) => Labels.Record(
+        new AlbumLabel(album.Title, album.Series?.Title, album.Type, album.IsSpecialIssue, album.VolumeNumber, album.StartVolumeNumber, album.EndVolumeNumber),
+        Format);
+
+    // The label the album keeps, of the data chosen, that the confirmation names it by; that of the first album while one of its
+    // parts is left to choose.
+    private string KeptLabel
+    {
+        get
+        {
+            if (Choices![TitleKey] is not { } title || Choices[SeriesKey] is not { } series || Choices[TypeKey] is not { } type
+                || Choices[SpecialIssueKey] is not { } special || Choices[VolumeKey] is not { } volume)
+                return FirstName;
+            var typed = Of(type);
+            return Labels.Record(
+                new AlbumLabel(Of(title).Title, Of(series).Series?.Title, typed.Type, Of(special).IsSpecialIssue, Of(volume).VolumeNumber,
+                    typed.StartVolumeNumber, typed.EndVolumeNumber),
+                Format);
+        }
+    }
+
+    // The blocks of the entry form of an album (visuel/saisie-album/contenu.md), whose titles and mentions the merge takes up
+    // (decision of the user, #645), each with the keys of its data, in its order; one without any row is left out.
+    private const string AlbumBlock = "Album";
+
+    private static readonly (string Key, Func<string, bool> Holds)[] BlockKeys =
+    [
+        (AlbumBlock, key => key is SeriesKey or TitleKey or SortKeyKey),
+        ("Volume", key => key is VolumeKey or TypeKey or SpecialIssueKey),
+        ("Publication", key => key is PublicationKey),
+        ("Authors", key => key.StartsWith(ContributionKind + "-", StringComparison.Ordinal)),
+        ("Classification", key => key.StartsWith(GenreKind + "-", StringComparison.Ordinal) || key.StartsWith(UniverseKind + "-", StringComparison.Ordinal)),
+        ("Reading", key => key is SummaryKey or NotesKey or RatingKey),
+    ];
+
+    private IEnumerable<(string Key, List<Row> Rows)> Blocks
+    {
+        get
+        {
+            var rows = Rows.ToList();
+            return BlockKeys.Select(block => (block.Key, Rows: rows.Where(row => block.Holds(row.Key)).ToList())).Where(block => block.Rows.Count > 0);
+        }
+    }
+
+    /// <summary>
+    /// A row of the merge: a data, or an element held by one album only (<paramref name="Element"/>, of the album
+    /// <paramref name="Holder"/>), or by both, the same value on both sides.
+    /// </summary>
+    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null);
+
+    // In the order of the entry form of an album (visuel/saisie-album/contenu.md).
+    private IEnumerable<Row> Rows
+    {
+        get
+        {
+            var (first, second) = (Preview!.First, Preview.Second);
+            yield return new(SeriesKey, L["Data.Series"], first.Series?.Title, second.Series?.Title);
+            yield return new(TitleKey, L["Data.Title"], first.Title, second.Title);
+            yield return new(SortKeyKey, L["Data.SortKey"], SortKeyText(first), SortKeyText(second));
+            yield return new(VolumeKey, L["Data.Volume"], first.VolumeNumber?.ToString(CultureInfo.CurrentCulture),
+                second.VolumeNumber?.ToString(CultureInfo.CurrentCulture));
+            yield return new(TypeKey, L["Data.Type"], TypeText(first), TypeText(second));
+            yield return new(SpecialIssueKey, L["Data.SpecialIssue"], YesNo(first.IsSpecialIssue), YesNo(second.IsSpecialIssue));
+            yield return new(PublicationKey, L["Data.Publication"], PublicationText(first), PublicationText(second));
+            foreach (var row in ContributionRows())
+                yield return row;
+            foreach (var row in ElementRows(GenreKind, L["Data.Genre"], a => a.Genres.Select(g => (g.Id, g.Label))))
+                yield return row;
+            foreach (var row in ElementRows(UniverseKind, L["Data.Universe"], a => a.Universes.Select(u => (u.Universe.Id, UniverseText(u)))))
+                yield return row;
+            yield return new(SummaryKey, L["Data.Summary"], first.Summary, second.Summary, Long: true);
+            yield return new(NotesKey, L["Data.Notes"], first.PersonalNotes, second.PersonalNotes, Long: true);
+            yield return new(RatingKey, L["Data.Rating"], Named(first.Rating), Named(second.Rating));
+        }
+    }
+
+    // A genre or a universe of both albums, by its identifier: once, the same on both sides; of one album only, retained or not.
+    private IEnumerable<Row> ElementRows(string kind, string label, Func<AlbumMergeRecord, IEnumerable<(Guid Id, string Text)>> elements)
+    {
+        var (first, second) = (elements(Preview!.First).ToList(), elements(Preview.Second).ToList());
+        foreach (var (id, text) in first.Concat(second.Where(e => !first.Exists(f => f.Id == e.Id))))
+        {
+            var (inFirst, inSecond) = (first.Exists(e => e.Id == id), second.Exists(e => e.Id == id));
+            // The album holding the element alone, none when both hold it.
+            MergeSide? holder = (inFirst, inSecond) switch
+            {
+                (true, true) => null,
+                (true, false) => MergeSide.First,
+                _ => MergeSide.Second,
+            };
+            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null, Element: holder is null ? null : id, Holder: holder);
+        }
+    }
+
+    // A credit of both albums, by its author and role: once, the same on both sides; of one album only, retained or not. A row
+    // per credit, its role named, in the order of the roles.
+    private IEnumerable<Row> ContributionRows()
+    {
+        var credits = Preview!.First.Contributions.Select(c => (Contribution: c, Side: MergeSide.First))
+            .Concat(Preview.Second.Contributions.Select(c => (Contribution: c, Side: MergeSide.Second)))
+            .GroupBy(c => (c.Contribution.Author.Id, c.Contribution.Role))
+            .OrderBy(g => g.Key.Role).ThenBy(g => AuthorName(g.First().Contribution.Author), StringComparer.CurrentCulture);
+        foreach (var credit in credits)
+        {
+            var name = AuthorName(credit.First().Contribution.Author);
+            var only = credit.Count() == 1 ? credit.Single() : ((MergeContribution, MergeSide)?)null;
+            yield return new($"{ContributionKind}-{credit.Key.Id}-{credit.Key.Role}", Values.Of(credit.Key.Role),
+                only is { Item2: MergeSide.Second } ? null : name, only is { Item2: MergeSide.First } ? null : name,
+                Element: only?.Item1.Id, Holder: only?.Item2);
+        }
+    }
+
+    private static string AuthorName(AuthorListItem author) => RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym);
+
+    // A sort key following the title, or that of the series without a title, is no value of its own: its result says it.
+    private string SortKeyText(AlbumMergeRecord album) => album.ManualSortKey ?? L["Data.SortKey.Auto"].Value;
+
+    // The type and the volumes an omnibus covers, together, of the same album (modele-metier/album.md).
+    private string TypeText(AlbumMergeRecord album) => (album.Type, album.StartVolumeNumber, album.EndVolumeNumber) switch
+    {
+        (AlbumType.Omnibus, { } start, { } end) => L["Data.Type.OmnibusOf", start, end].Value,
+        (AlbumType.Omnibus, _, _) => L["Data.Type.Omnibus"].Value,
+        _ => L["Data.Type.Regular"].Value,
+    };
+
+    private string? PublicationText(AlbumMergeRecord album) =>
+        album.FirstPublicationYear is { } year ? Display.PartialDate(year, album.FirstPublicationMonth) : null;
+
+    private string? Named<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } named ? Values.Of(named) : null;
+
+    private string YesNo(bool value) => value ? L["Data.Yes"].Value : L["Data.No"].Value;
+
+    // A universe with its ancestors, as the entry form of an album presents it.
+    private static string UniverseText(UniverseInHierarchy universe) =>
+        string.Join(" › ", universe.Ancestors.Select(a => a.Name).Append(universe.Universe.Name));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is null)
+        {
+            if (AlbumId is not { } first || OtherId is not { } second)
+            {
+                Navigation.NavigateTo(AppPaths.AdminAlbums);
+                return;
+            }
+
+            try
+            {
+                Format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+                Preview = await Api.GetAsync<AlbumMergePreview>($"/admin/albums/merge?first={first}&second={second}");
+            }
+            catch (ApiProblemException exception)
+            {
+                _loadProblem = exception.Problem;
+                return;
+            }
+
+            // A value set on one side only, or the same on both, is retained at once; two different values wait for the user's
+            // choice: no record is favoured (fonctionnel/regles-metier/fusion-des-fiches.md). A sort key following the title is
+            // no value of its own: one entered by hand is retained against it.
+            Choices = Rows.ToDictionary(row => row.Key, row => row.Key == SortKeyKey
+                ? Initial(Preview.First.ManualSortKey, Preview.Second.ManualSortKey)
+                : Initial(row.First, row.Second));
+        }
+
+        await ReadSortKeyAsync();
+    }
+
+    private static MergeSide? Initial(string? first, string? second) =>
+        (first, second) switch
+        {
+            _ when first == second => MergeSide.First,
+            (_, null) => MergeSide.First,
+            (null, _) => MergeSide.Second,
+            _ => null,
+        };
+
+    private async Task Choose(string key, MergeSide? side)
+    {
+        Choices![key] = side;
+        if (key is TitleKey or SortKeyKey or SeriesKey)
+            await ReadSortKeyAsync();
+    }
+
+    // The sort key the data chosen give: the one entered by hand, that of the series for an album without a title of its own, or
+    // the one the domain computes from the title, asked to the API (choix-implementation/socle/frontend.md, no rule of entry in
+    // the frontend), numbered, so that only the answer for the last choice is presented.
+    private async Task ReadSortKeyAsync()
+    {
+        var number = ++_sortKeyNumber;
+        _sortKey = null;
+        _sortKeyProblem = null;
+        if (Choices![SortKeyKey] is not { } sortKeySide || Choices[TitleKey] is not { } titleSide || Choices[SeriesKey] is not { } seriesSide)
+            return;
+        if (Of(titleSide).Title is not { } title)
+        {
+            _sortKey = Of(seriesSide).SeriesSortKey;
+            return;
+        }
+
+        if (Of(sortKeySide).ManualSortKey is { } manual)
+        {
+            _sortKey = manual;
+            return;
+        }
+
+        try
+        {
+            var key = await Api.GetAsync<TitleSortKey>($"/admin/sort-keys/title?title={Uri.EscapeDataString(title)}");
+            if (number == _sortKeyNumber)
+                _sortKey = key.SortKey;
+        }
+        catch (ApiProblemException exception)
+        {
+            if (number == _sortKeyNumber)
+                _sortKeyProblem = exception.Problem;
+        }
+    }
+
+    private AlbumMergeRecord Of(MergeSide side) => side == MergeSide.First ? Preview!.First : Preview!.Second;
+
+    // What the data chosen make of the album, as its entry form says it: its label and its sort key, or the failure to compute
+    // the sort key; nothing of a part left to choose.
+    private RenderFragment? Result => @<span class="merge-album-result">
+        @if (KeptLabelChosen)
+        {
+            <span>@L["Result.Label"] : <strong><LabelText Text="@KeptLabel" /></strong></span>
+        }
+        @if (_sortKey is { } sortKey)
+        {
+            <span>@L["Result.SortKey"] : <strong>@sortKey</strong></span>
+        }
+        else if (_sortKeyProblem is { } problem)
+        {
+            <ErrorMessage Problem="problem" Compact="true" TechnicalText="@L["Result.Failed"]" />
+        }
+    </span>;
+
+    // Whether every part of the label is chosen.
+    private bool KeptLabelChosen => new[] { TitleKey, SeriesKey, TypeKey, SpecialIssueKey, VolumeKey }.All(key => Choices![key] is not null);
+
+    /// <summary>
+    /// The head of a record above a block: its detail above the first block only, the blocks after it naming the record only.
+    /// </summary>
+    private MergeRecordHead Head(AlbumMergeRecord record, bool detailed)
+    {
+        var name = LabelOf(record);
+        if (!detailed)
+            return new MergeRecordHead(name, null, null);
+        var side = record == Preview!.First ? MergeSide.First : MergeSide.Second;
+        var parts = Preview.Links
+            .Select(l => (l.Kind, Count: side == MergeSide.First ? l.First : l.Second))
+            .Where(l => l.Count > 0)
+            .Select(l => L[$"Head.{l.Kind}.{(l.Count == 1 ? "One" : "Other")}", l.Count].Value)
+            .ToList();
+        return new MergeRecordHead(name, parts.Count == 0 ? null : string.Join(" · ", parts), record.ModifiedAt);
+    }
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    // What the merge will delete, set apart in the confirmation (fonctionnel/regles-metier/fusion-des-fiches.md): the intent on
+    // the whole album it withdraws, then each element of a list discarded, by type in the order of the entity types, and by the
+    // album that held it.
+    private IReadOnlyList<string> Removals
+    {
+        get
+        {
+            var discarded = Rows
+                .Where(r => r.Element is not null && Choices![r.Key] != r.Holder)
+                .Select(r => (Kind: KindOf(r.Key), Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, Row: r))
+                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", d.Name, d.Row.Label].Value : d.Name));
+            List<string> lines =
+            [
+                .. Preview!.WithdrawnPurchaseIntents.Select(side => L["Confirm.Withdrawn", NameOf(side)].Value),
+                .. Merge.Discarded(discarded, NameOf),
+            ];
+            return lines;
+        }
+    }
+
+    private static EntityKind KindOf(string key) =>
+        key.StartsWith(ContributionKind + "-", StringComparison.Ordinal) ? EntityKind.Contribution
+        : key.StartsWith(GenreKind + "-", StringComparison.Ordinal) ? EntityKind.Genre
+        : EntityKind.Universe;
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<AlbumMergeRequest, MergeResult>("/admin/albums/merge", Request());
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumMerged);
+            Navigation.NavigateTo(AppPaths.AdminAlbums);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    private AlbumMergeRequest Request()
+    {
+        MergeSide Side(string key) => Choices![key]!.Value;
+        List<MergeElement> Elements(string kind) =>
+            [.. Rows.Where(r => r.Key.StartsWith(kind + "-", StringComparison.Ordinal) && r.Element is not null).Select(r => new MergeElement(r.Element!.Value, Side(r.Key)))];
+
+        return new AlbumMergeRequest(
+            new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+            Side(SeriesKey), Side(TitleKey), Side(SortKeyKey), Side(VolumeKey), Side(TypeKey), Side(SpecialIssueKey), Side(PublicationKey),
+            Side(SummaryKey), Side(NotesKey), Side(RatingKey), Elements(GenreKind), Elements(UniverseKind), Elements(ContributionKind));
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The albums as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+}

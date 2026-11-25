@@ -225,6 +225,30 @@ public sealed class AlbumMergeEndpointsTests : IClassFixture<ApiWebApplicationFa
     }
 
     [Fact]
+    public async Task AlbumMerge_KeepingNoTitle_FilesTheAlbumUnderItsSeries_WhateverSortKeyEnteredByHandIsChosen()
+    {
+        await using var scope = _factory.Services.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
+        var series = new Series("Blake et Mortimer");
+        var untitled = new Album(null, series);
+        var titled = new Album("Le Secret de l'Espadon", series);
+        titled.SetSortKey("Espadon (manuelle)");
+        context.AddRange(untitled, titled);
+        await context.SaveChangesAsync();
+        var preview = (await _client.GetFromJsonAsync<AlbumMergePreview>($"/admin/albums/merge?first={untitled.Id}&second={titled.Id}"))!;
+
+        // The title of the first album, none, and the sort key of the second one, entered by hand.
+        var response = await _client.PostAsJsonAsync("/admin/albums/merge", new AlbumMergeRequest(
+            new MergedRecord(untitled.Id, preview.First.Version), new MergedRecord(titled.Id, preview.Second.Version),
+            MergeSide.First, MergeSide.First, MergeSide.Second, MergeSide.First, MergeSide.First, MergeSide.First, MergeSide.First,
+            MergeSide.First, MergeSide.First, MergeSide.First, [], [], []));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var kept = (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{untitled.Id}"))!;
+        Assert.Equal((null, null, null), (kept.Content.Title, kept.Content.ManualSortKey, kept.SortKey));
+    }
+
+    [Fact]
     public async Task AlbumMerge_FromAStaleVersion_IsAFunctionalErrorAndMergesNothing()
     {
         var seeded = await SeedAsync();

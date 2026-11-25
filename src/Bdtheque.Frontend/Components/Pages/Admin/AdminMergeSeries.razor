@@ -14,7 +14,7 @@
 @* The merge of two series (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the series, which
    gives the series and the other one: each data the series keeps, of the one or the other, in the order of its entry form; each
    genre, universe and contribution held by one series only, retained or discarded, in the blocks of that form; the sort key the data chosen give; the albums
-   that pass to it; then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor of
+   that pass to it; then the confirmation, which sets apart what the merge will delete. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor of
    a series, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
    title gives. *@
 <PageTitle>@L["Title"]</PageTitle>
@@ -61,6 +61,7 @@ else
                         <li>@L["Confirm.Albums", KeptTitle, linked]</li>
                     }
                 </ul>
+                <MergeRemovals Lines="Removals" />
             </ChildContent>
             <Actions>
                 <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
@@ -357,6 +358,22 @@ else
     }
 
     private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    // What the merge will delete, set apart in the confirmation (fonctionnel/regles-metier/fusion-des-fiches.md): each element
+    // of a list discarded, by type in the order of the entity types, and by the series that held it.
+    private IReadOnlyList<string> Removals =>
+    [
+        .. Merge.Discarded(
+            Rows.Where(r => r.Element is not null && Choices![r.Key] != r.Holder)
+                .Select(r => (Kind: KindOf(r.Key), Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, r.Label))
+                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", d.Name, d.Label].Value : d.Name)),
+            side => Of(side).Title),
+    ];
+
+    private static EntityKind KindOf(string key) =>
+        key.StartsWith("contribution-", StringComparison.Ordinal) ? EntityKind.Contribution
+        : key.StartsWith("genre-", StringComparison.Ordinal) ? EntityKind.Genre
+        : EntityKind.Universe;
 
     private void OpenConfirmation()
     {

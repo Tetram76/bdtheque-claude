@@ -1,0 +1,26 @@
+@inject IStringLocalizer<MergeRemovals> L
+
+@* What the merge will delete, in the confirmation (visuel/fusion/fusion-de-deux-fiches.md): apart from what it changes, under its
+   own heading and the alert mark, a line per deletion, so that a deletion of information cannot be mistaken for a change
+   (fonctionnel/regles-metier/fusion-des-fiches.md, decision of the user, #646). Nothing without a deletion. *@
+@if (Lines.Count > 0)
+{
+    <div class="merge-removals">
+        <p class="merge-removals-title"><Icon Name="IconName.Exclamation" /> @L["Title"]</p>
+        <ul>
+            @foreach (var line in Lines)
+            {
+                <li>@line</li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Each deletion, in the order the confirmation says them: the records the merge deletes besides the other one, each with
+    /// its reason, then the elements of a list discarded (<see cref="MergeTexts.Discarded"/>).
+    /// </summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Lines { get; set; } = [];
+}

@@ -153,7 +153,9 @@ internal static class AlbumEndpoints
     {
         var kept = pair.Kept;
         var (title, series) = (pair.Of(request.Title).Title, pair.Of(request.Series).Series);
-        var sortKey = pair.Of(request.SortKey) is { IsManualSortKey: true } manual ? manual.SortKey : null;
+        // Without a title of its own, the album is filed under the sort key of its series, which no sort key entered by hand
+        // replaces (visuel/saisie-album/contenu.md): the one chosen then has nothing to apply to.
+        var sortKey = title is not null && pair.Of(request.SortKey) is { IsManualSortKey: true } manual ? manual.SortKey : null;
         var typed = pair.Of(request.Type);
         var (type, start, end) = (typed.Type, typed.StartVolumeNumber, typed.EndVolumeNumber);
         var (specialIssue, volume) = (pair.Of(request.IsSpecialIssue).IsSpecialIssue, pair.Of(request.VolumeNumber).VolumeNumber);

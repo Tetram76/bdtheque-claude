@@ -24,3 +24,8 @@
 .merge-links-none {
     margin: 0;
 }
+
+/* A record the merge deletes besides the other one: said apart, in the alert color, never counted with what passes. */
+.merge-links-withdrawn {
+    color: var(--color-alert);
+}

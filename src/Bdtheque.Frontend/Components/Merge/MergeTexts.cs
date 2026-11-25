@@ -50,6 +50,27 @@ public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer)
         _ => localizer["Last", string.Join(localizer["Comma"].Value, parts.Take(parts.Count - 1)), parts[^1]].Value,
     };
 
+    /// <summary>
+    /// The elements of a list the merge discards, which the confirmation says it will delete (visuel/fusion/fusion-de-deux-fiches.md):
+    /// a line per type, in the order of the entity types, and per record that held them, the first one first
+    /// (« 1 contribution : Uderzo (Dessin), de Astérix », « 2 genres : Humour et Aventure, de Asterix »).
+    /// </summary>
+    /// <param name="discarded">Each element discarded: its type (a genre, a universe or a contribution), the record that held it, its name.</param>
+    /// <param name="recordName">The name of a merged record.</param>
+    public IEnumerable<string> Discarded(IEnumerable<(EntityKind Kind, MergeSide Holder, string Name)> discarded, Func<MergeSide, string> recordName) =>
+        discarded
+            .GroupBy(d => (d.Kind, d.Holder))
+            .OrderBy(g => EntityKindOrder.Of(g.Key.Kind)).ThenBy(g => g.Key.Holder)
+            .Select(g => DiscardedOfARecord(g.Key.Kind, [.. g.Select(d => d.Name)], recordName(g.Key.Holder)));
+
+    private string DiscardedOfARecord(EntityKind kind, IReadOnlyList<string> names, string record)
+    {
+        var listed = Enumerate(names);
+        return names.Count == 1
+            ? localizer[$"Discarded.One.{kind}", listed, record].Value
+            : localizer[$"Discarded.Other.{kind}", names.Count, listed, record].Value;
+    }
+
     /// <summary>Whether a type of records is named by the texts of the merge (a test pins every type a merge links).</summary>
     public bool Names(EntityKind kind) => !localizer[$"Linked.One.{kind}"].ResourceNotFound;
 }
