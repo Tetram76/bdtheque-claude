@@ -15777,7 +15777,7 @@
             "format": "int32"
           }
         },
-        "description": "What a type of records linked to the merged records counts, as the screen says it passes to the record\n(« Crédité sur 26 albums — les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches »)."
+        "description": "What a type of records linked to the merged records counts, as the screen says it passes to the record\n(« Crédité sur 26 albums — les 24 de « Gotlib » et les 3 de « Marcel Gotlib », dont 1 commun aux deux fiches »)."
       },
       "MergeResult": {
         "required": [
