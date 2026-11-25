@@ -196,8 +196,12 @@
 
     // A value missing, or a text left empty, reads as a data absent.
     private RenderFragment Value(ChangeLogValue? value) => value is not null && Texts.Value(value, _settings!.AlbumLabelFormat) is { Length: > 0 } text
-        ? @<LabelText Text="@text" />
+        ? Label(text)
         : @<NotSet Brief="true" Mention="@L["Empty.Value"]" />;
+
+    // The template closed by its semicolon: written on its line alone, it would take the line break after it, a space under the
+    // strikethrough of a value withdrawn.
+    private static RenderFragment Label(string text) => @<LabelText Text="@text" />;
 
     // « 12 408 entrées », « 1 entrée », « Aucune entrée ».
     private string CountText() => _list!.Entries.TotalCount switch

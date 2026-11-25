@@ -148,6 +148,15 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
     }
 
     [Fact]
+    // The value withdrawn struck through, and it alone: no space at its end under the strikethrough.
+    public void Changes_AWithdrawal_StrikesThroughItsValueOnly()
+    {
+        var struck = Rows(Open(""))[0].QuerySelector(".log-before s")!;
+
+        Assert.Equal("Albert Uderzo (Dessin)", struck.TextContent);
+    }
+
+    [Fact]
     // Its record modified, its history, the consultation: a record deleted since leads only to its history.
     public void Menu_LeadsToTheRecordAsLongAsItExists()
     {
