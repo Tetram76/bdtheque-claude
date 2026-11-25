@@ -165,7 +165,7 @@ else
     /// A row of the merge: a data, or an element held by one series only (<paramref name="Element"/>, of the series
     /// <paramref name="Holder"/>), or by both, the same value on both sides.
     /// </summary>
-    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null);
+    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null, EntityKind? Kind = null);
 
     // In the order of the entry form of a series (visuel/saisie-serie/contenu.md).
     private IEnumerable<Row> Rows
@@ -186,9 +186,9 @@ else
             foreach (var row in ContributionRows())
                 yield return row;
             yield return new(PublisherKey, L["Data.Publisher"], PublisherText(first), PublisherText(second));
-            foreach (var row in ElementRows("genre", L["Data.Genre"], s => s.Genres.Select(g => (g.Id, g.Label))))
+            foreach (var row in ElementRows("genre", EntityKind.Genre, L["Data.Genre"], s => s.Genres.Select(g => (g.Id, g.Label))))
                 yield return row;
-            foreach (var row in ElementRows("universe", L["Data.Universe"], s => s.Universes.Select(u => (u.Universe.Id, UniverseText(u)))))
+            foreach (var row in ElementRows("universe", EntityKind.Universe, L["Data.Universe"], s => s.Universes.Select(u => (u.Universe.Id, UniverseText(u)))))
                 yield return row;
             yield return new(SummaryKey, L["Data.Summary"], first.Summary, second.Summary, Long: true);
             yield return new(NotesKey, L["Data.Notes"], first.PersonalNotes, second.PersonalNotes, Long: true);
@@ -204,7 +204,7 @@ else
     }
 
     // A genre or a universe of both series, by its identifier: once, the same on both sides; of one series only, retained or not.
-    private IEnumerable<Row> ElementRows(string kind, string label, Func<SeriesMergeRecord, IEnumerable<(Guid Id, string Text)>> elements)
+    private IEnumerable<Row> ElementRows(string kind, EntityKind entity, string label, Func<SeriesMergeRecord, IEnumerable<(Guid Id, string Text)>> elements)
     {
         var (first, second) = (elements(Preview!.First).ToList(), elements(Preview.Second).ToList());
         foreach (var (id, text) in first.Concat(second.Where(e => !first.Exists(f => f.Id == e.Id))))
@@ -217,7 +217,7 @@ else
                 (true, false) => MergeSide.First,
                 _ => MergeSide.Second,
             };
-            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null, Element: holder is null ? null : id, Holder: holder);
+            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null, Element: holder is null ? null : id, Holder: holder, Kind: entity);
         }
     }
 
@@ -235,7 +235,7 @@ else
             var only = credit.Count() == 1 ? credit.Single() : ((MergeContribution, MergeSide)?)null;
             yield return new($"contribution-{credit.Key.Id}-{credit.Key.Role}", Values.Of(credit.Key.Role),
                 only is { Item2: MergeSide.Second } ? null : name, only is { Item2: MergeSide.First } ? null : name,
-                Element: only?.Item1.Id, Holder: only?.Item2);
+                Element: only?.Item1.Id, Holder: only?.Item2, Kind: EntityKind.Contribution);
         }
     }
 
@@ -376,15 +376,11 @@ else
     [
         .. Merge.Discarded(
             Rows.Where(r => r.Element is not null && Choices![r.Key] != r.Holder)
-                .Select(r => (Kind: KindOf(r.Key), Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, r.Label))
+                .Select(r => (Kind: r.Kind!.Value, Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, r.Label))
                 .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", Citation.Of(d.Name), d.Label].Value : Citation.Of(d.Name))),
             side => Of(side).Title),
     ];
 
-    private static EntityKind KindOf(string key) =>
-        key.StartsWith("contribution-", StringComparison.Ordinal) ? EntityKind.Contribution
-        : key.StartsWith("genre-", StringComparison.Ordinal) ? EntityKind.Genre
-        : EntityKind.Universe;
 
     private void OpenConfirmation()
     {
