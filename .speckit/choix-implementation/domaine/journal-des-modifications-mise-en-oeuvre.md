@@ -7,7 +7,7 @@ applies_to:
   - 'src/Bdtheque.Domain/Entities/ChangeLog*.cs'
   - 'src/Bdtheque.Domain/Entities/RecordLabel.cs'
   - 'src/Bdtheque.Api/Endpoints/ChangeLogEndpoints.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T12:00:00Z }
 ---
 
 # Journal des modifications : mise en œuvre
@@ -15,7 +15,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T22:30:00Z }
 - **Entrées capturées à l'enregistrement** ([Entrée du journal des modifications](../../modele-metier/entree-du-journal-des-modifications.md)), point de passage unique de toute écriture, comme les dates ([Dates renseignées automatiquement : mise en œuvre](../persistance/dates-renseignees-automatiquement-mise-en-oeuvre.md)), d'après ce que le suivi des modifications s'apprête à écrire, dans la même transaction : aucune opération du domaine ni aucun endpoint n'y pense, et la reprise des données les produira de même. Une fiche ajoutée au modèle y est ajoutée avec son libellé et la correspondance de ses attributs.
   - **Alternative écartée (entrées produites par chaque endpoint)** : autant d'appels à ne pas oublier que d'écritures, sans rien pour signaler un oubli.
   - Une **modification est déduite des valeurs**, jamais de l'état de l'entité : la racine d'un agrégat étant marquée modifiée à toute écriture ([Concurrence d'accès](../persistance/concurrence-d-acces.md)), une écriture qui ne change rien de la fiche ne produit pas d'entrée.
-  - Un **élément porté** (genre, univers, contribution, visuel) ajouté, retiré ou réarrangé, ou une contribution créditée à un autre auteur par la fusion de deux auteurs ([Fusion de deux fiches : mise en œuvre](../ecritures/fusion-des-fiches-mise-en-oeuvre.md)), est un changement de la fiche qui le porte ; son retrait par la suppression de l'élément associé, fait par la base, n'en est pas un : l'entrée de suppression de l'élément en rend compte.
+  - Un **élément porté** (genre, univers, contribution, visuel) ajouté, retiré ou réarrangé, ou une contribution créditée à un autre auteur par la fusion de deux auteurs, ou passée à la série qui reste par la fusion de deux séries ([Fusion de deux fiches : mise en œuvre](../ecritures/fusion-des-fiches-mise-en-oeuvre.md)), est un changement de la fiche qui le porte, celle qui la reçoit l'ajoutant, celle qui la perd la retirant ; son retrait par la suppression de l'élément associé, fait par la base, n'en est pas un : l'entrée de suppression de l'élément en rend compte.
   - Les **fiches supprimées avec une autre** reçoivent chacune leur entrée : elles doivent être chargées, pour que leur suppression passe par le suivi plutôt que par la cascade de la base, hors de vue du journal ; un enregistrement qui supprimerait par cascade une fiche non chargée est refusé.
   - **Enregistrement asynchrone seulement** : les libellés lisent en base les fiches que l'enregistrement ne suit pas.
 - **Chaque propriété d'une fiche forme un attribut, ou est écartée délibérément** (valeurs dérivées ou renseignées automatiquement, rattachements qui ne changent jamais) ; un test échoue pour toute propriété ajoutée sans être classée. Un attribut n'est consigné que si sa valeur change. L'empreinte d'un jeton d'accès, secret, forme un attribut consigné **sans valeur** : son renouvellement apparaît, sans rien révéler.
