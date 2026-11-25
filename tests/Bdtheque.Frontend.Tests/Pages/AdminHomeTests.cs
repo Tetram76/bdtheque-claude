@@ -185,10 +185,16 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     // Under the list, the link to the whole change log; the block bears the mention of the change log, the same set.
     public void LatestChanges_LeadToTheWholeChangeLog()
     {
+        _api.Answers["/admin/change-log/latest-records"] = new[]
+        {
+            new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 5, 20, 8, 0, TimeSpan.Zero), RecordType.Genre,
+                Guid.CreateVersion7(), null, true, new NameLabel("Western"), ChangeLogOperation.Creation, []),
+        };
+
         var block = BlockOf(Render<AdminHome>(), "Dernières modifications");
 
         var more = block.QuerySelector("p.admin-home-more")!;
-        Assert.True(more.PreviousElementSibling!.Matches("ul.admin-rows, p.admin-home-note"));
+        Assert.True(more.PreviousElementSibling!.Matches("ul.admin-rows"));
         Assert.Null(more.NextElementSibling);
         var link = more.QuerySelector("a")!;
         Assert.Equal(("Tout le journal", AppPaths.AdminChangeLog), (link.TextContent.Trim(), link.GetAttribute("href")));
@@ -200,7 +206,10 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     {
         var page = Render<AdminHome>();
 
-        Assert.Equal("Aucune fiche n'a encore été saisie.", BlockOf(page, "Dernières modifications").QuerySelector("p.admin-home-note")!.TextContent.Trim());
+        var block = BlockOf(page, "Dernières modifications");
+        Assert.Equal("Aucune fiche n'a encore été saisie.", block.QuerySelector("p.admin-home-note")!.TextContent.Trim());
+        // Nothing to follow: no link to the whole change log.
+        Assert.Null(block.QuerySelector("p.admin-home-more"));
     }
 
     [Fact]
