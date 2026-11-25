@@ -257,6 +257,20 @@ public sealed class Album : EntityBase, IAggregateRoot
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
 
+    /// <summary>
+    /// Attaches the album to <paramref name="kept"/> instead of <paramref name="merged"/>, as the merge of two series does
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md): its title, its contributions and everything else stay as they are.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same series twice.</exception>
+    public void TransferSeries(Series merged, Series kept)
+    {
+        MergeGuard.EnsureDistinct(merged, kept);
+        if (SeriesId != merged.Id)
+            return;
+        Series = kept;
+        SeriesId = kept.Id;
+    }
+
     public void SetRating(AlbumRating? rating)
     {
         if (rating is not null)

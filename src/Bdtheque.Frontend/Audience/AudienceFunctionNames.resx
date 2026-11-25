@@ -609,4 +609,10 @@
   <data name="admin.publisher-merge.merged" xml:space="preserve">
     <value>Fusion de deux éditeurs · fusion faite</value>
   </data>
+  <data name="admin.series-merge" xml:space="preserve">
+    <value>Fusion de deux séries</value>
+  </data>
+  <data name="admin.series-merge.merged" xml:space="preserve">
+    <value>Fusion de deux séries · fusion faite</value>
+  </data>
 </root>

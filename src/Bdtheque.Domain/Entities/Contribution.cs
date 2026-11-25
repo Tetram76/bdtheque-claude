@@ -93,6 +93,16 @@ public sealed class Contribution : EntityBase
     }
 
     /// <summary>
+    /// Passes the template contribution to <paramref name="series"/>, with its identity, as the merge of two series does when the
+    /// series that remains retains it of the other one (<see cref="Series.MergeTemplateContributions"/>).
+    /// </summary>
+    internal void MoveTo(Series series)
+    {
+        Series = series;
+        SeriesId = series.Id;
+    }
+
+    /// <summary>
     /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> in every role the latter holds, as the merge of two
     /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md): each contribution keeps its identity, which a saved search may
     /// designate, and a role both of them hold is credited once, by the contribution of <paramref name="kept"/>.

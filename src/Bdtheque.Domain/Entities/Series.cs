@@ -150,6 +150,51 @@ public sealed class Series : EntityBase, IAggregateRoot
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);
 
     /// <summary>
+    /// Each contribution of <paramref name="other"/> whose credit (author and role) this series holds too, with the contribution of
+    /// this series that holds it: the merge of the two series keeps such a credit once, by the contribution of the one that
+    /// remains, which a saved search designating the other one designates instead (fonctionnel/regles-metier/fusion-des-fiches.md).
+    /// </summary>
+    /// <exception cref="ArgumentException">The same series twice.</exception>
+    public IReadOnlyList<(Guid Removed, Guid Kept)> CreditsHeldOf(Series other)
+    {
+        MergeGuard.EnsureDistinct(other, this);
+        return
+        [
+            .. other._templateContributions
+                .Select(c => (Removed: c.Id, Kept: _templateContributions.Find(held => held.AuthorId == c.AuthorId && held.Role == c.Role)?.Id))
+                .Where(c => c.Kept is not null)
+                .Select(c => (c.Removed, c.Kept!.Value)),
+        ];
+    }
+
+    /// <summary>
+    /// Keeps, of the contributions of this series and of <paramref name="merged"/>, those the merge of the two series retains
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md), this series being the one that remains: a contribution of the other
+    /// series retained passes to this one with its identity, which a saved search may designate; one discarded stays with the
+    /// other series, deleted with it; one of this series discarded is removed. A credit both series hold, the same value on
+    /// both sides, is kept once, by the contribution of this series (<see cref="CreditsHeldOf"/>), whatever
+    /// <paramref name="retained"/> says of it.
+    /// </summary>
+    /// <param name="retained">The contributions retained, of either series.</param>
+    /// <exception cref="ArgumentException">The same series twice, or a contribution retained of neither series.</exception>
+    public void MergeTemplateContributions(Series merged, IReadOnlyCollection<Guid> retained)
+    {
+        ArgumentNullException.ThrowIfNull(retained);
+        var held = CreditsHeldOf(merged);
+        var foreign = retained.Where(id => !_templateContributions.Exists(c => c.Id == id) && !merged._templateContributions.Exists(c => c.Id == id)).ToList();
+        if (foreign.Count > 0)
+            throw new ArgumentException($"The contributions {string.Join(", ", foreign)} are of neither merged series.", nameof(retained));
+
+        _templateContributions.RemoveAll(c => !retained.Contains(c.Id) && !held.Any(h => h.Kept == c.Id));
+        foreach (var other in merged._templateContributions.Where(c => retained.Contains(c.Id) && !held.Any(h => h.Removed == c.Id)).ToList())
+        {
+            merged._templateContributions.Remove(other);
+            other.MoveTo(this);
+            _templateContributions.Add(other);
+        }
+    }
+
+    /// <summary>
     /// The contributions the series gives an album attached to it
     /// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): those of its template, for an album that
     /// has none yet, or, being created, whose authors are still exactly those of the series chosen before, which they replace;

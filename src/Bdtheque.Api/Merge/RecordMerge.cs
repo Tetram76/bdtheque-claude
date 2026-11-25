@@ -47,13 +47,16 @@ internal static class RecordMerge
 
     /// <summary>
     /// Merges two records: both are locked and checked at the versions their data were read, what designated
-    /// the other one is transferred to the record that remains, the saved searches designating the other one included, the
-    /// other one is deleted, then the record that remains takes its data, all in one transaction.
+    /// the other one is transferred to the record that remains, the saved searches designating the other one included, then the
+    /// record that remains takes its data and the other one is deleted, all in one transaction.
     /// </summary>
     /// <param name="keepFirst">Whether the first record remains (<see cref="KeepsFirst"/>).</param>
-    /// <param name="assign">Gives the record that remains its data, of the one or the other, both read and locked.</param>
+    /// <param name="assign">
+    /// Gives the record that remains its data, of the one or the other, both read and locked, the elements of the other one it
+    /// retains included (e.g. a contribution of a series, which passes to the series that remains with its identity).
+    /// </param>
     /// <param name="transfer">
-    /// Transfers to the record that remains what designated the other one, and tells the records it removed as duplicates
+    /// Transfers to the record that remains what designated the other one, and tells the records the merge removes as duplicates
     /// (e.g. a contribution both authors held), each with the one that replaces it.
     /// </param>
     /// <returns>The record that remains.</returns>
@@ -70,20 +73,21 @@ internal static class RecordMerge
             (first.Id, first.Version), (second.Id, second.Version), cancellationToken: cancellationToken);
         var pair = new MergePair<TRoot>(firstRoot, secondRoot, keepFirst);
 
-        // Three saves, one transaction. What designated the merged record is transferred first: what the transfer takes from
+        // Two saves, one transaction. What designated the merged record is transferred first: what the transfer takes from
         // its owners (e.g. the contributions of the merged author on an album) is only deleted by the save, before which it
-        // still designates the merged record, whose deletion would refuse it. The merged record is deleted next, so that the
-        // data the kept record takes from it last are free (e.g. the display name of an author, unique).
+        // still designates the merged record, whose deletion would refuse it. The kept record then takes its data, and the
+        // merged record is deleted, in the same save: the elements of the merged record the kept one retains leave it before its
+        // deletion takes them along, and the change log records the kept record once. A unique value the kept record takes
+        // from the other one (e.g. the display name of an author) is free, EF Core ordering the deletion that releases a value
+        // of a unique index before the update that takes it (source of EF Core, CommandBatchPreparer.AddUniqueValueEdges).
         var replaced = (await transfer(pair)).ToList();
         if (AdvancedSearchSchema.KindOf(typeof(TRoot)) is { } kind)
             replaced.Add(new MergeReplacement(kind, pair.Merged.Id, pair.Kept.Id));
         await TransferSavedSearchesAsync(context, replaced, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
-        context.Remove(pair.Merged);
-        await context.SaveChangesAsync(cancellationToken);
-
         assign(pair);
+        context.Remove(pair.Merged);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new MergeResult(pair.Kept.Id);

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 
 namespace Bdtheque.Contracts.Admin;
@@ -58,6 +59,44 @@ public sealed record AuthorMergeRequest(
 /// which the merge of two authors presents for the names chosen.
 /// </summary>
 public sealed record AuthorIdentity(string DisplayName, string SortKey, string NavigationEntry);
+
+/// <summary>
+/// An element of a list proper to the merged records (a genre, a universe, a contribution), held by one of them only, and the
+/// record whose value its row retains (fonctionnel/regles-metier/fusion-des-fiches.md): the record holding it keeps it, the other
+/// one, whose value is missing, discards it. An element both records hold is kept, with nothing to choose.
+/// </summary>
+public sealed record MergeElement(Guid Id, MergeSide Side);
+
+/// <summary>A template contribution of a series, as its merge presents it: its author, credited in its role.</summary>
+public sealed record SeriesMergeContribution(Guid Id, AuthorListItem Author, ContributionRole Role);
+
+/// <summary>A series as its merge presents it: what its form edits, and the records it references, named.</summary>
+/// <param name="ManualSortKey">The sort key entered by hand, <c>null</c> when it follows the title.</param>
+/// <param name="PublisherCollection">With its publisher, the one it belongs to.</param>
+/// <param name="Universes">Each with its ancestors, a universe being presented with them.</param>
+public sealed record SeriesMergeRecord(
+    Guid Id, string Title, string? ManualSortKey, SeriesStatus? Status, int? TheoreticalVolumeCount, bool IsComplete,
+    bool ExcludeFromMissingVolumes, bool ExcludeFromReleaseEstimates, string? Summary, string? PersonalNotes,
+    SeriesEditionTemplate EditionTemplate, PublisherListItem? Publisher, PublisherCollectionListItem? PublisherCollection,
+    IReadOnlyList<GenreListItem> Genres, IReadOnlyList<UniverseInHierarchy> Universes, IReadOnlyList<SeriesMergeContribution> Contributions,
+    DateTimeOffset ModifiedAt, uint Version);
+
+/// <summary>Two series to merge, and their albums, in the order of the entity types.</summary>
+public sealed record SeriesMergePreview(SeriesMergeRecord First, SeriesMergeRecord Second, IReadOnlyList<MergeLinkCount> Links);
+
+/// <summary>
+/// The merge of two series: each data kept, of the one or the other, the publisher and its collection together, of the same
+/// series (modele-metier/relations-et-cardinalites.md); and each genre, universe and contribution held by one series only,
+/// retained or discarded.
+/// </summary>
+/// <param name="SortKey">The sort key, entered by hand or following the title kept.</param>
+/// <param name="Publisher">The publisher and the collection of the template, together.</param>
+public sealed record SeriesMergeRequest(
+    MergedRecord First, MergedRecord Second, MergeSide Title, MergeSide SortKey, MergeSide Status, MergeSide TheoreticalVolumeCount,
+    MergeSide IsComplete, MergeSide ExcludeFromMissingVolumes, MergeSide ExcludeFromReleaseEstimates, MergeSide Summary,
+    MergeSide PersonalNotes, MergeSide Publisher, MergeSide Category, MergeSide Condition, MergeSide Binding, MergeSide Format,
+    MergeSide Orientation, MergeSide ReadingDirection, MergeSide IsColor, IReadOnlyList<MergeElement> Genres,
+    IReadOnlyList<MergeElement> Universes, IReadOnlyList<MergeElement> Contributions);
 
 /// <summary>A publisher as its merge presents it.</summary>
 public sealed record PublisherMergeRecord(Guid Id, string Name, string? Website, DateTimeOffset ModifiedAt, uint Version);

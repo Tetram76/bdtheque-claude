@@ -3670,6 +3670,152 @@
         }
       }
     },
+    "/admin/series/merge": {
+      "get": {
+        "tags": [
+          "SeriesEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeriesMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "SeriesEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeriesMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/albums": {
       "get": {
         "tags": [
@@ -14971,6 +15117,23 @@
         },
         "description": "A merged record, at the version its data were read, as the merge sends it back."
       },
+      "MergeElement": {
+        "required": [
+          "id",
+          "side"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "side": {
+            "$ref": "#/components/schemas/MergeSide"
+          }
+        },
+        "description": "An element of a list proper to the merged records (a genre, a universe, a contribution), held by one of them only, and the\nrecord whose value its row retains (fonctionnel/regles-metier/fusion-des-fiches.md): the record holding it keeps it, the other\none, whose value is missing, discards it. An element both records hold is kept, with nothing to choose."
+      },
       "MergeLinkCount": {
         "required": [
           "kind",
@@ -19134,6 +19297,292 @@
             "type": "string"
           }
         }
+      },
+      "SeriesMergeContribution": {
+        "required": [
+          "id",
+          "author",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorListItem"
+          },
+          "role": {
+            "$ref": "#/components/schemas/ContributionRole"
+          }
+        },
+        "description": "A template contribution of a series, as its merge presents it: its author, credited in its role."
+      },
+      "SeriesMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/SeriesMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/SeriesMergeRecord"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            }
+          }
+        },
+        "description": "Two series to merge, and their albums, in the order of the entity types."
+      },
+      "SeriesMergeRecord": {
+        "required": [
+          "id",
+          "title",
+          "manualSortKey",
+          "status",
+          "theoreticalVolumeCount",
+          "isComplete",
+          "excludeFromMissingVolumes",
+          "excludeFromReleaseEstimates",
+          "summary",
+          "personalNotes",
+          "editionTemplate",
+          "publisher",
+          "publisherCollection",
+          "genres",
+          "universes",
+          "contributions",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "manualSortKey": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The sort key entered by hand, `null` when it follows the title."
+          },
+          "status": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SeriesStatus"
+              }
+            ]
+          },
+          "theoreticalVolumeCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "excludeFromMissingVolumes": {
+            "type": "boolean"
+          },
+          "excludeFromReleaseEstimates": {
+            "type": "boolean"
+          },
+          "summary": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "personalNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "editionTemplate": {
+            "$ref": "#/components/schemas/SeriesEditionTemplate"
+          },
+          "publisher": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PublisherListItem"
+              }
+            ]
+          },
+          "publisherCollection": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "With its publisher, the one it belongs to.",
+                "$ref": "#/components/schemas/PublisherCollectionListItem"
+              }
+            ]
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreListItem"
+            }
+          },
+          "universes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniverseInHierarchy"
+            },
+            "description": "Each with its ancestors, a universe being presented with them."
+          },
+          "contributions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesMergeContribution"
+            }
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "A series as its merge presents it: what its form edits, and the records it references, named."
+      },
+      "SeriesMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "title",
+          "sortKey",
+          "status",
+          "theoreticalVolumeCount",
+          "isComplete",
+          "excludeFromMissingVolumes",
+          "excludeFromReleaseEstimates",
+          "summary",
+          "personalNotes",
+          "publisher",
+          "category",
+          "condition",
+          "binding",
+          "format",
+          "orientation",
+          "readingDirection",
+          "isColor",
+          "genres",
+          "universes",
+          "contributions"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "title": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "sortKey": {
+            "description": "The sort key, entered by hand or following the title kept.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "theoreticalVolumeCount": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isComplete": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "excludeFromMissingVolumes": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "excludeFromReleaseEstimates": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "personalNotes": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "publisher": {
+            "description": "The publisher and the collection of the template, together.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "category": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "binding": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "format": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "orientation": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "readingDirection": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isColor": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            }
+          },
+          "universes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            }
+          },
+          "contributions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            }
+          }
+        },
+        "description": "The merge of two series: each data kept, of the one or the other, the publisher and its collection together, of the same\nseries (modele-metier/relations-et-cardinalites.md); and each genre, universe and contribution held by one series only,\nretained or discarded."
       },
       "SeriesOverview": {
         "required": [

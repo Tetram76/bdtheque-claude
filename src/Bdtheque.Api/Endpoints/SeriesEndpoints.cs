@@ -1,6 +1,7 @@
 using System.Data;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -39,6 +40,160 @@ internal static class SeriesEndpoints
         series.MapPost("/", CreateAsync);
         series.MapPut("/{id:guid}", UpdateAsync);
         series.MapDeletion<Series>(DeletionLinks);
+        series.MapGet("/merge", GetMergeAsync);
+        series.MapPost("/merge", MergeAsync);
+    }
+
+    // The albums of a series, which pass to the series that remains (visuel/fusion/fusion-de-deux-fiches.md).
+    private static readonly (EntityKind Kind, Func<BdthequeDbContext, Guid, IQueryable<Guid>> Records)[] MergeLinks =
+    [
+        (EntityKind.Album, (context, id) => context.Albums.Where(a => a.SeriesId == id).Select(a => a.Id)),
+    ];
+
+    /// <summary>Two series to merge, and their albums (fonctionnel/regles-metier/fusion-des-fiches.md).</summary>
+    private static async Task<SeriesMergePreview> GetMergeAsync(Guid first, Guid second, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot: the counts are those of the two series read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        return new SeriesMergePreview(
+            await MergeRecordAsync(context, first, cancellationToken),
+            await MergeRecordAsync(context, second, cancellationToken),
+            await RecordMerge.CountLinksAsync(context, first, second, MergeLinks, cancellationToken));
+    }
+
+    private static async Task<SeriesMergeRecord> MergeRecordAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
+    {
+        // Tracked, for the version of the aggregate (BdthequeDbContext.VersionOf): the context lives for this request only.
+        var series = await WithChildren(context.Series).SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
+                     ?? throw new EntityNotFoundException(typeof(Series), id);
+        var form = await ToFormAsync(context, series, cancellationToken);
+        return new SeriesMergeRecord(
+            series.Id, series.Title, form.Content.ManualSortKey, form.Content.Status, series.TheoreticalVolumeCount, series.IsComplete,
+            series.ExcludeFromMissingVolumes, series.ExcludeFromReleaseEstimates, series.Summary, series.PersonalNotes,
+            form.Content.EditionTemplate, form.References.Publisher, form.References.PublisherCollection, form.References.Genres,
+            form.References.Universes,
+            [
+                .. series.TemplateContributions
+                    .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
+                    .Select(c => new SeriesMergeContribution(
+                        c.Id, new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
+                        EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value)),
+            ],
+            series.ModifiedAt, form.Version);
+    }
+
+    /// <summary>
+    /// Merges two series: the series that remains keeps each data chosen, the publisher and its collection together, the genres,
+    /// universes and contributions retained of both, a credit both held being kept once; the albums of both are its albums.
+    /// </summary>
+    private static Task<MergeResult> MergeAsync(SeriesMergeRequest request, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        RecordMerge.MergeAsync<Series>(
+            context, request.First, request.Second,
+            RecordMerge.KeepsFirst(
+            [
+                request.Title, request.SortKey, request.Status, request.TheoreticalVolumeCount, request.IsComplete,
+                request.ExcludeFromMissingVolumes, request.ExcludeFromReleaseEstimates, request.Summary, request.PersonalNotes,
+                request.Publisher, request.Category, request.Condition, request.Binding, request.Format, request.Orientation,
+                request.ReadingDirection, request.IsColor,
+                .. request.Genres.Select(g => g.Side), .. request.Universes.Select(u => u.Side), .. request.Contributions.Select(c => c.Side),
+            ]),
+            pair => AssignMerged(pair, request),
+            async pair =>
+            {
+                // What the series that remains takes of either series, read with them before anything changes.
+                foreach (var series in new[] { pair.First, pair.Second })
+                    await LoadChildrenAsync(context, series, cancellationToken);
+
+                foreach (var album in await RecordMerge.LoadLinkedForWriteAsync<Album>(
+                             context, context.Albums.Where(a => a.SeriesId == pair.Merged.Id).Select(a => a.Id), cancellationToken))
+                    album.TransferSeries(pair.Merged, pair.Kept);
+
+                // A credit both series hold is kept once, by the contribution of the series that remains, which a saved search
+                // designating the other one designates instead (contributions are searched).
+                return [.. pair.Kept.CreditsHeldOf(pair.Merged).Select(c => new MergeReplacement(EntityKind.Contribution, c.Removed, c.Kept))];
+            },
+            cancellationToken);
+
+    // The children of a series locked for its merge, which WithChildren reads with a series otherwise.
+    private static async Task LoadChildrenAsync(BdthequeDbContext context, Series series, CancellationToken cancellationToken)
+    {
+        var entry = context.Entry(series);
+        await entry.Collection(s => s.Genres).LoadAsync(cancellationToken);
+        await entry.Collection(s => s.Universes).LoadAsync(cancellationToken);
+        await entry.Reference(s => s.TemplatePublisher).LoadAsync(cancellationToken);
+        await entry.Reference(s => s.TemplatePublisherCollection).LoadAsync(cancellationToken);
+        await entry.Collection(s => s.TemplateContributions).Query().Include(c => c.Author).LoadAsync(cancellationToken);
+    }
+
+    // The data of the series that remains, each of the series chosen, read from both before it changes.
+    private static void AssignMerged(MergePair<Series> pair, SeriesMergeRequest request)
+    {
+        var kept = pair.Kept;
+        var title = pair.Of(request.Title).Title;
+        var sortKey = pair.Of(request.SortKey) is { IsManualSortKey: true } manual ? manual.SortKey : null;
+        var (status, volumes, complete) =
+            (pair.Of(request.Status).Status, pair.Of(request.TheoreticalVolumeCount).TheoreticalVolumeCount, pair.Of(request.IsComplete).IsComplete);
+        var (excludeFromMissing, excludeFromEstimates) =
+            (pair.Of(request.ExcludeFromMissingVolumes).ExcludeFromMissingVolumes, pair.Of(request.ExcludeFromReleaseEstimates).ExcludeFromReleaseEstimates);
+        var (summary, notes) = (pair.Of(request.Summary).Summary, pair.Of(request.PersonalNotes).PersonalNotes);
+        var (publisher, collection) = (pair.Of(request.Publisher).TemplatePublisher, pair.Of(request.Publisher).TemplatePublisherCollection);
+        var (category, condition, binding) = (
+            pair.Of(request.Category).TemplateEditionCategory, pair.Of(request.Condition).TemplateCondition, pair.Of(request.Binding).TemplateBinding);
+        var (format, orientation, readingDirection, isColor) = (
+            pair.Of(request.Format).TemplateFormat, pair.Of(request.Orientation).TemplateOrientation,
+            pair.Of(request.ReadingDirection).TemplateReadingDirection, pair.Of(request.IsColor).TemplateIsColor);
+        var genres = Retained(pair, request.Genres, s => s.Genres, g => g.Id);
+        var universes = Retained(pair, request.Universes, s => s.Universes, u => u.Id);
+        var contributions = Retained(pair, request.Contributions, s => s.TemplateContributions, c => (c.AuthorId, c.Role));
+
+        kept.SetTitle(title);
+        if (sortKey is not null)
+            kept.SetSortKey(sortKey);
+        else
+            kept.ResetSortKey();
+        kept.SetStatus(status);
+        kept.SetTheoreticalVolumeCount(volumes);
+        kept.SetComplete(complete);
+        kept.SetExcludeFromMissingVolumes(excludeFromMissing);
+        kept.SetExcludeFromReleaseEstimates(excludeFromEstimates);
+        kept.SetSummary(summary);
+        kept.SetPersonalNotes(notes);
+        kept.SetTemplate(publisher, collection);
+        kept.SetTemplateEditionCategory(category);
+        kept.SetTemplateCondition(condition);
+        kept.SetTemplateBinding(binding);
+        kept.SetTemplateFormat(format);
+        kept.SetTemplateOrientation(orientation);
+        kept.SetTemplateReadingDirection(readingDirection);
+        kept.SetTemplateIsColor(isColor);
+        FormReferences.ReplaceAssociations(kept.Genres, genres, kept.AddGenre, kept.RemoveGenre);
+        FormReferences.ReplaceAssociations(kept.Universes, universes, kept.AddUniverse, kept.RemoveUniverse);
+        kept.MergeTemplateContributions(pair.Merged, [.. contributions.Select(c => c.Id)]);
+    }
+
+    /// <summary>
+    /// The elements of a list of both series (genres, universes, contributions) the merge retains: one both hold, the same value
+    /// on both sides, with nothing to choose; one held by a single series, if the client retains the side of that series.
+    /// </summary>
+    /// <param name="sameAs">What makes the elements of the two series the same (a contribution: its credit, author and role).</param>
+    /// <exception cref="ArgumentException">An element held by a single series, with no side sent for it.</exception>
+    private static List<TElement> Retained<TElement, TSame>(
+        MergePair<Series> pair, IReadOnlyList<MergeElement> choices, Func<Series, IEnumerable<TElement>> elements, Func<TElement, TSame> sameAs)
+        where TElement : Domain.Entities.Common.EntityBase
+    {
+        var (first, second) = (elements(pair.First).ToList(), elements(pair.Second).ToList());
+        var common = first.Select(sameAs).Intersect(second.Select(sameAs)).ToHashSet();
+        var held = first.Select(e => (Element: e, Side: MergeSide.First)).Concat(second.Select(e => (Element: e, Side: MergeSide.Second))).ToList();
+        var unchosen = held.Where(e => !common.Contains(sameAs(e.Element)) && !choices.Any(c => c.Id == e.Element.Id)).Select(e => e.Element.Id).ToList();
+        if (unchosen.Count > 0)
+            throw new ArgumentException($"No side is sent for the elements {string.Join(", ", unchosen)}.", nameof(choices));
+
+        return
+        [
+            .. held.Where(e => common.Contains(sameAs(e.Element)) || choices.First(c => c.Id == e.Element.Id).Side == e.Side)
+                .Select(e => e.Element)
+                .DistinctBy(e => e.Id),
+        ];
     }
 
     public static void MapSeriesCatalog(this RouteGroupBuilder catalog)

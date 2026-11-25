@@ -314,6 +314,17 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.AlbumAsync(OneShot("Les Phares jumeaux", 2023, 5, [scienceFiction, sf], [],
             [Credit(arnaud, ContributionRole.Scenarist), Credit(arnautTwin, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));
         await data.AlbumAsync(OneShot("Orbite basse", 2024, 2, [sf], [], [Credit(arnautTwin, ContributionRole.Scenarist)]));
+        // A series saved again under its title in words, to merge with « 13 Lunes »: the same scenarist, a colourist instead of
+        // its illustrator, another publisher with its collection, another format and status, a genre and a universe of its own,
+        // a summary, and the next volume, which passes to the series that remains.
+        var moonsTwin = await data.SeriesAsync(Series(TwinSeriesTitle, SeriesStatus.InProgress,
+            Template(lagoon.Id, lagoon.Collections[1], EditionFormat.Large), [scienceFiction, fantasy], [archipelago],
+            [Credit(brume, ContributionRole.Scenarist), Credit(ostrova, ContributionRole.Colorist)]) with
+        {
+            Summary = "Trois lunes se lèvent sur l'archipel, puis une quatrième.",
+        });
+        await data.AlbumAsync(Album("Lune noire", moonsTwin, 4, 1993));
+
         // A publisher saved again under a shortened name, without website, its collections homonymous to two of the first one,
         // one spelled otherwise, the other the same, which the merge makes one, and one of its own; with a series in its own
         // collection, and an edition of its album in the homonym spelled otherwise.
@@ -385,6 +396,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
     /// <summary>The genre « Science-fiction » saved again under its abbreviation, to merge with it.</summary>
     public const string TwinGenre = "SF";
+
+    /// <summary>The series « 13 Lunes » saved again under its title in words, to merge with it.</summary>
+    public const string TwinSeriesTitle = "Treize Lunes";
 
     /// <summary>The publisher « Éditions du Lagon » saved again under a shortened name, to merge with it.</summary>
     public const string TwinPublisherName = "Éditions Lagon";
