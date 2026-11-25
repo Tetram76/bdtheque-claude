@@ -271,7 +271,12 @@ chosen before the others; the whole selection was presented at step 2.4.
   decide to do without the reply, when it can; wait for a needed reply
   within a bounded delay, then check the real state (GitHub,
   `get_session` / `list_events` of the session), and do without the reply
-  if it can, or send the message again if still needed. It is **paramount**
+  if it can, or send the message again if still needed. **Before waiting
+  for a reply, or sending a message again, check the state of the
+  recipient session** (`get_session`): an archived or deleted session never
+  reads a message nor replies to it; do not wait for it, send it nothing
+  more, check the real state (GitHub) and do without the reply, or turn to
+  whoever can answer (the orchestrator, the user). It is **paramount**
   that the sessions, the orchestrator included, take into account the
   messages they receive, and answer them as soon as possible when needed:
   read a message received as soon as possible and, if it asks for a reply,
