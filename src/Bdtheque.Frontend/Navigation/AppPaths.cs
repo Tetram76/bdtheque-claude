@@ -138,6 +138,11 @@ public static class AppPaths
     /// </summary>
     public const string AdminMergeAlbums = NotYetImplemented;
 
+    /// <summary>
+    /// The segment of the merge of two records, after the list of their type (visuel/fusion/fusion-de-deux-fiches.md).
+    /// </summary>
+    private const string MergeSegment = "/merge";
+
     /// <summary>The list of the series of the administration (visuel/listes/).</summary>
     public const string AdminSeries = "/admin/series";
 
@@ -148,7 +153,7 @@ public static class AppPaths
     /// The merge of two series (visuel/fusion/fusion-de-deux-fiches.md): it receives the series and the other one, <c>series</c>
     /// and <c>other</c>.
     /// </summary>
-    public const string AdminMergeSeries = AdminSeries + "/merge";
+    public const string AdminMergeSeries = AdminSeries + MergeSegment;
 
     /// <summary>The list of the editions of the administration (visuel/listes/).</summary>
     public const string AdminEditions = "/admin/editions";
@@ -227,7 +232,7 @@ public static class AppPaths
     /// The merge of two authors (visuel/fusion/fusion-de-deux-fiches.md): it receives the author and the other one,
     /// <c>author</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergeAuthors = AdminAuthors + "/merge";
+    public const string AdminMergeAuthors = AdminAuthors + MergeSegment;
 
     /// <summary>The list of the publishers of the administration (visuel/listes/).</summary>
     public const string AdminPublishers = "/admin/publishers";
@@ -239,7 +244,7 @@ public static class AppPaths
     /// The merge of two publishers and of their homonymous collections (visuel/fusion/fusion-de-deux-fiches.md): it receives the
     /// publisher and the other one, <c>publisher</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergePublishers = AdminPublishers + "/merge";
+    public const string AdminMergePublishers = AdminPublishers + MergeSegment;
 
     /// <summary>
     /// The list of the genres of the administration (visuel/listes/), where a genre is changed in its row and a new one added in
@@ -254,7 +259,7 @@ public static class AppPaths
     /// The merge of two genres (visuel/fusion/fusion-de-deux-fiches.md): it receives the genre and the other one, <c>genre</c>
     /// and <c>other</c>.
     /// </summary>
-    public const string AdminMergeGenres = AdminGenres + "/merge";
+    public const string AdminMergeGenres = AdminGenres + MergeSegment;
 
     /// <summary>
     /// The list of the universes of the administration (visuel/listes/), where a universe is entered in a side panel over the
