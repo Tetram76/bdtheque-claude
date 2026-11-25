@@ -58,7 +58,7 @@
     <value>Hier, {0}</value>
   </data>
   <data name="More" xml:space="preserve">
-    <value>Autres actions : {0}</value>
+    <value>Autres actions sur {0}</value>
   </data>
   <data name="Menu.Edit" xml:space="preserve">
     <value>Modifier la fiche</value>

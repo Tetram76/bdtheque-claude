@@ -252,6 +252,9 @@
   <data name="Attribute.DisplayCulture" xml:space="preserve">
     <value>Culture d'affichage</value>
   </data>
+  <data name="Attribute.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
   <data name="Attribute.AcceptedIsbn" xml:space="preserve">
     <value>ISBN dont l'erreur est acceptée</value>
   </data>

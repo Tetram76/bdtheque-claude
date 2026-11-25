@@ -40,6 +40,10 @@
 
 .log-time {
     grid-area: time;
+}
+
+/* The style of the values of a column is the rows' only, its head keeping that of the other heads (#319). */
+.log-row:not(.log-row-head) .log-time {
     color: var(--color-text-muted);
     font-size: var(--font-size-small);
     font-variant-numeric: tabular-nums;
@@ -105,7 +109,7 @@
         display: grid;
     }
 
-    .log-time {
+    .log-row:not(.log-row-head) .log-time {
         padding-block-start: 0.125rem;
     }
 

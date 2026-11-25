@@ -349,6 +349,17 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.AlbumAsync(OneShot("La Marée rousse", 2022, 9, [], [ashMoon, archipelagoTwin], [Credit(arnaud, ContributionRole.Scenarist)]));
         await data.UniverseAsync(NestedTwinUniverse, "Ombrelune avant sa refonte.", watchersCity);
 
+        // An album modified in several of its data at once, which the change log presents one by one
+        // (visuel/journal/journal-des-modifications.md, Entrées): its rating changed, a genre added, an author withdrawn, a
+        // summary written where there was none.
+        await data.ModifyAlbumAsync(fog.Id, album => album with
+        {
+            Rating = AlbumRating.VeryGood,
+            Summary = "Une brume tenace recouvre Ombrelune, et avec elle les souvenirs de ses habitants.",
+            GenreIds = [.. album.GenreIds, humour],
+            Contributions = [.. album.Contributions.Where(c => c.AuthorId != pinceau)],
+        });
+
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
         // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
         // its record as on its cards (fonctionnel/regles-metier/couverture-d-un-album.md).
@@ -634,6 +645,14 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             using var response = await client.PutAsJsonAsync(
                 $"/admin/publishers/{id}", new UpdatePublisherRequest(content, publisher.Version), cancellationToken);
             await ReadAsync<PublisherForm>(response);
+        }
+
+        public async Task ModifyAlbumAsync(Guid id, Func<AlbumContent, AlbumContent> change)
+        {
+            var album = await GetAsync<AlbumForm>($"/admin/albums/{id}");
+            using var response = await client.PutAsJsonAsync(
+                $"/admin/albums/{id}", new UpdateAlbumRequest(change(album.Content), album.Version), cancellationToken);
+            await ReadAsync<AlbumForm>(response);
         }
 
         public async Task<AlbumWrite> AlbumAsync(AlbumContent content)

@@ -1,13 +1,14 @@
 ---
 type: Choix d'implémentation
 title: 'Journal des modifications : mise en œuvre'
-description: 'Capture des écritures à l''enregistrement, correspondance des attributs, libellés et valeurs en données, stockage JSON, API ; à lire pour toute fiche ou attribut ajouté.'
+description: 'Capture des écritures à l''enregistrement, correspondance des attributs, libellés et valeurs en données, stockage JSON, API, recherche et filtres du journal entier, existence d''une fiche ; à lire pour toute fiche ou attribut ajouté, ou pour l''écran du journal.'
 applies_to:
   - 'src/Bdtheque.Infrastructure/ChangeLog*.cs'
   - 'src/Bdtheque.Domain/Entities/ChangeLog*.cs'
   - 'src/Bdtheque.Domain/Entities/RecordLabel.cs'
   - 'src/Bdtheque.Api/Endpoints/ChangeLogEndpoints.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T10:50:00Z }
+  - 'src/Bdtheque.Frontend/Formatting/ChangeLogTexts.cs'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T14:50:00Z }
 ---
 
 # Journal des modifications : mise en œuvre
@@ -24,3 +25,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T10:50:00Z }
 - **Dernières fiches écrites** ([Contenu](../../visuel/administration/contenu.md), Dernières modifications) : chaque fiche une fois, par sa dernière entrée, sans les fiches supprimées (un identifiant n'est jamais redonné). Les fiches sont lues d'abord, par regroupement, puis leurs entrées : EF Core ne traduit la première entrée d'un groupe que comme dernier opérateur d'une requête (documentation d'EF Core, *Complex query operators*).
 - **Parent lu avec l'entrée, jamais enregistré** : une édition et une intention d'acquisition, adressées par leur album, une collection, saisie avec son éditeur, n'ont de page que sous leur parent ([Contenu](../../visuel/administration/contenu.md), Dernières modifications) ; l'API le lit avec les entrées, pour les fiches qui existent encore, et la fiche supprimée depuis n'en a pas, ni de page où mener.
   - **Alternative écartée (parent enregistré dans l'entrée)** : un attribut de plus dans le modèle de l'entrée, que les entrées déjà écrites n'ont pas, pour une donnée qui dit où est la fiche, et non ce qu'elle était, ce que l'entrée consigne.
+- **Journal entier, recherche sur le libellé enregistré** ([Journal des modifications](../../visuel/journal/journal-des-modifications.md)) : le libellé d'une entrée n'existe qu'en composantes `jsonb` ; la recherche compare au texte cherché toutes ses chaînes, discriminants exceptés, celles du libellé de l'album d'une édition comprises, réunies par un chemin JSON écrit en SQL, sous la collation insensible à la casse et aux accents des listes ([Recherche](../api/recherche.md)), le reste de la requête se composant par-dessus ; sans index, comme toute recherche par inclusion.
+  - **Alternative écartée (texte du libellé stocké dans une colonne, calculée ou écrite à l'enregistrement)** : une colonne et une migration de plus, et une seconde forme du libellé à tenir alignée sur ses composantes, pour un parcours de quelques milliers d'entrées.
+  - **Alternative écartée (`jsonb::text` comparé tel quel)** : les noms des propriétés et les discriminants y seraient trouvés (« album », « title »).
+- **Période en jours du navigateur** : deux jours inclus, traduits en instants par l'API dans le fuseau horaire que le frontend transmet, comme pour la recherche avancée ([Recherche avancée : mise en œuvre](../recherche-avancee/recherche-avancee-mise-en-oeuvre.md)).
+- **Existence d'une fiche déduite du journal lui-même** : une fiche existe tant qu'aucune entrée de suppression ne la désigne, un identifiant n'étant jamais redonné ; aucune lecture des tables des fiches, de types différents.
+- **Attribut élément ou donnée** : l'ajout ou le retrait d'un élément porté (genre, univers, contribution, visuel) se présente comme tel, sans valeur avant ou après ([Entrée du journal des modifications](../../modele-metier/entree-du-journal-des-modifications.md)) ; pour tout autre attribut, une valeur absente est une donnée absente. Le frontend tient cette distinction par attribut, l'entrée ne portant que des valeurs.

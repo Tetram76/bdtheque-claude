@@ -18,7 +18,7 @@ public sealed class AdminListHeadsTests(AdministrationApplication application) :
     [Theory]
     [InEachTheme(AppPaths.AdminAlbums), InEachTheme(AppPaths.AdminSeries), InEachTheme(AppPaths.AdminEditions)]
     [InEachTheme(AppPaths.AdminPurchaseIntents), InEachTheme(AppPaths.AdminAuthors), InEachTheme(AppPaths.AdminPublishers)]
-    [InEachTheme(AppPaths.AdminGenres), InEachTheme(AppPaths.AdminUniverses)]
+    [InEachTheme(AppPaths.AdminGenres), InEachTheme(AppPaths.AdminUniverses), InEachTheme(AppPaths.AdminChangeLog)]
     public async Task HeadsOfTheColumns_AllHaveTheSameStyle(string theme, string list)
     {
         var page = await NewPageAsync(theme, Desktop);

@@ -5216,6 +5216,51 @@
         ],
         "parameters": [
           {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recordType",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RecordType"
+            }
+          },
+          {
+            "name": "operation",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ChangeLogOperation"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "record",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -5239,6 +5284,13 @@
               ],
               "format": "int32",
               "default": 50
+            }
+          },
+          {
+            "name": "timeZone",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -5288,7 +5340,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageOfChangeLogEntryItem"
+                  "$ref": "#/components/schemas/ChangeLogList"
                 }
               }
             }
@@ -12838,6 +12890,7 @@
           "recordType",
           "recordId",
           "parentId",
+          "recordExists",
           "label",
           "operation",
           "changes"
@@ -12869,6 +12922,10 @@
             "description": "The record under which the page of this one is addressed: the album of an edition or of a purchase intent, the publisher of\na collection (visuel/administration/contenu.md, Dernières modifications). Read with the entry, for a record that still\nexists; `null` for any other record.",
             "format": "uuid"
           },
+          "recordExists": {
+            "type": "boolean",
+            "description": "Whether the record still exists, that is has not been deleted since: only then does its entry lead to its entry form, or to the\nconsultation (visuel/journal/journal-des-modifications.md, Menu d'une entrée)."
+          },
           "label": {
             "description": "What the label of the record was built from at the time of the write.",
             "$ref": "#/components/schemas/RecordLabel"
@@ -12886,6 +12943,40 @@
         },
         "description": "An entry of the change log (modele-metier/entree-du-journal-des-modifications.md). It carries\ndata, never a text: the client builds the message in the display culture in force when it presents\nit (fonctionnel/presentation/langue-et-culture-d-affichage.md), and always the same message for the same entry."
       },
+      "ChangeLogList": {
+        "required": [
+          "entries",
+          "wholeCount",
+          "record"
+        ],
+        "type": "object",
+        "properties": {
+          "entries": {
+            "$ref": "#/components/schemas/PageOfChangeLogEntryItem"
+          },
+          "wholeCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The number of entries of the whole change log, whatever its criteria: the total of its title.",
+            "format": "int32"
+          },
+          "record": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "The record the change log is filtered on, by its latest entry, which the tag of its filter names; `null` without that\nfilter, or for a record no entry knows.",
+                "$ref": "#/components/schemas/ChangeLogRecord"
+              }
+            ]
+          }
+        },
+        "description": "A page of the change log under its criteria (visuel/journal/journal-des-modifications.md)."
+      },
       "ChangeLogOperation": {
         "enum": [
           "Creation",
@@ -12893,6 +12984,22 @@
           "Deletion"
         ],
         "description": "Operation recorded by an entry of the change log (modele-metier/entree-du-journal-des-modifications.md)."
+      },
+      "ChangeLogRecord": {
+        "required": [
+          "recordType",
+          "label"
+        ],
+        "type": "object",
+        "properties": {
+          "recordType": {
+            "$ref": "#/components/schemas/RecordType"
+          },
+          "label": {
+            "$ref": "#/components/schemas/RecordLabel"
+          }
+        },
+        "description": "A record, by its type and what its label was built from at its latest entry."
       },
       "ChangeLogValue": {
         "required": [

@@ -41,6 +41,8 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
             new(ChangeLogAttribute.Contribution, new ContributionValue(Guid.NewGuid(), new AuthorLabel("Uderzo", "Albert", null), ContributionRole.Illustrator), null),
             new(ChangeLogAttribute.Summary, null, null),
             new(ChangeLogAttribute.PersonalNotes, new TextValue(""), new TextValue("À relire")),
+            new(ChangeLogAttribute.Status, null, new EnumValue(nameof(SeriesStatus), nameof(SeriesStatus.Completed))),
+            new(ChangeLogAttribute.Website, new TextValue("https://example.org"), null),
         ]);
 
     private static readonly ChangeLogEntryItem EditionCreated = new(
@@ -124,8 +126,8 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
     }
 
     [Fact]
-    // Each change: its attribute, then its value before and after, an element added or withdrawn, a secret without its values,
-    // an empty value as a data absent.
+    // Each change: its attribute, then its value before and after, an element carried added or withdrawn, a secret without its
+    // values, a value missing or empty of any other attribute as a data absent.
     public void Changes_OfAModification_EachWithItsValues()
     {
         var changes = Rows(Open(""))[0].QuerySelectorAll(".log-change")
@@ -138,6 +140,8 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
                 ("Auteurs", "Albert Uderzo (Dessin) retiré"),
                 ("Résumé", "renouvelée, valeur non consignée"),
                 ("Notes personnelles", "—Non renseigné → À relire"),
+                ("Statut", "—Non renseigné → Terminée"),
+                ("Site web", "https://example.org → —Non renseigné"),
             ],
             changes);
         Assert.Empty(Rows(Open(""))[1].QuerySelectorAll(".log-changes"));
@@ -160,7 +164,7 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
             [("Modifier la fiche", AppPaths.AdminEditEdition(AlbumId, EditionId)), ("Historique de cette fiche", $"{AppPaths.AdminChangeLog}?record={EditionId}")],
             MenuOf(rows[1]));
         Assert.Equal([("Historique de cette fiche", $"{AppPaths.AdminChangeLog}?record={GenreId}")], MenuOf(rows[2]));
-        Assert.Equal("Autres actions : Western spaghetti", rows[2].QuerySelector(".actions-menu > button")!.GetAttribute("aria-label"));
+        Assert.Equal("Autres actions sur Western spaghetti", rows[2].QuerySelector(".actions-menu > button")!.GetAttribute("aria-label"));
     }
 
     [Fact]

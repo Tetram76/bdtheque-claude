@@ -184,17 +184,18 @@
         return CultureInfo.CurrentCulture.TextInfo.ToUpper(date[0]) + date[1..];
     }
 
-    // « Bien → Très bien », « + Humour », « Albert Uderzo (Dessin) retiré », or a secret renewed without its values.
+    // « Bien → Très bien », « — → Très bien », « + Humour », « Albert Uderzo (Dessin) retiré », or a secret renewed without its
+    // values; an element carried added or withdrawn, any other value missing being a data absent.
     private RenderFragment ChangeText(ChangeLogChange change) => (change.Before, change.After) switch
     {
         (null, null) => @<span class="log-secret">@Texts.Secret</span>,
-        (null, { } added) => @<strong>+ @Value(added)</strong>,
-        ({ } removed, null) => @<span class="log-before"><s>@Value(removed)</s> @Texts.Removed</span>,
-        ({ } before, { } after) => @<span><span class="log-before">@Value(before)</span> <span class="log-arrow" aria-label="@L["Becomes"]">→</span> <strong>@Value(after)</strong></span>,
+        (null, { } added) when ChangeLogTexts.IsElement(change.Attribute) => @<strong>+ @Value(added)</strong>,
+        ({ } removed, null) when ChangeLogTexts.IsElement(change.Attribute) => @<span class="log-before"><s>@Value(removed)</s> @Texts.Removed</span>,
+        var (before, after) => @<span><span class="log-before">@Value(before)</span> <span class="log-arrow" aria-label="@L["Becomes"]">→</span> <strong>@Value(after)</strong></span>,
     };
 
-    // A text left empty reads as a data absent.
-    private RenderFragment Value(ChangeLogValue value) => Texts.Value(value, _settings!.AlbumLabelFormat) is { Length: > 0 } text
+    // A value missing, or a text left empty, reads as a data absent.
+    private RenderFragment Value(ChangeLogValue? value) => value is not null && Texts.Value(value, _settings!.AlbumLabelFormat) is { Length: > 0 } text
         ? @<LabelText Text="@text" />
         : @<NotSet Brief="true" Mention="@L["Empty.Value"]" />;
 

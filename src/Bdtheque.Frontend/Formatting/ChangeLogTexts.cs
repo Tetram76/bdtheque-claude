@@ -21,6 +21,14 @@ public sealed class ChangeLogTexts(IStringLocalizer<ChangeLogTexts> texts, Value
     public string Of(ChangeLogAttribute attribute) => texts[$"Attribute.{attribute}"];
 
     /// <summary>
+    /// Whether an attribute is an element the record carries, added or withdrawn as a whole (a genre, a universe, a contribution,
+    /// a visual): a change without value before is then an addition, without value after a withdrawal
+    /// (modele-metier/entree-du-journal-des-modifications.md); of any other attribute, a value missing is a data absent.
+    /// </summary>
+    public static bool IsElement(ChangeLogAttribute attribute) =>
+        attribute is ChangeLogAttribute.Genre or ChangeLogAttribute.Universe or ChangeLogAttribute.Contribution or ChangeLogAttribute.Visual;
+
+    /// <summary>
     /// The type of a record of an entry, which the line under its label gives: an edition followed by its album, the label of
     /// an edition naming it alone (visuel/journal/journal-des-modifications.md, Entrées).
     /// </summary>
