@@ -46,8 +46,8 @@ public sealed class AdminUniverseMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux univers ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Star Wars {_marker}.");
-        await Assertions.Expect(confirmation).ToContainTextAsync("Les sous-univers homonymes n'en feront plus qu'un chacun : Clone Wars.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Star Wars {_marker}\u00A0».");
+        await Assertions.Expect(confirmation).ToContainTextAsync("Les sous-univers homonymes n'en feront plus qu'un chacun : «\u00A0Clone Wars\u00A0».");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminUniverses));

@@ -6,6 +6,7 @@
 @using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<AdminMergeSeries> L
 @inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
 @inject ValueLabels Values
 @inject ApiClient Api
 @inject AudienceRecorder Recorder
@@ -58,7 +59,7 @@ else
                     <li>@Merge.OneRecord(KeptTitle)</li>
                     @if (Merge.Linked(Preview.Links) is { } linked)
                     {
-                        <li>@L["Confirm.Albums", KeptTitle, linked]</li>
+                        <li>@L["Confirm.Albums", Citation.Of(KeptTitle), linked]</li>
                     }
                 </ul>
                 <MergeRemovals Lines="Removals" />
@@ -116,7 +117,7 @@ else
     [PersistentState]
     public Dictionary<string, MergeSide?>? Choices { get; set; }
 
-    private MergeTexts Merge => new(MergeLocalizer);
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
 
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Series"], AppPaths.AdminSeries), new(L["Breadcrumb"])];
 
@@ -366,7 +367,7 @@ else
         .. Merge.Discarded(
             Rows.Where(r => r.Element is not null && Choices![r.Key] != r.Holder)
                 .Select(r => (Kind: KindOf(r.Key), Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, r.Label))
-                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", d.Name, d.Label].Value : d.Name)),
+                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", Citation.Of(d.Name), d.Label].Value : Citation.Of(d.Name))),
             side => Of(side).Title),
     ];
 

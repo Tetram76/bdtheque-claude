@@ -171,7 +171,7 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
         Assert.Contains("2 éditions", links.TextContent);
         Assert.Contains("1 intention d'acquisition", links.TextContent);
         Assert.Equal(
-            "L'intention d'acquisition de La marque jaune (INT. - 6 [1 à 2]) sur l'album entier sera retirée : l'album aura des éditions.",
+            "L'intention d'acquisition de l'album «\u00A0La marque jaune (INT. - 6 [1 à 2])\u00A0» sera retirée : l'album aura des éditions.",
             page.Find(".merge-links-withdrawn").TextContent.Trim());
     }
 
@@ -189,14 +189,14 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
 
         await page.SubmitAsync("form");
         var confirmation = page.Find("dialog");
-        Assert.Contains("Les deux fiches n'en feront plus qu'une : La Marque jaune (Blake et Mortimer - T. 6).", confirmation.TextContent);
-        Assert.Contains("La Marque jaune (Blake et Mortimer - T. 6) aura les 2 éditions et l'intention des deux fiches.", confirmation.TextContent);
+        Assert.Contains("Les deux fiches n'en feront plus qu'une : «\u00A0La Marque jaune (Blake et Mortimer - T. 6)\u00A0».", confirmation.TextContent);
+        Assert.Contains("«\u00A0La Marque jaune (Blake et Mortimer - T. 6)\u00A0» aura les 2 éditions et l'intention des deux fiches.", confirmation.TextContent);
         Assert.Equal("Sera supprimé :", page.Find(".merge-removals-title").TextContent.Trim());
         Assert.Equal(
             [
-                "l'intention d'acquisition de La marque jaune (INT. - 6 [1 à 2]) sur l'album entier : l'album aura des éditions",
-                "1 contribution : Edgar P. Jacobs (Dessin), de La Marque jaune (Blake et Mortimer - T. 6)",
-                "1 genre : Policier, de La marque jaune (INT. - 6 [1 à 2])",
+                "l'intention d'acquisition de l'album «\u00A0La marque jaune (INT. - 6 [1 à 2])\u00A0» : l'album aura des éditions",
+                "1 contribution : «\u00A0Edgar P. Jacobs\u00A0» (Dessin), de «\u00A0La Marque jaune (Blake et Mortimer - T. 6)\u00A0»",
+                "1 genre : «\u00A0Policier\u00A0», de «\u00A0La marque jaune (INT. - 6 [1 à 2])\u00A0»",
             ],
             page.FindAll(".merge-removals li").Select(line => line.TextContent.Trim()));
         await page.ClickAsync("dialog button[data-variant=delete]");

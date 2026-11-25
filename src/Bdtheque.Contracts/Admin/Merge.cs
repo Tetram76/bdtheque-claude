@@ -20,7 +20,7 @@ public sealed record MergedRecord(Guid Id, uint Version);
 
 /// <summary>
 /// What a type of records linked to the merged records counts, as the screen says it passes to the record
-/// (« Crédité sur 26 albums — les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches »).
+/// (« Crédité sur 26 albums — les 24 de « Gotlib » et les 3 de « Marcel Gotlib », dont 1 commun aux deux fiches »).
 /// </summary>
 /// <param name="Kind">The type of the linked records.</param>
 /// <param name="Total">The records linked to the merged record, each once.</param>

@@ -5,6 +5,7 @@
 @using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<AdminMergeAuthors> L
 @inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
 @inject ApiClient Api
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -50,7 +51,7 @@ else
                     <li>@Merge.OneRecord(KeptName)</li>
                     @if (Merge.Linked(Preview.Links) is { } linked)
                     {
-                        <li>@L["Confirm.Credited", KeptName, linked]</li>
+                        <li>@L["Confirm.Credited", Citation.Of(KeptName), linked]</li>
                     }
                 </ul>
             </ChildContent>
@@ -88,7 +89,7 @@ else
     [PersistentState]
     public AuthorMergeChoices? Choices { get; set; }
 
-    private MergeTexts Merge => new(MergeLocalizer);
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
 
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Authors"], AppPaths.AdminAuthors), new(L["Breadcrumb"])];
 

@@ -1,5 +1,6 @@
 @using Bdtheque.Contracts.Admin
 @inject IStringLocalizer<MergeLinks> L
+@inject Citation Citation
 
 @* What passes to the record, in the order of the entity types (visuel/fusion/fusion-de-deux-fiches.md): a line per type of
    linked records, its total after the merge, then where it comes from. What was linked to both is counted once and said
@@ -38,7 +39,7 @@
 
     /// <summary>
     /// The records the merge deletes besides the other one, which it counts nowhere, each with its reason (« L'intention
-    /// d'acquisition de A sur l'album entier sera retirée : l'album aura des éditions. »), after the types of linked records
+    /// d'acquisition de l'album « A » sera retirée : l'album aura des éditions. »), after the types of linked records
     /// (decision of the user, #646).
     /// </summary>
     [Parameter]
@@ -48,8 +49,9 @@
     [Parameter, EditorRequired]
     public Func<MergeLinkCount, string> Count { get; set; } = null!;
 
-    // « les 24 de Gotlib et celle de Marcel Gotlib, dont 1 commune aux deux fiches »: a record with nothing of the type is not
-    // named, one record is « celui » or « celle », as the type is said.
+    // « les 24 de « Gotlib » et celle de « Marcel Gotlib », dont 1 commune aux deux fiches »: a record with nothing of the type is
+    // not named, one record is « celui » or « celle », as the type is said; each name cited
+    // (fonctionnel/presentation/noms-cites-dans-un-message.md).
     private string Detail(MergeLinkCount link)
     {
         var parts = new[] { Part(link.Kind, link.First, FirstName), Part(link.Kind, link.Second, SecondName) }.OfType<string>();
@@ -65,7 +67,7 @@
     private string? Part(Bdtheque.Contracts.Enums.EntityKind kind, int count, string name) => count switch
     {
         0 => null,
-        1 => L[$"Part.One.{kind}", name].Value,
-        _ => L["Part.Other", count, name].Value,
+        1 => L[$"Part.One.{kind}", Citation.Of(name)].Value,
+        _ => L["Part.Other", count, Citation.Of(name)].Value,
     };
 }

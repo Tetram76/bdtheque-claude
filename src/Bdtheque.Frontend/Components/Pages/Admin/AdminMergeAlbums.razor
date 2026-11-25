@@ -7,6 +7,7 @@
 @using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<AdminMergeAlbums> L
 @inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
 @inject ValueLabels Values
 @inject RecordLabels Labels
 @inject DisplayFormatter Display
@@ -51,7 +52,7 @@ else
             </MergeData>
         }
         <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count"
-                    Withdrawn="@([.. Preview.WithdrawnPurchaseIntents.Select(side => L["Links.Withdrawn", NameOf(side)].Value)])" />
+                    Withdrawn="@([.. Preview.WithdrawnPurchaseIntents.Select(side => L["Links.Withdrawn", Citation.Of(NameOf(side))].Value)])" />
     </EntryForm>
 
     @if (_confirming)
@@ -63,7 +64,7 @@ else
                     <li>@Merge.OneRecord(KeptLabel)</li>
                     @if (Merge.Linked(Preview.Links) is { } linked)
                     {
-                        <li>@L["Confirm.Linked", KeptLabel, linked]</li>
+                        <li>@L["Confirm.Linked", Citation.Of(KeptLabel), linked]</li>
                     }
                 </ul>
                 <MergeRemovals Lines="Removals" />
@@ -121,7 +122,7 @@ else
     [PersistentState]
     public Dictionary<string, MergeSide?>? Choices { get; set; }
 
-    private MergeTexts Merge => new(MergeLocalizer);
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
 
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(L["Breadcrumb"])];
 
@@ -407,10 +408,10 @@ else
             var discarded = Rows
                 .Where(r => r.Element is not null && Choices![r.Key] != r.Holder)
                 .Select(r => (Kind: KindOf(r.Key), Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, Row: r))
-                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", d.Name, d.Row.Label].Value : d.Name));
+                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", Citation.Of(d.Name), d.Row.Label].Value : Citation.Of(d.Name)));
             List<string> lines =
             [
-                .. Preview!.WithdrawnPurchaseIntents.Select(side => L["Confirm.Withdrawn", NameOf(side)].Value),
+                .. Preview!.WithdrawnPurchaseIntents.Select(side => L["Confirm.Withdrawn", Citation.Of(NameOf(side))].Value),
                 .. Merge.Discarded(discarded, NameOf),
             ];
             return lines;

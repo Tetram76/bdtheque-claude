@@ -45,7 +45,7 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux genres ?" });
         await Assertions.Expect(confirmation).ToContainTextAsync("La fusion est définitive.");
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : SF {_marker}.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0SF {_marker}\u00A0».");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres));
@@ -72,7 +72,7 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Courte." }).CheckAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux auteurs ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Gotlib {_marker}.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Gotlib {_marker}\u00A0».");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors));
@@ -114,8 +114,8 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux éditeurs ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Dupuis {_marker}.");
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Dupuis {_marker} réunira les 3 collections des deux fiches.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Dupuis {_marker}\u00A0».");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"«\u00A0Dupuis {_marker}\u00A0» réunira les 3 collections des deux fiches.");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers));
@@ -151,8 +151,8 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux séries ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Spirou et Fantasio {_marker}.");
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Spirou et Fantasio {_marker} regroupera les 2 albums des deux fiches.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Spirou et Fantasio {_marker}\u00A0».");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"«\u00A0Spirou et Fantasio {_marker}\u00A0» regroupera les 2 albums des deux fiches.");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
@@ -186,7 +186,7 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Fusionner deux albums");
         // The intent on the whole second album does not pass: the album will have the edition of the first one.
         await Assertions.Expect(page.Locator(".merge-links-withdrawn")).ToHaveTextAsync(
-            $"L'intention d'acquisition de Le lotus bleu {_marker} sur l'album entier sera retirée : l'album aura des éditions.");
+            $"L'intention d'acquisition de l'album «\u00A0Le lotus bleu {_marker}\u00A0» sera retirée : l'album aura des éditions.");
         // Two titles, neither favoured; every other data the same in both albums.
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("1 donnée reste à choisir");
         await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Titre" })
@@ -197,10 +197,10 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux albums ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Le lotus bleu {_marker}.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Le lotus bleu {_marker}\u00A0».");
         await Assertions.Expect(confirmation.Locator(".merge-removals")).ToContainTextAsync("Sera supprimé :");
         await Assertions.Expect(confirmation.Locator(".merge-removals li")).ToHaveTextAsync(
-            [$"l'intention d'acquisition de Le lotus bleu {_marker} sur l'album entier : l'album aura des éditions"]);
+            [$"l'intention d'acquisition de l'album «\u00A0Le lotus bleu {_marker}\u00A0» : l'album aura des éditions"]);
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));

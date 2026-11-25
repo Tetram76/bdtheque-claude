@@ -118,7 +118,7 @@
     <value>{0} intentions d&apos;acquisition</value>
   </data>
   <data name="Links.Withdrawn" xml:space="preserve">
-    <value>L&apos;intention d&apos;acquisition de {0} sur l&apos;album entier sera retirée : l&apos;album aura des éditions.</value>
+    <value>L&apos;intention d&apos;acquisition de l&apos;album {0} sera retirée : l&apos;album aura des éditions.</value>
   </data>
   <data name="Confirm.Title" xml:space="preserve">
     <value>Fusionner les deux albums ?</value>
@@ -127,7 +127,7 @@
     <value>{0} aura {1}.</value>
   </data>
   <data name="Confirm.Withdrawn" xml:space="preserve">
-    <value>l&apos;intention d&apos;acquisition de {0} sur l&apos;album entier : l&apos;album aura des éditions</value>
+    <value>l&apos;intention d&apos;acquisition de l&apos;album {0} : l&apos;album aura des éditions</value>
   </data>
   <data name="Confirm.Contribution" xml:space="preserve">
     <value>{0} ({1})</value>

@@ -92,7 +92,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         services.AddScoped<AdminRecordCounts>();
         services.AddScoped(_ => new BrowserTimeZone { Name = "Europe/Paris" });
         services.AddScoped<DisplayFormatter>();
-        services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
+        services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>().AddSingleton<Citation>();
         services.AddSingleton<ValueLabels>();
         services.AddSingleton<Bdtheque.Frontend.Audience.AudienceFunctionNames>();
     }

@@ -172,10 +172,10 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
 
         await page.SubmitAsync("form");
         var confirmation = page.Find("dialog");
-        Assert.Contains("Les deux fiches n'en feront plus qu'une : Asterix.", confirmation.TextContent);
-        Assert.Contains("Asterix regroupera les 40 albums des deux fiches.", confirmation.TextContent);
+        Assert.Contains("Les deux fiches n'en feront plus qu'une : «\u00A0Asterix\u00A0».", confirmation.TextContent);
+        Assert.Contains("«\u00A0Asterix\u00A0» regroupera les 40 albums des deux fiches.", confirmation.TextContent);
         // Uderzo, discarded, the confirmation sets apart as deleted.
-        Assert.Equal(["1 contribution : Albert Uderzo (Dessin), de Astérix"], page.FindAll(".merge-removals li").Select(line => line.TextContent.Trim()));
+        Assert.Equal(["1 contribution : «\u00A0Albert Uderzo\u00A0» (Dessin), de «\u00A0Astérix\u00A0»"], page.FindAll(".merge-removals li").Select(line => line.TextContent.Trim()));
         await page.ClickAsync("dialog button[data-variant=delete]");
 
         var (_, path, body) = Assert.Single(_api.Written);
