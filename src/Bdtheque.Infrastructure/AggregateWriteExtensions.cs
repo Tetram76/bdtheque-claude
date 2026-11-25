@@ -106,15 +106,7 @@ public static class AggregateWriteExtensions
                 "An aggregate must be locked before anything is tracked: entities read earlier would not be refreshed.");
 
         foreach (var (id, version) in new[] { first, second }.OrderBy(r => r.Id))
-        {
-            var lockedVersions = await context.Database
-                .SqlQueryRaw<long>(LockStatement<TRoot>(context, column => column + "::text::bigint", BdthequeDbContext.VersionProperty), id)
-                .ToListAsync(cancellationToken);
-            if (lockedVersions.Count == 0)
-                throw new EntityNotFoundException(typeof(TRoot), id);
-            if (lockedVersions[0] != version)
-                throw new DbUpdateConcurrencyException($"{typeof(TRoot).Name} {id} was modified since version {version} was read.");
-        }
+            await context.LockAtVersionAsync<TRoot>(id, version, cancellationToken);
 
         var query = context.Set<TRoot>().AsQueryable();
         var ids = new[] { first.Id, second.Id };
@@ -122,6 +114,28 @@ public static class AggregateWriteExtensions
         foreach (var root in roots)
             context.Entry(root).State = EntityState.Modified;
         return (roots.Single(r => r.Id == first.Id), roots.Single(r => r.Id == second.Id));
+    }
+
+    /// <summary>
+    /// Locks the root row of an aggregate (<c>SELECT … FOR UPDATE</c>) until the end of the transaction, and checks that it is
+    /// still at the version the client read, without loading it: for a write that changes it with others it locks first (the
+    /// sub-universes a merge of two universes merges with them, fonctionnel/regles-metier/fusion-des-fiches.md).
+    /// </summary>
+    /// <exception cref="EntityNotFoundException">No aggregate has this identifier.</exception>
+    /// <exception cref="DbUpdateConcurrencyException">The aggregate was modified since <paramref name="version"/>.</exception>
+    public static async Task LockAtVersionAsync<TRoot>(this BdthequeDbContext context, Guid id, uint version, CancellationToken cancellationToken)
+        where TRoot : EntityBase, IAggregateRoot
+    {
+        if (context.Database.CurrentTransaction is null)
+            throw new InvalidOperationException("An aggregate can only be locked within a transaction.");
+
+        var lockedVersions = await context.Database
+            .SqlQueryRaw<long>(LockStatement<TRoot>(context, column => column + "::text::bigint", BdthequeDbContext.VersionProperty), id)
+            .ToListAsync(cancellationToken);
+        if (lockedVersions.Count == 0)
+            throw new EntityNotFoundException(typeof(TRoot), id);
+        if (lockedVersions[0] != version)
+            throw new DbUpdateConcurrencyException($"{typeof(TRoot).Name} {id} was modified since version {version} was read.");
     }
 
     /// <summary>

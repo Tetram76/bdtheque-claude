@@ -65,10 +65,14 @@ internal static class RecordMerge
     /// <exception cref="DbUpdateConcurrencyException">One of the records was modified since its data were read.</exception>
     public static async Task<MergeResult> MergeAsync<TRoot>(
         BdthequeDbContext context, MergedRecord first, MergedRecord second, bool keepFirst, Action<MergePair<TRoot>> assign, Func<MergePair<TRoot>, Task<IReadOnlyList<MergeReplacement>>> transfer,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, Func<CancellationToken, Task>? lockFirst = null)
         where TRoot : EntityBase, IAggregateRoot
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        // The lock some merges take before any row lock (the hierarchy of the universes,
+        // choix-implementation/persistance/coherence-entre-tables.md).
+        if (lockFirst is not null)
+            await lockFirst(cancellationToken);
         var (firstRoot, secondRoot) = await context.LoadAggregatesForWriteAsync<TRoot>(
             (first.Id, first.Version), (second.Id, second.Version), cancellationToken: cancellationToken);
         var pair = new MergePair<TRoot>(firstRoot, secondRoot, keepFirst);
@@ -79,15 +83,21 @@ internal static class RecordMerge
         // merged record is deleted, in the same save: the elements of the merged record the kept one retains leave it before its
         // deletion takes them along, and the change log records the kept record once. A unique value the kept record takes
         // from the other one (e.g. the display name of an author) is free, EF Core ordering the deletion that releases a value
-        // of a unique index before the update that takes it (source of EF Core, CommandBatchPreparer.AddUniqueValueEdges).
+        // of a unique index before the update that takes it (source of EF Core, CommandBatchPreparer.AddUniqueValueEdges),
+        // as a sub-universe moved to the kept universe before the deletion of its former parent.
         var replaced = (await transfer(pair)).ToList();
-        if (AdvancedSearchSchema.KindOf(typeof(TRoot)) is { } kind)
-            replaced.Add(new MergeReplacement(kind, pair.Merged.Id, pair.Kept.Id));
+        var kind = AdvancedSearchSchema.KindOf(typeof(TRoot));
+        if (kind is not null)
+            replaced.Add(new MergeReplacement(kind.Value, pair.Merged.Id, pair.Kept.Id));
         await TransferSavedSearchesAsync(context, replaced, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
         assign(pair);
-        context.Remove(pair.Merged);
+        // The merged record, and every other record of its type the transfer replaced by another one (the homonymous
+        // sub-universes merged with two universes), loaded by the transfer.
+        var removed = replaced.Where(r => r.Kind == kind).Select(r => r.Merged).Append(pair.Merged.Id).ToHashSet();
+        foreach (var record in context.Set<TRoot>().Local.Where(r => removed.Contains(r.Id)).ToList())
+            context.Remove(record);
         await context.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new MergeResult(pair.Kept.Id);

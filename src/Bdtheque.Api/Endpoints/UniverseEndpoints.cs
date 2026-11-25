@@ -2,6 +2,7 @@ using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -38,6 +39,144 @@ internal static class UniverseEndpoints
         universes.MapPost("/", CreateAsync);
         universes.MapPut("/{id:guid}", UpdateAsync);
         universes.MapDeletion<Universe>(DeletionLinks);
+        universes.MapGet("/merge", GetMergeAsync);
+        universes.MapPost("/merge", MergeAsync);
+    }
+
+    /// <summary>
+    /// Two universes to merge (fonctionnel/regles-metier/fusion-des-fiches.md): each with its parent, and whether that parent
+    /// can be the one of the universe that remains; their homonymous sub-universes, merged with them at every level; and the
+    /// series, albums and sub-universes that pass to the universe that remains, counted as the list of the universes counts
+    /// them (visuel/listes/liste-par-liste.md), sub-universes included, what both hold counted once.
+    /// </summary>
+    private static async Task<UniverseMergePreview> GetMergeAsync(Guid first, Guid second, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot: the hierarchy, the pairs and the counts are those of the two universes read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var tree = await UniverseTree.LoadAsync(context, cancellationToken);
+        var (firstScope, secondScope) = (tree.WithDescendants(first), tree.WithDescendants(second));
+        // Neither of the two universes nor any of their sub-universes can be the parent of the one that remains.
+        var forbidden = firstScope.Union(secondScope).ToHashSet();
+        var pairs = UniverseMergePairs.Of(tree, await UniverseMergePairs.HomonymsAsync(context, cancellationToken), first, second);
+
+        var subRecords = await context.Universes.AsNoTracking()
+            .Where(u => pairs.Select(p => p.First).Contains(u.Id) || pairs.Select(p => p.Second).Contains(u.Id))
+            .Select(u => new UniverseMergeSubRecord(u.Id, u.Name, u.Description, u.ModifiedAt, EF.Property<uint>(u, BdthequeDbContext.VersionProperty)))
+            .ToDictionaryAsync(u => u.Id, cancellationToken);
+
+        var links = (await RecordMerge.CountLinksAsync(context, first, second,
+            [
+                (EntityKind.Series, (c, id) => c.Series.AsNoTracking().WhereUniverse(tree.WithDescendants(id)).Select(s => s.Id)),
+                (EntityKind.Album, (c, id) => c.Albums.AsNoTracking().WhereUniverse(tree.WithDescendants(id)).Select(a => a.Id)),
+            ], cancellationToken)).ToList();
+        // The sub-universes of each, the two merged excepted; a pair of homonyms, and a sub-universe of both (one universe
+        // under the other), pass as one.
+        var (ofFirst, ofSecond) = (firstScope.Except([first, second]).ToHashSet(), secondScope.Except([first, second]).ToHashSet());
+        var total = ofFirst.Union(ofSecond).Count() - pairs.Count;
+        links.Add(new MergeLinkCount(EntityKind.Universe, total, ofFirst.Count, ofSecond.Count, ofFirst.Count + ofSecond.Count - total));
+
+        return new UniverseMergePreview(
+            await MergeRecordAsync(context, tree, first, forbidden, cancellationToken),
+            await MergeRecordAsync(context, tree, second, forbidden, cancellationToken),
+            [.. pairs.Select(p => new UniverseMergePair(p.Path, subRecords[p.First], subRecords[p.Second]))],
+            [.. links.OrderBy(l => Bdtheque.Contracts.Enums.EntityKindOrder.Of(l.Kind))]);
+    }
+
+    private static async Task<UniverseMergeRecord> MergeRecordAsync(
+        BdthequeDbContext context, UniverseTree tree, Guid id, IReadOnlySet<Guid> forbidden, CancellationToken cancellationToken)
+    {
+        var universe = await context.Universes.AsNoTracking()
+                           .Where(u => u.Id == id)
+                           .Select(u => new { u.Id, u.Name, u.Description, u.ParentId, u.ModifiedAt, Version = EF.Property<uint>(u, BdthequeDbContext.VersionProperty) })
+                           .SingleOrDefaultAsync(cancellationToken)
+                       ?? throw new EntityNotFoundException(typeof(Universe), id);
+        return new UniverseMergeRecord(
+            universe.Id, universe.Name, universe.Description, universe.ParentId is { } parentId ? tree.InHierarchy(parentId) : null,
+            universe.ParentId is not { } parent || !forbidden.Contains(parent), universe.ModifiedAt, universe.Version);
+    }
+
+    /// <summary>
+    /// Merges two universes (fonctionnel/regles-metier/fusion-des-fiches.md): the universe that remains keeps each data chosen,
+    /// takes the series, albums and sub-universes of both, and each pair of homonymous sub-universes is merged in the same way,
+    /// at every level. The pairs the client chose on must be those of the hierarchy, which the lock of the hierarchy keeps from
+    /// changing until the merge is done.
+    /// </summary>
+    private static Task<MergeResult> MergeAsync(UniverseMergeRequest request, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // The pairs, each with its universe that remains and the one it absorbs, in the order of the hierarchy: a pair after the
+        // one it stands under.
+        var pairs = new List<(Universe Kept, Universe Merged, Guid? Under, UniverseMergePairChoice Choice)>();
+        return RecordMerge.MergeAsync<Universe>(
+            context, request.First, request.Second, RecordMerge.KeepsFirst([request.Name, request.Description, request.Parent]),
+            pair =>
+            {
+                // Read from both before the kept universes change.
+                var (name, description, parent) =
+                    (pair.Of(request.Name).Name, pair.Of(request.Description).Description, pair.Of(request.Parent).Parent);
+                var chosen = pairs.Select(p => (p.Kept, Name: Of(p, p.Choice.Name).Name, Description: Of(p, p.Choice.Description).Description)).ToList();
+                var leftOut = pairs.SelectMany(p => new[] { p.Kept.Id, p.Merged.Id }).Append(pair.Merged.Id).ToHashSet();
+
+                pair.Kept.Absorb(pair.Merged, parent, leftOut);
+                foreach (var (kept, merged, under, _) in pairs)
+                    kept.Absorb(merged, KeptUnder(under), leftOut);
+                pair.Kept.SetName(name);
+                pair.Kept.SetDescription(description);
+                foreach (var (kept, keptName, keptDescription) in chosen)
+                {
+                    kept.SetName(keptName);
+                    kept.SetDescription(keptDescription);
+                }
+
+                // The universe that remains where a pair stands: under the kept universe of the pair above it, or of the merge.
+                Universe KeptUnder(Guid? under) => under is { } id ? pairs.Single(p => p.Kept.Id == id || p.Merged.Id == id).Kept : pair.Kept;
+            },
+            async pair =>
+            {
+                var tree = await UniverseTree.LoadAsync(context, cancellationToken);
+                var found = UniverseMergePairs.Of(tree, await UniverseMergePairs.HomonymsAsync(context, cancellationToken), pair.First.Id, pair.Second.Id);
+                // Chosen on other pairs than the hierarchy now holds: a sub-universe added, renamed or moved since the reading.
+                if (!found.Select(p => (p.First, p.Second)).ToHashSet().SetEquals(request.Pairs.Select(p => (p.First.Id, p.Second.Id)))
+                    || found.Count != request.Pairs.Count)
+                    throw new DbUpdateConcurrencyException("The homonymous sub-universes of the merged universes changed since they were read.");
+
+                foreach (var record in request.Pairs.SelectMany(p => new[] { p.First, p.Second }).OrderBy(r => r.Id))
+                    await context.LockAtVersionAsync<Universe>(record.Id, record.Version, cancellationToken);
+                // The whole referential, tracked, which the moves of the merge check for cycles.
+                var universes = (await context.Universes.ToListAsync(cancellationToken)).ToDictionary(u => u.Id);
+                foreach (var found1 in found)
+                {
+                    var choice = request.Pairs.Single(c => c.First.Id == found1.First && c.Second.Id == found1.Second);
+                    var keepFirst = RecordMerge.KeepsFirst([choice.Name, choice.Description]);
+                    var (first, second) = (universes[found1.First], universes[found1.Second]);
+                    pairs.Add(keepFirst ? (first, second, found1.Under, choice) : (second, first, found1.Under, choice));
+                }
+
+                // The series and albums of every universe merged pass to the one that remains in its place.
+                var replaced = pairs.Select(p => (Merged: p.Merged, p.Kept)).Append((Merged: pair.Merged, pair.Kept)).ToList();
+                var mergedIds = replaced.Select(r => r.Merged.Id).ToList();
+                foreach (var series in await RecordMerge.LoadLinkedForWriteAsync<Series>(
+                             context, context.Series.Where(s => s.Universes.Any(u => mergedIds.Contains(u.Id))).Select(s => s.Id), cancellationToken))
+                {
+                    await context.Entry(series).Collection(s => s.Universes).LoadAsync(cancellationToken);
+                    foreach (var (merged, kept) in replaced)
+                        series.TransferUniverse(merged, kept);
+                }
+
+                foreach (var album in await RecordMerge.LoadLinkedForWriteAsync<Album>(
+                             context, context.Albums.Where(a => a.Universes.Any(u => mergedIds.Contains(u.Id))).Select(a => a.Id), cancellationToken))
+                {
+                    await context.Entry(album).Collection(a => a.Universes).LoadAsync(cancellationToken);
+                    foreach (var (merged, kept) in replaced)
+                        album.TransferUniverse(merged, kept);
+                }
+
+                return [.. pairs.Select(p => new MergeReplacement(EntityKind.Universe, p.Merged.Id, p.Kept.Id))];
+            },
+            cancellationToken,
+            lockFirst: token => UniverseHierarchy.LockAsync(context, token));
+
+        static Universe Of((Universe Kept, Universe Merged, Guid? Under, UniverseMergePairChoice Choice) pair, MergeSide side) =>
+            (side == MergeSide.First) == (pair.Choice.First.Id == pair.Kept.Id) ? pair.Kept : pair.Merged;
     }
 
     public static void MapUniverseCatalog(this RouteGroupBuilder catalog)
