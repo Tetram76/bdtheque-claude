@@ -142,6 +142,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                         <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
                           <span class="fu-label-sm" style="font-size: 12px; color: {{t.muted}}">{{o.from}}</span>
                           <span style="{{o.textStyle}}">{{o.text}}</span>
+                          <sc-if value="{{o.reason}}"><span style="font-size: 12px; color: {{t.muted}}">{{o.reason}}</span></sc-if>
                         </span>
                       </label>
                     </sc-for>
@@ -154,6 +155,53 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
               <sc-for list="{{result}}" as="p"><span>{{p.label}} : <strong>{{p.value}}</strong></span></sc-for>
             </div>
           </section>
+
+          <sc-if value="{{pairs}}">
+          <section aria-labelledby="s-pairs" style="{{block}}">
+            <span style="{{kickStyle}}">{{k.pairs}}</span>
+            <h2 id="s-pairs" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>{{x.pairsTitle}}</h2>
+            <p style="margin: 0; font-size: 14px; color: {{t.muted}}">{{x.pairsLead}}</p>
+            <sc-for list="{{pairs}}" as="p">
+              <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 10px; border-top: {{t.rowB}}">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 700">{{p.path}}</h3>
+                <div class="fu-grid">
+                  <div class="fu-head">
+                    <span></span>
+                    <sc-for list="{{p.records}}" as="r">
+                      <span style="display: flex; flex-direction: column; padding: 0 2px; border-bottom: {{t.rowB}}">
+                        <strong style="font-size: 14px">{{r.name}}</strong>
+                        <span style="font-size: 12px; color: {{t.muted}}">{{r.links}} · modifié le {{r.modified}}</span>
+                      </span>
+                    </sc-for>
+                  </div>
+                  <sc-for list="{{p.rows}}" as="row">
+                    <span id="{{row.id}}" style="padding-top: 9px; font-weight: 700; font-size: 13px">{{row.label}}</span>
+                    <sc-if value="{{row.same}}">
+                      <div class="fu-span" style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 8px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}">
+                        <span>{{row.same}}</span>
+                        <span style="font-size: 12px; color: {{t.muted}}">Identique dans les deux fiches</span>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{row.options}}">
+                      <div class="fu-span" role="radiogroup" aria-labelledby="{{row.id}}" style="display: contents">
+                        <sc-for list="{{row.options}}" as="o">
+                          <label style="{{o.style}}">
+                            <input class="fu-radio" type="radio" name="{{row.id}}" checked="{{o.checked}}" onClick="{{o.pick}}">
+                            <span aria-hidden="true" style="{{o.dot}}"><sc-if value="{{o.checked}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L19 7"></path></svg></sc-if></span>
+                            <span style="min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                              <span class="fu-label-sm" style="font-size: 12px; color: {{t.muted}}">{{o.from}}</span>
+                              <span style="{{o.textStyle}}">{{o.text}}</span>
+                            </span>
+                          </label>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+          </sc-if>
 
           <section aria-labelledby="s-links" style="{{block}}">
             <span style="{{kickStyle}}">{{k.links}}</span>
@@ -443,6 +491,72 @@ const EXAMPLES = {
       { count: '55 albums', detail: 'les 48 de Science-fiction et les 9 de SF, dont 2 communs aux deux fiches' }
     ],
     impact: (name) => ['Les deux fiches n\'en feront plus qu\'une : ' + name + '.', name + ' classera les 15 séries et les 55 albums des deux fiches.']
+  },
+  // Two universes under different parents, whose sub-universes of the same name (case and accents aside) are merged
+  // with them, at every level, what each pair keeps being chosen at the same time (fonctionnel/regles-metier/fusion-des-fiches.md).
+  univers: {
+    list: 'Univers', heading: 'Fusionner deux univers', confirmTitle: 'Fusionner les deux univers ?', noun: "l'univers",
+    a: { name: 'Star Wars', links: '4 séries · 31 albums · 3 sous-univers', modified: '18 avril 2026' },
+    b: { name: 'Star wars', links: '2 séries · 9 albums · 4 sous-univers', modified: '3 mai 2026' },
+    rows: [
+      { id: 'name', label: 'Nom', a: 'Star Wars', b: 'Star wars' },
+      { id: 'parent', label: 'Univers parent', a: '', b: 'Lucasfilm' },
+      { id: 'desc', label: 'Description', long: true,
+        a: 'La saga galactique créée par George Lucas en 1977 : ses films, ses séries animées, ses romans et ses bandes dessinées.', b: '' }
+    ],
+    result: (v) => [{ label: 'Classé', value: v.parent ? v.parent + ' › ' + (v.name ?? '…') : (v.name ? v.name + ', au premier niveau' : '—') }],
+    resultName: (v) => v.name ?? 'Star Wars',
+    pairsTitle: 'Ce que gardent les sous-univers de même nom',
+    pairsLead: 'Les sous-univers de même nom des deux fiches, à la casse et aux accents près, n\'en feront plus qu\'un chacun, à tous les niveaux, fusionnés comme elles.',
+    pairs: [
+      { id: 'cw', path: 'Clone Wars',
+        a: { name: 'Clone Wars', links: '2 séries · 7 albums · 1 sous-univers', modified: '18 avril 2026' },
+        b: { name: 'Clone wars', links: '1 série · 3 albums · 1 sous-univers', modified: '3 mai 2026' },
+        rows: [
+          { id: 'cw-name', label: 'Nom', a: 'Clone Wars', b: 'Clone wars' },
+          { id: 'cw-desc', label: 'Description', long: true, a: 'La guerre des clones, entre les épisodes II et III.', b: '' }
+        ] },
+      { id: 'jedi', path: 'Clone Wars › Les Jedi',
+        a: { name: 'Les Jedi', links: '3 albums', modified: '18 avril 2026' },
+        b: { name: 'Les Jédi', links: '1 album', modified: '3 mai 2026' },
+        rows: [
+          { id: 'jedi-name', label: 'Nom', a: 'Les Jedi', b: 'Les Jédi' },
+          { id: 'jedi-desc', label: 'Description', a: '', b: '' }
+        ] }
+    ],
+    moved: [
+      { count: '5 séries', detail: 'les 4 de Star Wars et les 2 de Star wars, dont 1 commune aux deux fiches' },
+      { count: '38 albums', detail: 'les 31 de Star Wars et les 9 de Star wars, dont 2 communs aux deux fiches' },
+      { count: '5 sous-univers', detail: 'les 3 de Star Wars et les 4 de Star wars, dont 2 de même nom, qui n\'en feront plus qu\'un chacun' }
+    ],
+    impact: (name) => [
+      'Les deux fiches n\'en feront plus qu\'une : ' + name + '.',
+      name + ' rassemblera les 5 séries, les 38 albums et les 5 sous-univers des deux fiches.',
+      'Les sous-univers de même nom n\'en feront plus qu\'un chacun : Clone Wars, et Clone Wars › Les Jedi.'
+    ]
+  },
+  // A universe merged with one of its own sub-universes: the parent of the latter, the universe itself, cannot be that of
+  // the universe that remains (fonctionnel/regles-metier/fusion-des-fiches.md, univers).
+  'univers-imbrique': {
+    list: 'Univers', heading: 'Fusionner deux univers', confirmTitle: 'Fusionner les deux univers ?', noun: "l'univers",
+    a: { name: 'Corto Maltese', links: '1 série · 12 albums · 2 sous-univers', modified: '9 février 2026' },
+    b: { name: 'Corto', links: '2 albums', modified: '21 mars 2026' },
+    rows: [
+      { id: 'name', label: 'Nom', a: 'Corto Maltese', b: 'Corto' },
+      { id: 'parent', label: 'Univers parent', a: 'Univers Hugo Pratt', b: 'Univers Hugo Pratt › Corto Maltese', impossible: 'b',
+        reason: 'Impossible : c\'est l\'autre fiche, qui ne peut être le parent de l\'univers qui reste.' },
+      { id: 'desc', label: 'Description', long: true,
+        a: 'Le marin de Hugo Pratt, de La Ballade de la mer salée aux Helvétiques.', b: 'Corto, avant La Ballade.' }
+    ],
+    result: (v) => [{ label: 'Classé', value: 'Univers Hugo Pratt › ' + (v.name ?? '…') }],
+    resultName: (v) => v.name ?? 'Corto Maltese',
+    pairs: null,
+    moved: [
+      { count: '1 série', detail: 'celle de Corto Maltese' },
+      { count: '13 albums', detail: 'les 12 de Corto Maltese et les 2 de Corto, dont 1 commun aux deux fiches' },
+      { count: '1 sous-univers', detail: 'l\'autre de Corto Maltese, Corto n\'en faisant plus qu\'un avec lui' }
+    ],
+    impact: (name) => ['Les deux fiches n\'en feront plus qu\'une : ' + name + '.', name + ' rassemblera la série, les 13 albums et le sous-univers des deux fiches.']
   }
 };
 
@@ -451,32 +565,39 @@ class View extends Mockup {
     const t = THEMES[this.props.theme] ?? THEMES.planche;
     const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.auteur;
     const kick = (i, label) => (t.kPre ? t.kPre(i, label) : label);
-    // What the user has chosen so far: 'a', 'b', or nothing yet where both records hold a value.
-    const initial = Object.fromEntries(x.rows.map((r) => [r.id, r.a === r.b ? 'a' : !r.b ? 'a' : !r.a ? 'b' : (this.props.choix === 'complet' ? 'b' : null)]));
+    // What the user has chosen so far: 'a', 'b', or nothing yet where both records hold a value. A value that cannot be
+    // kept (the parent of a universe that would make it its own ancestor) leaves the other one, retained at once.
+    const allRows = [...x.rows, ...(x.pairs ?? []).flatMap((p) => p.rows)];
+    const initial = Object.fromEntries(allRows.map((r) => [r.id,
+      r.impossible ? (r.impossible === 'a' ? 'b' : 'a')
+        : r.a === r.b ? 'a' : !r.b ? 'a' : !r.a ? 'b' : (this.props.choix === 'complet' ? 'b' : null)]));
     const picks = { ...initial, ...(this.state?.picks ?? {}) };
     const values = Object.fromEntries(x.rows.map((r) => [r.id, picks[r.id] == null ? null : (picks[r.id] === 'a' ? r.a : r.b)]));
     const pick = (id, side) => () => this.setState({ picks: { ...picks, [id]: side } });
-    const option = (r, side) => {
+    const option = (r, side, names) => {
       const text = side === 'a' ? r.a : r.b;
       const checked = picks[r.id] === side;
+      const impossible = r.impossible === side;
       return {
-        checked, pick: pick(r.id, side), from: side === 'a' ? x.a.name : x.b.name,
-        text: text || '—',
-        textStyle: (text ? '' : 'color: ' + t.muted + ';') + (r.long ? ' display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px;' : ''),
-        style: 'position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; box-sizing: border-box; border: 2px solid ' + (checked ? t.acc : t.line) + '; border-radius: ' + t.tR + '; background: ' + (checked ? t.tBg : 'transparent') + '; cursor: pointer;',
-        dot: 'width: 20px; height: 20px; flex: none; margin-top: 2px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid ' + (checked ? t.acc : t.line) + '; background: ' + (checked ? t.acc : 'transparent') + '; color: ' + t.onAcc + ';'
+        checked, pick: impossible ? null : pick(r.id, side), from: side === 'a' ? names.a.name : names.b.name,
+        text: text || '—', reason: impossible ? r.reason : null,
+        textStyle: (text && !impossible ? '' : 'color: ' + t.muted + ';') + (r.long ? ' display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px;' : ''),
+        style: 'position: relative; display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; box-sizing: border-box; border: 2px ' + (impossible ? 'dashed ' : 'solid ') + (checked ? t.acc : t.line) + '; border-radius: ' + t.tR + '; background: ' + (checked ? t.tBg : 'transparent') + '; cursor: ' + (impossible ? 'not-allowed' : 'pointer') + ';',
+        dot: 'width: 20px; height: 20px; flex: none; margin-top: 2px; box-sizing: border-box; display: ' + (impossible ? 'none' : 'inline-flex') + '; align-items: center; justify-content: center; border-radius: 50%; border: 2px solid ' + (checked ? t.acc : t.line) + '; background: ' + (checked ? t.acc : 'transparent') + '; color: ' + t.onAcc + ';'
       };
     };
-    const rows = x.rows.map((r) => r.a === r.b
+    const rowsOf = (list, names) => list.map((r) => r.a === r.b
       ? { id: r.id, label: r.label, same: r.a || '—', options: null }
-      : { id: r.id, label: r.label, same: null, options: [option(r, 'a'), option(r, 'b')] });
-    const pending = x.rows.filter((r) => picks[r.id] == null).length;
+      : { id: r.id, label: r.label, same: null, options: [option(r, 'a', names), option(r, 'b', names)] });
+    const rows = rowsOf(x.rows, x);
+    const pairs = x.pairs ? x.pairs.map((p) => ({ path: p.path, records: [p.a, p.b], rows: rowsOf(p.rows, p) })) : null;
+    const pending = allRows.filter((r) => picks[r.id] == null).length;
     const result = x.result(values);
-    const name = result[0].value;
+    const name = x.resultName ? x.resultName(values) : result[0].value;
     const confirmOpen = this.state?.confirmOpen ?? (this.props.dialogue === 'confirmation');
     return {
       ...commonVals(this, t, kick),
-      t, x, rows, result,
+      t, x, rows, result, pairs,
       records: [x.a, x.b],
       statusText: pending ? (pending === 1 ? '1 donnée reste à choisir' : pending + ' données restent à choisir') : 'Tout est choisi',
       statusShort: pending ? pending + ' à choisir' : 'Tout est choisi',
@@ -485,7 +606,9 @@ class View extends Mockup {
       confirmOpen: confirmOpen && !pending,
       openConfirm: () => { if (!pending) this.setState({ confirmOpen: true }); },
       closeConfirm: () => this.setState({ confirmOpen: false }),
-      k: { data: kick(1, 'Données'), links: kick(2, 'Fiches liées') },
+      k: x.pairs
+        ? { data: kick(1, 'Données'), pairs: kick(2, 'Sous-univers'), links: kick(3, 'Fiches liées') }
+        : { data: kick(1, 'Données'), links: kick(2, 'Fiches liées') },
       menu: menuOf(t, x.list)
     };
   }
@@ -493,7 +616,7 @@ class View extends Mockup {
 
 Mockup.mount(View, {
   theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
-  exemple: { label: 'Exemple', editor: 'enum', options: ['auteur', 'genre'], default: 'auteur' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['auteur', 'genre', 'univers', 'univers-imbrique'], default: 'auteur' },
   choix: { label: 'Choix', editor: 'enum', options: ['en-cours', 'complet'], default: 'en-cours' },
   dialogue: { label: 'Dialogue', editor: 'enum', options: ['aucun', 'confirmation'], default: 'aucun' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
