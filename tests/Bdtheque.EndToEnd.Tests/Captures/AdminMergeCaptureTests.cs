@@ -1,19 +1,21 @@
 extern alias frontend;
 
+using System.Text.RegularExpressions;
 using frontend::Bdtheque.Frontend.Navigation;
 
 namespace Bdtheque.EndToEnd.Tests.Captures;
 
 /// <summary>
-/// The merge of two authors, captured in each offered theme on the application of the merges (<see cref="MergeApplication"/>),
-/// whose dates are fixed, without merging anything (visuel/fusion/fusion-de-deux-fiches.md): as it opens, two data left to choose,
-/// then every data chosen, with the confirmation open. In a window as high as the page, the bar of the merge at its bottom
+/// The merge of two authors and that of two publishers, captured in each offered theme on the application of the merges
+/// (<see cref="MergeApplication"/>), whose dates are fixed, without merging anything (visuel/fusion/fusion-de-deux-fiches.md): as
+/// it opens, two data left to choose, then every data chosen, with the confirmation open; the publishers with their homonymous
+/// collections, in a block of their own. In a window as high as the page, the bar of the merge at its bottom
 /// (<see cref="ScreenCaptureTests.CaptureAsync"/>).
 /// </summary>
 [Collection(MergeApplication.Name)]
 public sealed class AdminMergeCaptureTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
 {
-    private static readonly string[] States = ["authors", "authors-confirmation"];
+    private static readonly string[] States = ["authors", "authors-confirmation", "publishers", "publishers-confirmation"];
 
     public static TheoryData<string, string, string> Captures
     {
@@ -33,16 +35,32 @@ public sealed class AdminMergeCaptureTests(MergeApplication application) : Brows
     public async Task Screen_LooksLikeItsReference(string theme, string state, string viewport)
     {
         var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
-        await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminMergeAuthors}?author={Application.Gotlib.Id}&other={Application.MarcelGotlib.Id}");
+        var path = state.StartsWith("authors", StringComparison.Ordinal)
+            ? $"{AppPaths.AdminMergeAuthors}?author={Application.Gotlib.Id}&other={Application.MarcelGotlib.Id}"
+            : $"{AppPaths.AdminMergePublishers}?publisher={Application.Dupuis.Id}&other={Application.EditionsDupuis.Id}";
+        await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
-        // A value is named after its record too on a smartphone: « Gotlieb » is only that of Gotlib.
-        if (state == "authors-confirmation")
+        if (state.EndsWith("-confirmation", StringComparison.Ordinal))
         {
-            await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).GetByRole(AriaRole.Radio, new() { Name = "Gotlieb" }).CheckAsync();
-            await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Né à Paris" }).CheckAsync();
-            await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync("Affiché : Gotlib");
+            // A value is named after its record too on a smartphone: « Gotlieb » is only that of Gotlib.
+            if (state == "authors-confirmation")
+            {
+                await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).GetByRole(AriaRole.Radio, new() { Name = "Gotlieb" }).CheckAsync();
+                await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Né à Paris" }).CheckAsync();
+                await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync("Affiché : Gotlib");
+            }
+            else
+            {
+                // Named after its value, preceded on a smartphone by the name of its record: matched at the start or at the end, and
+                // with its case, which alone tells the homonyms apart.
+                await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true })
+                    .GetByRole(AriaRole.Radio, new() { NameRegex = new Regex("^Dupuis") }).CheckAsync();
+                await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Aire Libre" })
+                    .GetByRole(AriaRole.Radio, new() { NameRegex = new Regex("Aire Libre$") }).CheckAsync();
+            }
+
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
             await Assertions.Expect(page.GetByRole(AriaRole.Alertdialog)).ToBeVisibleAsync();
         }

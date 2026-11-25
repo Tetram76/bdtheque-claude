@@ -32,14 +32,19 @@ public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer)
 
     /// <summary>
     /// What the merged record will be linked to, in the order of the entity types (« les 2 séries et les 26 albums des deux
-    /// fiches »), none when nothing is linked to either record.
+    /// fiches », « les 3 séries, les 2 collections et l'édition des deux fiches »), none when nothing is linked to either record.
     /// </summary>
     public string? Linked(IEnumerable<MergeLinkCount> links)
     {
         var parts = links.Where(l => l.Total > 0)
             .Select(l => l.Total == 1 ? localizer[$"Linked.One.{l.Kind}"].Value : localizer[$"Linked.Other.{l.Kind}", l.Total].Value)
             .ToList();
-        return parts.Count == 0 ? null : localizer["Linked", string.Join(localizer["And"].Value, parts)].Value;
+        return parts.Count switch
+        {
+            0 => null,
+            1 => localizer["Linked", parts[0]].Value,
+            _ => localizer["Linked", string.Join(localizer["Separator"].Value, parts[..^1]) + localizer["And"].Value + parts[^1]].Value,
+        };
     }
 
     /// <summary>Whether a type of records is named by the texts of the merge (a test pins every type a merge links).</summary>

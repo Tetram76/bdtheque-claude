@@ -314,6 +314,17 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         await data.AlbumAsync(OneShot("Les Phares jumeaux", 2023, 5, [scienceFiction, sf], [],
             [Credit(arnaud, ContributionRole.Scenarist), Credit(arnautTwin, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));
         await data.AlbumAsync(OneShot("Orbite basse", 2024, 2, [sf], [], [Credit(arnautTwin, ContributionRole.Scenarist)]));
+        // A publisher saved again under a shortened name, without website, its collections homonymous to two of the first one,
+        // one spelled otherwise, the other the same, which the merge makes one, and one of its own; with a series in its own
+        // collection, and an edition of its album in the homonym spelled otherwise.
+        var lagoonTwin = await data.PublisherAsync(TwinPublisherName, null, "grand large", "Escales", "Récifs");
+        var reefs = await data.SeriesAsync(Series("Les Écumeurs du Lagon", SeriesStatus.InProgress,
+            Template(lagoonTwin.Id, lagoonTwin.Collections[2], EditionFormat.Standard), [adventure], [], [Credit(arnaud, ContributionRole.Scenarist)]));
+        var reef = await data.AlbumAsync(Album("Le Récif d'argent", reefs, 1, 2022, 6));
+        await data.EditionAsync(reef, Owned(lagoonTwin.Id, lagoonTwin.Collections[0], 2022, AcquisitionMode.Purchase, new DateOnly(2022, 5, 14)) with
+        {
+            Category = EditionCategory.FirstEdition,
+        });
 
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
         // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
@@ -374,6 +385,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
     /// <summary>The genre « Science-fiction » saved again under its abbreviation, to merge with it.</summary>
     public const string TwinGenre = "SF";
+
+    /// <summary>The publisher « Éditions du Lagon » saved again under a shortened name, to merge with it.</summary>
+    public const string TwinPublisherName = "Éditions Lagon";
 
     /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
     public const string DeletedGenre = "Genre supprimé";

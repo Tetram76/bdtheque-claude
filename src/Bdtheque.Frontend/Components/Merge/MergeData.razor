@@ -4,7 +4,7 @@
    values, a row per data (MergeChoice), then what the data chosen make of the record. Laid out by the width of the block
    itself (container query): side by side, the values sit under the heads of their records; on a smartphone, the heads go,
    each value carrying the name of its record. *@
-<Block Title="@L["Title"]" Kicker="@L["Kicker"]" class="merge-data">
+<Block Title="@(Title ?? L["Title"])" Kicker="@(Kicker ?? L["Kicker"])" class="merge-data">
     <div class="merge-data-frame">
         <div class="merge-data-grid">
             <span class="merge-data-corner" aria-hidden="true"></span>
@@ -27,6 +27,17 @@
     [Parameter, EditorRequired]
     public MergeRecordHead Second { get; set; } = null!;
 
+    /// <summary>
+    /// The title of the block, « Ce que garde la fiche » by default; another block of data to choose has its own (« Collections
+    /// homonymes »).
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>The mention of the block, « Données » by default.</summary>
+    [Parameter]
+    public string? Kicker { get; set; }
+
     /// <summary>The rows of the data (MergeChoice).</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -38,12 +49,15 @@
     private RenderFragment Head(MergeRecordHead head) =>
         @<span class="merge-data-head">
             <strong><LabelText Text="@head.Name" /></strong>
-            <span class="merge-data-head-detail">
-                @if (head.Links is not null)
-                {
-                    @head.Links<text> · </text>
-                }
-                @L["Modified"] <LocalDateTime Value="head.ModifiedAt" DateOnly />
-            </span>
+            @if (head.ModifiedAt is { } modifiedAt)
+            {
+                <span class="merge-data-head-detail">
+                    @if (head.Links is not null)
+                    {
+                        @head.Links<text> · </text>
+                    }
+                    @L["Modified"] <LocalDateTime Value="modifiedAt" DateOnly />
+                </span>
+            }
         </span>;
 }
