@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Fusion de deux fiches'
 description: 'Écran de la fusion de deux fiches d''un même type : page dédiée, ce que garde la fiche donnée par donnée, ce qui passe à elle, barre de fusion, confirmation au futur et ses suppressions mises en évidence ; à lire pour toute fusion.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T13:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T14:50:00Z }
 ---
 
 # Fusion de deux fiches
@@ -13,7 +13,7 @@ De haut en bas :
 
 - **En-tête et menu** de l'administration ([En-tête et menu](../administration/en-tete-et-menu.md)), l'entrée du type de fiche étant l'entrée courante du menu.
 - **Fil d'Ariane** : Administration, la liste du type de fiche, puis « Fusion ».
-- **Titre** « Fusionner deux auteurs » (« deux genres »…), et dessous le nom des deux fiches (« Gotlib et Marcel Gotlib »).
+- **Titre** « Fusionner deux auteurs » (« deux genres »…), et dessous le nom des deux fiches, cités ([Noms cités dans un message](../../fonctionnel/presentation/noms-cites-dans-un-message.md)) : « « Gotlib » et « Marcel Gotlib » ».
 - **« Ce que garde la fiche »** (mention « Données ») : une ligne par donnée de la fiche, son nom à gauche, puis la valeur de chacune des deux fiches, côte à côte, sous l'en-tête de sa fiche : son nom, ce qui lui est rattaché (« crédité sur 2 séries · 24 albums », « 12 séries · 48 albums ») et sa date de dernière modification.
   - Une donnée dont les valeurs diffèrent se choisit d'un clic sur l'une des deux, la valeur retenue marquée d'une coche et bordée de la couleur d'accent. Une valeur absente (« — ») se choisit aussi : c'est écarter celle de l'autre fiche.
   - **Aucune fiche privilégiée** : une valeur renseignée d'un seul côté est retenue d'office ; deux valeurs renseignées et différentes ne le sont ni l'une ni l'autre, jusqu'au choix de l'utilisateur.
