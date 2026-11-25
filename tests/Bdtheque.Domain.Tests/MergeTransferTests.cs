@@ -233,6 +233,25 @@ public sealed class MergeTransferTests
         Assert.Same(pratt, kept.Parent);
     }
 
+    // The universe that remains stands deeper under the merged one, below a sub-universe of the latter, which passes under it:
+    // Pratt › Corto › Jeunesse › Corto Maltese becomes Pratt › Corto Maltese › Jeunesse.
+    [Fact]
+    public void UniverseAbsorb_OfAnAncestorAboveASubUniverse_TakesThatSubUniverseUnderItself()
+    {
+        var pratt = new Universe("Univers Hugo Pratt");
+        var merged = new Universe("Corto");
+        var child = new Universe("Jeunesse");
+        var kept = new Universe("Corto Maltese");
+        merged.SetParent(pratt);
+        child.SetParent(merged);
+        kept.SetParent(child);
+
+        kept.Absorb(merged, pratt, leftOut: []);
+
+        Assert.Same(pratt, kept.Parent);
+        Assert.Same(kept, child.Parent);
+    }
+
     [Fact]
     public void UniverseAbsorb_UnderTheMergedUniverse_Violates()
     {

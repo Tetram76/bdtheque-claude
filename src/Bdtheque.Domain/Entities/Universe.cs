@@ -136,11 +136,13 @@ public sealed class Universe : EntityBase, IAggregateRoot
         if (parent?.Id == merged.Id)
             throw CycleViolation();
 
-        // The sub-universes first, so that the parent chosen is checked against the hierarchy the merge leaves.
-        foreach (var child in merged.Children.Where(c => c.Id != Id && !leftOut.Contains(c.Id)).ToList())
-            child.SetParent(this);
+        // The parent first: this universe may stand under a sub-universe of the merged one, which can only pass under it once
+        // it has left it. A parent chosen among the sub-universes of either universe is refused all the same: under this
+        // universe, or under the merged one and moved under it next, it would then stand both above and below it.
         if (parent?.Id != ParentId)
             SetParent(parent);
+        foreach (var child in merged.Children.Where(c => c.Id != Id && !leftOut.Contains(c.Id)).ToList())
+            child.SetParent(this);
     }
 
     private void AttachTo(Universe? parent)
