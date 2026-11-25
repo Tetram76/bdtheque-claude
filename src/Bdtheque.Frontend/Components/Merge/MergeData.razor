@@ -27,6 +27,17 @@
     [Parameter, EditorRequired]
     public MergeRecordHead Second { get; set; } = null!;
 
+    /// <summary>
+    /// The title of the block, « Ce que garde la fiche » by default; another block of data to choose has its own (« Collections
+    /// homonymes »).
+    /// </summary>
+    [Parameter]
+    public string? Title { get; set; }
+
+    /// <summary>The mention of the block, « Données » by default.</summary>
+    [Parameter]
+    public string? Kicker { get; set; }
+
     /// <summary>The rows of the data (MergeChoice).</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -35,33 +46,18 @@
     [Parameter]
     public RenderFragment? Result { get; set; }
 
-    /// <summary>
-    /// The title of a block of the data, when they are grouped as the entry form of their type groups them (the merge of two
-    /// series, visuel/fusion/fusion-de-deux-fiches.md); « Ce que garde la fiche » otherwise.
-    /// </summary>
-    [Parameter]
-    public string? Title { get; set; }
-
-    /// <summary>The mention above the title of the block, with <see cref="Title"/>; « Données » otherwise.</summary>
-    [Parameter]
-    public string? Kicker { get; set; }
-
-    /// <summary>Whether the heads name their records only, a block of the data after the first one having said the rest.</summary>
-    [Parameter]
-    public bool NamesOnly { get; set; }
-
     private RenderFragment Head(MergeRecordHead head) =>
         @<span class="merge-data-head">
             <strong><LabelText Text="@head.Name" /></strong>
-            @if (!NamesOnly)
+            @if (head.ModifiedAt is { } modifiedAt)
             {
-            <span class="merge-data-head-detail">
-                @if (head.Links is not null)
-                {
-                    @head.Links<text> · </text>
-                }
-                @L["Modified"] <LocalDateTime Value="head.ModifiedAt" DateOnly />
-            </span>
+                <span class="merge-data-head-detail">
+                    @if (head.Links is not null)
+                    {
+                        @head.Links<text> · </text>
+                    }
+                    @L["Modified"] <LocalDateTime Value="modifiedAt" DateOnly />
+                </span>
             }
         </span>;
 }

@@ -26,6 +26,13 @@ public sealed class PublisherCollection : EntityBase
         PublisherId = publisher.Id;
     }
 
+    // Only reachable through Publisher.Absorb, the merge of its publisher into the other one.
+    internal void MoveTo(Publisher publisher)
+    {
+        Publisher = publisher;
+        PublisherId = publisher.Id;
+    }
+
     public void SetName(string name) =>
         Name = DomainText.Required(name, DomainRules.PublisherCollectionNameRequired, "A publisher collection must have a name.", this, nameof(Name));
 }

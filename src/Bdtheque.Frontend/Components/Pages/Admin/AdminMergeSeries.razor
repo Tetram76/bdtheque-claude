@@ -36,8 +36,8 @@ else
                Problem="@MergeProblem">
         @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
         {
-            <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First)"
-                       Second="Head(Preview.Second)" NamesOnly="index > 0" Result="@(block.Key == SeriesBlock ? Result : null)">
+            <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == 0)"
+                       Second="Head(Preview.Second, index == 0)" Result="@(block.Key == SeriesBlock ? Result : null)">
                 @foreach (var row in block.Rows)
                 {
                     <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
@@ -342,8 +342,13 @@ else
         _ => null,
     };
 
-    private MergeRecordHead Head(SeriesMergeRecord record)
+    /// <summary>
+    /// The head of a record above a block: its detail above the first block only, the blocks after it naming the record only.
+    /// </summary>
+    private MergeRecordHead Head(SeriesMergeRecord record, bool detailed)
     {
+        if (!detailed)
+            return new MergeRecordHead(record.Title, null, null);
         var albums = Preview!.Links.Where(l => l.Kind == EntityKind.Album).Sum(l => record == Preview.First ? l.First : l.Second);
         if (albums == 0)
             return new MergeRecordHead(record.Title, null, record.ModifiedAt);

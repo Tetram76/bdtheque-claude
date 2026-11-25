@@ -99,6 +99,13 @@ public sealed class Edition : EntityBase
         PublisherCollectionId = collection?.Id;
     }
 
+    // Only reachable through Album.TransferPublisher, the album seeing all its editions.
+    internal void TransferPublisher(PublisherMerge merge)
+    {
+        if (merge.Concerns(PublisherId, PublisherCollectionId))
+            SetPublisher(merge.Kept, merge.CollectionReplacing(PublisherCollectionId, PublisherCollection));
+    }
+
     /// <summary>
     /// Sets the edition year alone, which must leave every amount with a reference date. A form,
     /// which may at once replace the edition year by the acquisition date as reference date of the

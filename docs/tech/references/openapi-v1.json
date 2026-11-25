@@ -1618,6 +1618,152 @@
         }
       }
     },
+    "/admin/publishers/merge": {
+      "get": {
+        "tags": [
+          "PublisherEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublisherMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "PublisherEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublisherMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/publishers/{rootId}/collections": {
       "get": {
         "tags": [
@@ -16770,6 +16916,32 @@
         },
         "description": "A publisher collection as its administration form edits it."
       },
+      "PublisherCollectionHomonyms": {
+        "required": [
+          "first",
+          "firstName",
+          "second",
+          "secondName"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "second": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "secondName": {
+            "type": "string"
+          }
+        },
+        "description": "Two homonymous collections, one of each merged publisher, which the merge makes one\n(fonctionnel/regles-metier/fusion-des-fiches.md, duplicates created by the merge)."
+      },
       "PublisherCollectionListItem": {
         "required": [
           "id",
@@ -16794,6 +16966,28 @@
             "type": "string"
           }
         }
+      },
+      "PublisherCollectionMerge": {
+        "required": [
+          "first",
+          "second",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "second": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "$ref": "#/components/schemas/MergeSide"
+          }
+        },
+        "description": "The name two homonymous collections keep, of the one or the other (PublisherCollectionHomonyms)."
       },
       "PublisherCollectionUse": {
         "required": [
@@ -16953,6 +17147,105 @@
             "description": "Where a publisher leads, having no record of its own (fonctionnel/structure-de-l-application.md)."
           }
         }
+      },
+      "PublisherMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "homonyms",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/PublisherMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/PublisherMergeRecord"
+          },
+          "homonyms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublisherCollectionHomonyms"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            }
+          }
+        },
+        "description": "Two publishers to merge, their homonymous collections, and the series, collections, editions and purchase intents of both,\nin the order of the entity types."
+      },
+      "PublisherMergeRecord": {
+        "required": [
+          "id",
+          "name",
+          "website",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "website": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "A publisher as its merge presents it."
+      },
+      "PublisherMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "name",
+          "website",
+          "collections"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "name": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "website": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublisherCollectionMerge"
+            }
+          }
+        },
+        "description": "The merge of two publishers: each data kept, of the one or the other, and the name of each pair of homonymous collections."
       },
       "PurchaseIntentAdminListItem": {
         "required": [

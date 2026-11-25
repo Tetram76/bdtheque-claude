@@ -124,9 +124,14 @@ internal static class ChangeLogMappings
             // Derived from the name, never entered: the name is recorded.
             [nameof(Publisher.NavigationEntry)]),
 
-        // A collection never moves to another publisher.
+        // A collection only moves to another publisher by the merge of its own into it, which designates the other one.
         [typeof(PublisherCollection)] = new(
-            RecordType.PublisherCollection, [Text(ChangeLogAttribute.Name, nameof(PublisherCollection.Name))], [nameof(PublisherCollection.PublisherId)]),
+            RecordType.PublisherCollection,
+            [
+                Text(ChangeLogAttribute.Name, nameof(PublisherCollection.Name)),
+                Reference<Publisher>(ChangeLogAttribute.Publisher, nameof(PublisherCollection.PublisherId)),
+            ],
+            []),
 
         // Its entry of the navigation is derived from the label, never entered: the label is recorded.
         [typeof(Genre)] = new(RecordType.Genre, [Text(ChangeLogAttribute.Label, nameof(Genre.Label))], [nameof(Genre.NavigationEntry)]),

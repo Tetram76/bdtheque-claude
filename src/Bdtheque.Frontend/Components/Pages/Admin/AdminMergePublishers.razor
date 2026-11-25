@@ -1,0 +1,223 @@
+@attribute [Route(AppPaths.AdminMergePublishers)]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@inject IStringLocalizer<AdminMergePublishers> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two publishers (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the publishers,
+   which gives the publisher and the other one: each data the publisher keeps, of the one or the other, the name of each pair of
+   homonymous collections, which the merge makes one, in a block of its own (decision of the user, #643), what passes to it,
+   then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge, which the API alone
+   holds, the homonyms included: it sends, data by data, the record whose value is kept. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminPublisherMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Name, Preview.Second.Name]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminPublishers" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        <MergeData First="Head(Preview.First, p => p.First)" Second="Head(Preview.Second, p => p.Second)">
+            <MergeChoice Id="merge-name" Label="@L["Name"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                         First="@Preview.First.Name" Second="@Preview.Second.Name" @bind-Selected="Choices!.Name" />
+            <MergeChoice Id="merge-website" Label="@L["Website"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                         First="@Preview.First.Website" Second="@Preview.Second.Website" @bind-Selected="Choices.Website" />
+        </MergeData>
+        @if (Preview.Homonyms.Count > 0)
+        {
+            <MergeData Title="@L["Homonyms.Title"]" Kicker="@L["Homonyms.Kicker"]"
+                       First="new(Preview.First.Name, null, null)" Second="new(Preview.Second.Name, null, null)">
+                @foreach (var (homonyms, index) in Preview.Homonyms.Select((h, i) => (h, i)))
+                {
+                    var choice = Choices!.Collections[index];
+                    <MergeChoice @key="homonyms.First" Id="@($"merge-collection-{index}")" Label="@homonyms.FirstName"
+                                 FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name" First="@homonyms.FirstName"
+                                 Second="@homonyms.SecondName" @bind-Selected="choice.Name" />
+                }
+            </MergeData>
+        }
+        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Name" SecondName="@Preview.Second.Name" Count="Count" />
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(KeptName)</li>
+                    @if (Merge.Linked(Preview.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Gathers", KeptName, linked]</li>
+                    }
+                </ul>
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The publisher the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "publisher")]
+    public Guid? PublisherId { get; set; }
+
+    /// <summary>The other publisher, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two publishers as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public PublisherMergePreview? Preview { get; set; }
+
+    /// <summary>The record each data is kept from, as the user chose it.</summary>
+    [PersistentState]
+    public PublisherMergeChoices? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb =>
+        [new(L["Administration"], AppPaths.AdminHome), new(L["Publishers"], AppPaths.AdminPublishers), new(L["Breadcrumb"])];
+
+    private int Pending => new[] { Choices!.Name, Choices.Website }.Concat(Choices.Collections.Select(c => c.Name)).Count(c => c is null);
+
+    // The name the publisher keeps, that the confirmation names it by.
+    private string KeptName => Choices!.Name == MergeSide.Second ? Preview!.Second.Name : Preview!.First.Name;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is not null)
+            return;
+        if (PublisherId is not { } first || OtherId is not { } second)
+        {
+            Navigation.NavigateTo(AppPaths.AdminPublishers);
+            return;
+        }
+
+        try
+        {
+            Preview = await Api.GetAsync<PublisherMergePreview>($"/admin/publishers/merge?first={first}&second={second}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _loadProblem = exception.Problem;
+            return;
+        }
+
+        // A value set on one side only, or the same on both, is retained at once; two different values wait for the user's
+        // choice: no record is favoured (fonctionnel/regles-metier/fusion-des-fiches.md).
+        Choices = new PublisherMergeChoices
+        {
+            Name = Initial(Preview.First.Name, Preview.Second.Name),
+            Website = Initial(Preview.First.Website, Preview.Second.Website),
+            Collections = [.. Preview.Homonyms.Select(h => new CollectionChoice { Name = Initial(h.FirstName, h.SecondName) })],
+        };
+    }
+
+    private static MergeSide? Initial(string? first, string? second) => (first, second) switch
+    {
+        _ when first == second => MergeSide.First,
+        (_, null) => MergeSide.First,
+        (null, _) => MergeSide.Second,
+        _ => null,
+    };
+
+    // What is linked to the publisher, as its list says it (« 3 séries · 2 collections · 688 éditions · 3 intentions »).
+    private MergeRecordHead Head(PublisherMergeRecord record, Func<MergeLinkCount, int> count)
+    {
+        var links = Preview!.Links.Select(l => (l.Kind, Count: count(l))).Where(l => l.Count > 0)
+            .Select(l => L[$"Links.{l.Kind}.{(l.Count == 1 ? "One" : "Other")}", l.Count].Value).ToList();
+        return new MergeRecordHead(record.Name, links.Count == 0 ? null : string.Join(" · ", links), record.ModifiedAt);
+    }
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<PublisherMergeRequest, MergeResult>("/admin/publishers/merge", new PublisherMergeRequest(
+                new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+                Choices!.Name!.Value, Choices.Website!.Value,
+                [.. Preview.Homonyms.Zip(Choices.Collections, (h, c) => new PublisherCollectionMerge(h.First, h.Second, c.Name!.Value))]));
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherMerged);
+            Navigation.NavigateTo(AppPaths.AdminPublishers);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The publishers as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+
+    /// <summary>The record each data of a publisher is kept from, none while the user has not chosen.</summary>
+    public sealed class PublisherMergeChoices
+    {
+        public MergeSide? Name { get; set; }
+
+        public MergeSide? Website { get; set; }
+
+        /// <summary>The name of each pair of homonymous collections, in the order of the preview.</summary>
+        public List<CollectionChoice> Collections { get; set; } = [];
+    }
+
+    /// <summary>The record the name of two homonymous collections is kept from, none while the user has not chosen.</summary>
+    public sealed class CollectionChoice
+    {
+        public MergeSide? Name { get; set; }
+    }
+}

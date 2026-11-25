@@ -240,6 +240,19 @@ public sealed class Album : EntityBase, IAggregateRoot
     public IReadOnlyList<(Guid Removed, Guid Kept)> TransferAuthor(Author merged, Author kept) =>
         Contribution.Transfer(_contributions, merged, kept);
 
+    /// <summary>
+    /// Publishes the editions of the album that designated what the merge of two publishers replaces by the publisher that
+    /// remains, each in the collection that remains of its own (fonctionnel/regles-metier/fusion-des-fiches.md), editions
+    /// targeted by a purchase intent included.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The collection of an edition concerned is not loaded.</exception>
+    public void TransferPublisher(PublisherMerge merge)
+    {
+        ArgumentNullException.ThrowIfNull(merge);
+        foreach (var edition in _editions)
+            edition.TransferPublisher(merge);
+    }
+
     public void AddUniverse(Universe universe) => _universes.AddOnce(universe);
 
     public void RemoveUniverse(Universe universe) => _universes.RemoveById(universe);

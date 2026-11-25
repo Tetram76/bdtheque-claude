@@ -236,10 +236,10 @@ public static class AppPaths
     public static string AdminEditPublisher(Guid id) => $"{AdminPublishers}/{id}";
 
     /// <summary>
-    /// The next step of the merge of two publishers, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the publisher and the other one, <c>publisher</c> and <c>other</c>.
+    /// The merge of two publishers and of their homonymous collections (visuel/fusion/fusion-de-deux-fiches.md): it receives the
+    /// publisher and the other one, <c>publisher</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergePublishers = NotYetImplemented;
+    public const string AdminMergePublishers = AdminPublishers + "/merge";
 
     /// <summary>
     /// The list of the genres of the administration (visuel/listes/), where a genre is changed in its row and a new one added in
