@@ -169,12 +169,14 @@ internal static class SeriesEndpoints
     {
         var (first, second) = (elements(pair.First).ToList(), elements(pair.Second).ToList());
         var common = first.Select(sameAs).Intersect(second.Select(sameAs)).ToHashSet();
+        var held = first.Select(e => (Element: e, Side: MergeSide.First)).Concat(second.Select(e => (Element: e, Side: MergeSide.Second))).ToList();
+        var unchosen = held.Where(e => !common.Contains(sameAs(e.Element)) && !choices.Any(c => c.Id == e.Element.Id)).Select(e => e.Element.Id).ToList();
+        if (unchosen.Count > 0)
+            throw new ArgumentException($"No side is sent for the elements {string.Join(", ", unchosen)}.", nameof(choices));
+
         return
         [
-            .. first.Select(e => (Element: e, Side: MergeSide.First)).Concat(second.Select(e => (Element: e, Side: MergeSide.Second)))
-                .Where(e => common.Contains(sameAs(e.Element))
-                    || (choices.FirstOrDefault(c => c.Id == e.Element.Id)
-                        ?? throw new ArgumentException($"No side is sent for the element {e.Element.Id}.", nameof(choices))).Side == e.Side)
+            .. held.Where(e => common.Contains(sameAs(e.Element)) || choices.First(c => c.Id == e.Element.Id).Side == e.Side)
                 .Select(e => e.Element)
                 .DistinctBy(e => e.Id),
         ];
