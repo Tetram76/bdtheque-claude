@@ -27,50 +27,15 @@ internal static class ChangeLogEndpoints
         admin.MapGet("/change-log/latest-records", LatestRecordsAsync);
     }
 
-    // From the latest entry to the oldest; the entries of a same save share their date, and follow the order of their
-    // time-ordered identifiers (visuel/journal/journal-des-modifications.md). Its criteria combine: the search on the label of
-    // the records, their type, the operation, the period (two days, both included, in the time zone of the browser, as an
-    // advanced search compares a date and time by its day) and a single record.
+    // From the latest entry to the oldest (visuel/journal/journal-des-modifications.md), the search and the filters combined.
     private static async Task<Contract.ChangeLogList> ListAsync(
         BdthequeDbContext context,
+        [AsParameters] ChangeLogFilters filters,
         CancellationToken cancellationToken,
-        string? q = null,
-        ContractEnums.RecordType? recordType = null,
-        ContractEnums.ChangeLogOperation? operation = null,
-        DateOnly? from = null,
-        DateOnly? to = null,
-        Guid? record = null,
         int page = 1,
-        int pageSize = Paging.DefaultSize,
-        [FromQuery(Name = AdvancedSearchQuery.TimeZoneParameter)] string? timeZone = null)
+        int pageSize = Paging.DefaultSize)
     {
-        var zone = SearchTimeZones.Resolve(timeZone);
-        var entries = Searched(context, q).AsNoTracking();
-        if (recordType is { } type)
-        {
-            var domainType = EnumMapping.Map<DomainEnums.RecordType>(type)!.Value;
-            entries = entries.Where(e => e.RecordType == domainType);
-        }
-
-        if (operation is { } kind)
-        {
-            var domainOperation = EnumMapping.Map<DomainEnums.ChangeLogOperation>(kind)!.Value;
-            entries = entries.Where(e => e.Operation == domainOperation);
-        }
-
-        if (from is { } first)
-        {
-            var start = InstantField.StartOf(first, zone);
-            entries = entries.Where(e => e.CreatedAt >= start);
-        }
-
-        if (to is { } last)
-        {
-            var end = InstantField.StartOf(last.AddDays(1), zone);
-            entries = entries.Where(e => e.CreatedAt < end);
-        }
-        if (record is { } id)
-            entries = entries.Where(e => e.RecordId == id);
+        var entries = filters.Apply(context);
 
         // The entries of one write share its instant: they follow the types of their records, a fixed order, before their
         // identifiers, whose time-ordered part is that same instant and whose rest is random.
@@ -82,7 +47,7 @@ internal static class ChangeLogEndpoints
         var parents = await ReadParentsAsync(context, found.Items, cancellationToken);
         var deleted = await ReadDeletedAsync(context, found.Items, cancellationToken);
         var wholeCount = await context.ChangeLog.CountAsync(cancellationToken);
-        var filtered = record is { } recordId ? await ReadRecordAsync(context, recordId, cancellationToken) : null;
+        var filtered = filters.Record is { } recordId ? await ReadRecordAsync(context, recordId, cancellationToken) : null;
 
         return new Contract.ChangeLogList(
             new Page<Contract.ChangeLogEntryItem>(
@@ -90,53 +55,6 @@ internal static class ChangeLogEndpoints
             wholeCount,
             filtered);
     }
-
-    /// <summary>
-    /// The entries whose label contains <paramref name="text"/>, ignoring case and accents, by what identifies each record in
-    /// the lists (choix-implementation/api/recherche.md); all of them if it is blank. The label is stored in <c>jsonb</c> by its
-    /// components, each text compared on its own, decoded: every text of it, those of the labels it holds too (the album of an
-    /// edition or of a purchase intent), never the kinds that tell them apart, nor its numbers and flags; the full name of an
-    /// author in its two orders; an ISBN without its separators, on both sides.
-    /// </summary>
-    private static IQueryable<Model.ChangeLogEntry> Searched(BdthequeDbContext context, string? text)
-    {
-        if (string.IsNullOrWhiteSpace(text))
-            return context.ChangeLog;
-
-        var pattern = $"%{CatalogFilters.EscapeLike(text.Trim())}%";
-        // Without a character of its own, the ISBN searched is the text itself: a separator alone finds no ISBN by its absence.
-        var isbn = IsbnSearch.Normalize(text.Trim());
-        var isbnPattern = isbn.Length == 0 ? pattern : $"%{CatalogFilters.EscapeLike(isbn)}%";
-        // EF Core translates no JSON path over a converted column: the condition is written in SQL, parameters carrying the
-        // patterns, and the rest of the query composed over it.
-        return context.ChangeLog.FromSqlRaw(SearchSql, pattern, isbnPattern);
-    }
-
-    // Each text of the label, decoded (->>), with whether it is an ISBN; {0} the pattern of the text, {1} that of an ISBN, any
-    // other brace being read as a parameter. Composed once, of constants only: the values searched are parameters.
-    private static readonly string SearchSql =
-        $$"""
-        SELECT * FROM "ChangeLogEntries" AS entry
-        WHERE EXISTS (
-            SELECT 1
-            FROM jsonb_path_query(entry."Label", 'strict $.** ? (@.type() == "object")') AS label(part)
-            CROSS JOIN LATERAL (
-                SELECT label.part ->> key, key = 'isbn' FROM jsonb_each(label.part)
-                WHERE key <> 'kind' AND jsonb_typeof(value) = 'string'
-                UNION ALL
-                SELECT concat_ws(' ', label.part ->> 'firstName', label.part ->> 'lastName'), false
-                WHERE label.part ->> 'kind' = 'author'
-                UNION ALL
-                SELECT concat_ws(' ', label.part ->> 'lastName', label.part ->> 'firstName'), false
-                WHERE label.part ->> 'kind' = 'author'
-            ) AS searched(text, isbn)
-            WHERE searched.text COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
-                OR (searched.isbn AND {{IsbnWithoutSeparators("searched.text")}} LIKE {1} ESCAPE '\'))
-        """;
-
-    // The ISBN of a label without its separators, as the lists compare it (IsbnSearch).
-    private static string IsbnWithoutSeparators(string isbn) =>
-        IsbnSearch.Separators.Aggregate(isbn, (sql, separator) => $"replace({sql}, '{separator}', '')");
 
     /// <summary>The records of the entries deleted since: an identifier is never given again, so any deletion is the last.</summary>
     private static async Task<HashSet<Guid>> ReadDeletedAsync(

@@ -5369,41 +5369,53 @@
             }
           },
           {
-            "name": "recordType",
+            "name": "RecordType",
             "in": "query",
+            "description": "The type of the records.",
             "schema": {
               "$ref": "#/components/schemas/RecordType"
             }
           },
           {
-            "name": "operation",
+            "name": "Operation",
             "in": "query",
+            "description": "The operation.",
             "schema": {
               "$ref": "#/components/schemas/ChangeLogOperation"
             }
           },
           {
-            "name": "from",
+            "name": "From",
             "in": "query",
+            "description": "The first day of the period, included, in the time zone of the browser.",
             "schema": {
               "type": "string",
               "format": "date"
             }
           },
           {
-            "name": "to",
+            "name": "To",
             "in": "query",
+            "description": "The last day of the period, included.",
             "schema": {
               "type": "string",
               "format": "date"
             }
           },
           {
-            "name": "record",
+            "name": "Record",
             "in": "query",
+            "description": "A single record, whose history the change log then is.",
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "timeZone",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -5430,13 +5442,6 @@
               ],
               "format": "int32",
               "default": 50
-            }
-          },
-          {
-            "name": "timeZone",
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
