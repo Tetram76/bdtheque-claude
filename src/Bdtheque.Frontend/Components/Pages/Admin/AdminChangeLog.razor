@@ -195,7 +195,7 @@
         (null, null) => @<span class="log-secret">@Texts.Secret</span>,
         (null, { } added) when ChangeLogTexts.IsElement(change.Attribute) => @<strong>+ @Value(added)</strong>,
         ({ } removed, null) when ChangeLogTexts.IsElement(change.Attribute) => @<span class="log-before"><s>@Value(removed)</s> @Texts.Removed</span>,
-        var (before, after) => @<span><span class="log-before">@Value(before)</span> <span class="log-arrow" aria-label="@L["Becomes"]">→</span> <strong>@Value(after)</strong></span>,
+        _ => @<span><span class="log-before">@Value(change.Before)</span> <span class="log-arrow" aria-label="@L["Becomes"]">→</span> <strong>@Value(change.After)</strong></span>,
     };
 
     // A value missing, or a text left empty, reads as a data absent.
