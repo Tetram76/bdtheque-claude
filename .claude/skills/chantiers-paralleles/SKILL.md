@@ -263,6 +263,14 @@ chosen before the others; the whole selection was presented at step 2.4.
   It sends them no instruction of its own on how to do their work, not even
   after an incident: never a copy of a rule of the `.speckit/`, nor a list of
   concepts to read.
+- **A message may be read very late, or lost** (« Messages lus tard, voire
+  perdus » of the concept): a successful `SendMessage` only says it reached
+  the session, not that it was read; silence is neither a reply nor an
+  agreement. Never expect an immediate reply, never wait for one
+  indefinitely: go on with what does not depend on it; wait for a needed
+  reply within a bounded delay, then check the real state (GitHub,
+  `get_session` / `list_events` of the session) and send it again if still
+  needed.
 - Each message or note of a session of the batch: report it to the user in a
   line or two, with the links of its pull request; never fabricate its
   result. A message is the session's report, not a proof: check on GitHub

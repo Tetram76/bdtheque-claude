@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-25
+
+* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, un message entre sessions peut être lu très tard, voire perdu s'il n'est pas lu dans un délai imparti ; ni réponse immédiate espérée, ni réponse attendue indéfiniment : l'expéditeur poursuit ce qui n'en dépend pas, borne son attente, vérifie l'état réel et renvoie au besoin ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md)).
+
 ## 2026-11-24
 
 * **Choix** : la fusion de deux auteurs garde l'identité des contributions qu'elle reporte, qu'une recherche enregistrée peut désigner, et redirige vers la contribution qui reste celles qu'elle retire en double ; le journal consigne une contribution créditée à un autre auteur ([Fusion de deux fiches : mise en œuvre](choix-implementation/ecritures/fusion-des-fiches-mise-en-oeuvre.md), [Journal des modifications : mise en œuvre](choix-implementation/domaine/journal-des-modifications-mise-en-oeuvre.md), [Unicité vérifiée à la validation](choix-implementation/persistance/unicite-verifiee-a-la-validation.md)) (#642).
