@@ -165,4 +165,46 @@
   <data name="DisplayCulture.FrenchFrance" xml:space="preserve">
     <value>Français (France)</value>
   </data>
+  <data name="AlbumType.Regular" xml:space="preserve">
+    <value>Régulier</value>
+  </data>
+  <data name="AlbumType.Omnibus" xml:space="preserve">
+    <value>Intégrale</value>
+  </data>
+  <data name="EntityKind.Album" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="EntityKind.Series" xml:space="preserve">
+    <value>Séries</value>
+  </data>
+  <data name="EntityKind.Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="EntityKind.Edition" xml:space="preserve">
+    <value>Éditions</value>
+  </data>
+  <data name="EntityKind.EditionVisual" xml:space="preserve">
+    <value>Visuels</value>
+  </data>
+  <data name="EntityKind.PublisherCollection" xml:space="preserve">
+    <value>Collections éditeur</value>
+  </data>
+  <data name="EntityKind.Contribution" xml:space="preserve">
+    <value>Contributions</value>
+  </data>
+  <data name="EntityKind.PurchaseIntent" xml:space="preserve">
+    <value>Intentions d'acquisition</value>
+  </data>
+  <data name="EntityKind.Author" xml:space="preserve">
+    <value>Auteurs</value>
+  </data>
+  <data name="EntityKind.Publisher" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="EntityKind.Genre" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="EntityKind.SavedSearch" xml:space="preserve">
+    <value>Recherches enregistrées</value>
+  </data>
 </root>

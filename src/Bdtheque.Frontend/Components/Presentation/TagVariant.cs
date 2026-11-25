@@ -16,4 +16,7 @@ public enum TagVariant
 
     /// <summary>Framed by a solid border of the color of the text, without fill.</summary>
     Outlined,
+
+    /// <summary>Framed and written in the color of the deletions of the theme: a record deleted (the change log).</summary>
+    Deletion,
 }

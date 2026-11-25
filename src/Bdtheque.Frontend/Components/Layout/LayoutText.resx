@@ -120,6 +120,9 @@
   <data name="Admin.Statistics" xml:space="preserve">
     <value>Statistiques privées</value>
   </data>
+  <data name="Admin.ChangeLog" xml:space="preserve">
+    <value>Journal des modifications</value>
+  </data>
   <data name="Logout" xml:space="preserve">
     <value>Se déconnecter</value>
   </data>

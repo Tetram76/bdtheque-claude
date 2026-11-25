@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Search;
 
@@ -16,6 +17,10 @@ namespace Bdtheque.Contracts.Admin;
 /// a collection (visuel/administration/contenu.md, Dernières modifications). Read with the entry, for a record that still
 /// exists; <c>null</c> for any other record.
 /// </param>
+/// <param name="RecordExists">
+/// Whether the record still exists, that is has not been deleted since: only then does its entry lead to its entry form, or to the
+/// consultation (visuel/journal/journal-des-modifications.md, Menu d'une entrée).
+/// </param>
 /// <param name="Label">What the label of the record was built from at the time of the write.</param>
 /// <param name="Changes">For a modification only: each attribute changed.</param>
 public sealed record ChangeLogEntryItem(
@@ -24,9 +29,23 @@ public sealed record ChangeLogEntryItem(
     RecordType RecordType,
     Guid RecordId,
     Guid? ParentId,
+    bool RecordExists,
     RecordLabel Label,
     ChangeLogOperation Operation,
     IReadOnlyList<ChangeLogChange> Changes);
+
+/// <summary>
+/// A page of the change log under its criteria (visuel/journal/journal-des-modifications.md).
+/// </summary>
+/// <param name="WholeCount">The number of entries of the whole change log, whatever its criteria: the total of its title.</param>
+/// <param name="Record">
+/// The record the change log is filtered on, by its latest entry, which the tag of its filter names; <c>null</c> without that
+/// filter, or for a record no entry knows.
+/// </param>
+public sealed record ChangeLogList(Page<ChangeLogEntryItem> Entries, int WholeCount, ChangeLogRecord? Record);
+
+/// <summary>A record, by its type and what its label was built from at its latest entry.</summary>
+public sealed record ChangeLogRecord(RecordType RecordType, RecordLabel Label);
 
 /// <summary>
 /// One attribute changed by a modification: an element added (genre, contribution, visual…) has no

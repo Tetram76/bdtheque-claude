@@ -19,4 +19,7 @@ public enum RecordSet
 
     /// <summary>The records to correct or complete: the block « À vérifier » and its lists (the ISBN to check).</summary>
     Checks,
+
+    /// <summary>The change log: the block « Dernières modifications » and the whole change log.</summary>
+    Journal,
 }

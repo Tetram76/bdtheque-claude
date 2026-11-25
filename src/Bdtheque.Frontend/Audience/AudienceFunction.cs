@@ -704,6 +704,18 @@ public static class AudienceFunctions
     /// <summary>The merge of the two albums, confirmed and done.</summary>
     public static readonly AudienceFunction AdminAlbumMerged = new("admin.album-merge.merged", AudienceFunctionKind.Action);
 
+    /// <summary>The whole change log (visuel/journal/journal-des-modifications.md).</summary>
+    public static readonly AudienceFunction AdminChangeLog = new("admin.change-log", AudienceFunctionKind.Screen);
+
+    // The actions of the change log, each a request of it whose parameters are its criteria (Lists/ChangeLogQuery.cs); the
+    // history of one record is one of its filters.
+
+    public static readonly AudienceFunction AdminChangeLogSearch = new("admin.change-log.search", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminChangeLogFilter = new("admin.change-log.filter", AudienceFunctionKind.Action);
+
+    public static readonly AudienceFunction AdminChangeLogPage = new("admin.change-log.page", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -749,5 +761,6 @@ public static class AudienceFunctions
         AdminTwoSeriesMerge, AdminTwoSeriesMerged,
         AdminUniverseMerge, AdminUniverseMerged,
         AdminAlbumMerge, AdminAlbumMerged,
+        AdminChangeLog, AdminChangeLogSearch, AdminChangeLogFilter, AdminChangeLogPage,
     ];
 }

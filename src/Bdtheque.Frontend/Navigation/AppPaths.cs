@@ -318,6 +318,22 @@ public static class AppPaths
     /// <summary>The list of the universes with the panel of a new universe open over it.</summary>
     public const string AdminNewUniverse = $"{AdminUniverses}?new=open";
 
+    /// <summary>The whole change log, from the latest entry to the oldest (visuel/journal/journal-des-modifications.md).</summary>
+    public const string AdminChangeLog = "/admin/change-log";
+
+    /// <summary>
+    /// The page of a record in the consultation, for the records that have one (fonctionnel/structure-de-l-application.md):
+    /// an album, a series, an author or a universe; <c>null</c> for any other.
+    /// </summary>
+    public static string? ConsultationRecord(RecordType type, Guid id) => type switch
+    {
+        RecordType.Album => Album(id),
+        RecordType.Series => SeriesRecord(id),
+        RecordType.Author => AuthorRecord(id),
+        RecordType.Universe => UniverseRecord(id),
+        _ => null,
+    };
+
     /// <summary>The editions whose ISBN has a check digit that disagrees with it (visuel/administration/contenu.md, À vérifier).</summary>
     public const string AdminInvalidIsbns = "/admin/invalid-isbns";
 

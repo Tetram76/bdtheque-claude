@@ -173,7 +173,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
             plan.QuerySelectorAll(".admin-menu-group-title").Select(title => title.TextContent.Trim()));
         Assert.Equal(
             ["Tableau de bord", "Séries", "Albums", "Éditions", "Intentions d'acquisition", "Auteurs", "Éditeurs",
-                "Genres", "Univers", "Paramétrage", "Statistiques privées"],
+                "Genres", "Univers", "Paramétrage", "Statistiques privées", "Journal des modifications"],
             plan.QuerySelectorAll("a > span:first-child").Select(entry => entry.TextContent.Trim()));
         Assert.Equal(AppPaths.AdminHome, plan.QuerySelector("a")?.GetAttribute("href"));
         // The logout last, after a rule: a form posted to its page, never a link that any page could follow.
@@ -204,7 +204,7 @@ public sealed class LayoutTests : BunitContext, IDisposable
         var layout = Render<AdminLayout>(parameters => parameters.Add(p => p.Body, Body));
 
         Assert.Empty(layout.FindAll(".admin-menu-count"));
-        Assert.Equal(11, layout.FindAll("nav[aria-label=\"Plan de l'administration\"] a").Count);
+        Assert.Equal(12, layout.FindAll("nav[aria-label=\"Plan de l'administration\"] a").Count);
     }
 
     [Fact]

@@ -17,6 +17,12 @@
     font-size: var(--font-size-small);
 }
 
+/* The link to the whole change log, under the list of the latest changes, at its start: the rest of the list. */
+.admin-home-more {
+    margin: var(--space-xs) 0 0;
+    font-weight: var(--font-weight-strong);
+}
+
 .admin-home-pair {
     display: grid;
     gap: var(--admin-gap);

@@ -154,13 +154,13 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
         _api.Answers["/admin/change-log/latest-records"] = new[]
         {
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 6, 9, 42, 0, TimeSpan.Zero), RecordType.Album, album,
-                null, iris, ChangeLogOperation.Modification, []),
+                null, true, iris, ChangeLogOperation.Modification, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 6, 9, 30, 0, TimeSpan.Zero), RecordType.Edition, edition,
-                album, new EditionLabel(iris, "Albert René", null, 2023, null), ChangeLogOperation.Creation, []),
+                album, true, new EditionLabel(iris, "Albert René", null, 2023, null), ChangeLogOperation.Creation, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 5, 20, 8, 0, TimeSpan.Zero), RecordType.Genre,
-                genre, null, new NameLabel("Western"), ChangeLogOperation.Creation, []),
+                genre, null, true, new NameLabel("Western"), ChangeLogOperation.Creation, []),
             new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 4, 8, 0, 0, TimeSpan.Zero), RecordType.ApplicationSettings,
-                Guid.CreateVersion7(), null, new ApplicationSettingsLabel(), ChangeLogOperation.Modification, []),
+                Guid.CreateVersion7(), null, true, new ApplicationSettingsLabel(), ChangeLogOperation.Modification, []),
         };
 
         var page = Render<AdminHome>();
@@ -182,11 +182,34 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     }
 
     [Fact]
+    // Under the list, the link to the whole change log; the block bears the mention of the change log, the same set.
+    public void LatestChanges_LeadToTheWholeChangeLog()
+    {
+        _api.Answers["/admin/change-log/latest-records"] = new[]
+        {
+            new ChangeLogEntryItem(Guid.CreateVersion7(), new DateTimeOffset(2026, 11, 5, 20, 8, 0, TimeSpan.Zero), RecordType.Genre,
+                Guid.CreateVersion7(), null, true, new NameLabel("Western"), ChangeLogOperation.Creation, []),
+        };
+
+        var block = BlockOf(Render<AdminHome>(), "Dernières modifications");
+
+        var more = block.QuerySelector("p.admin-home-more")!;
+        Assert.True(more.PreviousElementSibling!.Matches("ul.admin-rows"));
+        Assert.Null(more.NextElementSibling);
+        var link = more.QuerySelector("a")!;
+        Assert.Equal(("Tout le journal", AppPaths.AdminChangeLog), (link.TextContent.Trim(), link.GetAttribute("href")));
+        Assert.Equal("Journal", block.QuerySelector(".block-kicker")!.TextContent.Trim());
+    }
+
+    [Fact]
     public void LatestChanges_NoneYet_SaysSo()
     {
         var page = Render<AdminHome>();
 
-        Assert.Equal("Aucune fiche n'a encore été saisie.", BlockOf(page, "Dernières modifications").QuerySelector("p.admin-home-note")!.TextContent.Trim());
+        var block = BlockOf(page, "Dernières modifications");
+        Assert.Equal("Aucune fiche n'a encore été saisie.", block.QuerySelector("p.admin-home-note")!.TextContent.Trim());
+        // Nothing to follow: no link to the whole change log.
+        Assert.Null(block.QuerySelector("p.admin-home-more"));
     }
 
     [Fact]

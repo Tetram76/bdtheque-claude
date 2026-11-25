@@ -24,7 +24,7 @@ Le tableau suivant associe chaque sujet documenté à la page, ou aux pages, qui
 | L'écran d'accueil, les cookies, la visite et son thème, les couleurs du jour, la culture et le fuseau horaire, et la mesure d'audience. | [Frontend : visite, thème, culture et mesure d'audience](../mecanismes/frontend-visite-theme-et-culture.md) |
 | La recherche des listes, la recherche avancée et les recherches enregistrées. | [Recherche simple et avancée](../mecanismes/recherche.md) |
 | Le téléversement des visuels, leur zone d'attente, leur stockage, leurs médias et leur réconciliation. | [Visuels](../mecanismes/visuels.md) |
-| La capture du journal des modifications, la correspondance des attributs, son stockage et sa lecture. | [Journal des modifications](../mecanismes/journal-des-modifications.md) |
+| La capture du journal des modifications, la correspondance des attributs, son stockage, sa lecture filtrée et son écran dans l'administration. | [Journal des modifications](../mecanismes/journal-des-modifications.md) |
 | Le workflow CI : classement des fichiers modifiés, jobs et leurs conditions, tests de bout en bout par thème, analyse SonarQube Cloud et analyse des images. | [Intégration continue](../integration-et-tests/integration-continue.md) |
 | Les projets de tests et leurs ressources, les tests du dépôt, l'horloge et le thème imposés, les API interdites et les captures de référence. | [Stratégie de tests](../integration-et-tests/strategie-de-tests.md) |
 | Le contrôle qualité hebdomadaire, le contrôle de sécurité quotidien et le relevé des versions. | [Contrôles périodiques](../integration-et-tests/controles-periodiques.md) |

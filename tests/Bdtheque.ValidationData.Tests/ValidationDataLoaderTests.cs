@@ -365,6 +365,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Contains(latest, entry => entry.PublisherWebsite is null);
     }
 
+    // The change log: an album modified in several of its data at once, each change with its values
+    // (visuel/journal/journal-des-modifications.md, Entrées).
+    [Fact]
+    public async Task ChangeLog_PresentsAModificationOfSeveralChanges()
+    {
+        var log = await _client.GetFromJsonAsync<Contracts.Admin.ChangeLogList>(
+            "/admin/change-log?q=Brouillard%20sur%20Ombrelune&recordType=Album&operation=Modification");
+
+        var modification = Assert.Single(log!.Entries.Items);
+        Assert.Equal(
+            [ChangeLogAttribute.Summary, ChangeLogAttribute.Genre, ChangeLogAttribute.Contribution, ChangeLogAttribute.Rating],
+            modification.Changes.Select(c => c.Attribute).Order());
+        Assert.True(modification.RecordExists);
+    }
+
     // The home page of the administration: a record modified among the latest changes, a deleted one left out, and the
     // records whose page is their own or under their parent (an edition and an intent under their album, a collection under
     // its publisher), which carry it.
