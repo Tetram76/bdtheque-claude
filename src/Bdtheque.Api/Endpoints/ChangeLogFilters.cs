@@ -55,7 +55,8 @@ internal sealed record ChangeLogFilters(
                 WHERE label.part ->> 'kind' = 'author'
             ) AS searched(text, isbn)
             WHERE searched.text COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
-                OR (searched.isbn AND translate(searched.text, {2}, '') LIKE {1} ESCAPE '\'))
+                OR (searched.isbn
+                    AND translate(searched.text, {2}, '') COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {1} ESCAPE '\'))
         """;
 
     /// <summary>The entries of the change log that the search and the filters keep.</summary>

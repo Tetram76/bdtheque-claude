@@ -112,6 +112,10 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
         Assert.Contains((await ReadAsync("q=%22Grand%22&pageSize=100")).Entries.Items, e => e.RecordId == quoted.Id);
         Assert.Contains((await ReadAsync("q=978 2205 046005&pageSize=100")).Entries.Items, e => e.RecordId == edition.Id);
         Assert.Contains((await ReadAsync("q=2-205-04600&pageSize=100")).Entries.Items, e => e.RecordId == edition.Id);
+        // An ISBN-10 whose check digit is an X, searched without its separators and in lower case, as the lists find it.
+        var tenDigits = await PostAsync<CreateEditionRequest, EditionForm>(
+            $"/admin/albums/{quoted.Id}/editions", new(Edition(publisher.Id) with { Isbn = "0-8044-2957-X" }, edition.AlbumVersion));
+        Assert.Contains((await ReadAsync("q=080442957x&pageSize=100")).Entries.Items, e => e.RecordId == tenDigits.Id);
         // Two texts of a label are searched apart, never their storage between them.
         Assert.DoesNotContain((await ReadAsync("q=Uderzo%22,&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
     }
