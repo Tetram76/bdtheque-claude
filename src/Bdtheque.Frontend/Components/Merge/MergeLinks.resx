@@ -45,4 +45,19 @@
   <data name="Title" xml:space="preserve">
     <value>Ce qui passe à la fiche</value>
   </data>
+  <data name="Common.One.PublisherCollection" xml:space="preserve">
+    <value>, dont 1 commune aux deux fiches</value>
+  </data>
+  <data name="Common.Other.PublisherCollection" xml:space="preserve">
+    <value>, dont {0} communes aux deux fiches</value>
+  </data>
+  <data name="Part.One.PublisherCollection" xml:space="preserve">
+    <value>celle de {0}</value>
+  </data>
+  <data name="Part.One.Edition" xml:space="preserve">
+    <value>celle de {0}</value>
+  </data>
+  <data name="Part.One.PurchaseIntent" xml:space="preserve">
+    <value>celle de {0}</value>
+  </data>
 </root>

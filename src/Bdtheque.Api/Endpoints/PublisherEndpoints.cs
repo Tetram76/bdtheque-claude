@@ -1,8 +1,11 @@
+using System.Data;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
+using Bdtheque.Contracts.Enums;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -59,6 +62,147 @@ internal static class PublisherEndpoints
         collections.MapPut("/{id:guid}", UpdateCollectionAsync);
         collections.MapChildDeletion<Publisher, PublisherCollection>(
             query => query.Include(p => p.Collections), publisher => publisher.Collections, CollectionDeletionLinks);
+
+        publishers.MapGet("/merge", GetMergeAsync);
+        publishers.MapPost("/merge", MergeAsync);
+    }
+
+    // The series, editions and purchase intents of a publisher, an edition a purchase intent targets being counted as that intent
+    // (visuel/fusion/fusion-de-deux-fiches.md, fonctionnel/regles-metier/suppression-des-entites.md); its collections, whose
+    // homonyms become one, are counted apart (CollectionLinkAsync).
+    private static readonly (EntityKind Kind, Func<BdthequeDbContext, Guid, IQueryable<Guid>> Records)[] MergeLinks =
+    [
+        (EntityKind.Series, (context, id) => context.Series.Where(s => s.TemplatePublisherId == id).Select(s => s.Id)),
+        (EntityKind.Edition, (context, id) =>
+            context.Editions.Where(CatalogExpressions.Expand((Edition e) => e.PublisherId == id && e.IsOwned())).Select(e => e.Id)),
+        (EntityKind.PurchaseIntent, (context, id) => context.PurchaseIntents.Where(i => i.Edition!.PublisherId == id).Select(i => i.Id)),
+    ];
+
+    /// <summary>
+    /// Two publishers to merge, their homonymous collections, and what designates them
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md).
+    /// </summary>
+    private static async Task<PublisherMergePreview> GetMergeAsync(Guid first, Guid second, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot: the homonyms and the counts are those of the two publishers read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        var (firstRecord, secondRecord) = (await MergeRecordAsync(context, first, cancellationToken), await MergeRecordAsync(context, second, cancellationToken));
+        var homonyms = await HomonymsAsync(context, first, second, cancellationToken);
+        var links = (await RecordMerge.CountLinksAsync(context, first, second, MergeLinks, cancellationToken))
+            .Append(await CollectionLinkAsync(context, first, second, homonyms.Count, cancellationToken))
+            .OrderBy(l => EntityKindOrder.Of(l.Kind))
+            .ToList();
+        return new PublisherMergePreview(firstRecord, secondRecord, homonyms, links);
+    }
+
+    private static async Task<PublisherMergeRecord> MergeRecordAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken) =>
+        await context.Publishers.AsNoTracking()
+            .Where(p => p.Id == id)
+            .Select(p => new PublisherMergeRecord(p.Id, p.Name, p.Website, p.ModifiedAt, EF.Property<uint>(p, BdthequeDbContext.VersionProperty)))
+            .SingleOrDefaultAsync(cancellationToken)
+        ?? throw new EntityNotFoundException(typeof(Publisher), id);
+
+    /// <summary>
+    /// The collections of the first publisher homonymous to one of the second, by name: the names compare as their column
+    /// compares them, without case nor accents (choix-implementation/persistance/collation-des-colonnes-texte.md), the only
+    /// comparison that the uniqueness of a name among the collections of a publisher, which the merge must keep, follows.
+    /// Each collection has at most one homonym, the names of a publisher's collections being unique.
+    /// </summary>
+    private static async Task<List<PublisherCollectionHomonyms>> HomonymsAsync(
+        BdthequeDbContext context, Guid first, Guid second, CancellationToken cancellationToken) =>
+        (await context.PublisherCollections.AsNoTracking()
+            .Where(c => c.PublisherId == first)
+            .Join(context.PublisherCollections.Where(c => c.PublisherId == second), c => c.Name, c => c.Name,
+                (ofFirst, ofSecond) => new { First = ofFirst.Id, FirstName = ofFirst.Name, Second = ofSecond.Id, SecondName = ofSecond.Name })
+            .OrderBy(h => h.FirstName)
+            .ThenBy(h => h.First)
+            .ToListAsync(cancellationToken))
+        .Select(h => new PublisherCollectionHomonyms(h.First, h.FirstName, h.Second, h.SecondName))
+        .ToList();
+
+    // The collections of both publishers, two homonyms counted once, as common to both: they become one.
+    private static async Task<MergeLinkCount> CollectionLinkAsync(
+        BdthequeDbContext context, Guid first, Guid second, int homonyms, CancellationToken cancellationToken)
+    {
+        var ofFirst = await context.PublisherCollections.CountAsync(c => c.PublisherId == first, cancellationToken);
+        var ofSecond = await context.PublisherCollections.CountAsync(c => c.PublisherId == second, cancellationToken);
+        return new MergeLinkCount(EntityKind.PublisherCollection, ofFirst + ofSecond - homonyms, ofFirst, ofSecond, homonyms);
+    }
+
+    /// <summary>
+    /// Merges two publishers: the publisher that remains keeps each data chosen and takes the collections of the other one,
+    /// two homonymous collections becoming the one whose name is kept; the editions and series of both are published by it,
+    /// each in the collection that remains of its own.
+    /// </summary>
+    /// <exception cref="ArgumentException">
+    /// The collections chosen are not the homonyms of the two publishers as read: the client sends back what it read, which
+    /// the versions of the publishers guarantee unchanged.
+    /// </exception>
+    private static Task<MergeResult> MergeAsync(PublisherMergeRequest request, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        RecordMerge.MergeAsync<Publisher>(
+            context, request.First, request.Second, RecordMerge.KeepsFirst([request.Name, request.Website]),
+            pair =>
+            {
+                // Read from both before the kept publisher changes.
+                var (name, website) = (pair.Of(request.Name).Name, pair.Of(request.Website).Website);
+                pair.Kept.SetName(name);
+                pair.Kept.SetWebsite(website);
+            },
+            async pair =>
+            {
+                // Loaded, and tracked before the editions and series that designate them: each collection is one of a
+                // publisher's, and a collection deleted with its publisher is recorded by the change log.
+                foreach (var publisher in new[] { pair.First, pair.Second })
+                    await context.Entry(publisher).Collection(p => p.Collections).LoadAsync(cancellationToken);
+                var collections = pair.First.Collections.Concat(pair.Second.Collections).ToDictionary(c => c.Id);
+                var homonyms = KeptOfHomonyms(request, await HomonymsAsync(context, pair.First.Id, pair.Second.Id, cancellationToken))
+                    .Select(h => h.Name == MergeSide.First
+                        ? (Remaining: collections[h.Homonyms.First], Removed: collections[h.Homonyms.Second])
+                        : (Remaining: collections[h.Homonyms.Second], Removed: collections[h.Homonyms.First]))
+                    .ToList();
+
+                var removed = homonyms.Select(h => h.Removed.Id).ToList();
+                var series = await RecordMerge.LoadLinkedForWriteAsync<Series>(
+                    context,
+                    context.Series.Where(s => s.TemplatePublisherId == pair.Merged.Id
+                                              || (s.TemplatePublisherCollectionId != null && removed.Contains(s.TemplatePublisherCollectionId.Value)))
+                        .Select(s => s.Id),
+                    cancellationToken);
+                var albums = await RecordMerge.LoadLinkedForWriteAsync<Album>(
+                    context,
+                    context.Editions.Where(e => e.PublisherId == pair.Merged.Id
+                                                || (e.PublisherCollectionId != null && removed.Contains(e.PublisherCollectionId.Value)))
+                        .Select(e => e.AlbumId),
+                    cancellationToken);
+
+                var merge = pair.Kept.Absorb(pair.Merged, homonyms);
+                foreach (var oneSeries in series)
+                    oneSeries.TransferPublisher(merge);
+                foreach (var album in albums)
+                    album.TransferPublisher(merge);
+                return [.. merge.Replaced.Select(r => new MergeReplacement(EntityKind.PublisherCollection, r.Key, r.Value.Id))];
+            },
+            cancellationToken);
+
+    /// <summary>The name each pair of homonymous collections keeps, as the request chooses it.</summary>
+    /// <exception cref="ArgumentException">
+    /// The request does not choose the name of each pair, and of them only: the client sends back the homonyms it read, which the
+    /// versions of the publishers guarantee unchanged.
+    /// </exception>
+    private static List<(PublisherCollectionHomonyms Homonyms, MergeSide Name)> KeptOfHomonyms(
+        PublisherMergeRequest request, List<PublisherCollectionHomonyms> homonyms)
+    {
+        if (request.Collections.Count != homonyms.Count)
+            throw new ArgumentException("A collection chosen is not one of the homonyms of the two publishers.", nameof(request));
+        var kept = new List<(PublisherCollectionHomonyms Homonyms, MergeSide Name)>(homonyms.Count);
+        foreach (var pair in homonyms)
+        {
+            var chosen = request.Collections.FirstOrDefault(c => c.First == pair.First && c.Second == pair.Second)
+                         ?? throw new ArgumentException($"The name of the collections {pair.First} and {pair.Second} is not chosen.", nameof(request));
+            kept.Add((pair, chosen.Name));
+        }
+
+        return kept;
     }
 
     // A publisher and its collections have no record (fonctionnel/structure-de-l-application.md): a

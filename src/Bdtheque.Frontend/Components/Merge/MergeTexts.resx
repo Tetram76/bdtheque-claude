@@ -51,4 +51,25 @@
   <data name="Pending.Short" xml:space="preserve">
     <value>{0} à choisir</value>
   </data>
+  <data name="Separator" xml:space="preserve">
+    <value>, </value>
+  </data>
+  <data name="Linked.One.PublisherCollection" xml:space="preserve">
+    <value>la collection</value>
+  </data>
+  <data name="Linked.Other.PublisherCollection" xml:space="preserve">
+    <value>les {0} collections</value>
+  </data>
+  <data name="Linked.One.Edition" xml:space="preserve">
+    <value>l&apos;édition</value>
+  </data>
+  <data name="Linked.Other.Edition" xml:space="preserve">
+    <value>les {0} éditions</value>
+  </data>
+  <data name="Linked.One.PurchaseIntent" xml:space="preserve">
+    <value>l&apos;intention</value>
+  </data>
+  <data name="Linked.Other.PurchaseIntent" xml:space="preserve">
+    <value>les {0} intentions</value>
+  </data>
 </root>

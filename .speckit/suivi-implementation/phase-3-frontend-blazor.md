@@ -84,7 +84,7 @@ La liste des albums de la consultation (#603) est réalisée la première : elle
 | ~~#612~~ | Confirmation d'une acquisition et conversion d'une intention d'acquisition |
 | ~~#613~~ | Éditions dont l'ISBN est à vérifier |
 | ~~#642~~ | Fusion de deux genres ou de deux auteurs : écran et mécanisme communs de la fusion |
-| #643 | Fusion de deux éditeurs et de leurs collections |
+| ~~#643~~ | Fusion de deux éditeurs et de leurs collections |
 | #644 | Fusion de deux univers et de leurs sous-univers |
 | #645 | Fusion de deux séries |
 | #646 | Fusion de deux albums |

@@ -252,4 +252,16 @@ public sealed class Series : EntityBase, IAggregateRoot
         TemplatePublisherCollection = collection;
         TemplatePublisherCollectionId = collection?.Id;
     }
+
+    /// <summary>
+    /// Gives the series the publisher that remains of the merge of two publishers, if its publisher was one of them, with the
+    /// collection that remains of its own (fonctionnel/regles-metier/fusion-des-fiches.md).
+    /// </summary>
+    /// <exception cref="InvalidOperationException">The template collection of the series is not loaded.</exception>
+    public void TransferPublisher(PublisherMerge merge)
+    {
+        ArgumentNullException.ThrowIfNull(merge);
+        if (merge.Concerns(TemplatePublisherId, TemplatePublisherCollectionId))
+            SetTemplate(merge.Kept, merge.CollectionReplacing(TemplatePublisherCollectionId, TemplatePublisherCollection));
+    }
 }
