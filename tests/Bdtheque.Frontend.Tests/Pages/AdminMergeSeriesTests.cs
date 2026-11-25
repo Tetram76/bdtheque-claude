@@ -46,8 +46,8 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
             [new GenreListItem(Aventure, "Aventure"), new GenreListItem(Humour, "Humour")],
             [new UniverseInHierarchy(new UniverseListItem(Gaule, "Gaule", null, null), [])],
             [
-                new SeriesMergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d1"), Goscinny, ContributionRole.Scenarist),
-                new SeriesMergeContribution(UderzoCredit, Uderzo, ContributionRole.Illustrator),
+                new MergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d1"), Goscinny, ContributionRole.Scenarist),
+                new MergeContribution(UderzoCredit, Uderzo, ContributionRole.Illustrator),
             ],
             new DateTimeOffset(2026, 10, 2, 8, 0, 0, TimeSpan.Zero), 11),
         new SeriesMergeRecord(
@@ -58,8 +58,8 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
             [new GenreListItem(Humour, "Humour")],
             [],
             [
-                new SeriesMergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d3"), Goscinny, ContributionRole.Scenarist),
-                new SeriesMergeContribution(MebarkiCredit, Mebarki, ContributionRole.Colorist),
+                new MergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d3"), Goscinny, ContributionRole.Scenarist),
+                new MergeContribution(MebarkiCredit, Mebarki, ContributionRole.Colorist),
             ],
             new DateTimeOffset(2026, 11, 4, 8, 0, 0, TimeSpan.Zero), 12),
         [new MergeLinkCount(EntityKind.Album, 40, 38, 2, 0)]);
@@ -91,9 +91,11 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_EachDataInTheOrderOfTheEntryForm_AndEachCreditGenreAndUniverseOfEitherSeries()
+    public async Task Rows_EachDataInTheOrderOfTheEntryForm_AndEachCreditGenreAndUniverseOfEitherSeries()
     {
         var page = Open();
+        // Every data presented (« Tout afficher »).
+        await page.ChangeAsync(".merge-show-all", true);
 
         Assert.Equal("Fusionner deux séries", page.Find("h1").TextContent.Trim());
         Assert.Equal(
@@ -125,9 +127,11 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Choices_ASameValueOnce_AValueOfOneSeriesRetained_TwoValuesWaitingForTheUser()
+    public async Task Choices_ASameValueOnce_AValueOfOneSeriesRetained_TwoValuesWaitingForTheUser()
     {
         var page = Open();
+        // Every data presented (« Tout afficher »).
+        await page.ChangeAsync(".merge-show-all", true);
 
         // A credit and a genre of both, the same on both sides, as the exclusions, the category and the template values alike.
         Assert.Contains($"merge-contribution-{Goscinny.Id}-Scenarist-label", Same(page));
@@ -172,8 +176,10 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
 
         await page.SubmitAsync("form");
         var confirmation = page.Find("dialog");
-        Assert.Contains("Les deux fiches n'en feront plus qu'une : Asterix.", confirmation.TextContent);
-        Assert.Contains("Asterix regroupera les 40 albums des deux fiches.", confirmation.TextContent);
+        Assert.Contains("Les deux fiches n'en feront plus qu'une : «\u00A0Asterix\u00A0».", confirmation.TextContent);
+        Assert.Contains("«\u00A0Asterix\u00A0» regroupera les 40 albums des deux fiches.", confirmation.TextContent);
+        // Uderzo, discarded, the confirmation sets apart as deleted.
+        Assert.Equal(["1 contribution : «\u00A0Albert Uderzo\u00A0» (Dessin), de «\u00A0Astérix\u00A0»"], page.FindAll(".merge-removals li").Select(line => line.TextContent.Trim()));
         await page.ClickAsync("dialog button[data-variant=delete]");
 
         var (_, path, body) = Assert.Single(_api.Written);

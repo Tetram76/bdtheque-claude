@@ -359,6 +359,20 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
             GenreIds = [.. album.GenreIds, humour],
             Contributions = [.. album.Contributions.Where(c => c.AuthorId != pinceau)],
         });
+        // An album saved again under its title in figures, to merge with « Le Phare aux mille lanternes »: published the
+        // same year, without its month, another rating and summary, the same scenarist with a colourist of its own, a genre of its
+        // own, and a third edition, owned, which passes to the album that remains with an edition targeted by an intent.
+        var lighthouseTwin = await data.AlbumAsync(OneShot(TwinAlbumTitle, 1989, null, [fantasy, adventure], [],
+            [Credit(quintin, ContributionRole.Scenarist), Credit(ostrova, ContributionRole.Colorist)]) with
+        {
+            Summary = "Un gardien de phare allume chaque nuit mille lanternes.",
+        });
+        await data.EditionAsync(lighthouseTwin, Owned(blackPlate.Id, null, 2021, AcquisitionMode.Gift, new DateOnly(2021, 12, 24)) with { IsFree = true });
+        await data.IntentOnEditionAsync(lighthouseTwin, new PurchaseIntentEditionContent(horizon.Id, null, 2025, null, null, null, null, null, null, null, true));
+        // An album wished for as a whole, saved again outside its series: to merge with « Le Récif d'argent », which has an
+        // edition, the intent on the whole album being withdrawn (fonctionnel/regles-metier/fusion-des-fiches.md).
+        var reefTwin = await data.AlbumAsync(OneShot(TwinWishedAlbumTitle, 2022, 6, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist)]));
+        await data.IntentOnAlbumAsync(reefTwin);
 
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
         // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
@@ -433,6 +447,12 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     /// A duplicate of « Ombrelune » saved under one of its sub-universes, to merge with it: its parent cannot be kept.
     /// </summary>
     public const string NestedTwinUniverse = "Ombrelune (ancienne)";
+
+    /// <summary>The album « Le Phare aux mille lanternes » saved again under its title in figures, to merge with it.</summary>
+    public const string TwinAlbumTitle = "Le Phare aux 1000 lanternes";
+
+    /// <summary>The album « Le Récif d'argent », wished for as a whole, saved again outside its series, to merge with it.</summary>
+    public const string TwinWishedAlbumTitle = "Le Récif d'Argent";
 
     /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
     public const string DeletedGenre = "Genre supprimé";

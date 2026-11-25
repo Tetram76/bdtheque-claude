@@ -103,6 +103,55 @@ public sealed class Contribution : EntityBase
     }
 
     /// <summary>
+    /// Passes the contribution to <paramref name="album"/>, with its identity, as the merge of two albums does when the album that
+    /// remains retains it of the other one (<see cref="Album.MergeContributions"/>).
+    /// </summary>
+    internal void MoveTo(Album album)
+    {
+        Album = album;
+        AlbumId = album.Id;
+    }
+
+    /// <summary>
+    /// The credits two merged records both hold (fonctionnel/regles-metier/fusion-des-fiches.md, duplicates of a list): each
+    /// contribution of <paramref name="other"/> whose author and role a contribution of <paramref name="held"/> credits, with
+    /// that one, which replaces it.
+    /// </summary>
+    internal static IReadOnlyList<(Guid Removed, Guid Kept)> HeldOf(List<Contribution> held, IEnumerable<Contribution> other) =>
+    [
+        .. other
+            .Select(c => (Removed: c.Id, Kept: held.Find(h => h.AuthorId == c.AuthorId && h.Role == c.Role)?.Id))
+            .Where(c => c.Kept is not null)
+            .Select(c => (c.Removed, c.Kept!.Value)),
+    ];
+
+    /// <summary>
+    /// Keeps, of the contributions of the record that remains (<paramref name="kept"/>) and of the other one
+    /// (<paramref name="merged"/>), those the merge retains: one of the other record retained passes to the one that remains with
+    /// its identity, which a saved search may designate (<paramref name="moveTo"/>); one discarded stays with the other record,
+    /// deleted with it; one of the record that remains discarded is removed. A credit both hold, the same value on both sides, is
+    /// kept once, by the contribution of the record that remains, whatever <paramref name="retained"/> says of it.
+    /// </summary>
+    /// <param name="retained">The contributions retained, of either record.</param>
+    /// <exception cref="ArgumentException">A contribution retained of neither record; nothing is changed.</exception>
+    internal static void Merge(List<Contribution> kept, List<Contribution> merged, IReadOnlyCollection<Guid> retained, Action<Contribution> moveTo)
+    {
+        ArgumentNullException.ThrowIfNull(retained);
+        var held = HeldOf(kept, merged);
+        var foreign = retained.Where(id => !kept.Exists(c => c.Id == id) && !merged.Exists(c => c.Id == id)).ToList();
+        if (foreign.Count > 0)
+            throw new ArgumentException($"The contributions {string.Join(", ", foreign)} are of neither merged record.", nameof(retained));
+
+        kept.RemoveAll(c => !retained.Contains(c.Id) && !held.Any(h => h.Kept == c.Id));
+        foreach (var other in merged.Where(c => retained.Contains(c.Id) && !held.Any(h => h.Removed == c.Id)).ToList())
+        {
+            merged.Remove(other);
+            moveTo(other);
+            kept.Add(other);
+        }
+    }
+
+    /// <summary>
     /// Credits <paramref name="kept"/> instead of <paramref name="merged"/> in every role the latter holds, as the merge of two
     /// authors does (fonctionnel/regles-metier/fusion-des-fiches.md): each contribution keeps its identity, which a saved search may
     /// designate, and a role both of them hold is credited once, by the contribution of <paramref name="kept"/>.

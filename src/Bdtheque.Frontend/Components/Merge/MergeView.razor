@@ -1,0 +1,44 @@
+@inject IStringLocalizer<MergeView> L
+
+@* The data of a merge, in its reduced display by default (visuel/fusion/fusion-de-deux-fiches.md): only the data with a choice
+   to make; a row with nothing to choose (the same value in both records, or a value that cannot be kept) is left out by
+   MergeChoice itself, a group left without a row to choose (a block of MergeData, a pair of homonyms) is hidden by the style of
+   the view, and a line says there is nothing to choose in their place. « Tout afficher », in the bar of the merge, presents
+   every data. *@
+<div class="merge-view" data-reduced="@(Reduced ? "true" : null)">
+    <CascadingValue Name="@ReducedName" Value="Reduced">
+        @ChildContent
+    </CascadingValue>
+    @if (Reduced)
+    {
+        <p class="merge-view-empty">@L["Empty"]</p>
+    }
+</div>
+
+@code {
+    /// <summary>The name of the cascading value that tells the rows of the view whether it is reduced.</summary>
+    public const string ReducedName = "MergeViewReduced";
+
+    /// <summary>Whether only the data with a choice to make are presented; the default of a merge.</summary>
+    [Parameter]
+    public bool Reduced { get; set; }
+
+    /// <summary>The groups of data (MergeData, homonyms), each marked <c>merge-group</c>.</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Whether a data has a choice to make, the one rule of the reduced display: two different values, either of them possible.
+    /// A page that lays out its own groups (the heads of the two records in the first group presented) asks it too.
+    /// </summary>
+    /// <param name="same">
+    /// Whether the two values are the same, when their texts cannot tell (two homonymous series of two albums are two values);
+    /// by default, the same text.
+    /// </param>
+    public static bool HasChoice(string? first, string? second, bool impossible = false, bool? same = null) =>
+        !impossible && !IsSame(first, second, same);
+
+    /// <summary>Whether the two values of a data are the same: by <paramref name="same"/> when given, else by their texts.</summary>
+    public static bool IsSame(string? first, string? second, bool? same = null) =>
+        same ?? string.Equals(first, second, StringComparison.Ordinal);
+}

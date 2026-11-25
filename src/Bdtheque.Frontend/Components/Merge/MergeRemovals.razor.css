@@ -1,0 +1,31 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the alert color sets the deletions apart from
+   the changes the confirmation says above them. */
+.merge-removals {
+    margin-block-start: var(--space-m);
+}
+
+.merge-removals-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin: 0 0 var(--space-xs);
+    color: var(--color-alert);
+    font-weight: 700;
+}
+
+.merge-removals ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.merge-removals li::before {
+    content: "− ";
+    color: var(--color-alert);
+}
+
+.merge-removals-title ::deep .icon {
+    flex: none;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+}

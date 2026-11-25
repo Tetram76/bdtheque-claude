@@ -133,10 +133,10 @@ public static class AppPaths
         path.TrimEnd('/').EndsWith("/acquisition-intents/new", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
-    /// The next step of the merge of two albums, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the album and the other one, <c>album</c> and <c>other</c>.
+    /// The merge of two albums (visuel/fusion/fusion-de-deux-fiches.md), the next step of the dialog of the merge of the list of
+    /// the albums: it receives the album and the other one, <c>album</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergeAlbums = NotYetImplemented;
+    public const string AdminMergeAlbums = AdminAlbums + MergeSegment;
 
     /// <summary>
     /// The segment of the merge of two records, after the list of their type (visuel/fusion/fusion-de-deux-fiches.md).

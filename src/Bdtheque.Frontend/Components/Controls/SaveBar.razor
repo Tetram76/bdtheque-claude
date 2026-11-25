@@ -8,6 +8,10 @@
         <p class="save-bar-state" role="status" data-state="@StateName">
             <span class="save-bar-state-long">@(StateText ?? L[$"{State}.Long"])</span><span class="save-bar-state-short">@(StateShortText ?? L[$"{State}.Short"])</span>
         </p>
+        @if (Options is not null)
+        {
+            <div class="save-bar-options">@Options</div>
+        }
         <div class="save-bar-actions">
             <Button Label="@L["Cancel"]" Href="@CancelHref" />
             <Button Label="@SaveLabel" Type="submit" Variant="ButtonVariant.Primary" Disabled="@(Saving || SaveDisabled || State == SaveBarState.Sending)" />
@@ -42,6 +46,12 @@
     /// <summary>Whether the record cannot be saved yet (e.g. a merge with data left to choose).</summary>
     [Parameter]
     public bool SaveDisabled { get; set; }
+
+    /// <summary>
+    /// What the bar offers besides cancelling and saving, at hand anywhere in the page (e.g. « Tout afficher » of a merge).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? Options { get; set; }
 
     private string StateName => State.ToString().ToLowerInvariant();
 }

@@ -1,16 +1,22 @@
 @using Bdtheque.Contracts.Admin
 @inject IStringLocalizer<MergeLinks> L
+@inject Citation Citation
 
 @* What passes to the record, in the order of the entity types (visuel/fusion/fusion-de-deux-fiches.md): a line per type of
    linked records, its total after the merge, then where it comes from. What was linked to both is counted once and said
-   common to both records, never a duplicate removed: nothing of it is lost (decision of the user). *@
+   common to both records, never a duplicate removed: nothing of it is lost (decision of the user). A record the merge deletes
+   besides the other one is said apart, after them. *@
 <Block Title="@L["Title"]" Kicker="@L["Kicker"]">
-    @if (Links.Any(l => l.Total > 0))
+    @if (Links.Any(l => l.Total > 0) || Withdrawn.Count > 0)
     {
         <ul class="merge-links">
             @foreach (var link in Links.Where(l => l.Total > 0))
             {
                 <li><strong>@Count(link)</strong> <span class="merge-links-detail">@Detail(link)</span></li>
+            }
+            @foreach (var withdrawn in Withdrawn)
+            {
+                <li class="merge-links-withdrawn"><Icon Name="IconName.Exclamation" /> <span>@withdrawn</span></li>
             }
         </ul>
     }
@@ -31,12 +37,21 @@
     [Parameter, EditorRequired]
     public string SecondName { get; set; } = null!;
 
+    /// <summary>
+    /// The records the merge deletes besides the other one, which it counts nowhere, each with its reason (« L'intention
+    /// d'acquisition de l'album « A » sera retirée : l'album aura des éditions. »), after the types of linked records
+    /// (decision of the user, #646).
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<string> Withdrawn { get; set; } = [];
+
     /// <summary>The total of a type, as the page says it (« Crédité sur 26 albums », « 55 albums »).</summary>
     [Parameter, EditorRequired]
     public Func<MergeLinkCount, string> Count { get; set; } = null!;
 
-    // « les 24 de Gotlib et celle de Marcel Gotlib, dont 1 commune aux deux fiches »: a record with nothing of the type is not
-    // named, one record is « celui » or « celle », as the type is said.
+    // « les 24 de « Gotlib » et celle de « Marcel Gotlib », dont 1 commune aux deux fiches »: a record with nothing of the type is
+    // not named, one record is « celui » or « celle », as the type is said; each name cited
+    // (fonctionnel/presentation/noms-cites-dans-un-message.md).
     private string Detail(MergeLinkCount link)
     {
         var parts = new[] { Part(link.Kind, link.First, FirstName), Part(link.Kind, link.Second, SecondName) }.OfType<string>();
@@ -52,7 +67,7 @@
     private string? Part(Bdtheque.Contracts.Enums.EntityKind kind, int count, string name) => count switch
     {
         0 => null,
-        1 => L[$"Part.One.{kind}", name].Value,
-        _ => L["Part.Other", count, name].Value,
+        1 => L[$"Part.One.{kind}", Citation.Of(name)].Value,
+        _ => L["Part.Other", count, Citation.Of(name)].Value,
     };
 }

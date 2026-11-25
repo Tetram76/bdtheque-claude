@@ -633,4 +633,10 @@
   <data name="admin.universe-merge.merged" xml:space="preserve">
     <value>Fusion de deux univers · fusion faite</value>
   </data>
+  <data name="admin.album-merge" xml:space="preserve">
+    <value>Fusion de deux albums</value>
+  </data>
+  <data name="admin.album-merge.merged" xml:space="preserve">
+    <value>Fusion de deux albums · fusion faite</value>
+  </data>
 </root>

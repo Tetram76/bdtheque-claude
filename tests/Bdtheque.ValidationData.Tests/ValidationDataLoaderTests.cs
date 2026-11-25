@@ -418,6 +418,21 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         return (await _client.GetFromJsonAsync<SeriesDetail>($"/catalog/series/{Assert.Single(found!.Series.Items).Id}"))!;
     }
 
+    // visuel/fusion/fusion-de-deux-fiches.md: two albums to merge, the editions and the intent of the second passing to the album
+    // that remains; and an album wished for as a whole, whose intent the merge with an album that has an edition withdraws.
+    [Fact]
+    public async Task AlbumTwins_OneWithAnEditionAndAnIntentOfItsOwn_TheOtherWishedForAsAWhole()
+    {
+        var twin = await AlbumAsync(ValidationDataLoader.TwinAlbumTitle);
+        Assert.Equal(Bdtheque.Contracts.Admin.AlbumCollectionState.InCollection, twin.State);
+        Assert.NotEmpty(twin.Editions);
+
+        var found = await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?q={Uri.EscapeDataString(ValidationDataLoader.TwinWishedAlbumTitle)}");
+        var wished = Assert.Single(found!.Albums.Items, a => a.Album.SeriesId is null);
+        Assert.NotNull((await _client.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{wished.Album.Id}"))!.PurchaseIntent);
+        Assert.Single(found.Albums.Items, a => a.Album.SeriesId is not null);
+    }
+
     private async Task<AlbumDetail> AlbumAsync(string title)
     {
         var found = await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?q={Uri.EscapeDataString(title)}");

@@ -6,6 +6,7 @@
 @using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<AdminMergeUniverses> L
 @inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
 @inject ApiClient Api
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -28,42 +29,47 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Name, Preview.Second.Name]"
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Citation.Of(Preview.First.Name), Citation.Of(Preview.Second.Name)]"
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminUniverses" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)" Result="@Result">
-            <MergeChoice Id="merge-name" Label="@L["Name"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
-                         First="@Preview.First.Name" Second="@Preview.Second.Name" @bind-Selected="Choices!.Name" />
-            <MergeChoice Id="merge-parent" Label="@L["Parent"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
-                         First="@Path(Preview.First.Parent)" Second="@Path(Preview.Second.Parent)" @bind-Selected="Choices.Parent"
-                         Impossible="ImpossibleParent" ImpossibleReason="@L["Parent.Impossible"]" />
-            <MergeChoice Id="merge-description" Label="@L["Description"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
-                         First="@Preview.First.Description" Second="@Preview.Second.Description" @bind-Selected="Choices.Description" Long="true" />
-        </MergeData>
-        @if (Preview.Pairs.Count > 0)
-        {
-            <Block Title="@L["Pairs.Title"]" Kicker="@L["Pairs.Kicker"]">
-                <p class="merge-pairs-lead">@L["Pairs.Lead"]</p>
-                @for (var index = 0; index < Preview.Pairs.Count; index++)
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)" Result="@Result">
+                    <MergeChoice Id="merge-name" Label="@L["Name"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                                 First="@Preview.First.Name" Second="@Preview.Second.Name" @bind-Selected="Choices!.Name" />
+                    <MergeChoice Id="merge-parent" Label="@L["Parent"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                                 First="@Path(Preview.First.Parent)" Second="@Path(Preview.Second.Parent)" @bind-Selected="Choices.Parent"
+                                 Impossible="ImpossibleParent" ImpossibleReason="@L["Parent.Impossible"]" />
+                    <MergeChoice Id="merge-description" Label="@L["Description"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                                 First="@Preview.First.Description" Second="@Preview.Second.Description" @bind-Selected="Choices.Description" Long="true" />
+                </MergeData>
+                @if (Preview.Pairs.Count > 0)
                 {
-                    var pair = Preview.Pairs[index];
-                    var choice = Choices!.Pairs[index];
-                    <section class="merge-pair" aria-label="@PairPath(pair)">
-                        <h3 class="merge-pair-title">@PairPath(pair)</h3>
-                        <MergeData Framed="false" First="new MergeRecordHead(pair.First.Name, null, pair.First.ModifiedAt)"
-                                   Second="new MergeRecordHead(pair.Second.Name, null, pair.Second.ModifiedAt)">
-                            <MergeChoice Id="@($"merge-pair-{index}-name")" Label="@L["Name"]" FirstRecord="@pair.First.Name" SecondRecord="@pair.Second.Name"
-                                         First="@pair.First.Name" Second="@pair.Second.Name" @bind-Selected="choice.Name" />
-                            <MergeChoice Id="@($"merge-pair-{index}-description")" Label="@L["Description"]" FirstRecord="@pair.First.Name"
-                                         SecondRecord="@pair.Second.Name" First="@pair.First.Description" Second="@pair.Second.Description"
-                                         @bind-Selected="choice.Description" Long="true" />
-                        </MergeData>
-                    </section>
+                    <Block Title="@L["Pairs.Title"]" Kicker="@L["Pairs.Kicker"]" class="merge-group">
+                        <p class="merge-pairs-lead">@L["Pairs.Lead"]</p>
+                        @for (var index = 0; index < Preview.Pairs.Count; index++)
+                        {
+                            var pair = Preview.Pairs[index];
+                            var choice = Choices!.Pairs[index];
+                            <section class="merge-pair merge-group" aria-label="@PairPath(pair)">
+                                <h3 class="merge-pair-title">@PairPath(pair)</h3>
+                                <MergeData Framed="false" First="new MergeRecordHead(pair.First.Name, null, pair.First.ModifiedAt)"
+                                           Second="new MergeRecordHead(pair.Second.Name, null, pair.Second.ModifiedAt)">
+                                    <MergeChoice Id="@($"merge-pair-{index}-name")" Label="@L["Name"]" FirstRecord="@pair.First.Name" SecondRecord="@pair.Second.Name"
+                                                 First="@pair.First.Name" Second="@pair.Second.Name" @bind-Selected="choice.Name" />
+                                    <MergeChoice Id="@($"merge-pair-{index}-description")" Label="@L["Description"]" FirstRecord="@pair.First.Name"
+                                                 SecondRecord="@pair.Second.Name" First="@pair.First.Description" Second="@pair.Second.Description"
+                                                 @bind-Selected="choice.Description" Long="true" />
+                                </MergeData>
+                            </section>
+                        }
+                    </Block>
                 }
-            </Block>
-        }
-        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Name" SecondName="@Preview.Second.Name" Count="Count" />
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Name" SecondName="@Preview.Second.Name" Count="Count" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -75,11 +81,11 @@ else
                     <li>@Merge.OneRecord(KeptName)</li>
                     @if (Merge.Linked(Preview.Links) is { } linked)
                     {
-                        <li>@L["Confirm.Gathers", KeptName, linked]</li>
+                        <li>@L["Confirm.Gathers", Citation.Of(KeptName), linked]</li>
                     }
                     @if (Preview.Pairs.Count > 0)
                     {
-                        <li>@L["Confirm.Pairs", Merge.Enumerate([.. Preview.Pairs.Select(PairPath)])]</li>
+                        <li>@L["Confirm.Pairs", Merge.Enumerate([.. Preview.Pairs.Select(p => Citation.Of(PairPath(p)))])]</li>
                     }
                 </ul>
             </ChildContent>
@@ -91,6 +97,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     private ApiProblem? _loadProblem;
     private ApiProblem? _mergeProblem;
     private EntryForm? _form;
@@ -114,7 +122,7 @@ else
     [PersistentState]
     public UniverseMergeChoices? Choices { get; set; }
 
-    private MergeTexts Merge => new(MergeLocalizer);
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
 
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Universes"], AppPaths.AdminUniverses), new(L["Breadcrumb"])];
 

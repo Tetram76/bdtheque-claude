@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Administration</value>
+  </data>
+  <data name="Albums" xml:space="preserve">
+    <value>Albums</value>
+  </data>
+  <data name="Breadcrumb" xml:space="preserve">
+    <value>Fusion</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Fusionner deux albums</value>
+  </data>
+  <data name="Subject" xml:space="preserve">
+    <value>{0} et {1}</value>
+  </data>
+  <data name="Merge" xml:space="preserve">
+    <value>Fusionner…</value>
+  </data>
+  <data name="Data.Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="Data.Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Data.SortKey" xml:space="preserve">
+    <value>Clé de tri</value>
+  </data>
+  <data name="Data.SortKey.Auto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="Data.Volume" xml:space="preserve">
+    <value>Tome</value>
+  </data>
+  <data name="Data.Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Data.Type.Regular" xml:space="preserve">
+    <value>Régulier</value>
+  </data>
+  <data name="Data.Type.Omnibus" xml:space="preserve">
+    <value>Intégrale</value>
+  </data>
+  <data name="Data.Type.OmnibusOf" xml:space="preserve">
+    <value>Intégrale, tomes {0} à {1}</value>
+  </data>
+  <data name="Data.SpecialIssue" xml:space="preserve">
+    <value>Hors-série</value>
+  </data>
+  <data name="Data.Yes" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="Data.No" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="Data.Publication" xml:space="preserve">
+    <value>Première publication</value>
+  </data>
+  <data name="Data.Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="Data.Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Data.Summary" xml:space="preserve">
+    <value>Résumé</value>
+  </data>
+  <data name="Data.Notes" xml:space="preserve">
+    <value>Notes personnelles</value>
+  </data>
+  <data name="Data.Rating" xml:space="preserve">
+    <value>Appréciation</value>
+  </data>
+  <data name="Result.Label" xml:space="preserve">
+    <value>Affiché</value>
+  </data>
+  <data name="Result.SortKey" xml:space="preserve">
+    <value>Classé à</value>
+  </data>
+  <data name="Result.Failed" xml:space="preserve">
+    <value>La clé de tri n&apos;a pas pu être calculée.</value>
+  </data>
+  <data name="Head.Edition.One" xml:space="preserve">
+    <value>1 édition</value>
+  </data>
+  <data name="Head.Edition.Other" xml:space="preserve">
+    <value>{0} éditions</value>
+  </data>
+  <data name="Head.PurchaseIntent.One" xml:space="preserve">
+    <value>1 intention</value>
+  </data>
+  <data name="Head.PurchaseIntent.Other" xml:space="preserve">
+    <value>{0} intentions</value>
+  </data>
+  <data name="Links.Edition.One" xml:space="preserve">
+    <value>1 édition</value>
+  </data>
+  <data name="Links.Edition.Other" xml:space="preserve">
+    <value>{0} éditions</value>
+  </data>
+  <data name="Links.PurchaseIntent.One" xml:space="preserve">
+    <value>1 intention d&apos;acquisition</value>
+  </data>
+  <data name="Links.PurchaseIntent.Other" xml:space="preserve">
+    <value>{0} intentions d&apos;acquisition</value>
+  </data>
+  <data name="Links.Withdrawn" xml:space="preserve">
+    <value>L&apos;intention d&apos;acquisition de l&apos;album {0} sera retirée : l&apos;album aura des éditions.</value>
+  </data>
+  <data name="Confirm.Title" xml:space="preserve">
+    <value>Fusionner les deux albums ?</value>
+  </data>
+  <data name="Confirm.Linked" xml:space="preserve">
+    <value>{0} aura {1}.</value>
+  </data>
+  <data name="Confirm.Withdrawn" xml:space="preserve">
+    <value>l&apos;intention d&apos;acquisition de l&apos;album {0} : l&apos;album aura des éditions</value>
+  </data>
+  <data name="Confirm.Contribution" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Problem.Conflict" xml:space="preserve">
+    <value>L&apos;un des deux albums a été modifié depuis l&apos;ouverture de la fusion. Rechargez-la pour choisir de nouveau.</value>
+  </data>
+  <data name="Problem.NotFound" xml:space="preserve">
+    <value>L&apos;un des deux albums a été supprimé entre-temps.</value>
+  </data>
+  <data name="Problem.Technical" xml:space="preserve">
+    <value>La fusion n&apos;a pas pu aboutir. Réessayez dans un instant.</value>
+  </data>
+  <data name="Block.Album" xml:space="preserve">
+    <value>L&apos;album</value>
+  </data>
+  <data name="Kicker.Album" xml:space="preserve">
+    <value>Identification</value>
+  </data>
+  <data name="Block.Volume" xml:space="preserve">
+    <value>Tomaison</value>
+  </data>
+  <data name="Kicker.Volume" xml:space="preserve">
+    <value>Dans la série</value>
+  </data>
+  <data name="Block.Publication" xml:space="preserve">
+    <value>Parution</value>
+  </data>
+  <data name="Kicker.Publication" xml:space="preserve">
+    <value>Calendrier</value>
+  </data>
+  <data name="Block.Authors" xml:space="preserve">
+    <value>Les auteurs</value>
+  </data>
+  <data name="Kicker.Authors" xml:space="preserve">
+    <value>Contributions</value>
+  </data>
+  <data name="Block.Classification" xml:space="preserve">
+    <value>Genres et univers</value>
+  </data>
+  <data name="Kicker.Classification" xml:space="preserve">
+    <value>Classement</value>
+  </data>
+  <data name="Block.Reading" xml:space="preserve">
+    <value>Résumé, notes et appréciation</value>
+  </data>
+  <data name="Kicker.Reading" xml:space="preserve">
+    <value>Lecture</value>
+  </data>
+</root>

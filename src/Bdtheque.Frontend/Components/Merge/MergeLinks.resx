@@ -69,4 +69,10 @@
   <data name="Part.One.Universe" xml:space="preserve">
     <value>celui de {0}</value>
   </data>
+  <data name="Common.One.PurchaseIntent" xml:space="preserve">
+    <value>, dont 1 commune aux deux fiches</value>
+  </data>
+  <data name="Common.Other.PurchaseIntent" xml:space="preserve">
+    <value>, dont {0} communes aux deux fiches</value>
+  </data>
 </root>

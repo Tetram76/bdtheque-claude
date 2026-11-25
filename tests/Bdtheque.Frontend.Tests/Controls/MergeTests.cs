@@ -13,9 +13,10 @@ namespace Bdtheque.Frontend.Tests.Controls;
 public sealed class MergeTests : BunitContext
 {
     public MergeTests() =>
-        Services.AddLogging().AddLocalization().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
+        Services.AddLogging().AddLocalization().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>()
+            .AddSingleton<Bdtheque.Frontend.Formatting.Citation>();
 
-    private MergeTexts Texts => new(Services.GetRequiredService<IStringLocalizer<MergeTexts>>());
+    private MergeTexts Texts => new(Services.GetRequiredService<IStringLocalizer<MergeTexts>>(), Services.GetRequiredService<Bdtheque.Frontend.Formatting.Citation>());
 
     [Fact]
     public async Task Choice_OfTwoValues_OffersBoth_AndRetainsTheOneClicked()
@@ -60,9 +61,9 @@ public sealed class MergeTests : BunitContext
 
     // What was linked to both is said common, never a duplicate removed: nothing of it is lost (decision of the user).
     [Theory]
-    [InlineData(24, 3, 1, "les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches")]
-    [InlineData(2, 1, 1, "les 2 de Gotlib et celui de Marcel Gotlib, dont 1 commun aux deux fiches")]
-    [InlineData(0, 3, 0, "les 3 de Marcel Gotlib")]
+    [InlineData(24, 3, 1, "les 24 de «\u00A0Gotlib\u00A0» et les 3 de «\u00A0Marcel Gotlib\u00A0», dont 1 commun aux deux fiches")]
+    [InlineData(2, 1, 1, "les 2 de «\u00A0Gotlib\u00A0» et celui de «\u00A0Marcel Gotlib\u00A0», dont 1 commun aux deux fiches")]
+    [InlineData(0, 3, 0, "les 3 de «\u00A0Marcel Gotlib\u00A0»")]
     public void Links_SayWhereEachTypeComesFrom(int first, int second, int common, string detail)
     {
         var links = Render<MergeLinks>(parameters => parameters
@@ -81,7 +82,7 @@ public sealed class MergeTests : BunitContext
             .Add(p => p.FirstName, "Gotlib").Add(p => p.SecondName, "Marcel Gotlib")
             .Add(p => p.Count, link => $"{link.Total}"));
 
-        Assert.Equal(["les 2 de Gotlib et celle de Marcel Gotlib, dont 1 commune aux deux fiches"],
+        Assert.Equal(["les 2 de «\u00A0Gotlib\u00A0» et celle de «\u00A0Marcel Gotlib\u00A0», dont 1 commune aux deux fiches"],
             links.FindAll(".merge-links-detail").Select(d => d.TextContent));
     }
 
@@ -99,7 +100,7 @@ public sealed class MergeTests : BunitContext
     [Fact]
     public void Confirmation_SaysWhatTheMergeWillDo()
     {
-        Assert.Equal("Les deux fiches n'en feront plus qu'une : Gotlib.", Texts.OneRecord("Gotlib"));
+        Assert.Equal("Les deux fiches n'en feront plus qu'une : «\u00A0Gotlib\u00A0».", Texts.OneRecord("Gotlib"));
         Assert.Equal("les 2 séries et l'album des deux fiches", Texts.Linked(
             [new MergeLinkCount(EntityKind.Series, 2, 2, 1, 1), new MergeLinkCount(EntityKind.Album, 1, 1, 0, 0)]));
         Assert.Null(Texts.Linked([new MergeLinkCount(EntityKind.Album, 0, 0, 0, 0)]));
@@ -151,7 +152,7 @@ public sealed class MergeTests : BunitContext
             .Add(p => p.FirstName, "Star Wars").Add(p => p.SecondName, "Star wars")
             .Add(p => p.Count, link => $"{link.Total} sous-univers"));
 
-        Assert.Equal("les 2 de Star Wars et les 3 de Star wars, dont 2 communs aux deux fiches", links.Find(".merge-links-detail").TextContent);
+        Assert.Equal("les 2 de «\u00A0Star Wars\u00A0» et les 3 de «\u00A0Star wars\u00A0», dont 2 communs aux deux fiches", links.Find(".merge-links-detail").TextContent);
     }
 
     [Fact]

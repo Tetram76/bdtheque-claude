@@ -10,7 +10,7 @@ using frontend::Bdtheque.Frontend.Navigation;
 namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
-/// The merge of two genres, of two authors, of two publishers and of two series (visuel/fusion/fusion-de-deux-fiches.md), on an
+/// The merge of two genres, of two authors, of two publishers, of two series and of two albums (visuel/fusion/fusion-de-deux-fiches.md), on an
 /// application of its own: a merge deletes one of its records, which no other test may count on. Each journey of the
 /// administrator, through the browser: from the dialog of the list to the merge, the data chosen one by one, the confirmation and
 /// the list again; and two records modified meanwhile. Its captures are in <see cref="Captures.AdminMergeCaptureTests"/>.
@@ -45,7 +45,7 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux genres ?" });
         await Assertions.Expect(confirmation).ToContainTextAsync("La fusion est définitive.");
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : SF {_marker}.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0SF {_marker}\u00A0».");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminGenres));
@@ -65,6 +65,9 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         // The last name and the biography differ on both sides: the user chooses them; the pseudonym and the nationality, set on
         // one side only, are retained at once, the first name, the same, has nothing to choose.
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("2 données restent à choisir");
+        // Left out of the reduced display, the default; presented by « Tout afficher ».
+        await Assertions.Expect(page.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
         await Assertions.Expect(page.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(1);
         await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).GetByRole(AriaRole.Radio, new() { Name = $"Gotlib {_marker}", Exact = true }).CheckAsync();
         // The display name the names chosen give, as the domain derives it: the pseudonym.
@@ -72,7 +75,7 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Courte." }).CheckAsync();
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux auteurs ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Gotlib {_marker}.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Gotlib {_marker}\u00A0».");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAuthors));
@@ -102,6 +105,9 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         // at once, and the other pair of collections, spelled the same, has nothing to choose.
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("2 données restent à choisir");
         var homonyms = page.Locator(".merge-data", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Collections homonymes" }) });
+        // Left out of the reduced display, the default; presented by « Tout afficher ».
+        await Assertions.Expect(homonyms.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
         await Assertions.Expect(homonyms.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator(".merge-links")).ToContainTextAsync("3 collections");
 
@@ -114,8 +120,8 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux éditeurs ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Dupuis {_marker}.");
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Dupuis {_marker} réunira les 3 collections des deux fiches.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Dupuis {_marker}\u00A0».");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"«\u00A0Dupuis {_marker}\u00A0» réunira les 3 collections des deux fiches.");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers));
@@ -151,8 +157,8 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux séries ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Spirou et Fantasio {_marker}.");
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Spirou et Fantasio {_marker} regroupera les 2 albums des deux fiches.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Spirou et Fantasio {_marker}\u00A0».");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"«\u00A0Spirou et Fantasio {_marker}\u00A0» regroupera les 2 albums des deux fiches.");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminSeries));
@@ -161,6 +167,53 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         var kept = (await api.GetFromJsonAsync<SeriesDetail>($"/catalog/series/{first.Id}"))!;
         Assert.Equal(($"Spirou et Fantasio {_marker}", 2), (kept.Title, kept.Albums.Count));
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/series/{second.Id}")).StatusCode);
+    }
+
+    [Theory, InEachTheme]
+    public async Task AlbumMerge_FromTheDialogOfTheList_SaysTheIntentWithdrawn_AndKeepsTheEditionOfTheOther(string theme)
+    {
+        using var api = Application.CreateApiClient();
+        var first = await CreateAlbumAsync(api, $"Le Lotus bleu {_marker}");
+        var publisher = Application.Dupuis;
+        (await api.PostAsJsonAsync($"/admin/albums/{first.Id}/editions", new CreateEditionRequest(
+            new EditionContent(publisher.Id, null, 1936, null, null, null, null, null, null, null, false, true, null, AcquisitionMode.Purchase, false,
+                null, null, null, false, null, null, null, null), first.Version))).EnsureSuccessStatusCode();
+        var second = await CreateAlbumAsync(api, $"Le lotus bleu {_marker}");
+        (await api.PostAsJsonAsync($"/admin/albums/{second.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, second.Version))).EnsureSuccessStatusCode();
+        var page = await OpenAsync(theme,
+            $"{AppPaths.AdminAlbums}?q={_marker}&merge={first.Id}&mergeQ={Uri.EscapeDataString($"Le lotus bleu {_marker}")}");
+
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux albums" });
+        await dialog.GetByRole(AriaRole.Radio, new() { Name = $"Le lotus bleu {_marker}" }).CheckAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Continuer" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminMergeAlbums, $"?other={second.Id}&album={first.Id}"));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Fusionner deux albums");
+        // The intent on the whole second album does not pass: the album will have the edition of the first one.
+        await Assertions.Expect(page.Locator(".merge-links-withdrawn")).ToHaveTextAsync(
+            $"L'intention d'acquisition de l'album «\u00A0Le lotus bleu {_marker}\u00A0» sera retirée : l'album aura des éditions.");
+        // Two titles, neither favoured; every other data the same in both albums.
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("1 donnée reste à choisir");
+        await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Titre" })
+            .GetByRole(AriaRole.Radio, new() { Name = $"Le lotus bleu {_marker}", Exact = true }).CheckAsync();
+        // The label and the sort key the title chosen gives, as the domain computes it.
+        await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync($"Affiché : Le lotus bleu {_marker}");
+        await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync($"Classé à : lotus bleu {_marker} [Le]");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
+
+        var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux albums ?" });
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Le lotus bleu {_marker}\u00A0».");
+        await Assertions.Expect(confirmation.Locator(".merge-removals")).ToContainTextAsync("Sera supprimé :");
+        await Assertions.Expect(confirmation.Locator(".merge-removals li")).ToHaveTextAsync(
+            [$"l'intention d'acquisition de l'album «\u00A0Le lotus bleu {_marker}\u00A0» : l'album aura des éditions"]);
+        await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbums));
+        // As many data of each album kept, the first one remains, with its edition and without the intent.
+        var kept = (await api.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{first.Id}"))!;
+        Assert.Equal(($"Le lotus bleu {_marker}", 1, null), (kept.Album.Title, kept.Editions.Count, kept.PurchaseIntent));
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/albums/{second.Id}")).StatusCode);
     }
 
     [Theory, InEachTheme]
@@ -216,6 +269,14 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
     }
 
     // A series of one album.
+    private static async Task<AlbumForm> CreateAlbumAsync(HttpClient api, string title)
+    {
+        var response = await api.PostAsJsonAsync("/admin/albums", new AlbumContent(
+            title, null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [], [], []));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<AlbumForm>())!;
+    }
+
     private async Task<SeriesForm> CreateSeriesAsync(string title)
     {
         using var api = Application.CreateApiClient();
@@ -353,7 +414,36 @@ public sealed class MergeApplication : ApplicationHost
         await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Les Jedi", null, cloneWars.Id));
         await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Les Jédi", null, cloneWarsTwin.Id));
         await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Rebels", null, StarWarsTwin.Id));
+
+        // The two albums of the captures: « Le Tour de Gaule d'Astérix », in « Les Aventures d'Astérix », apart from the series
+        // of the merge of two series, whose captures count the albums, tome 5, an owned edition; « Le Tour de Gaule », saved again
+        // later without series, wished for as a whole, the same scenarist and a colourist of its own, a genre of its own, published
+        // in another month.
+        var adventures = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series("Les Aventures d'Astérix"));
+        var tour = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album(adventures.Id, 5) with
+        {
+            Title = "Le Tour de Gaule d'Astérix", FirstPublicationYear = 1965, FirstPublicationMonth = 3, Rating = AlbumRating.VeryGood,
+            Summary = "Astérix et Obélix font le tour de la Gaule pour en rapporter les spécialités.",
+            GenreIds = [aventure.Id], Contributions = [new(goscinny.Id, ContributionRole.Scenarist), new(uderzo.Id, ContributionRole.Illustrator)],
+        });
+        await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{tour.Id}/editions", new(Owned(dargaud.Id, dargaud.Collections[0].Id), tour.Version));
+        Tour = await GetAsync<AlbumForm>(api, $"/admin/albums/{tour.Id}");
+        var tourAgain = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album(null, 5) with
+        {
+            Title = "Le Tour de Gaule", FirstPublicationYear = 1965, FirstPublicationMonth = 5,
+            PersonalNotes = "Saisi de nouveau, à fusionner.", GenreIds = [aventure.Id, humour.Id],
+            Contributions = [new(goscinny.Id, ContributionRole.Scenarist), new(mebarki.Id, ContributionRole.Colorist)],
+        });
+        await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(api, $"/admin/albums/{tourAgain.Id}/purchase-intents", new(null, tourAgain.Version));
+        TourAgain = await GetAsync<AlbumForm>(api, $"/admin/albums/{tourAgain.Id}");
     }
+
+    /// <summary>The two albums of the captures: one in its series, with an edition, the other saved again later, wished for as a whole.</summary>
+    public AlbumForm Tour { get; private set; } = null!;
+
+    public AlbumForm TourAgain { get; private set; } = null!;
+
+    private static async Task<TResponse> GetAsync<TResponse>(HttpClient api, string path) => (await api.GetFromJsonAsync<TResponse>(path))!;
 
     /// <summary>The two publishers of the captures: the first one, and the same saved again under a longer name.</summary>
     public PublisherForm Dupuis { get; private set; } = null!;
@@ -377,7 +467,7 @@ public sealed class MergeApplication : ApplicationHost
         new(title, null, null, null, false, false, false, null, null, new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null),
             [], [], []);
 
-    private static AlbumContent Album(Guid series, int volume) =>
+    private static AlbumContent Album(Guid? series, int? volume) =>
         new(null, null, series, AlbumType.Regular, false, volume, null, null, null, null, null, null, null, [], [], []);
 }
 

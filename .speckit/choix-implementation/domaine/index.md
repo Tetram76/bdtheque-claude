@@ -1,6 +1,6 @@
 # Règles du domaine
 
-* [Intention d'acquisition : agrégat porté par l'album](intention-d-acquisition-agregat-porte-par-l-album.md) - Intentions d'acquisition portées par l'agrégat Album : acquisition, conversion, édition non possédée indissociable de son intention.
+* [Intention d'acquisition : agrégat porté par l'album](intention-d-acquisition-agregat-porte-par-l-album.md) - Intentions d'acquisition portées par l'agrégat Album : acquisition, conversion, édition non possédée indissociable de son intention, fusion de deux albums.
 * [Valeur d'une édition : mise en œuvre](valeur-d-une-edition-mise-en-oeuvre.md) - Règles des montants d'une édition, écriture atomique de l'acquisition, date de référence.
 * [Représentation de la devise](representation-de-la-devise.md) - Devise en code ISO 4217, ancien franc sous le code QZF.
 * [Version de l'API Frankfurter](version-de-l-api-frankfurter.md) - Taux de change par l'API Frankfurter v2, taux fixes en constantes (Phase 4).

@@ -78,4 +78,22 @@
   <data name="Comma" xml:space="preserve">
     <value>, </value>
   </data>
+  <data name="Discarded.One.Contribution" xml:space="preserve">
+    <value>1 contribution : {0}, de {1}</value>
+  </data>
+  <data name="Discarded.Other.Contribution" xml:space="preserve">
+    <value>{0} contributions : {1}, de {2}</value>
+  </data>
+  <data name="Discarded.One.Genre" xml:space="preserve">
+    <value>1 genre : {0}, de {1}</value>
+  </data>
+  <data name="Discarded.Other.Genre" xml:space="preserve">
+    <value>{0} genres : {1}, de {2}</value>
+  </data>
+  <data name="Discarded.One.Universe" xml:space="preserve">
+    <value>1 univers : {0}, de {1}</value>
+  </data>
+  <data name="Discarded.Other.Universe" xml:space="preserve">
+    <value>{0} univers : {1}, de {2}</value>
+  </data>
 </root>

@@ -698,6 +698,11 @@ public static class AudienceFunctions
 
     /// <summary>The merge of the two universes, confirmed and done.</summary>
     public static readonly AudienceFunction AdminUniverseMerged = new("admin.universe-merge.merged", AudienceFunctionKind.Action);
+    /// <summary>The merge of two albums, as that of two genres.</summary>
+    public static readonly AudienceFunction AdminAlbumMerge = new("admin.album-merge", AudienceFunctionKind.Screen);
+
+    /// <summary>The merge of the two albums, confirmed and done.</summary>
+    public static readonly AudienceFunction AdminAlbumMerged = new("admin.album-merge.merged", AudienceFunctionKind.Action);
 
     /// <summary>The whole change log (visuel/journal/journal-des-modifications.md).</summary>
     public static readonly AudienceFunction AdminChangeLog = new("admin.change-log", AudienceFunctionKind.Screen);
@@ -755,6 +760,7 @@ public static class AudienceFunctions
         AdminPublisherMerge, AdminPublisherMerged,
         AdminTwoSeriesMerge, AdminTwoSeriesMerged,
         AdminUniverseMerge, AdminUniverseMerged,
+        AdminAlbumMerge, AdminAlbumMerged,
         AdminChangeLog, AdminChangeLogSearch, AdminChangeLogFilter, AdminChangeLogPage,
     ];
 }

@@ -1,13 +1,13 @@
 ---
 type: Choix d'implémentation
 title: 'Intention d''acquisition : agrégat porté par l''album'
-description: 'Intentions d''acquisition portées par l''agrégat Album : acquisition, conversion, édition non possédée indissociable de son intention.'
+description: 'Intentions d''acquisition portées par l''agrégat Album : acquisition, conversion, édition non possédée indissociable de son intention, fusion de deux albums.'
 applies_to:
   - 'src/Bdtheque.Domain/Entities/Album.cs'
   - 'src/Bdtheque.Domain/Entities/PurchaseIntent.cs'
   - 'src/Bdtheque.Infrastructure/Configurations/PurchaseIntentConfiguration.cs'
   - 'src/Bdtheque.Api/Endpoints/PurchaseIntentEndpoints.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T14:30:00Z }
 ---
 
 # Intention d'acquisition : agrégat porté par l'album
@@ -21,4 +21,5 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
 - **Album visé en entier** : l'agrégat refuse une intention sur l'album, ou une conversion vers lui, dès que l'album a une édition ; l'acquisition et la conversion vers une édition le font sortir de cet état.
   - **Reprise des données** : une intention sur l'album, pour un album qui a des éditions, serait refusée par le domaine ([Cohérence entre tables](../persistance/coherence-entre-tables.md)) ; elle est soumise à l'arbitrage de l'utilisateur, comme un prix au doute persistant ([Reprise des prix antérieurs à l'euro : devise retenue](../reprise-donnees/reprise-des-prix-anterieurs-a-l-euro-devise-retenue.md)).
   - **Alternative écartée (correction automatique à la reprise)** : supprimer l'intention perdrait un souhait de l'utilisateur, et la porter sur une nouvelle édition en inventerait les caractéristiques.
+- **Fusion de deux albums** ([Fusion de deux fiches](../../fonctionnel/regles-metier/fusion-des-fiches.md)) : l'album qui reste prend les éditions de l'autre et leurs intentions, puis applique à ses intentions sur l'album entier la règle de l'album visé en entier, que la même opération désigne pour l'écran avant la fusion : retirées dès qu'il a une édition, gardées une fois sinon.
 - **Alternative écartée (exclusion garantie aussi en base : contrainte d'exclusion, table de verrou, clé étrangère composite)** : arbitrage général de [Cohérence entre tables](../persistance/coherence-entre-tables.md). Les écritures concurrentes sur les intentions d'un album sont de toute façon sérialisées par la version de l'album ([Concurrence d'accès](../persistance/concurrence-d-acces.md)) : de deux transactions parties de la même version, la seconde échoue entièrement.

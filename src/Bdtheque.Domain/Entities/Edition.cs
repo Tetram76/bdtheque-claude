@@ -79,6 +79,16 @@ public sealed class Edition : EntityBase
     }
 
     /// <summary>
+    /// Passes the edition to <paramref name="album"/>, with its identity, its visuals and its history, as the merge of two albums
+    /// does (<see cref="Album.TakeEditionsOf"/>), the only way for an edition to change albums.
+    /// </summary>
+    internal void MoveTo(Album album)
+    {
+        Album = album;
+        AlbumId = album.Id;
+    }
+
+    /// <summary>
     /// Sets the publisher and, optionally, a publisher collection, as a single atomic
     /// operation: a collection can only be set together with the publisher it belongs to
     /// (modele-metier/edition.md). The publisher is required, a form left without one being an

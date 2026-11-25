@@ -1,0 +1,16 @@
+@inject IStringLocalizer<MergeShowAll> L
+
+@* « Tout afficher », in the bar of a merge, at hand anywhere in the page: every data presented, or, unchecked, only those with a
+   choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md, MergeView). *@
+<Choice Label="@L["Label"]"><input type="checkbox" class="merge-show-all" checked="@All" @onchange="ChangeAsync" /></Choice>
+
+@code {
+    /// <summary>Whether every data is presented.</summary>
+    [Parameter]
+    public bool All { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> AllChanged { get; set; }
+
+    private Task ChangeAsync(ChangeEventArgs change) => AllChanged.InvokeAsync(change.Value is true);
+}

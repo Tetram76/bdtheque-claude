@@ -41,6 +41,7 @@ builder.Services.AddScoped(services => new BrowserTimeZone
 });
 builder.Services.AddScoped<DisplayFormatter>();
 builder.Services.AddSingleton<RecordLabels>();
+builder.Services.AddSingleton<Citation>();
 // The ranges of the International ISBN Agency, downloaded from its site at the start then every day (IsbnRangesRefresher).
 builder.Services.AddSingleton<IsbnFormatter>();
 builder.Services.AddOptions<IsbnRangesOptions>().Bind(builder.Configuration.GetSection(IsbnRangesOptions.SectionName));

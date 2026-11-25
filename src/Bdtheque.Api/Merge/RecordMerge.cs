@@ -46,6 +46,31 @@ internal static class RecordMerge
         choices.Count(c => c == MergeSide.First) >= choices.Count(c => c == MergeSide.Second);
 
     /// <summary>
+    /// The elements of a list of both records (genres, universes, contributions) the merge retains: one both hold, the same value
+    /// on both sides, with nothing to choose; one held by a single record, if the client retains the side of that record.
+    /// </summary>
+    /// <param name="sameAs">What makes the elements of the two records the same (a contribution: its credit, author and role).</param>
+    /// <exception cref="ArgumentException">An element held by a single record, with no side sent for it.</exception>
+    public static List<TElement> Retained<TRoot, TElement, TSame>(
+        MergePair<TRoot> pair, IReadOnlyList<MergeElement> choices, Func<TRoot, IEnumerable<TElement>> elements, Func<TElement, TSame> sameAs)
+        where TElement : EntityBase
+    {
+        var (first, second) = (elements(pair.First).ToList(), elements(pair.Second).ToList());
+        var common = first.Select(sameAs).Intersect(second.Select(sameAs)).ToHashSet();
+        var held = first.Select(e => (Element: e, Side: MergeSide.First)).Concat(second.Select(e => (Element: e, Side: MergeSide.Second))).ToList();
+        var unchosen = held.Where(e => !common.Contains(sameAs(e.Element)) && !choices.Any(c => c.Id == e.Element.Id)).Select(e => e.Element.Id).ToList();
+        if (unchosen.Count > 0)
+            throw new ArgumentException($"No side is sent for the elements {string.Join(", ", unchosen)}.", nameof(choices));
+
+        return
+        [
+            .. held.Where(e => common.Contains(sameAs(e.Element)) || choices.First(c => c.Id == e.Element.Id).Side == e.Side)
+                .Select(e => e.Element)
+                .DistinctBy(e => e.Id),
+        ];
+    }
+
+    /// <summary>
     /// Merges two records: both are locked and checked at the versions their data were read, what designated
     /// the other one is transferred to the record that remains, the saved searches designating the other one included, then the
     /// record that remains takes its data and the other one is deleted, all in one transaction: the caller's when it opened one,
