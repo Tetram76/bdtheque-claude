@@ -21,6 +21,35 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     /// </summary>
     public string Album(AlbumSummary album, AlbumLabelFormat format) => Album(LabelOf(album), format);
 
+    /// <summary>The label of an album from what the change log kept of it (<see cref="Album(AlbumSummary, AlbumLabelFormat)"/>).</summary>
+    public string Album(AlbumLabel album, AlbumLabelFormat format)
+    {
+        var series = album.SeriesTitle;
+        var title = album.Title;
+        var volume = Volume(album, abbreviated: title is not null || series is not null);
+
+        if (title is null && series is null)
+            return volume ?? Untitled;
+
+        return format switch
+        {
+            AlbumLabelFormat.VolumeTitleSeries => (title, series, volume) switch
+            {
+                (_, _, null) => TitleWithSeries(title, series),
+                (null, _, _) => $"{volume} - {series}",
+                (_, null, _) => $"{volume} - {title}",
+                _ => $"{volume} - {title} ({series})",
+            },
+            _ => (title, series, volume) switch
+            {
+                (_, _, null) => TitleWithSeries(title, series),
+                (null, _, _) => $"{series} - {volume}",
+                (_, null, _) => $"{title} ({volume})",
+                _ => $"{title} ({series} - {volume})",
+            },
+        };
+    }
+
     /// <summary>
     /// The identification of an album where its series goes without saying: its name without the series, and the volume that
     /// goes with it, none when the name already says it (fonctionnel/presentation/libelle-d-un-album.md#série-reprise-selon-le-contexte).
@@ -53,6 +82,13 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
 
     /// <summary>The label of an edition: its publisher, then its collection, year and ISBN when known.</summary>
     public string Edition(EditionSummary edition) => edition.PublisherName + EditionAfterItsPublisher(edition);
+
+    /// <summary>The label of an edition from what the change log kept of it, without its album.</summary>
+    public string Edition(EditionLabel edition) =>
+        Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
+
+    private string Edition(string publisher, string? collectionName, int? publicationYear, string? isbn) =>
+        publisher + AfterThePublisher(collectionName, publicationYear, isbn);
 
     /// <summary>
     /// The label of an edition after the name of its publisher, which a page presents apart to make it a link
@@ -105,42 +141,6 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
 
     private static AlbumLabel LabelOf(AlbumSummary album) => new(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue,
         album.VolumeNumber, album.StartVolumeNumber, album.EndVolumeNumber);
-
-    /// <summary>The label of an album from what the change log kept of it (<see cref="Album(AlbumSummary, AlbumLabelFormat)"/>).</summary>
-    public string Album(AlbumLabel album, AlbumLabelFormat format)
-    {
-        var series = album.SeriesTitle;
-        var title = album.Title;
-        var volume = Volume(album, abbreviated: title is not null || series is not null);
-
-        if (title is null && series is null)
-            return volume ?? Untitled;
-
-        return format switch
-        {
-            AlbumLabelFormat.VolumeTitleSeries => (title, series, volume) switch
-            {
-                (_, _, null) => TitleWithSeries(title, series),
-                (null, _, _) => $"{volume} - {series}",
-                (_, null, _) => $"{volume} - {title}",
-                _ => $"{volume} - {title} ({series})",
-            },
-            _ => (title, series, volume) switch
-            {
-                (_, _, null) => TitleWithSeries(title, series),
-                (null, _, _) => $"{series} - {volume}",
-                (_, null, _) => $"{title} ({volume})",
-                _ => $"{title} ({series} - {volume})",
-            },
-        };
-    }
-
-    /// <summary>The label of an edition from what the change log kept of it, without its album.</summary>
-    public string Edition(EditionLabel edition) =>
-        Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
-
-    private string Edition(string publisher, string? collectionName, int? publicationYear, string? isbn) =>
-        publisher + AfterThePublisher(collectionName, publicationYear, isbn);
 
     private string AfterThePublisher(string? collectionName, int? publicationYear, string? isbn)
     {
