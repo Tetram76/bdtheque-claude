@@ -158,13 +158,7 @@ public sealed class Series : EntityBase, IAggregateRoot
     public IReadOnlyList<(Guid Removed, Guid Kept)> CreditsHeldOf(Series other)
     {
         MergeGuard.EnsureDistinct(other, this);
-        return
-        [
-            .. other._templateContributions
-                .Select(c => (Removed: c.Id, Kept: _templateContributions.Find(held => held.AuthorId == c.AuthorId && held.Role == c.Role)?.Id))
-                .Where(c => c.Kept is not null)
-                .Select(c => (c.Removed, c.Kept!.Value)),
-        ];
+        return Contribution.HeldOf(_templateContributions, other._templateContributions);
     }
 
     /// <summary>
@@ -179,19 +173,8 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// <exception cref="ArgumentException">The same series twice, or a contribution retained of neither series.</exception>
     public void MergeTemplateContributions(Series merged, IReadOnlyCollection<Guid> retained)
     {
-        ArgumentNullException.ThrowIfNull(retained);
-        var held = CreditsHeldOf(merged);
-        var foreign = retained.Where(id => !_templateContributions.Exists(c => c.Id == id) && !merged._templateContributions.Exists(c => c.Id == id)).ToList();
-        if (foreign.Count > 0)
-            throw new ArgumentException($"The contributions {string.Join(", ", foreign)} are of neither merged series.", nameof(retained));
-
-        _templateContributions.RemoveAll(c => !retained.Contains(c.Id) && !held.Any(h => h.Kept == c.Id));
-        foreach (var other in merged._templateContributions.Where(c => retained.Contains(c.Id) && !held.Any(h => h.Removed == c.Id)).ToList())
-        {
-            merged._templateContributions.Remove(other);
-            other.MoveTo(this);
-            _templateContributions.Add(other);
-        }
+        MergeGuard.EnsureDistinct(merged, this);
+        Contribution.Merge(_templateContributions, merged._templateContributions, retained, c => c.MoveTo(this));
     }
 
     /// <summary>

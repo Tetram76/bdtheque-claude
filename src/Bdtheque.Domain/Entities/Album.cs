@@ -49,8 +49,8 @@ public sealed class Album : EntityBase, IAggregateRoot
     private readonly List<PurchaseIntent> _purchaseIntents = [];
     public IReadOnlyCollection<PurchaseIntent> PurchaseIntents => _purchaseIntents;
 
-    // Read-only from outside: an edition registers itself here on construction, and can never be
-    // moved to another album. The album's first publication date is a reference date of their
+    // Read-only from outside: an edition registers itself here on construction, and only moves to
+    // another album by the merge of its own into it (TakeEditionsOf). The album's first publication date is a reference date of their
     // amounts, which SetFirstPublicationDate checks against this collection: the persistence layer
     // always loads it with the album, for the same reason as the intents.
     private readonly List<Edition> _editions = [];
@@ -277,6 +277,82 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// </summary>
     /// <exception cref="ArgumentException">The same universe twice.</exception>
     public void TransferUniverse(Universe merged, Universe kept) => _universes.Transfer(merged, kept);
+
+    /// <summary>
+    /// Each contribution of <paramref name="other"/> whose credit (author and role) this album holds too, with the contribution of
+    /// this album that holds it: the merge of the two albums keeps such a credit once, by the contribution of the one that
+    /// remains, which a saved search designating the other one designates instead (fonctionnel/regles-metier/fusion-des-fiches.md).
+    /// </summary>
+    /// <exception cref="ArgumentException">The same album twice.</exception>
+    public IReadOnlyList<(Guid Removed, Guid Kept)> CreditsHeldOf(Album other)
+    {
+        MergeGuard.EnsureDistinct(other, this);
+        return Contribution.HeldOf(_contributions, other._contributions);
+    }
+
+    /// <summary>
+    /// Keeps, of the contributions of this album and of <paramref name="merged"/>, those the merge of the two albums retains
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md), this album being the one that remains: a contribution of the other album
+    /// retained passes to this one with its identity, which a saved search may designate; one discarded stays with the other
+    /// album, deleted with it; one of this album discarded is removed. A credit both albums hold is kept once, by the
+    /// contribution of this album (<see cref="CreditsHeldOf"/>), whatever <paramref name="retained"/> says of it.
+    /// </summary>
+    /// <param name="retained">The contributions retained, of either album.</param>
+    /// <exception cref="ArgumentException">The same album twice, or a contribution retained of neither album.</exception>
+    public void MergeContributions(Album merged, IReadOnlyCollection<Guid> retained)
+    {
+        MergeGuard.EnsureDistinct(merged, this);
+        Contribution.Merge(_contributions, merged._contributions, retained, c => c.MoveTo(this));
+    }
+
+    /// <summary>
+    /// The intents on the whole album that the merge of <paramref name="first"/> and <paramref name="second"/> withdraws, whichever
+    /// remains (fonctionnel/regles-metier/fusion-des-fiches.md): an album that has an edition, owned or targeted, can no longer be
+    /// targeted as a whole, so that once either album has one, the intent on the whole other album goes. An intent both albums
+    /// without edition hold is kept once, the same wish on both sides, and is not withdrawn.
+    /// </summary>
+    public static IReadOnlyList<PurchaseIntent> PurchaseIntentsWithdrawnByMerge(Album first, Album second)
+    {
+        ArgumentNullException.ThrowIfNull(first);
+        ArgumentNullException.ThrowIfNull(second);
+        return first._editions.Count + second._editions.Count == 0
+            ? []
+            : [.. first._purchaseIntents.Concat(second._purchaseIntents).Where(p => p.EditionId is null)];
+    }
+
+    /// <summary>
+    /// Takes the editions of <paramref name="merged"/>, with their visuals and the intents targeting them, as the merge of two
+    /// albums does, this album being the one that remains (fonctionnel/regles-metier/fusion-des-fiches.md): each keeps its identity,
+    /// which a saved search, a visual or the history of the spotlight designates. The intents on the whole album then follow the
+    /// rules of the album that remains (<see cref="PurchaseIntentsWithdrawnByMerge"/>): withdrawn once it has an edition, the one
+    /// of the other album staying with it, deleted with it; otherwise one, its own, or else the one of the other album.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same album twice.</exception>
+    public void TakeEditionsOf(Album merged)
+    {
+        MergeGuard.EnsureDistinct(merged, this);
+        var withdrawn = PurchaseIntentsWithdrawnByMerge(this, merged);
+
+        foreach (var edition in merged._editions.ToList())
+        {
+            merged._editions.Remove(edition);
+            edition.MoveTo(this);
+            _editions.Add(edition);
+        }
+
+        var wholeAlbum = merged._purchaseIntents.Find(p => p.EditionId is null);
+        var passing = merged._purchaseIntents.Where(p => p.EditionId is not null).ToList();
+        if (wholeAlbum is not null && !withdrawn.Contains(wholeAlbum) && !_purchaseIntents.Exists(p => p.EditionId is null))
+            passing.Add(wholeAlbum);
+        foreach (var intent in passing)
+        {
+            merged._purchaseIntents.Remove(intent);
+            intent.MoveTo(this);
+            _purchaseIntents.Add(intent);
+        }
+
+        _purchaseIntents.RemoveAll(withdrawn.Contains);
+    }
 
     public void SetRating(AlbumRating? rating)
     {

@@ -67,8 +67,8 @@ public sealed record AuthorIdentity(string DisplayName, string SortKey, string N
 /// </summary>
 public sealed record MergeElement(Guid Id, MergeSide Side);
 
-/// <summary>A template contribution of a series, as its merge presents it: its author, credited in its role.</summary>
-public sealed record SeriesMergeContribution(Guid Id, AuthorListItem Author, ContributionRole Role);
+/// <summary>A contribution of an album, or of the template of a series, as its merge presents it: its author, credited in its role.</summary>
+public sealed record MergeContribution(Guid Id, AuthorListItem Author, ContributionRole Role);
 
 /// <summary>A series as its merge presents it: what its form edits, and the records it references, named.</summary>
 /// <param name="ManualSortKey">The sort key entered by hand, <c>null</c> when it follows the title.</param>
@@ -78,7 +78,7 @@ public sealed record SeriesMergeRecord(
     Guid Id, string Title, string? ManualSortKey, SeriesStatus? Status, int? TheoreticalVolumeCount, bool IsComplete,
     bool ExcludeFromMissingVolumes, bool ExcludeFromReleaseEstimates, string? Summary, string? PersonalNotes,
     SeriesEditionTemplate EditionTemplate, PublisherListItem? Publisher, PublisherCollectionListItem? PublisherCollection,
-    IReadOnlyList<GenreListItem> Genres, IReadOnlyList<UniverseInHierarchy> Universes, IReadOnlyList<SeriesMergeContribution> Contributions,
+    IReadOnlyList<GenreListItem> Genres, IReadOnlyList<UniverseInHierarchy> Universes, IReadOnlyList<MergeContribution> Contributions,
     DateTimeOffset ModifiedAt, uint Version);
 
 /// <summary>Two series to merge, and their albums, in the order of the entity types.</summary>
@@ -97,6 +97,41 @@ public sealed record SeriesMergeRequest(
     MergeSide PersonalNotes, MergeSide Publisher, MergeSide Category, MergeSide Condition, MergeSide Binding, MergeSide Format,
     MergeSide Orientation, MergeSide ReadingDirection, MergeSide IsColor, IReadOnlyList<MergeElement> Genres,
     IReadOnlyList<MergeElement> Universes, IReadOnlyList<MergeElement> Contributions);
+
+/// <summary>An album as its merge presents it: what its form edits, and the records it references, named.</summary>
+/// <param name="ManualSortKey">The sort key entered by hand, <c>null</c> when it follows the title.</param>
+/// <param name="SeriesSortKey">The sort key of its series, under which an album without a title of its own is filed.</param>
+/// <param name="Universes">Each with its ancestors, a universe being presented with them.</param>
+public sealed record AlbumMergeRecord(
+    Guid Id, string? Title, string? ManualSortKey, SeriesListItem? Series, string? SeriesSortKey, AlbumType Type, bool IsSpecialIssue,
+    int? VolumeNumber, int? StartVolumeNumber, int? EndVolumeNumber, int? FirstPublicationYear, int? FirstPublicationMonth,
+    string? Summary, string? PersonalNotes, AlbumRating? Rating, IReadOnlyList<GenreListItem> Genres,
+    IReadOnlyList<UniverseInHierarchy> Universes, IReadOnlyList<MergeContribution> Contributions, DateTimeOffset ModifiedAt, uint Version);
+
+/// <summary>Two albums to merge, and their editions and purchase intents, in the order of the entity types.</summary>
+/// <param name="Links">
+/// What passes to the album that remains: its owned editions, and its purchase intents, an edition targeted by an intent counted
+/// as the intent; an intent on the whole album both albums hold is common to both, one the merge withdraws is not counted.
+/// </param>
+/// <param name="WithdrawnPurchaseIntents">
+/// The albums whose intent on the whole album the merge withdraws, the other one having an edition
+/// (fonctionnel/regles-metier/fusion-des-fiches.md).
+/// </param>
+public sealed record AlbumMergePreview(
+    AlbumMergeRecord First, AlbumMergeRecord Second, IReadOnlyList<MergeLinkCount> Links, IReadOnlyList<MergeSide> WithdrawnPurchaseIntents);
+
+/// <summary>
+/// The merge of two albums: each data kept, of the one or the other, the type and the volumes an omnibus covers together, of
+/// the same album (modele-metier/album.md); and each genre, universe and contribution held by one album only, retained or
+/// discarded.
+/// </summary>
+/// <param name="SortKey">The sort key, entered by hand or following the title kept.</param>
+/// <param name="Type">The type and the volumes an omnibus covers, together.</param>
+/// <param name="FirstPublicationDate">The year and the month of the first publication, together.</param>
+public sealed record AlbumMergeRequest(
+    MergedRecord First, MergedRecord Second, MergeSide Series, MergeSide Title, MergeSide SortKey, MergeSide VolumeNumber,
+    MergeSide Type, MergeSide IsSpecialIssue, MergeSide FirstPublicationDate, MergeSide Summary, MergeSide PersonalNotes,
+    MergeSide Rating, IReadOnlyList<MergeElement> Genres, IReadOnlyList<MergeElement> Universes, IReadOnlyList<MergeElement> Contributions);
 
 /// <summary>A publisher as its merge presents it.</summary>
 public sealed record PublisherMergeRecord(Guid Id, string Name, string? Website, DateTimeOffset ModifiedAt, uint Version);

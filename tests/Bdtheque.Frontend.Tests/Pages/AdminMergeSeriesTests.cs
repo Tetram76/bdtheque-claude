@@ -46,8 +46,8 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
             [new GenreListItem(Aventure, "Aventure"), new GenreListItem(Humour, "Humour")],
             [new UniverseInHierarchy(new UniverseListItem(Gaule, "Gaule", null, null), [])],
             [
-                new SeriesMergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d1"), Goscinny, ContributionRole.Scenarist),
-                new SeriesMergeContribution(UderzoCredit, Uderzo, ContributionRole.Illustrator),
+                new MergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d1"), Goscinny, ContributionRole.Scenarist),
+                new MergeContribution(UderzoCredit, Uderzo, ContributionRole.Illustrator),
             ],
             new DateTimeOffset(2026, 10, 2, 8, 0, 0, TimeSpan.Zero), 11),
         new SeriesMergeRecord(
@@ -58,8 +58,8 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
             [new GenreListItem(Humour, "Humour")],
             [],
             [
-                new SeriesMergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d3"), Goscinny, ContributionRole.Scenarist),
-                new SeriesMergeContribution(MebarkiCredit, Mebarki, ContributionRole.Colorist),
+                new MergeContribution(Guid.Parse("01900000-0000-7000-8000-0000000000d3"), Goscinny, ContributionRole.Scenarist),
+                new MergeContribution(MebarkiCredit, Mebarki, ContributionRole.Colorist),
             ],
             new DateTimeOffset(2026, 11, 4, 8, 0, 0, TimeSpan.Zero), 12),
         [new MergeLinkCount(EntityKind.Album, 40, 38, 2, 0)]);

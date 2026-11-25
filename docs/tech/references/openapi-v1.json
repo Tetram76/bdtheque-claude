@@ -4555,6 +4555,152 @@
         }
       }
     },
+    "/admin/albums/merge": {
+      "get": {
+        "tags": [
+          "AlbumEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlbumMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "AlbumEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlbumMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/sort-keys/title": {
       "get": {
         "tags": [
@@ -11858,6 +12004,284 @@
         },
         "description": "The records the list is filtered on, as the list names them; each `null` when the list is not filtered on\nits type, or on a record that does not exist (a filtered list does not address its record: the list is then\nempty, choix-implementation/api/recherche.md)."
       },
+      "AlbumMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "links",
+          "withdrawnPurchaseIntents"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/AlbumMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/AlbumMergeRecord"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            },
+            "description": "What passes to the album that remains: its owned editions, and its purchase intents, an edition targeted by an intent counted\nas the intent; an intent on the whole album both albums hold is common to both, one the merge withdraws is not counted."
+          },
+          "withdrawnPurchaseIntents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeSide"
+            },
+            "description": "The albums whose intent on the whole album the merge withdraws, the other one having an edition\n(fonctionnel/regles-metier/fusion-des-fiches.md)."
+          }
+        },
+        "description": "Two albums to merge, and their editions and purchase intents, in the order of the entity types."
+      },
+      "AlbumMergeRecord": {
+        "required": [
+          "id",
+          "title",
+          "manualSortKey",
+          "series",
+          "seriesSortKey",
+          "type",
+          "isSpecialIssue",
+          "volumeNumber",
+          "startVolumeNumber",
+          "endVolumeNumber",
+          "firstPublicationYear",
+          "firstPublicationMonth",
+          "summary",
+          "personalNotes",
+          "rating",
+          "genres",
+          "universes",
+          "contributions",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "manualSortKey": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The sort key entered by hand, `null` when it follows the title."
+          },
+          "series": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SeriesListItem"
+              }
+            ]
+          },
+          "seriesSortKey": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The sort key of its series, under which an album without a title of its own is filed."
+          },
+          "type": {
+            "$ref": "#/components/schemas/AlbumType"
+          },
+          "isSpecialIssue": {
+            "type": "boolean"
+          },
+          "volumeNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "startVolumeNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "endVolumeNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "firstPublicationYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "firstPublicationMonth": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "summary": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "personalNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rating": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AlbumRating"
+              }
+            ]
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreListItem"
+            }
+          },
+          "universes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniverseInHierarchy"
+            },
+            "description": "Each with its ancestors, a universe being presented with them."
+          },
+          "contributions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeContribution"
+            }
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "An album as its merge presents it: what its form edits, and the records it references, named."
+      },
+      "AlbumMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "series",
+          "title",
+          "sortKey",
+          "volumeNumber",
+          "type",
+          "isSpecialIssue",
+          "firstPublicationDate",
+          "summary",
+          "personalNotes",
+          "rating",
+          "genres",
+          "universes",
+          "contributions"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "series": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "title": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "sortKey": {
+            "description": "The sort key, entered by hand or following the title kept.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "volumeNumber": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "type": {
+            "description": "The type and the volumes an omnibus covers, together.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isSpecialIssue": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "firstPublicationDate": {
+            "description": "The year and the month of the first publication, together.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "personalNotes": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "rating": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            }
+          },
+          "universes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            }
+          },
+          "contributions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            }
+          }
+        },
+        "description": "The merge of two albums: each data kept, of the one or the other, the type and the volumes an omnibus covers together, of\nthe same album (modele-metier/album.md); and each genre, universe and contribution held by one album only, retained or\ndiscarded."
+      },
       "AlbumPurchaseIntentItem": {
         "required": [
           "id",
@@ -12793,7 +13217,8 @@
           "SearchVariables",
           "AlbumLabelFormat",
           "DisplayCulture",
-          "AcceptedIsbn"
+          "AcceptedIsbn",
+          "Album"
         ],
         "description": "Attribute of a record changed by a modification, as the change log names it\n(modele-metier/entree-du-journal-des-modifications.md). The type of the record gives it its\ncontext: the title of\nan album and the title of a series are both ChangeLogAttribute.Title."
       },
@@ -15240,6 +15665,27 @@
           }
         },
         "description": "An edition entered in the collection."
+      },
+      "MergeContribution": {
+        "required": [
+          "id",
+          "author",
+          "role"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "author": {
+            "$ref": "#/components/schemas/AuthorListItem"
+          },
+          "role": {
+            "$ref": "#/components/schemas/ContributionRole"
+          }
+        },
+        "description": "A contribution of an album, or of the template of a series, as its merge presents it: its author, credited in its role."
       },
       "MergedRecord": {
         "required": [
@@ -19444,27 +19890,6 @@
           }
         }
       },
-      "SeriesMergeContribution": {
-        "required": [
-          "id",
-          "author",
-          "role"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "author": {
-            "$ref": "#/components/schemas/AuthorListItem"
-          },
-          "role": {
-            "$ref": "#/components/schemas/ContributionRole"
-          }
-        },
-        "description": "A template contribution of a series, as its merge presents it: its author, credited in its role."
-      },
       "SeriesMergePreview": {
         "required": [
           "first",
@@ -19605,7 +20030,7 @@
           "contributions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SeriesMergeContribution"
+              "$ref": "#/components/schemas/MergeContribution"
             }
           },
           "modifiedAt": {

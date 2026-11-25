@@ -75,7 +75,7 @@ internal static class SeriesEndpoints
             [
                 .. series.TemplateContributions
                     .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
-                    .Select(c => new SeriesMergeContribution(
+                    .Select(c => new MergeContribution(
                         c.Id, new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
                         EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value)),
             ],
@@ -142,9 +142,9 @@ internal static class SeriesEndpoints
         var (format, orientation, readingDirection, isColor) = (
             pair.Of(request.Format).TemplateFormat, pair.Of(request.Orientation).TemplateOrientation,
             pair.Of(request.ReadingDirection).TemplateReadingDirection, pair.Of(request.IsColor).TemplateIsColor);
-        var genres = Retained(pair, request.Genres, s => s.Genres, g => g.Id);
-        var universes = Retained(pair, request.Universes, s => s.Universes, u => u.Id);
-        var contributions = Retained(pair, request.Contributions, s => s.TemplateContributions, c => (c.AuthorId, c.Role));
+        var genres = RecordMerge.Retained(pair, request.Genres, s => s.Genres, g => g.Id);
+        var universes = RecordMerge.Retained(pair, request.Universes, s => s.Universes, u => u.Id);
+        var contributions = RecordMerge.Retained(pair, request.Contributions, s => s.TemplateContributions, c => (c.AuthorId, c.Role));
 
         kept.SetTitle(title);
         if (sortKey is not null)
@@ -169,31 +169,6 @@ internal static class SeriesEndpoints
         FormReferences.ReplaceAssociations(kept.Genres, genres, kept.AddGenre, kept.RemoveGenre);
         FormReferences.ReplaceAssociations(kept.Universes, universes, kept.AddUniverse, kept.RemoveUniverse);
         kept.MergeTemplateContributions(pair.Merged, [.. contributions.Select(c => c.Id)]);
-    }
-
-    /// <summary>
-    /// The elements of a list of both series (genres, universes, contributions) the merge retains: one both hold, the same value
-    /// on both sides, with nothing to choose; one held by a single series, if the client retains the side of that series.
-    /// </summary>
-    /// <param name="sameAs">What makes the elements of the two series the same (a contribution: its credit, author and role).</param>
-    /// <exception cref="ArgumentException">An element held by a single series, with no side sent for it.</exception>
-    private static List<TElement> Retained<TElement, TSame>(
-        MergePair<Series> pair, IReadOnlyList<MergeElement> choices, Func<Series, IEnumerable<TElement>> elements, Func<TElement, TSame> sameAs)
-        where TElement : Domain.Entities.Common.EntityBase
-    {
-        var (first, second) = (elements(pair.First).ToList(), elements(pair.Second).ToList());
-        var common = first.Select(sameAs).Intersect(second.Select(sameAs)).ToHashSet();
-        var held = first.Select(e => (Element: e, Side: MergeSide.First)).Concat(second.Select(e => (Element: e, Side: MergeSide.Second))).ToList();
-        var unchosen = held.Where(e => !common.Contains(sameAs(e.Element)) && !choices.Any(c => c.Id == e.Element.Id)).Select(e => e.Element.Id).ToList();
-        if (unchosen.Count > 0)
-            throw new ArgumentException($"No side is sent for the elements {string.Join(", ", unchosen)}.", nameof(choices));
-
-        return
-        [
-            .. held.Where(e => common.Contains(sameAs(e.Element)) || choices.First(c => c.Id == e.Element.Id).Side == e.Side)
-                .Select(e => e.Element)
-                .DistinctBy(e => e.Id),
-        ];
     }
 
     public static void MapSeriesCatalog(this RouteGroupBuilder catalog)

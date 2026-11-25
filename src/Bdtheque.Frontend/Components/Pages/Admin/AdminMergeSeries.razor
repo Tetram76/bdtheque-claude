@@ -220,7 +220,7 @@ else
         foreach (var credit in credits)
         {
             var name = AuthorName(credit.First().Contribution.Author);
-            var only = credit.Count() == 1 ? credit.Single() : ((SeriesMergeContribution, MergeSide)?)null;
+            var only = credit.Count() == 1 ? credit.Single() : ((MergeContribution, MergeSide)?)null;
             yield return new($"contribution-{credit.Key.Id}-{credit.Key.Role}", Values.Of(credit.Key.Role),
                 only is { Item2: MergeSide.Second } ? null : name, only is { Item2: MergeSide.First } ? null : name,
                 Element: only?.Item1.Id, Holder: only?.Item2);

@@ -97,4 +97,7 @@ public enum ChangeLogAttribute
 
     // Edition, continued
     AcceptedIsbn = 67,
+
+    // Edition and purchase intent: the album, which changes by the merge of their own into another one only
+    Album = 68,
 }
