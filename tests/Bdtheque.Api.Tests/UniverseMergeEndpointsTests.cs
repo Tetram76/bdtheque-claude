@@ -94,6 +94,23 @@ public sealed class UniverseMergeEndpointsTests(ApiWebApplicationFactory factory
         Assert.Equal(first.Id, (await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{youth.Id}"))!.ParentId);
     }
 
+    // The universe that remains stands below a sub-universe of the other one, which passes under it.
+    [Fact]
+    public async Task Merge_OfAUniverseWithOneOfItsIndirectDescendants_TakesTheSubUniverseBetweenThemUnderTheOneThatRemains()
+    {
+        var pratt = await CreateAsync("Univers Hugo Pratt");
+        var first = await CreateAsync("Corto", pratt.Id);
+        var youth = await CreateAsync("Jeunesse", first.Id);
+        var second = await CreateAsync("Corto Maltese", youth.Id);
+        var preview = await PreviewAsync(first.Id, second.Id);
+
+        var response = await MergeAsync(preview, MergeSide.Second, MergeSide.Second, MergeSide.First, []);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(pratt.Id, (await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{second.Id}"))!.ParentId);
+        Assert.Equal(second.Id, (await _client.GetFromJsonAsync<UniverseForm>($"/admin/universes/{youth.Id}"))!.ParentId);
+    }
+
     [Fact]
     public async Task Merge_ChosenOnPairsThatChangedSince_IsAFunctionalErrorAndMergesNothing()
     {
