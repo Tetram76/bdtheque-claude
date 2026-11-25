@@ -229,12 +229,15 @@
         Add("Operation", _query.Operation is { } operation ? Texts.Of(operation) : null, _query with { Operation = null });
         Add("From", _query.From is { } from ? Format.Date(from) : null, _query with { From = null });
         Add("To", _query.To is { } to ? Format.Date(to) : null, _query with { To = null });
-        // The record by its type and its label at its latest entry; one no entry knows, by nothing but the filter itself.
-        Add("Record", _query.RecordId is null ? null
-            : _list?.Record is { } record ? $"{Texts.Of(record.RecordType)} {Texts.LabelOf(record.Label, _settings!.AlbumLabelFormat)}"
-            : L["Filter.Record.Unknown"], _query with { RecordId = null });
+        Add("Record", _query.RecordId is null ? null : RecordFilterText(), _query with { RecordId = null });
         return tags;
     }
+
+    // The record of a history by its type and its label at its latest entry; one no entry knows, by nothing but the filter
+    // itself.
+    private string RecordFilterText() => _list?.Record is { } record
+        ? $"{Texts.Of(record.RecordType)} {Texts.LabelOf(record.Label, _settings!.AlbumLabelFormat)}"
+        : L["Filter.Record.Unknown"];
 
     // The type of record and the operation chosen in a list, the period by two days; the record of a history, which no field of
     // the panel chooses, kept as it is.
