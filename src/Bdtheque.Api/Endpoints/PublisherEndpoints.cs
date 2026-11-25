@@ -190,13 +190,19 @@ internal static class PublisherEndpoints
     /// versions of the publishers guarantee unchanged.
     /// </exception>
     private static List<(PublisherCollectionHomonyms Homonyms, MergeSide Name)> KeptOfHomonyms(
-        PublisherMergeRequest request, IReadOnlyList<PublisherCollectionHomonyms> homonyms)
+        PublisherMergeRequest request, List<PublisherCollectionHomonyms> homonyms)
     {
         if (request.Collections.Count != homonyms.Count)
             throw new ArgumentException("A collection chosen is not one of the homonyms of the two publishers.", nameof(request));
-        return homonyms.Select(h => (h, request.Collections.SingleOrDefault(c => c.First == h.First && c.Second == h.Second)?.Name
-            ?? throw new ArgumentException($"The name of the collections {h.First} and {h.Second} is not chosen.", nameof(request))))
-            .ToList();
+        var kept = new List<(PublisherCollectionHomonyms Homonyms, MergeSide Name)>(homonyms.Count);
+        foreach (var pair in homonyms)
+        {
+            var chosen = request.Collections.FirstOrDefault(c => c.First == pair.First && c.Second == pair.Second)
+                         ?? throw new ArgumentException($"The name of the collections {pair.First} and {pair.Second} is not chosen.", nameof(request));
+            kept.Add((pair, chosen.Name));
+        }
+
+        return kept;
     }
 
     // A publisher and its collections have no record (fonctionnel/structure-de-l-application.md): a
