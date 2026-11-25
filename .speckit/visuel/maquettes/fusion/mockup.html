@@ -506,7 +506,7 @@ const EXAMPLES = {
     ],
     result: (v) => [{ label: 'Classé', value: v.parent ? v.parent + ' › ' + (v.name ?? '…') : (v.name ? v.name + ', au premier niveau' : '—') }],
     resultName: (v) => v.name ?? 'Star Wars',
-    pairsTitle: 'Ce que gardent les sous-univers de même nom',
+    pairsTitle: 'Sous-univers homonymes',
     pairsLead: 'Les sous-univers de même nom des deux fiches, à la casse et aux accents près, n\'en feront plus qu\'un chacun, à tous les niveaux, fusionnés comme elles.',
     pairs: [
       { id: 'cw', path: 'Clone Wars',
@@ -527,12 +527,12 @@ const EXAMPLES = {
     moved: [
       { count: '5 séries', detail: 'les 4 de Star Wars et les 2 de Star wars, dont 1 commune aux deux fiches' },
       { count: '38 albums', detail: 'les 31 de Star Wars et les 9 de Star wars, dont 2 communs aux deux fiches' },
-      { count: '5 sous-univers', detail: 'les 3 de Star Wars et les 4 de Star wars, dont 2 de même nom, qui n\'en feront plus qu\'un chacun' }
+      { count: '5 sous-univers', detail: 'les 3 de Star Wars et les 4 de Star wars, dont 2 communs aux deux fiches' }
     ],
     impact: (name) => [
       'Les deux fiches n\'en feront plus qu\'une : ' + name + '.',
       name + ' rassemblera les 5 séries, les 38 albums et les 5 sous-univers des deux fiches.',
-      'Les sous-univers de même nom n\'en feront plus qu\'un chacun : Clone Wars, et Clone Wars › Les Jedi.'
+      'Les sous-univers homonymes n\'en feront plus qu\'un chacun : Clone Wars, et Clone Wars › Les Jedi.'
     ]
   },
   // A universe merged with one of its own sub-universes: the parent of the latter, the universe itself, cannot be that of
