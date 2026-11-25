@@ -100,6 +100,10 @@ internal static class SeriesEndpoints
             pair => AssignMerged(pair, request),
             async pair =>
             {
+                // What the series that remains takes of either series, read with them before anything changes.
+                foreach (var series in new[] { pair.First, pair.Second })
+                    await LoadChildrenAsync(context, series, cancellationToken);
+
                 foreach (var album in await RecordMerge.LoadLinkedForWriteAsync<Album>(
                              context, context.Albums.Where(a => a.SeriesId == pair.Merged.Id).Select(a => a.Id), cancellationToken))
                     album.TransferSeries(pair.Merged, pair.Kept);
@@ -108,8 +112,18 @@ internal static class SeriesEndpoints
                 // designating the other one designates instead (contributions are searched).
                 return [.. pair.Kept.CreditsHeldOf(pair.Merged).Select(c => new MergeReplacement(EntityKind.Contribution, c.Removed, c.Kept))];
             },
-            cancellationToken,
-            WithChildren);
+            cancellationToken);
+
+    // The children of a series locked for its merge, which WithChildren reads with a series otherwise.
+    private static async Task LoadChildrenAsync(BdthequeDbContext context, Series series, CancellationToken cancellationToken)
+    {
+        var entry = context.Entry(series);
+        await entry.Collection(s => s.Genres).LoadAsync(cancellationToken);
+        await entry.Collection(s => s.Universes).LoadAsync(cancellationToken);
+        await entry.Reference(s => s.TemplatePublisher).LoadAsync(cancellationToken);
+        await entry.Reference(s => s.TemplatePublisherCollection).LoadAsync(cancellationToken);
+        await entry.Collection(s => s.TemplateContributions).Query().Include(c => c.Author).LoadAsync(cancellationToken);
+    }
 
     // The data of the series that remains, each of the series chosen, read from both before it changes.
     private static void AssignMerged(MergePair<Series> pair, SeriesMergeRequest request)

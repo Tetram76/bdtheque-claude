@@ -59,19 +59,18 @@ internal static class RecordMerge
     /// Transfers to the record that remains what designated the other one, and tells the records the merge removes as duplicates
     /// (e.g. a contribution both authors held), each with the one that replaces it.
     /// </param>
-    /// <param name="shape">What to read of both records with them, which <paramref name="assign"/> needs (e.g. their genres).</param>
     /// <returns>The record that remains.</returns>
     /// <exception cref="ArgumentException">The same record twice.</exception>
     /// <exception cref="EntityNotFoundException">One of the records no longer exists.</exception>
     /// <exception cref="DbUpdateConcurrencyException">One of the records was modified since its data were read.</exception>
     public static async Task<MergeResult> MergeAsync<TRoot>(
         BdthequeDbContext context, MergedRecord first, MergedRecord second, bool keepFirst, Action<MergePair<TRoot>> assign, Func<MergePair<TRoot>, Task<IReadOnlyList<MergeReplacement>>> transfer,
-        CancellationToken cancellationToken, Func<IQueryable<TRoot>, IQueryable<TRoot>>? shape = null)
+        CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
     {
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        var (firstRoot, secondRoot) = await context.LoadAggregatesForWriteAsync(
-            (first.Id, first.Version), (second.Id, second.Version), shape, cancellationToken);
+        var (firstRoot, secondRoot) = await context.LoadAggregatesForWriteAsync<TRoot>(
+            (first.Id, first.Version), (second.Id, second.Version), cancellationToken: cancellationToken);
         var pair = new MergePair<TRoot>(firstRoot, secondRoot, keepFirst);
 
         // Two saves, one transaction. What designated the merged record is transferred first: what the transfer takes from
