@@ -35,7 +35,7 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", FirstName, SecondName]"
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Citation.Of(FirstName), Citation.Of(SecondName)]"
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminAlbums" OnSave="OpenConfirmation"
                Problem="@MergeProblem">

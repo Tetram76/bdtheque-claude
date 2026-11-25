@@ -108,7 +108,7 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
         Assert.Equal(["1956", "mars 1987"], Values(page, "merge-publication"));
         Assert.Equal(["Auto", "Marque jaune (manuelle)"], Values(page, "merge-sort-key"));
         // Each album named by its label, its series included, and its editions and intents in the heads of the first block alone.
-        Assert.Equal("La Marque jaune (Blake et Mortimer - T. 6) et La marque jaune (INT. - 6 [1 à 2])", page.Find(".entry-form-subject").TextContent.Trim());
+        Assert.Equal("«\u00A0La Marque jaune (Blake et Mortimer - T. 6)\u00A0» et «\u00A0La marque jaune (INT. - 6 [1 à 2])\u00A0»", page.Find(".entry-form-subject").TextContent.Trim());
         Assert.Contains("2 éditions · 1 intention", page.FindAll(".merge-data")[0].TextContent);
         Assert.Equal(2, page.FindAll(".merge-data-head-detail").Count);
     }
