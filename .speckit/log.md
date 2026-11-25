@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-25
+
+* **Décision de l'utilisateur** : les collections homonymes de deux éditeurs fusionnés sont présentées dans un bloc à part, « Collections homonymes », entre « Ce que garde la fiche » et « Ce qui passe à la fiche », une ligne par paire ([Fusion de deux fiches](visuel/fusion/fusion-de-deux-fiches.md)). **Choix** : collections reportées avec leur identité, homonymes trouvés par la base, celle dont le nom est gardé restant ; l'éditeur d'une collection consigné au journal ([Fusion de deux fiches : mise en œuvre](choix-implementation/ecritures/fusion-des-fiches-mise-en-oeuvre.md), [Journal des modifications : mise en œuvre](choix-implementation/domaine/journal-des-modifications-mise-en-oeuvre.md)) ; #643 réalisé ([Phase 3 — Frontend Blazor](suivi-implementation/phase-3-frontend-blazor.md)) (#643).
+
 ## 2026-11-24
 
 * **Choix** : la fusion de deux auteurs garde l'identité des contributions qu'elle reporte, qu'une recherche enregistrée peut désigner, et redirige vers la contribution qui reste celles qu'elle retire en double ; le journal consigne une contribution créditée à un autre auteur ([Fusion de deux fiches : mise en œuvre](choix-implementation/ecritures/fusion-des-fiches-mise-en-oeuvre.md), [Journal des modifications : mise en œuvre](choix-implementation/domaine/journal-des-modifications-mise-en-oeuvre.md), [Unicité vérifiée à la validation](choix-implementation/persistance/unicite-verifiee-a-la-validation.md)) (#642).
