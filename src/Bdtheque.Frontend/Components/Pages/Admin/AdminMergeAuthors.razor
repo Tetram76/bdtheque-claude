@@ -32,14 +32,19 @@ else
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminAuthors" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        <MergeData First="Head(Preview.First, FirstName)" Second="Head(Preview.Second, SecondName)" Result="@Result">
-            @Choice("merge-first-name", L["FirstName"], a => a.FirstName, Choices!.FirstName, side => Choose(c => c.FirstName = side))
-            @Choice("merge-last-name", L["LastName"], a => a.LastName, Choices.LastName, side => Choose(c => c.LastName = side))
-            @Choice("merge-pseudonym", L["Pseudonym"], a => a.Pseudonym, Choices.Pseudonym, side => Choose(c => c.Pseudonym = side))
-            @Choice("merge-nationality", L["Nationality"], a => a.Nationality, Choices.Nationality, side => Choose(c => c.Nationality = side))
-            @Choice("merge-biography", L["Biography"], a => a.Biography, Choices.Biography, side => Choose(c => c.Biography = side), isLong: true)
-        </MergeData>
-        <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count" />
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                <MergeData First="Head(Preview.First, FirstName)" Second="Head(Preview.Second, SecondName)" Result="@Result">
+                    @Choice("merge-first-name", L["FirstName"], a => a.FirstName, Choices!.FirstName, side => Choose(c => c.FirstName = side))
+                    @Choice("merge-last-name", L["LastName"], a => a.LastName, Choices.LastName, side => Choose(c => c.LastName = side))
+                    @Choice("merge-pseudonym", L["Pseudonym"], a => a.Pseudonym, Choices.Pseudonym, side => Choose(c => c.Pseudonym = side))
+                    @Choice("merge-nationality", L["Nationality"], a => a.Nationality, Choices.Nationality, side => Choose(c => c.Nationality = side))
+                    @Choice("merge-biography", L["Biography"], a => a.Biography, Choices.Biography, side => Choose(c => c.Biography = side), isLong: true)
+                </MergeData>
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -63,6 +68,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     private ApiProblem? _loadProblem;
     private ApiProblem? _mergeProblem;
     private ApiProblem? _identityProblem;

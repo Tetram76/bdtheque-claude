@@ -1,0 +1,16 @@
+/* The reduced display (visuel/fusion/fusion-de-deux-fiches.md): a group of data with no row to choose left, the rows with nothing
+   to choose being left out by MergeChoice, is hidden; with no row to choose at all, the line that says so takes the place of the
+   groups. */
+.merge-view[data-reduced] ::deep .merge-group:not(:has(.merge-choice-options)) {
+    display: none;
+}
+
+.merge-view-empty {
+    display: none;
+    margin: var(--space-l) 0 0;
+    color: var(--color-text-muted);
+}
+
+.merge-view[data-reduced]:not(:has(.merge-choice-options)) ::deep .merge-view-empty {
+    display: block;
+}

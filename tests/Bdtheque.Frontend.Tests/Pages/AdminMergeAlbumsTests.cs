@@ -88,9 +88,11 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_EachDataInTheBlocksOfTheEntryForm_AndEachCreditGenreAndUniverseOfEitherAlbum()
+    public async Task Rows_EachDataInTheBlocksOfTheEntryForm_AndEachCreditGenreAndUniverseOfEitherAlbum()
     {
         var page = Open();
+        // Every data presented (« Tout afficher »).
+        await page.ChangeAsync(".merge-show-all", true);
 
         Assert.Equal("Fusionner deux albums", page.Find("h1").TextContent.Trim());
         Assert.Equal(["L'album", "Tomaison", "Parution", "Les auteurs", "Genres et univers", "Résumé, notes et appréciation"],
@@ -114,9 +116,35 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Choices_ASameValueOnce_AValueOfOneAlbumRetained_TwoValuesWaitingForTheUser()
+    public async Task ReducedDisplay_ByDefault_LeavesOutTheDataWithNothingToChoose_UntilEverythingIsShown()
     {
         var page = Open();
+
+        // The volume, the special issue and the scenarist, the same in both albums, left out; the groups left without a row to
+        // choose are hidden by the style of the view (visuel/fusion/fusion-de-deux-fiches.md).
+        Assert.False(page.Find(".merge-show-all").HasAttribute("checked"));
+        Assert.Equal("true", page.Find(".merge-view").GetAttribute("data-reduced"));
+        var reduced = page.FindAll(".merge-choice-label").Select(label => label.TextContent.Trim()).ToList();
+        Assert.DoesNotContain("Tome", reduced);
+        Assert.DoesNotContain("Hors-série", reduced);
+        Assert.DoesNotContain("Scénario", reduced);
+        Assert.Contains("Titre", reduced);
+        Assert.Empty(page.FindAll(".merge-choice-same"));
+        // The detail of the two albums in the heads of the first block presented.
+        Assert.Equal(2, page.FindAll(".merge-data-head-detail").Count);
+
+        await page.ChangeAsync(".merge-show-all", true);
+
+        Assert.Null(page.Find(".merge-view").GetAttribute("data-reduced"));
+        Assert.Contains("Tome", page.FindAll(".merge-choice-label").Select(label => label.TextContent.Trim()));
+    }
+
+    [Fact]
+    public async Task Choices_ASameValueOnce_AValueOfOneAlbumRetained_TwoValuesWaitingForTheUser()
+    {
+        var page = Open();
+        // Every data presented (« Tout afficher »).
+        await page.ChangeAsync(".merge-show-all", true);
 
         Assert.Contains($"merge-contribution-{Jacobs.Id}-Scenarist-label", Same(page));
         Assert.Contains($"merge-genre-{Aventure}-label", Same(page));

@@ -31,11 +31,16 @@ else
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminGenres" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)">
-            <MergeChoice Id="merge-label" Label="@L["Label"]" FirstRecord="@Preview.First.Label" SecondRecord="@Preview.Second.Label"
-                         First="@Preview.First.Label" Second="@Preview.Second.Label" @bind-Selected="Choices!.Label" />
-        </MergeData>
-        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Label" SecondName="@Preview.Second.Label" Count="Count" />
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)">
+                    <MergeChoice Id="merge-label" Label="@L["Label"]" FirstRecord="@Preview.First.Label" SecondRecord="@Preview.Second.Label"
+                                 First="@Preview.First.Label" Second="@Preview.Second.Label" @bind-Selected="Choices!.Label" />
+                </MergeData>
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Label" SecondName="@Preview.Second.Label" Count="Count" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -59,6 +64,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     private ApiProblem? _loadProblem;
     private ApiProblem? _mergeProblem;
     private EntryForm? _form;

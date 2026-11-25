@@ -39,20 +39,25 @@ else
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminAlbums" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
-        {
-            <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == 0)"
-                       Second="Head(Preview.Second, index == 0)" Result="@(block.Key == AlbumBlock ? Result : null)">
-                @foreach (var row in block.Rows)
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
                 {
-                    <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@FirstName"
-                                 SecondRecord="@SecondName" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
-                                 SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+                    <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == FirstShown)"
+                               Second="Head(Preview.Second, index == FirstShown)" Result="@(block.Key == AlbumBlock ? Result : null)">
+                        @foreach (var row in block.Rows)
+                        {
+                            <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@FirstName"
+                                         SecondRecord="@SecondName" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
+                                         SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+                        }
+                    </MergeData>
                 }
-            </MergeData>
-        }
-        <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count"
-                    Withdrawn="@([.. Preview.WithdrawnPurchaseIntents.Select(side => L["Links.Withdrawn", Citation.Of(NameOf(side))].Value)])" />
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count"
+                        Withdrawn="@([.. Preview.WithdrawnPurchaseIntents.Select(side => L["Links.Withdrawn", Citation.Of(NameOf(side))].Value)])" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -77,6 +82,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     // The keys of the data of an album, each the key of its row and of the choice made for it.
     private const string SeriesKey = "series";
     private const string TitleKey = "title";
@@ -170,6 +177,9 @@ else
         ("Classification", key => key.StartsWith(GenreKind + "-", StringComparison.Ordinal) || key.StartsWith(UniverseKind + "-", StringComparison.Ordinal)),
         ("Reading", key => key is SummaryKey or NotesKey or RatingKey),
     ];
+
+    // The block whose heads carry the detail of the two records: the first one presented (visuel/fusion/fusion-de-deux-fiches.md).
+    private int FirstShown => _all ? 0 : Math.Max(0, Blocks.ToList().FindIndex(b => b.Rows.Any(r => MergeView.HasChoice(r.First, r.Second))));
 
     private IEnumerable<(string Key, List<Row> Rows)> Blocks
     {

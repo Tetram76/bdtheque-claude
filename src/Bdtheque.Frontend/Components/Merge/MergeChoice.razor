@@ -6,6 +6,11 @@
    one. The same value in both records is presented once, with nothing to choose. Placed in the grid of MergeData, its
    name and its values are cells of the grid, the values side by side under the record they come from, or, on a smartphone,
    one under the other, each preceded by the name of its record. *@
+@* Left out of the reduced display when there is nothing to choose (MergeView). *@
+@if (Reduced && !MergeView.HasChoice(First, Second, Impossible is not null))
+{
+    return;
+}
 <span class="merge-choice-label" id="@LabelId">@Label</span>
 @if (IsSame)
 {
@@ -55,6 +60,10 @@ else
     /// <summary>A long text (a biography, a summary…), presented on a few lines.</summary>
     [Parameter]
     public bool Long { get; set; }
+
+    /// <summary>Whether the view of the merge presents only the data with a choice to make (MergeView).</summary>
+    [CascadingParameter(Name = MergeView.ReducedName)]
+    public bool Reduced { get; set; }
 
     private string LabelId => $"{Id}-label";
 

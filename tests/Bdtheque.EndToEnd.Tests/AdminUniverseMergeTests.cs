@@ -68,7 +68,10 @@ public sealed class AdminUniverseMergeTests(MergeApplication application) : Brow
         var page = await OpenAsync(theme, $"{AppPaths.AdminMergeUniverses}?universe={first.Id}&other={second.Id}");
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
+        // Nothing to choose: left out of the reduced display, the default; presented by « Tout afficher ».
         var parent = page.GetByRole(AriaRole.Radiogroup, new() { Name = "Univers parent" });
+        await Assertions.Expect(parent).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
         await Assertions.Expect(parent.Locator("input[value=Second]")).ToBeDisabledAsync();
         await Assertions.Expect(parent.Locator("input[value=First]")).ToBeCheckedAsync();
         await Assertions.Expect(parent).ToContainTextAsync("Impossible : l'univers qui reste en serait son propre ancêtre.");

@@ -65,6 +65,9 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         // The last name and the biography differ on both sides: the user chooses them; the pseudonym and the nationality, set on
         // one side only, are retained at once, the first name, the same, has nothing to choose.
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("2 données restent à choisir");
+        // Left out of the reduced display, the default; presented by « Tout afficher ».
+        await Assertions.Expect(page.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
         await Assertions.Expect(page.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(1);
         await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).GetByRole(AriaRole.Radio, new() { Name = $"Gotlib {_marker}", Exact = true }).CheckAsync();
         // The display name the names chosen give, as the domain derives it: the pseudonym.
@@ -102,6 +105,9 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         // at once, and the other pair of collections, spelled the same, has nothing to choose.
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("2 données restent à choisir");
         var homonyms = page.Locator(".merge-data", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Collections homonymes" }) });
+        // Left out of the reduced display, the default; presented by « Tout afficher ».
+        await Assertions.Expect(homonyms.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
         await Assertions.Expect(homonyms.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(1);
         await Assertions.Expect(page.Locator(".merge-links")).ToContainTextAsync("3 collections");
 

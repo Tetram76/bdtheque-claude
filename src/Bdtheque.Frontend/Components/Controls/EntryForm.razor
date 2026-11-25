@@ -32,7 +32,7 @@
             @ChildContent
         </fieldset>
         <SaveBar State="State" SaveLabel="@SaveLabel" CancelHref="@CancelHref" Saving="Saving" StateText="@StateText"
-                 StateShortText="@StateShortText" SaveDisabled="SaveDisabled" />
+                 StateShortText="@StateShortText" SaveDisabled="SaveDisabled" Options="BarOptions" />
     </form>
 </div>
 
@@ -92,6 +92,10 @@
 
     [Parameter]
     public string? StateShortText { get; set; }
+
+    /// <summary>What the bar offers besides cancelling and saving (<see cref="SaveBar.Options"/>).</summary>
+    [Parameter]
+    public RenderFragment? BarOptions { get; set; }
 
     /// <summary>Whether the record cannot be saved yet.</summary>
     [Parameter]

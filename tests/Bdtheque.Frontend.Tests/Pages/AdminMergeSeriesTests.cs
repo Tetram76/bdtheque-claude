@@ -91,9 +91,11 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Rows_EachDataInTheOrderOfTheEntryForm_AndEachCreditGenreAndUniverseOfEitherSeries()
+    public async Task Rows_EachDataInTheOrderOfTheEntryForm_AndEachCreditGenreAndUniverseOfEitherSeries()
     {
         var page = Open();
+        // Every data presented (« Tout afficher »).
+        await page.ChangeAsync(".merge-show-all", true);
 
         Assert.Equal("Fusionner deux séries", page.Find("h1").TextContent.Trim());
         Assert.Equal(
@@ -125,9 +127,11 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Choices_ASameValueOnce_AValueOfOneSeriesRetained_TwoValuesWaitingForTheUser()
+    public async Task Choices_ASameValueOnce_AValueOfOneSeriesRetained_TwoValuesWaitingForTheUser()
     {
         var page = Open();
+        // Every data presented (« Tout afficher »).
+        await page.ChangeAsync(".merge-show-all", true);
 
         // A credit and a genre of both, the same on both sides, as the exclusions, the category and the template values alike.
         Assert.Contains($"merge-contribution-{Goscinny.Id}-Scenarist-label", Same(page));

@@ -32,26 +32,31 @@ else
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminPublishers" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        <MergeData First="Head(Preview.First, p => p.First)" Second="Head(Preview.Second, p => p.Second)">
-            <MergeChoice Id="merge-name" Label="@L["Name"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
-                         First="@Preview.First.Name" Second="@Preview.Second.Name" @bind-Selected="Choices!.Name" />
-            <MergeChoice Id="merge-website" Label="@L["Website"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
-                         First="@Preview.First.Website" Second="@Preview.Second.Website" @bind-Selected="Choices.Website" />
-        </MergeData>
-        @if (Preview.Homonyms.Count > 0)
-        {
-            <MergeData Title="@L["Homonyms.Title"]" Kicker="@L["Homonyms.Kicker"]"
-                       First="new(Preview.First.Name, null, null)" Second="new(Preview.Second.Name, null, null)">
-                @foreach (var (homonyms, index) in Preview.Homonyms.Select((h, i) => (h, i)))
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                <MergeData First="Head(Preview.First, p => p.First)" Second="Head(Preview.Second, p => p.Second)">
+                    <MergeChoice Id="merge-name" Label="@L["Name"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                                 First="@Preview.First.Name" Second="@Preview.Second.Name" @bind-Selected="Choices!.Name" />
+                    <MergeChoice Id="merge-website" Label="@L["Website"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                                 First="@Preview.First.Website" Second="@Preview.Second.Website" @bind-Selected="Choices.Website" />
+                </MergeData>
+                @if (Preview.Homonyms.Count > 0)
                 {
-                    var choice = Choices!.Collections[index];
-                    <MergeChoice @key="homonyms.First" Id="@($"merge-collection-{index}")" Label="@homonyms.FirstName"
-                                 FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name" First="@homonyms.FirstName"
-                                 Second="@homonyms.SecondName" @bind-Selected="choice.Name" />
+                    <MergeData Title="@L["Homonyms.Title"]" Kicker="@L["Homonyms.Kicker"]"
+                               First="HomonymsHead(Preview.First, p => p.First)" Second="HomonymsHead(Preview.Second, p => p.Second)">
+                        @foreach (var (homonyms, index) in Preview.Homonyms.Select((h, i) => (h, i)))
+                        {
+                            var choice = Choices!.Collections[index];
+                            <MergeChoice @key="homonyms.First" Id="@($"merge-collection-{index}")" Label="@homonyms.FirstName"
+                                         FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name" First="@homonyms.FirstName"
+                                         Second="@homonyms.SecondName" @bind-Selected="choice.Name" />
+                        }
+                    </MergeData>
                 }
-            </MergeData>
-        }
-        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Name" SecondName="@Preview.Second.Name" Count="Count" />
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Name" SecondName="@Preview.Second.Name" Count="Count" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -75,6 +80,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     private ApiProblem? _loadProblem;
     private ApiProblem? _mergeProblem;
     private EntryForm? _form;
@@ -147,6 +154,13 @@ else
     };
 
     // What is linked to the publisher, as its list says it (« 3 séries · 2 collections · 688 éditions · 3 intentions »).
+    // The heads of the homonyms carry the detail of the two publishers when they are the first block presented, the data of the
+    // publishers having nothing to choose (visuel/fusion/fusion-de-deux-fiches.md).
+    private MergeRecordHead HomonymsHead(PublisherMergeRecord record, Func<MergeLinkCount, int> count) =>
+        !_all && !MergeView.HasChoice(Preview!.First.Name, Preview.Second.Name) && !MergeView.HasChoice(Preview.First.Website, Preview.Second.Website)
+            ? Head(record, count)
+            : new(record.Name, null, null);
+
     private MergeRecordHead Head(PublisherMergeRecord record, Func<MergeLinkCount, int> count)
     {
         var links = Preview!.Links.Select(l => (l.Kind, Count: count(l))).Where(l => l.Count > 0)
