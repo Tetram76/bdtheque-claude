@@ -35,7 +35,10 @@
 
         @if (_list.Entries.Items.Count == 0)
         {
-            switch (_query.EmptyReason)
+            @* Over a period, which days of the browser it covers depend on its time zone, whatever the entries found: marked
+               for the script that renders the page again once it knows it (wwwroot/browser-time-zone.js), as the rows are. *@
+            <div class="log-empty" data-local="@(_query.From is not null || _query.To is not null)">
+            @switch (_query.EmptyReason)
             {
                 case EmptyListReason.Search:
                     <EmptyList Message="@L["Empty.Text", _query.Text!]" SearchedIn="@L["Empty.SearchedIn"]">
@@ -55,6 +58,7 @@
                     <EmptyList Message="@L["Empty.None"]" />
                     break;
             }
+            </div>
         }
         else
         {

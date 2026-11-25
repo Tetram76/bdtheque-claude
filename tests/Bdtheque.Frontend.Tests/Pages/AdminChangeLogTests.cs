@@ -253,6 +253,22 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
         Assert.Equal([("Effacer les filtres", AppPaths.AdminChangeLog)], empty.QuerySelectorAll("a").Select(link => (Text(link), link.GetAttribute("href"))));
     }
 
+    [Theory]
+    // Over a period, the entries found depend on the time zone of the browser even when there are none: the page is rendered
+    // again once it knows it (wwwroot/browser-time-zone.js), which only an element marked data-local asks for.
+    [InlineData("from=2026-11-01", true)]
+    [InlineData("to=2026-11-25", true)]
+    [InlineData("operation=Deletion", false)]
+    public void Empty_OverAPeriod_DependsOnTheTimeZone(string query, bool local)
+    {
+        Answer([]);
+
+        var page = Open(query);
+
+        Assert.Equal(local, page.FindAll(".log-empty[data-local]").Count == 1);
+        Assert.Single(page.FindAll(".log-empty .empty-list"));
+    }
+
     [Fact]
     public void Empty_NothingYet_SaysSo()
     {

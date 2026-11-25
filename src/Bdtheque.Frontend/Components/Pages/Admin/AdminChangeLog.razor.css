@@ -8,6 +8,11 @@
     container: log-rows / inline-size;
 }
 
+/* A mark for the script of the time zone only: the empty list keeps its place among the parts of the page. */
+.log-empty {
+    display: contents;
+}
+
 .log-row {
     display: grid;
     grid-template-columns: auto auto minmax(0, 1fr) auto;
