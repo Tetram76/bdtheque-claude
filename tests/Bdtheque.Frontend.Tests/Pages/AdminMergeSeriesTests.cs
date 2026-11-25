@@ -109,6 +109,22 @@ public sealed class AdminMergeSeriesTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Blocks_ThoseOfTheEntryFormOfASeries_TheirTitlesAndMentions_TheRecordsDetailedInTheFirstOnly()
+    {
+        var page = Open();
+
+        Assert.Equal(["La série", "Avancement", "Calculs", "Les auteurs", "Éditeur et collection", "Genres et univers", "Résumé et notes",
+                "Nouvelles éditions"],
+            page.FindAll(".block-title").Where(title => title.Closest(".merge-data") is not null).Select(title => title.TextContent.Trim()));
+        Assert.Equal(["Identification", "Suivi", "Réglages", "Contributions", "Publication", "Classement", "Lecture", "Pré-remplissage"],
+            page.FindAll(".merge-data .block-kicker").Select(kicker => kicker.TextContent.Trim()));
+        Assert.Equal(["Titre", "Clé de tri", "Statut"], page.FindAll(".merge-data")[0].QuerySelectorAll(".merge-choice-label").Select(label => label.TextContent.Trim()));
+        // The albums and the last modification of each series in the heads of the first block alone.
+        Assert.Equal(2, page.FindAll(".merge-data-head-detail").Count);
+        Assert.Contains("38 albums", page.FindAll(".merge-data")[0].TextContent);
+    }
+
+    [Fact]
     public void Choices_ASameValueOnce_AValueOfOneSeriesRetained_TwoValuesWaitingForTheUser()
     {
         var page = Open();

@@ -13,7 +13,7 @@
 
 @* The merge of two series (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the series, which
    gives the series and the other one: each data the series keeps, of the one or the other, in the order of its entry form; each
-   genre, universe and contribution held by one series only, retained or discarded; the sort key the data chosen give; the albums
+   genre, universe and contribution held by one series only, retained or discarded, in the blocks of that form; the sort key the data chosen give; the albums
    that pass to it; then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor of
    a series, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
    title gives. *@
@@ -34,14 +34,18 @@ else
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminSeries" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)" Result="@Result">
-            @foreach (var row in Rows)
-            {
-                <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
-                             SecondRecord="@Preview.Second.Title" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
-                             SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
-            }
-        </MergeData>
+        @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
+        {
+            <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First)"
+                       Second="Head(Preview.Second)" NamesOnly="index > 0" Result="@(block.Key == SeriesBlock ? Result : null)">
+                @foreach (var row in block.Rows)
+                {
+                    <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
+                                 SecondRecord="@Preview.Second.Title" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
+                                 SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+                }
+            </MergeData>
+        }
         <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Title" SecondName="@Preview.Second.Title" Count="Count" />
     </EntryForm>
 
@@ -119,6 +123,31 @@ else
 
     // The title the series keeps, that the confirmation names it by, once chosen.
     private string KeptTitle => Choices![TitleKey] is { } side ? Of(side).Title : Preview!.First.Title;
+
+    // The blocks of the entry form of a series (visuel/saisie-serie/contenu.md), whose titles and mentions the merge takes up
+    // (decision of the user, #645), each with the keys of its data, in its order; one without any row is left out.
+    private const string SeriesBlock = "Series";
+
+    private static readonly (string Key, Func<string, bool> Holds)[] BlockKeys =
+    [
+        (SeriesBlock, key => key is TitleKey or SortKeyKey or StatusKey),
+        ("Progress", key => key is VolumesKey or CompleteKey),
+        ("Computations", key => key is ExcludeFromMissingKey or ExcludeFromEstimatesKey),
+        ("Authors", key => key.StartsWith("contribution-", StringComparison.Ordinal)),
+        ("Publisher", key => key is PublisherKey),
+        ("Classification", key => key.StartsWith("genre-", StringComparison.Ordinal) || key.StartsWith("universe-", StringComparison.Ordinal)),
+        ("Reading", key => key is SummaryKey or NotesKey),
+        ("Template", key => key is CategoryKey or ConditionKey or BindingKey or FormatKey or OrientationKey or ReadingDirectionKey or ColorKey),
+    ];
+
+    private IEnumerable<(string Key, List<Row> Rows)> Blocks
+    {
+        get
+        {
+            var rows = Rows.ToList();
+            return BlockKeys.Select(block => (block.Key, Rows: rows.Where(row => block.Holds(row.Key)).ToList())).Where(block => block.Rows.Count > 0);
+        }
+    }
 
     /// <summary>
     /// A row of the merge: a data, or an element held by one series only (<paramref name="Element"/>, of the series

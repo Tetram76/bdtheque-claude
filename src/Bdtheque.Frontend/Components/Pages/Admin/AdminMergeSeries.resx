@@ -135,4 +135,52 @@
   <data name="Problem.Technical" xml:space="preserve">
     <value>La fusion n&apos;a pas pu aboutir. Réessayez dans un instant.</value>
   </data>
+  <data name="Block.Series" xml:space="preserve">
+    <value>La série</value>
+  </data>
+  <data name="Kicker.Series" xml:space="preserve">
+    <value>Identification</value>
+  </data>
+  <data name="Block.Progress" xml:space="preserve">
+    <value>Avancement</value>
+  </data>
+  <data name="Kicker.Progress" xml:space="preserve">
+    <value>Suivi</value>
+  </data>
+  <data name="Block.Computations" xml:space="preserve">
+    <value>Calculs</value>
+  </data>
+  <data name="Kicker.Computations" xml:space="preserve">
+    <value>Réglages</value>
+  </data>
+  <data name="Block.Authors" xml:space="preserve">
+    <value>Les auteurs</value>
+  </data>
+  <data name="Kicker.Authors" xml:space="preserve">
+    <value>Contributions</value>
+  </data>
+  <data name="Block.Publisher" xml:space="preserve">
+    <value>Éditeur et collection</value>
+  </data>
+  <data name="Kicker.Publisher" xml:space="preserve">
+    <value>Publication</value>
+  </data>
+  <data name="Block.Classification" xml:space="preserve">
+    <value>Genres et univers</value>
+  </data>
+  <data name="Kicker.Classification" xml:space="preserve">
+    <value>Classement</value>
+  </data>
+  <data name="Block.Reading" xml:space="preserve">
+    <value>Résumé et notes</value>
+  </data>
+  <data name="Kicker.Reading" xml:space="preserve">
+    <value>Lecture</value>
+  </data>
+  <data name="Block.Template" xml:space="preserve">
+    <value>Nouvelles éditions</value>
+  </data>
+  <data name="Kicker.Template" xml:space="preserve">
+    <value>Pré-remplissage</value>
+  </data>
 </root>
