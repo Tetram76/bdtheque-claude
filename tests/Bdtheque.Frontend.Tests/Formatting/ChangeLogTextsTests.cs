@@ -78,8 +78,10 @@ public sealed class ChangeLogTextsTests : IDisposable
         { new SearchVariablesValue([]), "Aucune variable" },
     };
 
+    // The values, records of the domain, are not serializable by xUnit: the rows are enumerated when the test runs, not at its
+    // discovery.
     [Theory]
-    [MemberData(nameof(Values))]
+    [MemberData(nameof(Values), DisableDiscoveryEnumeration = true)]
     public void Value_AsTheRecordHoldsIt(ChangeLogValue value, string text) =>
         Assert.Equal(text, _texts.Value(value, AlbumLabelFormat.TitleSeriesVolume).Replace(' ', ' ').Replace(' ', ' '));
 
