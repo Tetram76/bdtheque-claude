@@ -272,9 +272,8 @@ chosen before the others; the whole selection was presented at step 2.4.
   within a bounded delay, then check the real state (GitHub,
   `get_session` / `list_events` of the session), and do without the reply
   if it can, or send the message again if still needed. It is **paramount**
-  that the sessions, the orchestrator included, take the time to answer the
-  messages they receive: a
-  message received is never left unanswered.
+  that the sessions, the orchestrator included, take into account the
+  messages they receive, and answer them as soon as possible when needed.
 - Each message or note of a session of the batch: report it to the user in a
   line or two, with the links of its pull request; never fabricate its
   result. A message is the session's report, not a proof: check on GitHub
