@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Journal des modifications — administration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&amp;family=Delius&amp;family=Anton&amp;family=Baloo+2:wght@600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&amp;family=DM+Sans:wght@400;500;700&amp;family=DM+Serif+Display:ital@0;1&amp;family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,600&amp;family=Karla:wght@400;500;700&amp;family=Libre+Franklin:ital,wght@0,400;0,600;0,800;1,800&amp;family=Nunito:wght@400;600;700&amp;family=Rubik+Mono+One&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Inter+Tight:wght@400..900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{text-decoration:none}a:hover{text-decoration:underline;text-underline-offset:3px}
+/* A placeholder keeps the contrast of muted text rather than fading it with an opacity. */
+input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
+/* The focus ring is drawn outside the control, over a band of the page colour: it stands out from the
+   control, coloured or not, and from the surface around it. */
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 2px var(--focus-gap)}
+.adm-search{flex:1 1 260px;max-width:400px;margin-left:auto}
+/* An entry is a line of a table on a wide screen: its time, the record, the operation, its actions; the
+   changes of a modification below the record, across the record and operation columns. */
+.jr-row{display:grid;grid-template-columns:56px minmax(0,1fr) 130px 40px;align-items:start;column-gap:14px}
+.jr-time{grid-column:1;grid-row:1}
+.jr-main{grid-column:2;grid-row:1}
+.jr-op{grid-column:3;grid-row:1}
+.jr-act{grid-column:4;grid-row:1}
+.jr-changes{grid-column:2 / 4;grid-row:2}
+.jr-act-label{display:inline}
+@media (max-width: 760px){
+  .jr-head{display:none !important}
+  .jr-row{grid-template-columns:minmax(0,1fr) auto;row-gap:4px}
+  .jr-main{grid-column:1;grid-row:1}
+  .jr-act{grid-column:2;grid-row:1}
+  .jr-time{grid-column:1;grid-row:2;display:inline-flex;gap:10px;align-items:center}
+  .jr-op{grid-column:1;grid-row:2;justify-self:start;margin-left:52px}
+  .jr-changes{grid-column:1 / -1;grid-row:3}
+  .jr-act-label{display:none}
+  .jr-edit{width:34px;padding:0 !important;justify-content:center}
+  .jr-filters{grid-template-columns:repeat(2, minmax(0, 1fr)) !important}
+  .jr-change{grid-template-columns:minmax(0,1fr) !important}
+}
+@media (max-width: 640px){
+  .adm-search{order:3;flex-basis:100%;max-width:none;margin-left:0}
+  .adm-actions{margin-left:auto}
+  .adm-consult-label,.adm-menu-label{display:none}
+  .adm-menu{width:38px;padding:0 !important;justify-content:center}
+  .adm-tag{padding:2px 8px !important;font-size:11px !important}
+}
+</style>
+<script src="../shared/mockup.js"></script>
+<script src="../shared/couverture-theme.js"></script>
+<script src="../shared/comic-skin.js"></script>
+<script src="../shared/comic-bubbles.js"></script>
+<script src="../shared/comic-frames.js"></script>
+</head>
+<body>
+<div id="mockup"></div>
+<template id="view">
+<div style="--placeholder: {{t.muted}}; --focus: {{t.text}}; --focus-gap: {{t.bg}}; min-height: 100vh; background: {{t.bg}}; color: {{t.text}}; font-family: {{t.fb}}; font-size: 15px; line-height: 1.5">
+
+  <header style="--placeholder: {{hdrMuted}}; --focus: {{t.hText}}; --focus-gap: {{hdrBg}}; position: sticky; top: 0; z-index: 20; background: {{hdrBg}}; color: {{t.hText}}; border-bottom: {{t.hLine}}">
+    <div style="position: relative; max-width: 1280px; margin: 0 auto; padding: 10px clamp(12px, 3vw, 24px); box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; color: {{t.hText}}; text-decoration: none">
+        <sc-if value="{{t.lgMark}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: #E8604C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 19px">B</span></sc-if>
+        <span style="display: inline-block; padding: {{t.lgPad}}; border-radius: {{t.lgR}}; background: {{t.lgBg}}; color: {{t.lgText}}; font: {{t.lgFont}}; line-height: 1.1; text-transform: {{t.lgTT}}; transform: rotate({{t.lgRot}}); box-shadow: {{t.lgSh}}; text-shadow: {{t.lgTSh}}">BDthèque<span style="color: {{t.lgDot}}">.</span></span>
+      </a>
+      <span class="adm-tag" style="padding: 4px 12px; border: {{t.tagB}}; border-radius: {{t.tagR}}; background: {{t.tagBg}}; color: {{t.tagText}}; font-weight: 700; font-size: 13px; text-transform: {{t.tagTT}}; letter-spacing: {{t.tagLS}}">Administration</span>
+      <div class="adm-search" style="min-width: 0; display: flex; align-items: center; gap: 8px">
+        <label for="find" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Retrouver une fiche</label>
+        <input id="find" type="search" placeholder="Retrouver une fiche à modifier…" style="flex: 1 1 auto; min-width: 0; height: 38px; padding: 0 14px; box-sizing: border-box; border: {{t.hInB}}; border-radius: {{t.inR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font: inherit">
+        <button type="button" aria-label="Aide sur cette page" style="width: 38px; height: 38px; flex: none; border: {{t.helpB}}; border-radius: {{t.helpR}}; background: {{t.helpBg}}; color: {{t.helpText}}; font-family: {{t.fd}}; font-weight: 700; font-size: 18px; cursor: pointer">?</button>
+      </div>
+      <div class="adm-actions" style="display: flex; align-items: center; gap: 8px">
+      <a href="#" aria-label="Aller à la consultation" style="display: inline-flex; align-items: center; gap: 6px; height: 38px; flex: none; padding: 0 6px; color: {{t.hText}}; font-weight: 700; font-size: 14px"><span class="adm-consult-label">Aller à la consultation</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7 M9 7h8v8"></path></svg></a>
+      <button type="button" aria-label="Menu" aria-expanded="{{menuExpanded}}" aria-controls="admin-menu" onClick="{{toggleMenu}}" class="adm-menu" style="display: inline-flex; align-items: center; gap: 8px; height: 38px; flex: none; padding: 0 12px; border: {{t.hInB}}; border-radius: {{t.btnR}}; background: {{t.hInBg}}; color: {{t.hInText}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg><span class="adm-menu-label">Menu</span></button>
+      </div>
+
+      <sc-if value="{{menuOpen}}">
+    <button type="button" tabindex="-1" aria-label="Fermer le menu" onClick="{{closeMenu}}" style="position: fixed; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: default"></button>
+    <nav id="admin-menu" aria-label="Plan de l'administration" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 8px); right: 24px; width: min(340px, calc(100% - 48px)); max-height: 80vh; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 12px; border: {{panelB}}; border-radius: {{t.cR}}; background: {{panelBg}}; color: {{t.text}}; box-shadow: {{panelSh}}; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: {{t.rowB}}">
+        <span style="padding-left: 10px; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 16px; text-transform: {{t.fdTT}}">Menu</span>
+        <button type="button" aria-label="Fermer le menu" onClick="{{toggleMenu}}" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: {{t.secB}}; border-radius: {{t.btnR}}; background: transparent; color: {{t.secText}}; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <sc-for list="{{menu}}" as="g">
+        <div style="display: flex; flex-direction: column; gap: 1px">
+          <span style="padding: 0 10px 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: {{t.muted}}">{{g.label}}</span>
+          <sc-for list="{{g.items}}" as="m">
+            <a href="#" aria-current="{{m.current}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; padding: 0 10px; font-size: 14px; border-radius: {{t.btnR}}; background: {{m.bg}}; color: {{m.fg}}; font-weight: {{m.fw}}">
+              <span>{{m.label}}</span>
+              <span style="font-size: 13px; font-variant-numeric: tabular-nums; opacity: .85">{{m.n}}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="padding-top: 8px; border-top: {{t.rowB}}">
+        <button type="button" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 32px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h4v16h-4 M10 8l-4 4 4 4 M6 12h10"></path></svg>Se déconnecter</button>
+      </div>
+    </nav>
+      </sc-if>
+    </div>
+  </header>
+
+  <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
+    <main style="display: flex; flex-direction: column; gap: 18px">
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <nav aria-label="Fil d'Ariane" style="font-size: 13px; color: {{t.muted}}">
+          <a href="#" style="color: {{t.link}}; font-weight: 700">Administration</a>
+          <span aria-hidden="true" style="margin: 0 6px">›</span>
+          <span aria-current="page">Journal des modifications</span>
+        </nav>
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; min-width: 0">
+          <h1 style="margin: 0; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: {{t.h1size}}; line-height: 1.05; text-transform: {{t.fdTT}}; color: {{t.text}}">Journal des modifications</h1>
+          <span style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; color: {{t.muted}}">12 408</span>
+        </div>
+      </div>
+
+      <section aria-labelledby="j-list" style="--focus-gap: {{cardBg}}; position: relative; padding: {{t.cPad}}; border: {{t.cB}}; border-top: {{t.cBT}}; border-radius: {{t.cR}}; background: {{t.cBg}}; box-shadow: {{t.cSh}}; display: flex; flex-direction: column; gap: 12px">
+        <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{kick}}</span>
+        <h2 id="j-list" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Entrées du journal</h2>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+          <label for="q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Rechercher</label>
+          <div style="flex: 1 1 280px; min-width: 0; position: relative">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="position: absolute; left: 14px; top: 12px; color: {{t.muted}}"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4"></path></svg>
+            <input id="q" type="search" placeholder="Libellé de la fiche…" value="{{query}}" style="width: 100%; height: 42px; padding: 0 14px 0 40px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit">
+          </div>
+          <button type="button" aria-expanded="{{filtersExpanded}}" aria-controls="jr-filters" onClick="{{toggleFilters}}" style="display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border: {{t.secB}}; border-radius: {{t.btnR}}; background: {{filtersBtnBg}}; color: {{filtersBtnFg}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"></path></svg>Filtres<sc-if value="{{activeCount}}"><span style="min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; background: {{t.acc}}; color: {{t.onAcc}}; font-size: 12px">{{activeCount}}</span></sc-if></button>
+        </div>
+
+        <sc-if value="{{filtersOpen}}">
+          <div id="jr-filters" style="display: flex; flex-direction: column; gap: 10px; padding: 12px; border: {{t.tB}}; border-radius: {{t.tR}}; background: {{t.tBg}}">
+            <div class="jr-filters" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px 12px">
+              <sc-for list="{{filters}}" as="f">
+                <label style="display: flex; flex-direction: column; gap: 3px; min-width: 0; font-weight: 700; font-size: 12px; color: {{t.muted}}">{{f.label}}
+                  <span style="display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 36px; padding: 0 12px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{f.fg}}; font-weight: 400; font-size: 14px"><span style="min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{f.value}}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="{{f.icon}}"></path></svg></span>
+                </label>
+              </sc-for>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: {{t.muted}}">L'historique d'une seule fiche s'obtient depuis le menu « ⋯ » de l'une de ses entrées.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{activeCount}}">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px">
+            <sc-for list="{{active}}" as="a">
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px 2px 12px; border: {{t.secB}}; border-radius: {{t.btnR}}; font-size: 13px"><span><span style="color: {{t.muted}}">{{a.name}} :</span> <strong>{{a.value}}</strong></span><button type="button" aria-label="Retirer le filtre {{a.name}}" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: {{t.text}}; cursor: pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
+            </sc-for>
+            <a href="#" style="font-weight: 700; font-size: 13px; color: {{t.link}}">Tout effacer</a>
+          </div>
+        </sc-if>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; font-size: 13px; color: {{t.muted}}">
+          <span><strong style="color: {{t.text}}">{{count}}</strong></span>
+          <span>De la plus récente à la plus ancienne</span>
+        </div>
+
+        <sc-if value="{{empty}}">
+          <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 4px">
+            <p style="margin: 0">Aucune entrée ne correspond à « {{query}} ».</p>
+            <p style="margin: 0; font-size: 13px; color: {{t.muted}}">La recherche porte sur le libellé des fiches, sans tenir compte des majuscules ni des accents.</p>
+            <a href="#" style="font-weight: 700; color: {{t.link}}">Effacer la recherche</a>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{notEmpty}}">
+          <div role="table" aria-label="Journal des modifications" style="display: flex; flex-direction: column">
+            <div role="row" class="jr-row jr-head" style="padding: 0 4px 6px; border-bottom: {{headB}}; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">
+              <span role="columnheader">Heure</span>
+              <span role="columnheader">Fiche</span>
+              <span role="columnheader">Opération</span>
+              <span role="columnheader" style="text-align: right"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Actions</span></span>
+            </div>
+            <sc-for list="{{days}}" as="d">
+              <div role="row" style="padding: 12px 4px 4px; border-bottom: {{t.rowB}}">
+                <span role="rowheader" style="font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-size: 15px; text-transform: {{t.fdTT}}; color: {{t.text}}">{{d.label}}</span>
+              </div>
+              <sc-for list="{{d.entries}}" as="r">
+                <div role="row" class="jr-row" style="padding: 8px 4px; border-bottom: {{t.rowB}}; font-size: 14px">
+                  <span role="cell" class="jr-time" style="padding-top: 2px; font-size: 13px; font-variant-numeric: tabular-nums; color: {{t.muted}}">{{r.time}}</span>
+                  <span role="cell" class="jr-main" style="min-width: 0; display: flex; flex-direction: column">
+                    <span style="font-weight: 700; overflow-wrap: anywhere">{{r.label}}<sc-if value="{{r.isbn}}"> - <span style="white-space: nowrap">ISBN {{r.isbn}}</span></sc-if></span>
+                    <span style="font-size: 12px; color: {{t.muted}}">{{r.type}}</span>
+                  </span>
+                  <span role="cell" class="jr-op"><span style="display: inline-flex; align-items: center; padding: 1px 9px; border: {{r.opB}}; border-radius: {{t.btnR}}; background: {{r.opBg}}; color: {{r.opFg}}; font-weight: 700; font-size: 12px; white-space: nowrap">{{r.op}}</span></span>
+                  <span role="cell" class="jr-act" style="position: relative; display: flex; align-items: center; justify-content: flex-end; gap: 4px">
+                    
+                    <button type="button" aria-label="Autres actions : {{r.label}}" aria-haspopup="menu" aria-expanded="{{r.menuExpanded}}" onClick="{{r.toggle}}" style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: {{t.btnR}}; background: {{r.moreBg}}; color: {{r.moreFg}}; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"></circle><circle cx="12" cy="12" r="2"></circle><circle cx="19" cy="12" r="2"></circle></svg></button>
+                    <sc-if value="{{r.menuOpen}}">
+                      <span aria-hidden="true" onClick="{{closeRowMenu}}" style="position: fixed; inset: 0; z-index: 25; cursor: default"></span>
+                      <div role="menu" style="--focus: {{t.text}}; --focus-gap: {{panelBg}}; position: absolute; top: calc(100% + 4px); right: 0; z-index: 26; width: 270px; padding: 6px; box-sizing: border-box; border: {{panelB}}; border-radius: {{t.tR}}; background: {{panelBg}}; box-shadow: {{panelSh}}; display: flex; flex-direction: column; gap: 1px">
+                        <sc-for list="{{r.menu}}" as="m">
+                          <button type="button" role="menuitem" style="display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 0 10px; border: 0; border-radius: {{t.btnR}}; background: transparent; color: {{t.text}}; font-family: {{t.fb}}; font-weight: 700; font-size: 14px; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg>{{m.label}}</button>
+                        </sc-for>
+                      </div>
+                    </sc-if>
+                  </span>
+                  <sc-if value="{{r.changes.length}}">
+                    <ul role="cell" class="jr-changes" style="margin: 4px 0 0; padding: 6px 10px; list-style: none; border-left: 3px solid {{t.line}}; display: flex; flex-direction: column; gap: 3px; font-size: 13px">
+                      <sc-for list="{{r.changes}}" as="c">
+                        <li class="jr-change" style="display: grid; grid-template-columns: 190px minmax(0,1fr); column-gap: 12px">
+                          <span style="color: {{t.muted}}">{{c.attribute}}</span>
+                          <span style="min-width: 0; overflow-wrap: anywhere">
+                            <sc-if value="{{c.added}}"><span style="font-weight: 700">+ {{c.after}}</span></sc-if>
+                            <sc-if value="{{c.removed}}"><span style="color: {{t.muted}}"><s>{{c.before}}</s> retiré</span></sc-if>
+                            <sc-if value="{{c.changed}}"><span style="color: {{t.muted}}">{{c.before}}</span> <span aria-label="devient" style="color: {{t.muted}}">→</span> <span style="font-weight: 700">{{c.after}}</span></sc-if>
+                            <sc-if value="{{c.secret}}"><span style="font-style: italic">renouvelée, valeur non consignée</span></sc-if>
+                          </span>
+                        </li>
+                      </sc-for>
+                    </ul>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </sc-for>
+          </div>
+
+          <nav aria-label="Pages du journal" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-top: 4px; font-size: 13px">
+            <span style="color: {{t.muted}}">{{pageLabel}}</span>
+            <sc-if value="{{pages.length}}">
+              <span style="display: flex; align-items: center; gap: 4px">
+                <span aria-disabled="true" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; color: {{t.muted}}; font-weight: 700; white-space: nowrap">‹ Précédente</span>
+                <sc-for list="{{pages}}" as="p">
+                  <a href="#" aria-current="{{p.current}}" style="min-width: 32px; height: 32px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; border-radius: {{t.btnR}}; background: {{p.bg}}; color: {{p.fg}}; font-weight: 700; font-variant-numeric: tabular-nums">{{p.label}}</a>
+                </sc-for>
+                <a href="#" style="height: 32px; padding: 0 10px; display: inline-flex; align-items: center; color: {{t.link}}; font-weight: 700; white-space: nowrap">Suivante ›</a>
+              </span>
+            </sc-if>
+          </nav>
+        </sc-if>
+      </section>
+    </main>
+  </div>
+
+  <footer style="max-width: 1280px; margin: 0 auto; padding: 12px clamp(12px, 3vw, 24px) 24px; box-sizing: border-box; font-size: 12px; color: {{t.muted}}">
+    <span>Espace réservé au compte administrateur.</span>
+  </footer>
+</div>
+</template>
+<script>
+// Shared defaults: each theme only states what its identity changes.
+const BASE = {
+  kDisp: 'none', kPos: 'static', kTop: 'auto', kLeft: 'auto', kBg: 'transparent', kText: 'inherit', kPad: '0', kR: '0',
+  kFont: 'inherit', kW: '700', kSize: '12px', kLS: '0', kTT: 'none', kPre: null,
+  lgMark: false, lgSh: 'none', lgTSh: 'none', lgRot: '0deg', lgPad: '0', lgR: '0', lgBg: 'transparent',
+  tagTT: 'none', tagLS: '0', fdTT: 'none', h1size: 'clamp(24px, 3vw, 36px)', cSh: 'none', hiSh: 'none', thR: '3px'
+};
+
+// Tokens of a theme drawn in cases, from its page, panel and border colours: « La planche encrée » starts from them.
+const cases = (c) => ({
+  ...BASE,
+  bg: c.bg, text: '#FBF3EA', muted: c.muted, line: c.border,
+  acc: '#FFB547', onAcc: c.bg, link: '#FFB547', warn: '#FF7A6B', onWarn: c.bg, del: '#FF7A6B', nBg: '#FBF3EA', nFg: c.bg,
+  fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+  cBg: c.panel, cB: '2px solid ' + c.border, cBT: '2px solid ' + c.border, cR: '26px 16px 28px 18px', cPad: 'clamp(14px, 2.2vw, 22px)',
+  tBg: c.bg, tB: '2px solid ' + c.border, tR: '18px 12px 20px 14px', rowB: '1px solid ' + c.border,
+  inBg: c.bg, inB: '2px solid ' + c.border, inR: '999px', btnR: '999px', secB: '2px solid ' + c.soft, secText: '#FBF3EA', thR: '6px 3px 7px 4px',
+  hBg: 'transparent', hText: '#FBF3EA', hLine: '0', hInBg: c.panel, hInB: '2px solid ' + c.border, hInText: '#FBF3EA',
+  helpBg: '#4FD1C5', helpText: c.bg, helpR: '50% 50% 50% 12%', helpB: '0',
+  lgBg: '#FBF3EA', lgText: c.bg, lgPad: '5px 14px', lgR: '22px 26px 24px 8px', lgRot: '-2deg', lgFont: '800 20px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+  tagBg: 'transparent', tagText: c.soft, tagB: '2px solid ' + c.border, tagR: '999px'
+});
+
+// « La planche encrée »: a comic page, white outside its blocks, black ink throughout. Its blocks become
+// cases of their own colours, with hand-drawn edges and balloon titles (comic-skin.js): the theme
+// itself only sets what the template draws.
+const planche = {
+  ...cases({ bg: '#FFFFFF', panel: '#FFFFFF', border: '#111111', soft: '#111111', muted: '#111111' }),
+  text: '#111111', acc: '#111111', onAcc: '#FFFFFF', link: '#111111', warn: '#F2775A', onWarn: '#111111', del: '#B42318', nBg: '#FFFFFF', nFg: '#111111',
+  fb: "Delius, 'DM Sans', system-ui, sans-serif",
+  cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0',
+  tBg: '#FFFFFF', tB: '3px solid #111111', tR: '0', rowB: '1px solid #111111',
+  inBg: '#FFFFFF', inB: '2px solid #111111', secB: '2px solid #111111', secText: '#111111', thR: '0', chipR: '999px',
+  hBg: '#FFFFFF', hText: '#111111', hLine: '3px solid #111111', hInBg: '#FFFFFF', hInB: '2px solid #111111', hInText: '#111111',
+  helpBg: '#FFC93C', helpText: '#111111', helpR: '50%', helpB: '2px solid #111111',
+  lgBg: '#FFFFFF', lgText: '#111111', lgPad: '3px 14px', lgR: '0', lgSh: '0 0 0 3px #111111, 7px 7px 0 #111111', lgFont: '800 22px Fraunces, Georgia, serif', lgDot: 'transparent',
+  tagBg: '#FFFFFF', tagText: '#111111', tagB: '2px solid #111111',
+  h2c: '#111111', h2bg: 'transparent', h2pad: '0', h2r: '0', h2rot: '0deg', h2lift: '0', cTop: '0', tail: false,
+  infoBg: '#4FB0E6', infoFg: '#111111', colBg: '#63C36A', colFg: '#111111',
+  cvB: '3px solid #111111', cvBg: '#FFFFFF', cvR: '0', cvSh: '6px 6px 0 #111111', imgR: '0',
+  pal: [['#FFC93C', '#111111'], ['#4FB0E6', '#111111'], ['#F483AE', '#111111']]
+};
+
+// Text set on a coloured fill keeps a 4.5:1 contrast: where a theme's own ink would not reach it,
+// another ink of the same theme carries the text or the fill.
+const THEMES = {
+  planche,
+  gazette: {
+    ...BASE,
+    bg: '#FBF3EA', text: '#2B1030', muted: '#5E3F63', line: '#D9C6CF',
+    acc: '#2B1030', onAcc: '#FBF3EA', link: '#9A3D12', warn: '#9A3D12', onWarn: '#FBF3EA', del: '#9A3D12', nBg: '#F1E3D6', nFg: '#2B1030',
+    fd: 'Fraunces, Georgia, serif', fdw: '800', fb: "'DM Sans', system-ui, sans-serif",
+    cBg: 'transparent', cB: '0', cBT: '2px solid #2B1030', cR: '0', cPad: '14px 0 0',
+    tBg: 'transparent', tB: '1px solid #D9C6CF', tR: '0', rowB: '1px solid #D9C6CF',
+    inBg: 'transparent', inB: '2px solid #2B1030', inR: '999px', btnR: '999px', secB: '2px solid #2B1030', secText: '#2B1030', thR: '0',
+    hBg: 'transparent', hText: '#2B1030', hLine: '4px double #2B1030', hInBg: 'transparent', hInB: '2px solid #2B1030', hInText: '#2B1030',
+    helpBg: '#2B1030', helpText: '#FBF3EA', helpR: '50%', helpB: '0',
+    lgText: '#2B1030', lgFont: '800 26px Fraunces, Georgia, serif', lgTT: 'none', lgDot: '#FFB547',
+    tagBg: '#FFB547', tagText: '#2B1030', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.08em',
+    kDisp: 'block', kText: '#5E3F63', kSize: '12px', kLS: '.1em', kTT: 'uppercase'
+  },
+  sommaire: {
+    ...BASE,
+    bg: '#FAF7F0', text: '#111111', muted: '#5C5C5C', line: '#111111',
+    acc: '#1D4ED8', onAcc: '#FFFFFF', link: '#1D4ED8', warn: '#E63946', onWarn: '#FFFFFF', del: '#C62D3A', nBg: '#111111', nFg: '#FFFFFF',
+    fd: 'Anton, Impact, sans-serif', fdw: '400', fdTT: 'uppercase', fb: "'Libre Franklin', system-ui, sans-serif", h1size: 'clamp(30px, 4vw, 48px)',
+    cBg: '#FFFFFF', cB: '3px solid #111111', cBT: '3px solid #111111', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '10px 10px 0 #111111', hiSh: '10px 10px 0 #111111',
+    tBg: '#FAF7F0', tB: '2px solid #111111', tR: '0', rowB: '1px solid #111111',
+    inBg: '#FFFFFF', inB: '2px solid #111111', inR: '0', btnR: '0', secB: '2px solid #111111', secText: '#111111', thR: '0',
+    hBg: 'transparent', hText: '#111111', hLine: '4px solid #111111', hInBg: 'transparent', hInB: '2px solid #111111', hInText: '#111111',
+    helpBg: '#FFD60A', helpText: '#111111', helpR: '0', helpB: '0',
+    lgBg: '#E63946', lgText: '#FFFFFF', lgPad: '4px 14px', lgRot: '-1.5deg', lgSh: '5px 5px 0 #111111', lgFont: '400 24px Anton, Impact, sans-serif', lgTT: 'uppercase', lgDot: '#FFD60A',
+    tagBg: '#111111', tagText: '#FFFFFF', tagB: '0', tagR: '0', tagTT: 'uppercase', tagLS: '.06em'
+  },
+  festival: {
+    ...BASE,
+    bg: '#FFF8EC', text: '#1B2350', muted: '#5B6290', line: '#D9CFBB',
+    acc: '#1F3A93', onAcc: '#FFFFFF', link: '#1F3A93', warn: '#C2412F', onWarn: '#FFFFFF', del: '#C2412F', nBg: '#F6C343', nFg: '#1B2350',
+    fd: "'Bricolage Grotesque', system-ui, sans-serif", fdw: '800', fb: "'Bricolage Grotesque', system-ui, sans-serif",
+    cBg: '#FFFFFF', cB: '0', cBT: '0', cR: '24px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 2px 0 rgba(27,35,80,.08)', hiSh: '0 2px 0 rgba(27,35,80,.08)',
+    tBg: '#FFF8EC', tB: '2px solid #1B2350', tR: '18px', rowB: '1px solid #ECE3D1',
+    inBg: '#FFFFFF', inB: '2px solid #1B2350', inR: '999px', btnR: '999px', secB: '2px solid #1B2350', secText: '#1B2350', thR: '8px',
+    hBg: 'transparent', hText: '#1B2350', hLine: '0', hInBg: '#FFFFFF', hInB: '2px solid #1B2350', hInText: '#1B2350',
+    helpBg: '#F6C343', helpText: '#1B2350', helpR: '50%', helpB: '0',
+    lgMark: true, lgText: '#1B2350', lgFont: "800 20px 'Bricolage Grotesque', sans-serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: '#F6C343', tagText: '#1B2350', tagB: '0', tagR: '999px',
+    kDisp: 'block', kText: '#5B6290', kW: '800', kSize: '13px', kLS: '.08em', kTT: 'uppercase', kPre: (label) => 'Station ' + label
+  },
+  riso: {
+    ...BASE,
+    bg: '#F4EFE4', text: '#0078BF', muted: '#0078BF', line: '#0078BF',
+    acc: '#0078BF', onAcc: '#F4EFE4', link: '#0078BF', warn: '#FF48B0', onWarn: '#002284', del: '#C4007A', nBg: 'rgba(0,120,191,.12)', nFg: '#00578C',
+    fd: "'Rubik Mono One', sans-serif", fdw: '400', fb: "'Space Grotesk', system-ui, sans-serif", h1size: 'clamp(20px, 2.4vw, 28px)',
+    cBg: 'transparent', cB: '2px dashed #0078BF', cBT: '2px dashed #0078BF', cR: '0', cPad: 'clamp(14px, 2.2vw, 22px)', hiSh: '7px 6px 0 rgba(255,72,176,.85)',
+    tBg: 'rgba(0,120,191,.07)', tB: '0', tR: '0', rowB: '2px dotted #FF48B0',
+    inBg: 'transparent', inB: '2px dashed #0078BF', inR: '0', btnR: '0', secB: '2px solid #0078BF', secText: '#0078BF', thR: '0',
+    hBg: 'transparent', hText: '#0078BF', hLine: '2px dashed #0078BF', hInBg: 'transparent', hInB: '2px dashed #0078BF', hInText: '#0078BF',
+    helpBg: '#0078BF', helpText: '#F4EFE4', helpR: '50%', helpB: '0',
+    lgText: '#0078BF', lgTSh: '3px 2px 0 rgba(255,72,176,.85)', lgFont: "400 20px 'Rubik Mono One', sans-serif", lgTT: 'uppercase', lgDot: '#FF48B0',
+    tagBg: 'transparent', tagText: '#0078BF', tagB: '2px solid #FF48B0', tagR: '0'
+  },
+  librairie: {
+    ...BASE,
+    bg: '#F5EEDF', text: '#2A2420', muted: '#76654F', line: '#B8924A',
+    acc: '#1E3B2F', onAcc: '#F5EEDF', link: '#A3472F', warn: '#B5523B', onWarn: '#FBF7EE', del: '#A3472F', nBg: '#EFE6D2', nFg: '#2A2420',
+    fd: "'DM Serif Display', Georgia, serif", fdw: '400', fb: 'Karla, system-ui, sans-serif',
+    cBg: '#FBF7EE', cB: '1px solid #B8924A', cBT: '1px solid #B8924A', cR: '2px', cPad: 'clamp(14px, 2.2vw, 22px)', cSh: '0 1px 4px rgba(42,36,32,.12)', hiSh: '0 1px 4px rgba(42,36,32,.12)',
+    tBg: '#F5EEDF', tB: '1px solid #E2D6BC', tR: '2px', rowB: '1px solid #E2D6BC',
+    inBg: '#FFFFFF', inB: '1px solid #B8924A', inR: '22px', btnR: '22px', secB: '1px solid #1E3B2F', secText: '#1E3B2F', thR: '1px',
+    hBg: '#16291F', hText: '#F5EEDF', hLine: '3px solid #B8924A', hInBg: 'transparent', hInB: '1px solid #B8924A', hInText: '#F5EEDF', hMuted: '#D8C9A8',
+    helpBg: 'transparent', helpText: '#D8B972', helpR: '50%', helpB: '1px solid #B8924A',
+    lgText: '#D8B972', lgFont: "400 24px 'DM Serif Display', serif", lgTT: 'none', lgDot: 'transparent',
+    tagBg: 'transparent', tagText: '#B8924A', tagB: '1px solid #B8924A', tagR: '0', tagTT: 'uppercase', tagLS: '.3em'
+  },
+  vignettes: {
+    ...BASE,
+    bg: '#FFF4D6', text: '#23323A', muted: '#5B6B72', line: '#9DB8BD',
+    acc: '#0F7C8C', onAcc: '#FFFFFF', link: '#0F7C8C', warn: '#C8366B', onWarn: '#FFFFFF', del: '#B42E5E', nBg: '#9DD6DD', nFg: '#23323A',
+    fd: "'Baloo 2', sans-serif", fdw: '800', fb: 'Nunito, system-ui, sans-serif',
+    cBg: '#FFFBEF', cB: '3px solid #0F7C8C', cBT: '3px solid #0F7C8C', cR: '20px', cPad: '26px clamp(14px, 2.2vw, 22px) clamp(14px, 2.2vw, 22px)',
+    tBg: '#FFFFFF', tB: '2px dashed #9DB8BD', tR: '14px', rowB: '2px dotted #9DB8BD',
+    inBg: '#FFFFFF', inB: '2px solid #0F7C8C', inR: '999px', btnR: '999px', secB: '2px solid #0F7C8C', secText: '#0F7C8C', thR: '4px',
+    hBg: '#0F7C8C', hText: '#FFFFFF', hLine: '0', hInBg: '#FFFFFF', hInB: '0', hInText: '#23323A', hMuted: '#5B6B72',
+    helpBg: '#FFD23F', helpText: '#23323A', helpR: '50%', helpB: '0',
+    lgText: '#FFFFFF', lgFont: "800 22px 'Baloo 2', sans-serif", lgTT: 'none', lgDot: '#FFD23F',
+    tagBg: '#FFD23F', tagText: '#23323A', tagB: '0', tagR: '999px',
+    kDisp: 'block', kPos: 'absolute', kTop: '-13px', kLeft: '20px', kBg: '#0F7C8C', kText: '#FFFFFF', kPad: '1px 12px', kR: '999px',
+    kFont: "'Baloo 2', sans-serif", kSize: '13px', kPre: (label) => 'Page 1 · ' + label
+  }
+};
+
+// « La couverture du jour »: the colours of the day's featured cover, on the festival's rounded forms
+// (shared/couverture-theme.js).
+THEMES.couverture = { ...THEMES.festival, ...COUVERTURE_THEME };
+
+const ICON = {
+  edit: 'M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4',
+  history: 'M3 12a9 9 0 1 0 3-6.7 M3 4v5h5 M12 7v5l3 2',
+  view: 'M7 17L17 7 M9 7h8v8',
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z M20 20l-4-4',
+  chevron: 'M6 9l6 6 6-6',
+  calendar: 'M4 6h16v14H4z M4 10h16 M8 3v5 M16 3v5'
+};
+
+// Each change of a modification: its attribute, then its value before and after; an associated element added
+// has no value before, one withdrawn none after; a secret is told changed, without any value.
+const ch = (attribute, before, after) => ({ attribute, before, after });
+const added = (attribute, after) => ({ attribute, after, kind: 'added' });
+const removed = (attribute, before) => ({ attribute, before, kind: 'removed' });
+const secret = (attribute) => ({ attribute, kind: 'secret' });
+
+// The records of the consultation that have a page there: the menu of their entries leads to it.
+const CONSULTED = ['Album', 'Série', 'Auteur', 'Univers'];
+
+// Entries from the latest to the oldest, grouped under their day; data is fictitious.
+const DAYS = [
+  { label: "Aujourd'hui, mercredi 25 novembre 2026", entries: [
+    { time: '10:15', type: 'Album', label: "L'Iris blanc (Astérix - T. 40)", op: 'Modification', changes: [
+      ch('Résumé', '—', 'Le barde Assurancetourix découvre la pensée positive…'),
+      added('Genres', 'Humour'),
+      removed('Auteurs', 'Albert Uderzo (Dessin)'),
+      added('Auteurs', 'Didier Conrad (Dessin)'),
+      ch('Appréciation', 'Bien', 'Très bien')
+    ] },
+    { time: '10:12', type: 'Édition', label: 'Éditions Albert René [2023]', isbn: '978-2-86497-357-2', op: 'Création', parent: "L'Iris blanc (Astérix - T. 40)" },
+    { time: '09:58', type: 'Intention d\'acquisition', label: "L'Iris blanc (Astérix - T. 40)", op: 'Suppression', gone: true }
+  ] },
+  { label: 'Hier, mardi 24 novembre 2026', entries: [
+    { time: '21:08', type: 'Auteur', label: 'Juanjo Guarnido', op: 'Modification', changes: [
+      ch('Nationalité', 'Française', 'Espagnole'),
+      ch('Biographie', 'Dessinateur de Blacksad.', 'Dessinateur et coloriste de Blacksad, ancien animateur des studios Disney.')
+    ] },
+    { time: '20:51', type: 'Série', label: 'Undertaker', op: 'Modification', changes: [
+      ch('Statut', 'En cours', 'Terminée'),
+      ch('Tomes prévus', '6', '7'),
+      ch('Éditeur des nouvelles éditions', 'Dupuis', 'Dargaud'),
+      ch('Collection des nouvelles éditions', '—', 'Poisson Pilote')
+    ] },
+    { time: '20:47', type: 'Collection éditeur', label: 'Long courrier (Dargaud)', op: 'Création' },
+    { time: '18:30', type: 'Genre', label: 'Western spaghetti', op: 'Suppression', gone: true }
+  ] },
+  { label: 'Jeudi 8 octobre 2026', entries: [
+    { time: '18:02', type: 'Genre', label: 'Western', op: 'Modification', changes: [ch('Libellé', 'Westerns', 'Western')] },
+    { time: '17:40', type: 'Album', label: 'Le Grand Pouvoir du Chninkel', op: 'Modification', gone: true, changes: [
+      ch('Date de première publication', '1986', 'mai 1986'),
+      ch('Hors-série', 'Non', 'Oui')
+    ] },
+    { time: '17:22', type: 'Paramétrage', label: "Paramétrage de l'application", op: 'Modification', changes: [ch('Format du libellé des albums', 'Album (Série - Tome)', 'Tome - Album (Série)')] },
+    { time: '09:00', type: 'Jeton d\'accès', label: 'Assistant de saisie', op: 'Modification', changes: [secret('Valeur du jeton')] },
+    { time: '08:45', type: 'Album', label: 'Blacksad - Intégrale [1 à 5]', op: 'Reprise' }
+  ] }
+];
+
+const FILTERS = [
+  { label: 'Type de fiche', value: 'Tous les types', icon: ICON.chevron },
+  { label: 'Opération', value: 'Toutes les opérations', icon: ICON.chevron },
+  { label: 'Du', value: 'jj/mm/aaaa', icon: ICON.calendar, empty: true },
+  { label: 'Au', value: 'jj/mm/aaaa', icon: ICON.calendar, empty: true }
+];
+
+class View extends Mockup {
+  renderVals() {
+    const t = THEMES[this.props.theme] ?? THEMES.planche;
+    const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
+    const filtersOpen = this.state?.filtersOpen ?? (this.props.filtres ?? false);
+    const rowMenu = this.state?.rowMenu !== undefined ? this.state.rowMenu : (this.props.actions ? 0 : null);
+    document.documentElement.style.overflow = menuOpen ? 'hidden' : '';
+    const panelBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+    const panelB = t.cB !== '0' ? t.cB : (t.cBT !== '0' ? t.cBT : '2px solid ' + t.line);
+    const panelSh = t.hiSh !== 'none' && t.hiSh !== t.cSh ? t.hiSh : '0 18px 40px rgba(0,0,0,.28)';
+    const hdrBg = t.hBg === 'transparent' ? t.bg : t.hBg;
+    const cardBg = t.cBg === 'transparent' ? t.bg : t.cBg;
+    const menuItem = (label, n) => {
+      const current = label === 'Journal des modifications';
+      return { label, n, current: current ? 'page' : 'false', bg: current ? t.acc : 'transparent', fg: current ? t.onAcc : t.text, fw: current ? '700' : '500' };
+    };
+    // The operation, told apart at first glance: a creation filled, a modification outlined, a deletion in the
+    // colour of deletion, a migration from the former application dashed.
+    const opStyle = (op) => ({
+      Création: { opBg: t.nBg, opFg: t.nFg, opB: '2px solid transparent' },
+      Modification: { opBg: 'transparent', opFg: t.text, opB: '2px solid ' + t.text },
+      Suppression: { opBg: 'transparent', opFg: t.del, opB: '2px solid ' + t.del },
+      Reprise: { opBg: 'transparent', opFg: t.text, opB: '2px dashed ' + t.line }
+    })[op];
+    // The history of one record: the « fiche » setting restricts the journal to the entries of one album.
+    const record = this.props.fiche ? "L'Iris blanc (Astérix - T. 40)" : null;
+    let index = 0;
+    const days = DAYS.map((d) => ({
+      label: d.label,
+      entries: d.entries
+        .filter((r) => !record || r.label === record && r.type === 'Album')
+        // A search on the label of the records, an edition or an intent found by its album too.
+        .filter((r) => !this.props.recherche || [r.label, r.parent ?? ''].some((l) => l.includes('Astérix')))
+        .map((r) => {
+          const i = index++;
+          const exists = !r.gone;
+          const menu = [
+            ...(exists ? [{ label: 'Modifier la fiche', icon: ICON.edit }] : []),
+            ...(record ? [] : [{ label: 'Historique de cette fiche', icon: ICON.history }]),
+            ...(exists && CONSULTED.includes(r.type) ? [{ label: 'Voir dans la consultation', icon: ICON.view }] : [])
+          ];
+          return {
+            ...r, ...opStyle(r.op), exists,
+            type: r.parent ? r.type + ' de ' + r.parent : r.type,
+            changes: (r.changes ?? []).map((c) => ({ ...c, added: c.kind === 'added', removed: c.kind === 'removed', secret: c.kind === 'secret', changed: !c.kind })),
+            menu,
+            hasMenu: menu.length > 0,
+            menuOpen: rowMenu === i,
+            menuExpanded: rowMenu === i ? 'true' : 'false',
+            moreBg: rowMenu === i ? t.nBg : 'transparent',
+            moreFg: rowMenu === i ? t.nFg : t.text,
+            toggle: () => this.setState({ rowMenu: rowMenu === i ? null : i })
+          };
+        })
+    })).filter((d) => d.entries.length > 0);
+    const empty = Boolean(this.props.vide);
+    const active = [
+      ...(record ? [{ name: 'Fiche', value: 'Album ' + record }] : []),
+      ...(this.props.filtres && !record ? [{ name: 'Opération', value: 'Modification' }] : []),
+    ];
+    const filters = FILTERS.map((f) => ({ ...f, value: f.label === 'Opération' && this.props.filtres && !record ? 'Modification' : f.value, fg: f.empty ? t.muted : t.text }));
+    const total = record ? 6 : 12408;
+    return {
+      t, hdrBg, hdrMuted: t.hMuted ?? t.muted, cardBg,
+      headB: t.rowB.replace(/^1px/, '2px'),
+      menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
+      panelBg, panelB, panelSh,
+      toggleMenu: () => this.setState({ menuOpen: !menuOpen }),
+      closeMenu: () => this.setState({ menuOpen: false }),
+      closeRowMenu: () => this.setState({ rowMenu: null }),
+      kick: t.kPre ? t.kPre('Journal') : 'Journal',
+      filtersExpanded: filtersOpen ? 'true' : 'false',
+      filtersOpen,
+      filtersBtnBg: filtersOpen ? t.nBg : 'transparent',
+      filtersBtnFg: filtersOpen ? t.nFg : t.secText,
+      toggleFilters: () => this.setState({ filtersOpen: !filtersOpen }),
+      filters,
+      active, activeCount: active.length || null,
+      empty, notEmpty: !empty,
+      query: empty ? 'Spirou' : (this.props.recherche ? 'Astérix' : ''),
+      count: empty ? 'Aucune entrée' : (this.props.recherche ? '27 entrées sur 12 408' : record ? '6 entrées' : (active.length ? '3 184 entrées sur 12 408' : '12 408 entrées')),
+      days,
+      pageLabel: this.props.recherche ? 'Entrées 1 à 27 sur 27' : record ? 'Entrées 1 à 6 sur 6' : (active.length ? 'Entrées 1 à 50 sur 3 184' : 'Entrées 1 à 50 sur 12 408'),
+      pages: (record || this.props.recherche ? [] : (active.length ? ['1', '2', '3', '…', '64'] : ['1', '2', '3', '…', '249']))
+        .map((p, i) => ({ label: p, current: i === 0 ? 'page' : 'false', bg: i === 0 ? t.acc : 'transparent', fg: i === 0 ? t.onAcc : (p === '…' ? t.muted : t.text) })),
+      total,
+      menu: [
+        { label: 'Accueil', items: [menuItem('Tableau de bord', '')] },
+        { label: 'Collection', items: [menuItem('Séries', '412'), menuItem('Albums', '2 847'), menuItem('Éditions', '2 913'), menuItem("Intentions d'acquisition", '18')] },
+        { label: 'Auteurs et éditeurs', items: [menuItem('Auteurs', '1 106'), menuItem('Éditeurs', '96')] },
+        { label: 'Référentiels', items: [menuItem('Genres', '24'), menuItem('Univers', '37')] },
+        { label: 'Réglages', items: [menuItem('Paramétrage', ''), menuItem('Statistiques privées', ''), menuItem('Journal des modifications', '')] }
+      ]
+    };
+  }
+}
+
+Mockup.mount(View, {
+  theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
+  filtres: { label: 'Filtres ouverts (une opération choisie)', editor: 'boolean', default: false },
+  fiche: { label: 'Historique d’une fiche', editor: 'boolean', default: false },
+  actions: { label: 'Actions d’une entrée', editor: 'boolean', default: false },
+  recherche: { label: 'Recherche « Astérix »', editor: 'boolean', default: false },
+  vide: { label: 'Recherche sans résultat', editor: 'boolean', default: false },
+  menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }
+});
+</script>
+</body>
+</html>

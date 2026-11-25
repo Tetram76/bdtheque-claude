@@ -10,6 +10,7 @@
 * [Fiche de série](fiche-serie/index.md)
 * [Fiche d'univers](fiche-univers/index.md)
 * [Fusion de deux fiches](fusion/index.md)
+* [Journal des modifications](journal/index.md)
 * [Liste des albums](liste-albums/index.md)
 * [Listes de l'administration](listes/index.md)
 * [Saisie d'un album](saisie-album/index.md)

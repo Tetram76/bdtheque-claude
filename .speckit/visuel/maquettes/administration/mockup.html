@@ -164,6 +164,7 @@ input::placeholder{color:inherit;opacity:.6}
           <span style="display: {{t.kDisp}}; position: {{t.kPos}}; top: {{t.kTop}}; left: {{t.kLeft}}; width: max-content; padding: {{t.kPad}}; border-radius: {{t.kR}}; background: {{t.kBg}}; color: {{t.kText}}; font-family: {{t.kFont}}; font-weight: {{t.kW}}; font-size: {{t.kSize}}; letter-spacing: {{t.kLS}}; text-transform: {{t.kTT}}">{{k.journal}}</span>
           <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: {{t.rowAlign}}; gap: 8px 16px">
             <h2 id="a-journal" style="position: relative; flex: {{t.h2grow}} 1 auto; margin: {{t.h2lift}} 0 0; display: flex; align-items: center; gap: 12px; padding: {{t.h2pad}}; border-radius: {{t.h2r}}; border-bottom: {{t.h2line}}; background: {{t.h2bg}}; color: {{t.h2c}}; font-family: {{t.fd}}; font-weight: {{t.fdw}}; font-style: {{t.h2fs}}; font-size: {{t.h2size}}; line-height: 1.15; text-transform: {{t.h2tt}}; text-shadow: {{t.h2sh}}"><span aria-hidden="true" data-tail="" style="{{tail}}"></span><span aria-hidden="true" style="display: {{t.mkDisp}}; flex: none; width: 24px; height: 24px; box-sizing: border-box; border-radius: 50%; border: 6px solid #1B2350; background: #FFFFFF"></span>Dernières modifications</h2>
+            <a href="#" style="font-weight: 700; font-size: 14px; color: {{t.link}}">Tout le journal</a>
           </div>
           <ul style="margin: 0; padding: 0; list-style: none">
             <sc-for list="{{edits}}" as="d" hint-placeholder-count="6">
@@ -461,7 +462,7 @@ class View extends Mockup {
         { label: 'Collection', items: [menuItem('Albums', '2 847', false), menuItem('Séries', '412', false), menuItem('Éditions', '2 913', false), menuItem("Intentions d'acquisition", '18', false)] },
         { label: 'Auteurs et éditeurs', items: [menuItem('Auteurs', '1 106', false), menuItem('Éditeurs', '96', false)] },
         { label: 'Référentiels', items: [menuItem('Genres', '24', false), menuItem('Univers', '37', false)] },
-        { label: 'Réglages', items: [menuItem('Paramétrage', '', false), menuItem('Statistiques privées', '', false)] }
+        { label: 'Réglages', items: [menuItem('Paramétrage', '', false), menuItem('Statistiques privées', '', false), menuItem('Journal des modifications', '', false)] }
       ]
     };
   }
