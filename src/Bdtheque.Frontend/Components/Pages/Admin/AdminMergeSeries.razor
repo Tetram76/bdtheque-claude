@@ -345,7 +345,10 @@ else
     private MergeRecordHead Head(SeriesMergeRecord record)
     {
         var albums = Preview!.Links.Where(l => l.Kind == EntityKind.Album).Sum(l => record == Preview.First ? l.First : l.Second);
-        return new MergeRecordHead(record.Title, albums == 0 ? null : L[$"Head.Album.{(albums == 1 ? "One" : "Other")}", albums].Value, record.ModifiedAt);
+        if (albums == 0)
+            return new MergeRecordHead(record.Title, null, record.ModifiedAt);
+        var plural = albums == 1 ? "One" : "Other";
+        return new MergeRecordHead(record.Title, L[$"Head.Album.{plural}", albums].Value, record.ModifiedAt);
     }
 
     private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
