@@ -58,3 +58,27 @@ public sealed record AuthorMergeRequest(
 /// which the merge of two authors presents for the names chosen.
 /// </summary>
 public sealed record AuthorIdentity(string DisplayName, string SortKey, string NavigationEntry);
+
+/// <summary>A publisher as its merge presents it.</summary>
+public sealed record PublisherMergeRecord(Guid Id, string Name, string? Website, DateTimeOffset ModifiedAt, uint Version);
+
+/// <summary>
+/// Two homonymous collections, one of each merged publisher, which the merge makes one
+/// (fonctionnel/regles-metier/fusion-des-fiches.md, duplicates created by the merge).
+/// </summary>
+public sealed record PublisherCollectionHomonyms(Guid First, string FirstName, Guid Second, string SecondName);
+
+/// <summary>
+/// Two publishers to merge, their homonymous collections, and the series, collections, editions and purchase intents of both,
+/// in the order of the entity types.
+/// </summary>
+public sealed record PublisherMergePreview(
+    PublisherMergeRecord First, PublisherMergeRecord Second, IReadOnlyList<PublisherCollectionHomonyms> Homonyms,
+    IReadOnlyList<MergeLinkCount> Links);
+
+/// <summary>The name two homonymous collections keep, of the one or the other (<see cref="PublisherCollectionHomonyms"/>).</summary>
+public sealed record PublisherCollectionMerge(Guid First, Guid Second, MergeSide Name);
+
+/// <summary>The merge of two publishers: each data kept, of the one or the other, and the name of each pair of homonymous collections.</summary>
+public sealed record PublisherMergeRequest(
+    MergedRecord First, MergedRecord Second, MergeSide Name, MergeSide Website, IReadOnlyList<PublisherCollectionMerge> Collections);

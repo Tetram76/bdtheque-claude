@@ -192,6 +192,23 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         }
     }
 
+    // visuel/fusion/fusion-de-deux-fiches.md: two publishers to merge, whose homonymous collections are spelled the same or
+    // otherwise, each with what passes to the publisher that remains.
+    [Fact]
+    public async Task PublisherTwin_HasCollectionsHomonymousToThoseOfTheFirstOne_SpelledTheSameOrOtherwise()
+    {
+        var list = (await _client.GetFromJsonAsync<Page<Bdtheque.Contracts.Admin.PublisherAdminListItem>>("/admin/publishers?pageSize=100"))!.Items;
+        var (first, twin) = (list.Single(p => p.Name == "Éditions du Lagon"), list.Single(p => p.Name == ValidationDataLoader.TwinPublisherName));
+
+        var preview = await _client.GetFromJsonAsync<Bdtheque.Contracts.Admin.PublisherMergePreview>($"/admin/publishers/merge?first={first.Id}&second={twin.Id}");
+
+        Assert.Equal([("Escales", "Escales"), ("Grand Large", "grand large")], preview!.Homonyms.Select(h => (h.FirstName, h.SecondName)));
+        Assert.Superset(
+            new HashSet<EntityKind>([EntityKind.Series, EntityKind.PublisherCollection, EntityKind.Edition]),
+            preview.Links.Where(link => link.Second > 0).Select(link => link.Kind).ToHashSet());
+        Assert.NotEqual(preview.First.Website, preview.Second.Website);
+    }
+
     [Fact]
     public async Task PurchaseIntents_TargetWholeAlbumsAndEditions_OfAlbumsInAndOutsideTheCollection()
     {

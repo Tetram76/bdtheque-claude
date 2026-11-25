@@ -12,7 +12,8 @@ namespace Bdtheque.Frontend.Tests.Controls;
 /// </summary>
 public sealed class MergeTests : BunitContext
 {
-    public MergeTests() => Services.AddLocalization();
+    public MergeTests() =>
+        Services.AddLogging().AddLocalization().AddSingleton<Bdtheque.Frontend.Formatting.IsbnFormatter>().AddSingleton<Bdtheque.Frontend.Formatting.RecordLabels>();
 
     private MergeTexts Texts => new(Services.GetRequiredService<IStringLocalizer<MergeTexts>>());
 
@@ -104,9 +105,37 @@ public sealed class MergeTests : BunitContext
         Assert.Null(Texts.Linked([new MergeLinkCount(EntityKind.Album, 0, 0, 0, 0)]));
     }
 
-    // Every type a merge of #642 links is named by the texts of the merge.
+    // The records of a publisher are of more than two types: each but the last one is separated by a comma.
+    [Fact]
+    public void Confirmation_ListsMoreThanTwoTypes_TheLastOneAfterAnd()
+    {
+        Assert.Equal("les 3 séries, les 2 collections, les 4 éditions et l'intention des deux fiches", Texts.Linked(
+        [
+            new MergeLinkCount(EntityKind.Series, 3, 1, 2, 0), new MergeLinkCount(EntityKind.PublisherCollection, 2, 1, 2, 1),
+            new MergeLinkCount(EntityKind.Edition, 4, 3, 1, 0), new MergeLinkCount(EntityKind.PurchaseIntent, 1, 1, 0, 0),
+        ]));
+    }
+
+    // Another block of data to choose (the homonymous collections of two publishers) has its own title, its heads only naming the
+    // records, whose block of data has already said what is linked to them.
+    [Fact]
+    public void Data_OfAnotherBlock_HasItsOwnTitle_AndHeadsThatOnlyNameTheRecords()
+    {
+        var data = Render<MergeData>(parameters => parameters
+            .Add(p => p.Title, "Collections homonymes").Add(p => p.Kicker, "Collections")
+            .Add(p => p.First, new MergeRecordHead("Dupuis", null, null)).Add(p => p.Second, new MergeRecordHead("dupuis", null, null)));
+
+        Assert.Equal("Collections homonymes", data.Find("h2").TextContent.Trim());
+        Assert.Equal(["Dupuis", "dupuis"], data.FindAll(".merge-data-head").Select(h => h.TextContent.Trim()));
+        Assert.Empty(data.FindAll(".merge-data-head-detail"));
+    }
+
+    // Every type a merge links is named by the texts of the merge.
     [Theory]
     [InlineData(EntityKind.Series)]
     [InlineData(EntityKind.Album)]
+    [InlineData(EntityKind.PublisherCollection)]
+    [InlineData(EntityKind.Edition)]
+    [InlineData(EntityKind.PurchaseIntent)]
     public void Texts_NameEveryTypeAMergeLinks(EntityKind kind) => Assert.True(Texts.Names(kind));
 }

@@ -1,6 +1,7 @@
 extern alias frontend;
 
 using System.Net.Http.Json;
+using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
@@ -8,13 +9,13 @@ using frontend::Bdtheque.Frontend.Navigation;
 namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
-/// The merge of two genres and of two authors (visuel/fusion/fusion-de-deux-fiches.md), on an application of its own: a merge
+/// The merge of two genres, of two authors and of two publishers (visuel/fusion/fusion-de-deux-fiches.md), on an application of its own: a merge
 /// deletes one of its records, which no other test may count on. Each journey of the administrator, through the browser: from the
 /// dialog of the list to the merge, the data chosen one by one, the confirmation and the list again; and two records modified
 /// meanwhile. Its captures are in <see cref="Captures.AdminMergeCaptureTests"/>.
 /// </summary>
 [Collection(MergeApplication.Name)]
-public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
+public sealed partial class AdminMergeTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
@@ -83,6 +84,49 @@ public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<
     }
 
     [Theory, InEachTheme]
+    public async Task PublisherMerge_FromTheDialogOfTheList_ChoosesTheNameOfTheHomonymousCollections_AndKeepsEachDataChosen(string theme)
+    {
+        var first = await CreatePublisherAsync(new($"Dupuis {_marker}", "https://www.example.org/dupuis", [new(null, "Aire Libre"), new(null, "Expresso")]));
+        var second = await CreatePublisherAsync(new($"Éditions Dupuis {_marker}", null, [new(null, "aire libre"), new(null, "Expresso"), new(null, "Repérages")]));
+        var page = await OpenAsync(theme, $"{AppPaths.AdminPublishers}?q={_marker}&merge={first.Id}&mergeQ={Uri.EscapeDataString($"Éditions Dupuis {_marker}")}");
+
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux éditeurs" });
+        await Assertions.Expect(dialog.GetByRole(AriaRole.Radio, new() { Name = $"Éditions Dupuis {_marker}" })).ToBeCheckedAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Continuer" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminMergePublishers, $"?other={second.Id}&publisher={first.Id}"));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Fusionner deux éditeurs");
+        // The names differ, and so do those of a pair of homonymous collections; the website, set on one side only, is retained
+        // at once, and the other pair of collections, spelled the same, has nothing to choose.
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("2 données restent à choisir");
+        var homonyms = page.Locator(".merge-data", new() { Has = page.GetByRole(AriaRole.Heading, new() { Name = "Collections homonymes" }) });
+        await Assertions.Expect(homonyms.GetByText("Identique dans les deux fiches")).ToHaveCountAsync(1);
+        await Assertions.Expect(page.Locator(".merge-links")).ToContainTextAsync("3 collections");
+
+        await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true })
+            .GetByRole(AriaRole.Radio, new() { Name = $"Dupuis {_marker}", Exact = true }).CheckAsync();
+        // Its case alone tells it from its homonym.
+        await homonyms.GetByRole(AriaRole.Radiogroup, new() { Name = "Aire Libre" })
+            .GetByRole(AriaRole.Radio, new() { NameRegex = LowerCaseAireLibre() }).CheckAsync();
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
+
+        var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux éditeurs ?" });
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Dupuis {_marker}.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Dupuis {_marker} réunira les 3 collections des deux fiches.");
+        await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminPublishers));
+        using var api = Application.CreateApiClient();
+        // The name and the website of the first publisher: it remains, with the collections of both, the homonyms once.
+        var kept = (await api.GetFromJsonAsync<PublisherForm>($"/admin/publishers/{first.Id}"))!;
+        Assert.Equal(($"Dupuis {_marker}", "https://www.example.org/dupuis"), (kept.Name, kept.Website));
+        Assert.Equal(["aire libre", "Expresso", "Repérages"], kept.Collections.Select(c => c.Name));
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/publishers/{second.Id}")).StatusCode);
+    }
+
+    [Theory, InEachTheme]
     public async Task Merge_OfAGenreModifiedMeanwhile_MergesNothing_AndOffersToReload(string theme)
     {
         var first = await CreateGenreAsync($"Western {_marker}");
@@ -122,6 +166,18 @@ public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<
         return (await response.Content.ReadFromJsonAsync<GenreForm>())!;
     }
 
+    // Case sensitive: its case alone tells the collection from its homonym.
+    [GeneratedRegex("aire libre$")]
+    private static partial Regex LowerCaseAireLibre();
+
+    private async Task<PublisherForm> CreatePublisherAsync(PublisherContent content)
+    {
+        using var api = Application.CreateApiClient();
+        var response = await api.PostAsJsonAsync("/admin/publishers", content);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<PublisherForm>())!;
+    }
+
     private async Task<AuthorForm> CreateAuthorAsync(CreateAuthorRequest request)
     {
         using var api = Application.CreateApiClient();
@@ -132,7 +188,8 @@ public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<
 }
 
 /// <summary>
-/// An application whose records the merges delete, which no other test may count on, with two authors saved twice and two genres,
+/// An application whose records the merges delete, which no other test may count on, with two authors saved twice, two genres
+/// and two publishers saved twice,
 /// at fixed dates, for the captures of the merge (<see cref="Captures.AdminMergeCaptureTests"/>), which write nothing.
 /// </summary>
 public sealed class MergeApplication : ApplicationHost
@@ -176,7 +233,36 @@ public sealed class MergeApplication : ApplicationHost
         });
         // The genres keep the other captures' data apart: none of them is merged by them.
         await PostAsync<CreateGenreRequest, GenreForm>(api, "/admin/genres", new("Humour"));
+
+        // Two publishers, the second saved later under a longer name, each collection of the first homonymous to one of the
+        // second, spelled otherwise or the same; a series of each, and editions of their albums.
+        Dupuis = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Dupuis", "https://www.example.org/dupuis",
+            [new(null, "Aire Libre"), new(null, "Expresso")]));
+        EditionsDupuis = await PostAsync<PublisherContent, PublisherForm>(api, "/admin/publishers", new("Éditions Dupuis", null,
+            [new(null, "aire libre"), new(null, "Expresso"), new(null, "Repérages")]));
+        foreach (var (publisher, title, volumes) in new[] { (Dupuis, "Le Pouvoir des innocents", 3), (EditionsDupuis, "Spirou et Fantasio", 2) })
+        {
+            var collection = publisher.Collections[0].Id;
+            var publishedSeries = await PostAsync<SeriesContent, SeriesForm>(api, "/admin/series", Series(title) with
+            {
+                EditionTemplate = new SeriesEditionTemplate(publisher.Id, collection, null, null, null, null, null, null, null),
+            });
+            foreach (var volume in Enumerable.Range(1, volumes))
+            {
+                var album = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album(publishedSeries.Id, volume));
+                await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{album.Id}/editions", new(Owned(publisher.Id, collection), album.Version));
+            }
+        }
     }
+
+    /// <summary>The two publishers of the captures: the first one, and the same saved again under a longer name.</summary>
+    public PublisherForm Dupuis { get; private set; } = null!;
+
+    public PublisherForm EditionsDupuis { get; private set; } = null!;
+
+    private static EditionContent Owned(Guid publisher, Guid collection) =>
+        new(publisher, collection, 2020, null, null, null, null, null, null, null, false, true, null, AcquisitionMode.Purchase, false,
+            null, null, null, false, null, null, null, null);
 
     // Each write a quarter of an hour after the one before, at known dates.
     private async Task<TResponse> PostAsync<TRequest, TResponse>(HttpClient api, string path, TRequest request)
