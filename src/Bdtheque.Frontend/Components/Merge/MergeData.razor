@@ -4,20 +4,16 @@
    values, a row per data (MergeChoice), then what the data chosen make of the record. Laid out by the width of the block
    itself (container query): side by side, the values sit under the heads of their records; on a smartphone, the heads go,
    each value carrying the name of its record. *@
-<Block Title="@(Title ?? L["Title"])" Kicker="@(Kicker ?? L["Kicker"])" class="merge-data">
-    <div class="merge-data-frame">
-        <div class="merge-data-grid">
-            <span class="merge-data-corner" aria-hidden="true"></span>
-            @Head(First)
-            @Head(Second)
-            @ChildContent
-        </div>
-    </div>
-    @if (Result is not null)
-    {
-        <p class="merge-data-result">@Result</p>
-    }
-</Block>
+@if (Framed)
+{
+    <Block Title="@(Title ?? L["Title"])" Kicker="@(Kicker ?? L["Kicker"])" class="merge-data">
+        @Content
+    </Block>
+}
+else
+{
+    @Content
+}
 
 @code {
     /// <summary>The head of the first record: its name, what is linked to it, its last modification.</summary>
@@ -29,7 +25,7 @@
 
     /// <summary>
     /// The title of the block, « Ce que garde la fiche » by default; another block of data to choose has its own (« Collections
-    /// homonymes »).
+    /// homonymes »), as each pair of homonyms within a block (« Clone Wars »).
     /// </summary>
     [Parameter]
     public string? Title { get; set; }
@@ -38,6 +34,13 @@
     [Parameter]
     public string? Kicker { get; set; }
 
+    /// <summary>
+    /// Whether the data make a block of their own; not when they are a part of a block (each pair of homonymous sub-universes
+    /// of a merge of universes, in the block of the pairs).
+    /// </summary>
+    [Parameter]
+    public bool Framed { get; set; } = true;
+
     /// <summary>The rows of the data (MergeChoice).</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
@@ -45,6 +48,22 @@
     /// <summary>What the data chosen make of the record (e.g. the display name of an author), if anything.</summary>
     [Parameter]
     public RenderFragment? Result { get; set; }
+
+    private RenderFragment Content =>
+        @<text>
+            <div class="merge-data-frame">
+                <div class="merge-data-grid">
+                    <span class="merge-data-corner" aria-hidden="true"></span>
+                    @Head(First)
+                    @Head(Second)
+                    @ChildContent
+                </div>
+            </div>
+            @if (Result is not null)
+            {
+                <p class="merge-data-result">@Result</p>
+            }
+        </text>;
 
     private RenderFragment Head(MergeRecordHead head) =>
         @<span class="merge-data-head">

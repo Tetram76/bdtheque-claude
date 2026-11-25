@@ -693,6 +693,12 @@ public static class AudienceFunctions
     /// <summary>The merge of the two series, confirmed and done.</summary>
     public static readonly AudienceFunction AdminTwoSeriesMerged = new("admin.series-merge.merged", AudienceFunctionKind.Action);
 
+    /// <summary>The merge of two universes and of their homonymous sub-universes, as that of two genres.</summary>
+    public static readonly AudienceFunction AdminUniverseMerge = new("admin.universe-merge", AudienceFunctionKind.Screen);
+
+    /// <summary>The merge of the two universes, confirmed and done.</summary>
+    public static readonly AudienceFunction AdminUniverseMerged = new("admin.universe-merge.merged", AudienceFunctionKind.Action);
+
     public static readonly IReadOnlyList<AudienceFunction> Followed =
     [
         AlbumRecord, AlbumRecordVisual,
@@ -736,5 +742,6 @@ public static class AudienceFunctions
         AdminGenreMerge, AdminGenreMerged, AdminAuthorMerge, AdminAuthorMerged,
         AdminPublisherMerge, AdminPublisherMerged,
         AdminTwoSeriesMerge, AdminTwoSeriesMerged,
+        AdminUniverseMerge, AdminUniverseMerged,
     ];
 }

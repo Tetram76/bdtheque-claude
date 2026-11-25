@@ -1150,6 +1150,152 @@
         }
       }
     },
+    "/admin/universes/merge": {
+      "get": {
+        "tags": [
+          "UniverseEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UniverseMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UniverseEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UniverseMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/publishers": {
       "get": {
         "tags": [
@@ -19992,6 +20138,212 @@
             "description": "The name of the parent universe; `null` for a universe at the top of the hierarchy."
           }
         }
+      },
+      "UniverseMergePair": {
+        "required": [
+          "path",
+          "first",
+          "second"
+        ],
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The names that lead to the pair under the universe that remains, the name of the pair last."
+          },
+          "first": {
+            "$ref": "#/components/schemas/UniverseMergeSubRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/UniverseMergeSubRecord"
+          }
+        },
+        "description": "Two sub-universes, one under each merged universe or under a pair merged already, that the merge would make homonymous, merged\nwith it (fonctionnel/regles-metier/fusion-des-fiches.md)."
+      },
+      "UniverseMergePairChoice": {
+        "required": [
+          "first",
+          "second",
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "name": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "description": {
+            "$ref": "#/components/schemas/MergeSide"
+          }
+        },
+        "description": "What a pair of homonymous sub-universes keeps, of the one or the other."
+      },
+      "UniverseMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "pairs",
+          "links"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/UniverseMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/UniverseMergeRecord"
+          },
+          "pairs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniverseMergePair"
+            }
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            }
+          }
+        },
+        "description": "Two universes to merge, their homonymous sub-universes merged with them, at every level, and the series, albums and\nsub-universes that pass to the universe that remains, in the order of the entity types."
+      },
+      "UniverseMergeRecord": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "parent",
+          "parentChoosable",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "parent": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "Its parent with the ancestors of the latter, none at the top of the hierarchy.",
+                "$ref": "#/components/schemas/UniverseInHierarchy"
+              }
+            ]
+          },
+          "parentChoosable": {
+            "type": "boolean",
+            "description": "Whether its parent can be that of the universe that remains: neither the other universe nor one of the sub-universes of\neither (fonctionnel/regles-metier/fusion-des-fiches.md, univers)."
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "A universe as its merge presents it, with its parent and its ancestors."
+      },
+      "UniverseMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "name",
+          "description",
+          "parent",
+          "pairs"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "name": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "description": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "pairs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UniverseMergePairChoice"
+            }
+          }
+        },
+        "description": "The merge of two universes: each data kept, of the one or the other, and what each pair of sub-universes keeps."
+      },
+      "UniverseMergeSubRecord": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "uint32"
+          }
+        },
+        "description": "A sub-universe of a pair the merge makes homonymous, as its merge presents it."
       },
       "UpdateAlbumRequest": {
         "required": [

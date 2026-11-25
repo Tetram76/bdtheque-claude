@@ -106,6 +106,22 @@
     font-size: var(--font-size-small);
 }
 
+/* A value that cannot be kept: presented in dashes, without a mark, with its reason (visuel/fusion/fusion-de-deux-fiches.md). */
+.merge-choice-option[data-impossible] {
+    border-style: dashed;
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+.merge-choice-option[data-impossible] .merge-choice-mark {
+    visibility: hidden;
+}
+
+.merge-choice-reason {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+}
+
 @container merge-data (min-width: 40rem) {
     .merge-choice-label {
         padding-block-start: var(--space-s);

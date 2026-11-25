@@ -271,10 +271,10 @@ public static class AppPaths
     public static string AdminEditUniverse(Guid id) => $"{AdminUniverses}?edit={id}";
 
     /// <summary>
-    /// The next step of the merge of two universes, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the universe and the other one, <c>universe</c> and <c>other</c>.
+    /// The merge of two universes (visuel/fusion/fusion-de-deux-fiches.md): it receives the universe and the other one,
+    /// <c>universe</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergeUniverses = NotYetImplemented;
+    public const string AdminMergeUniverses = AdminUniverses + "/merge";
 
     /// <summary>The saved searches of the administration (fonctionnel/recherche-avancee/recherches-enregistrees.md).</summary>
     public const string AdminSavedSearches = NotYetImplemented;

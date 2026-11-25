@@ -12,9 +12,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="And" xml:space="preserve">
-    <value> et </value>
-  </data>
   <data name="Confirm" xml:space="preserve">
     <value>Fusionner définitivement</value>
   </data>
@@ -51,9 +48,6 @@
   <data name="Pending.Short" xml:space="preserve">
     <value>{0} à choisir</value>
   </data>
-  <data name="Separator" xml:space="preserve">
-    <value>, </value>
-  </data>
   <data name="Linked.One.PublisherCollection" xml:space="preserve">
     <value>la collection</value>
   </data>
@@ -71,5 +65,17 @@
   </data>
   <data name="Linked.Other.PurchaseIntent" xml:space="preserve">
     <value>les {0} intentions</value>
+  </data>
+  <data name="Linked.One.Universe" xml:space="preserve">
+    <value>le sous-univers</value>
+  </data>
+  <data name="Linked.Other.Universe" xml:space="preserve">
+    <value>les {0} sous-univers</value>
+  </data>
+  <data name="Last" xml:space="preserve">
+    <value>{0} et {1}</value>
+  </data>
+  <data name="Comma" xml:space="preserve">
+    <value>, </value>
   </data>
 </root>
