@@ -13,7 +13,7 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 /// (<see cref="ScreenCaptureTests.CaptureAsync"/>).
 /// </summary>
 [Collection(MergeApplication.Name)]
-public sealed class AdminMergeCaptureTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
+public sealed partial class AdminMergeCaptureTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
 {
     private static readonly string[] States = ["authors", "authors-confirmation", "publishers", "publishers-confirmation"];
 
@@ -53,12 +53,10 @@ public sealed class AdminMergeCaptureTests(MergeApplication application) : Brows
             }
             else
             {
-                // Named after its value, preceded on a smartphone by the name of its record: matched at the start or at the end, and
-                // with its case, which alone tells the homonyms apart.
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true })
-                    .GetByRole(AriaRole.Radio, new() { NameRegex = new Regex("^Dupuis") }).CheckAsync();
+                    .GetByRole(AriaRole.Radio, new() { NameRegex = StartsWithDupuis() }).CheckAsync();
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Aire Libre" })
-                    .GetByRole(AriaRole.Radio, new() { NameRegex = new Regex("Aire Libre$") }).CheckAsync();
+                    .GetByRole(AriaRole.Radio, new() { NameRegex = CapitalizedAireLibre() }).CheckAsync();
             }
 
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
@@ -72,4 +70,12 @@ public sealed class AdminMergeCaptureTests(MergeApplication application) : Brows
 
         CaptureStore.Verify(theme, $"admin-merge-{state}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }
+
+    // Named after its value, preceded on a smartphone by the name of its record: matched at the start or at the end, and with
+    // its case, which alone tells the homonyms apart.
+    [GeneratedRegex("^Dupuis")]
+    private static partial Regex StartsWithDupuis();
+
+    [GeneratedRegex("Aire Libre$")]
+    private static partial Regex CapitalizedAireLibre();
 }

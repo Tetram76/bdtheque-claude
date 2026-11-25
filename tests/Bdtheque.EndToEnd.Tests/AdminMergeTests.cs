@@ -15,7 +15,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// meanwhile. Its captures are in <see cref="Captures.AdminMergeCaptureTests"/>.
 /// </summary>
 [Collection(MergeApplication.Name)]
-public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
+public sealed partial class AdminMergeTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
 
@@ -108,7 +108,7 @@ public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<
             .GetByRole(AriaRole.Radio, new() { Name = $"Dupuis {_marker}", Exact = true }).CheckAsync();
         // Its case alone tells it from its homonym.
         await homonyms.GetByRole(AriaRole.Radiogroup, new() { Name = "Aire Libre" })
-            .GetByRole(AriaRole.Radio, new() { NameRegex = new Regex("aire libre$") }).CheckAsync();
+            .GetByRole(AriaRole.Radio, new() { NameRegex = LowerCaseAireLibre() }).CheckAsync();
         await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
@@ -165,6 +165,10 @@ public sealed class AdminMergeTests(MergeApplication application) : BrowserTest<
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<GenreForm>())!;
     }
+
+    // Case sensitive: its case alone tells the collection from its homonym.
+    [GeneratedRegex("aire libre$")]
+    private static partial Regex LowerCaseAireLibre();
 
     private async Task<PublisherForm> CreatePublisherAsync(PublisherContent content)
     {
