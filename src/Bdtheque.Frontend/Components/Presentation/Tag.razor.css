@@ -34,6 +34,12 @@
     color: var(--color-text);
 }
 
+.tag[data-variant="deletion"] {
+    border-color: var(--color-delete);
+    background: transparent;
+    color: var(--color-delete);
+}
+
 /* Bordered as a control in error (themes/base.css), whatever its variant. */
 .tag[data-invalid] {
     border-color: var(--color-alert);

@@ -1,0 +1,116 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): the rows of the change log, the rest of the
+   page being that of every list of the administration (Components/Lists). */
+/* The layout of the rows follows the width of the list itself: mobile-first, an entry holds its record and its menu, then its
+   time and its operation, then its changes across the whole width, each attribute above its values. A list wide enough is a
+   table: the time, the record, the operation and the menu, the changes under the record, across it and the operation
+   (visuel/journal/journal-des-modifications.md). */
+.log-rows {
+    container: log-rows / inline-size;
+}
+
+.log-row {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "main main main actions" "time operation . ." "changes changes changes changes";
+    align-items: center;
+    column-gap: var(--space-m);
+    row-gap: var(--space-xs);
+    padding: var(--space-s) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+}
+
+.log-row-head {
+    display: none;
+    padding-block: 0 var(--space-xs);
+    border-block-end-width: 2px;
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+/* The title of a day, in the font of the titles of the theme. */
+.log-day {
+    padding: var(--space-m) var(--space-xs) var(--space-xs);
+    border-block-end: 1px solid var(--color-rule);
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+}
+
+.log-time {
+    grid-area: time;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.log-main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+}
+
+.log-operation {
+    grid-area: operation;
+}
+
+.log-actions {
+    grid-area: actions;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* The changes of a modification, set apart by a rule of the line color, each attribute then its values. */
+.log-changes {
+    grid-area: changes;
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: var(--space-xs) var(--space-s);
+    border-inline-start: 3px solid var(--color-rule);
+    list-style: none;
+    font-size: var(--font-size-small);
+}
+
+.log-change {
+    display: grid;
+    min-inline-size: 0;
+}
+
+.log-attribute,
+.log-before,
+.log-arrow {
+    color: var(--color-text-muted);
+}
+
+.log-values {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+}
+
+.log-secret {
+    font-style: italic;
+}
+
+@container log-rows (min-width: 46rem) {
+    .log-row {
+        grid-template-columns: 3.5rem minmax(0, 1fr) 8rem 2.5rem;
+        grid-template-areas: "time main operation actions" ". changes changes .";
+        align-items: start;
+    }
+
+    .log-row-head {
+        display: grid;
+    }
+
+    .log-time {
+        padding-block-start: 0.125rem;
+    }
+
+    .log-change {
+        grid-template-columns: 14rem minmax(0, 1fr);
+        column-gap: var(--space-m);
+    }
+}

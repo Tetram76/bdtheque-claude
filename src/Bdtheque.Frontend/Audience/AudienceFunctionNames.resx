@@ -198,6 +198,18 @@
   <data name="admin.editions.merge" xml:space="preserve">
     <value>Liste des éditions · dialogue de fusion ouvert</value>
   </data>
+  <data name="admin.change-log" xml:space="preserve">
+    <value>Journal des modifications</value>
+  </data>
+  <data name="admin.change-log.search" xml:space="preserve">
+    <value>Journal des modifications · recherche</value>
+  </data>
+  <data name="admin.change-log.filter" xml:space="preserve">
+    <value>Journal des modifications · filtres</value>
+  </data>
+  <data name="admin.change-log.page" xml:space="preserve">
+    <value>Journal des modifications · changement de page</value>
+  </data>
   <data name="admin.invalid-isbns" xml:space="preserve">
     <value>Liste des ISBN au chiffre de contrôle incohérent</value>
   </data>

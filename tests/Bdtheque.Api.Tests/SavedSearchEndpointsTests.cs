@@ -331,9 +331,9 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         (await _client.PutAsJsonAsync($"/admin/saved-searches/{search.Id}", new UpdateSavedSearchRequest(content, search.Version)))
             .EnsureSuccessStatusCode();
 
-        var log = (await _client.GetFromJsonAsync<Page<ChangeLogEntryItem>>("/admin/change-log?pageSize=100"))!;
+        var log = (await _client.GetFromJsonAsync<ChangeLogList>("/admin/change-log?pageSize=100"))!;
 
-        var entry = log.Items.First(e => e.RecordId == search.Id);
+        var entry = log.Entries.Items.First(e => e.RecordId == search.Id);
         Assert.Equal((RecordType.SavedSearch, ChangeLogOperation.Modification, (RecordLabel)new NameLabel(search.Content.Name)),
             (entry.RecordType, entry.Operation, entry.Label));
         Assert.Equal([ChangeLogAttribute.SearchCriteria, ChangeLogAttribute.SearchVariables], entry.Changes.Select(c => c.Attribute));

@@ -29,6 +29,9 @@ public sealed class ValueLabelsTests
         .. Enum.GetValues<RenderingEngine>().Cast<Enum>(),
         .. Enum.GetValues<AlbumLabelFormat>().Cast<Enum>(),
         .. Enum.GetValues<DisplayCulture>().Cast<Enum>(),
+        // Presented by the change log only.
+        .. Enum.GetValues<AlbumType>().Cast<Enum>(),
+        .. Enum.GetValues<EntityKind>().Cast<Enum>(),
     ];
 
     [Theory]

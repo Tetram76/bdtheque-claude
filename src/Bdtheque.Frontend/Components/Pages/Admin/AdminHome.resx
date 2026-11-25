@@ -138,8 +138,8 @@
   <data name="Latest.Title" xml:space="preserve">
     <value>Dernières modifications</value>
   </data>
-  <data name="Latest.Kicker" xml:space="preserve">
-    <value>Journal</value>
+  <data name="Latest.All" xml:space="preserve">
+    <value>Tout le journal</value>
   </data>
   <data name="Latest.None" xml:space="preserve">
     <value>Aucune fiche n&apos;a encore été saisie.</value>

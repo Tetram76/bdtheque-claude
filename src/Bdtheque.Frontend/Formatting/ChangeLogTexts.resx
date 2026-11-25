@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RecordType.Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="RecordType.Edition" xml:space="preserve">
+    <value>Édition</value>
+  </data>
+  <data name="RecordType.Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="RecordType.PurchaseIntent" xml:space="preserve">
+    <value>Intention d'acquisition</value>
+  </data>
+  <data name="RecordType.Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="RecordType.Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="RecordType.PublisherCollection" xml:space="preserve">
+    <value>Collection éditeur</value>
+  </data>
+  <data name="RecordType.Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="RecordType.Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="RecordType.SavedSearch" xml:space="preserve">
+    <value>Recherche enregistrée</value>
+  </data>
+  <data name="RecordType.ApplicationSettings" xml:space="preserve">
+    <value>Paramétrage</value>
+  </data>
+  <data name="Operation.Creation" xml:space="preserve">
+    <value>Création</value>
+  </data>
+  <data name="Operation.Modification" xml:space="preserve">
+    <value>Modification</value>
+  </data>
+  <data name="Operation.Deletion" xml:space="preserve">
+    <value>Suppression</value>
+  </data>
+  <data name="Attribute.Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Attribute.SortKey" xml:space="preserve">
+    <value>Clé de tri</value>
+  </data>
+  <data name="Attribute.ManualSortKey" xml:space="preserve">
+    <value>Clé de tri saisie</value>
+  </data>
+  <data name="Attribute.Summary" xml:space="preserve">
+    <value>Résumé</value>
+  </data>
+  <data name="Attribute.PersonalNotes" xml:space="preserve">
+    <value>Notes personnelles</value>
+  </data>
+  <data name="Attribute.Genre" xml:space="preserve">
+    <value>Genres</value>
+  </data>
+  <data name="Attribute.Universe" xml:space="preserve">
+    <value>Univers</value>
+  </data>
+  <data name="Attribute.Contribution" xml:space="preserve">
+    <value>Auteurs</value>
+  </data>
+  <data name="Attribute.Series" xml:space="preserve">
+    <value>Série</value>
+  </data>
+  <data name="Attribute.AlbumType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Attribute.SpecialIssue" xml:space="preserve">
+    <value>Hors-série</value>
+  </data>
+  <data name="Attribute.VolumeNumber" xml:space="preserve">
+    <value>Tome</value>
+  </data>
+  <data name="Attribute.StartVolumeNumber" xml:space="preserve">
+    <value>Premier tome couvert</value>
+  </data>
+  <data name="Attribute.EndVolumeNumber" xml:space="preserve">
+    <value>Dernier tome couvert</value>
+  </data>
+  <data name="Attribute.FirstPublicationDate" xml:space="preserve">
+    <value>Première publication</value>
+  </data>
+  <data name="Attribute.Rating" xml:space="preserve">
+    <value>Appréciation</value>
+  </data>
+  <data name="Attribute.Status" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Attribute.TheoreticalVolumeCount" xml:space="preserve">
+    <value>Tomes numérotés prévus</value>
+  </data>
+  <data name="Attribute.Complete" xml:space="preserve">
+    <value>Complète dans la collection</value>
+  </data>
+  <data name="Attribute.ExcludeFromMissingVolumes" xml:space="preserve">
+    <value>Exclure des albums manquants</value>
+  </data>
+  <data name="Attribute.ExcludeFromReleaseEstimates" xml:space="preserve">
+    <value>Exclure des estimations de sortie</value>
+  </data>
+  <data name="Attribute.TemplatePublisher" xml:space="preserve">
+    <value>Éditeur des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplatePublisherCollection" xml:space="preserve">
+    <value>Collection des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateBinding" xml:space="preserve">
+    <value>Reliure des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateOrientation" xml:space="preserve">
+    <value>Orientation des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateReadingDirection" xml:space="preserve">
+    <value>Sens de lecture des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateFormat" xml:space="preserve">
+    <value>Format des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateEditionCategory" xml:space="preserve">
+    <value>Catégorie des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateCondition" xml:space="preserve">
+    <value>État des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.TemplateColor" xml:space="preserve">
+    <value>Couleur des nouvelles éditions</value>
+  </data>
+  <data name="Attribute.Publisher" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="Attribute.PublisherCollection" xml:space="preserve">
+    <value>Collection</value>
+  </data>
+  <data name="Attribute.PublicationYear" xml:space="preserve">
+    <value>Année d'édition</value>
+  </data>
+  <data name="Attribute.Isbn" xml:space="preserve">
+    <value>ISBN</value>
+  </data>
+  <data name="Attribute.Binding" xml:space="preserve">
+    <value>Reliure</value>
+  </data>
+  <data name="Attribute.Orientation" xml:space="preserve">
+    <value>Orientation</value>
+  </data>
+  <data name="Attribute.ReadingDirection" xml:space="preserve">
+    <value>Sens de lecture</value>
+  </data>
+  <data name="Attribute.Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="Attribute.PageCount" xml:space="preserve">
+    <value>Nombre de pages</value>
+  </data>
+  <data name="Attribute.EditionCategory" xml:space="preserve">
+    <value>Catégorie</value>
+  </data>
+  <data name="Attribute.Dedicated" xml:space="preserve">
+    <value>Dédicacée</value>
+  </data>
+  <data name="Attribute.Color" xml:space="preserve">
+    <value>En couleur</value>
+  </data>
+  <data name="Attribute.Condition" xml:space="preserve">
+    <value>État</value>
+  </data>
+  <data name="Attribute.AcquisitionMode" xml:space="preserve">
+    <value>Mode d'acquisition</value>
+  </data>
+  <data name="Attribute.SecondHand" xml:space="preserve">
+    <value>D'occasion</value>
+  </data>
+  <data name="Attribute.AcquisitionDate" xml:space="preserve">
+    <value>Date d'acquisition</value>
+  </data>
+  <data name="Attribute.AcquisitionPrice" xml:space="preserve">
+    <value>Prix d'acquisition</value>
+  </data>
+  <data name="Attribute.Free" xml:space="preserve">
+    <value>Gratuite</value>
+  </data>
+  <data name="Attribute.InitialValue" xml:space="preserve">
+    <value>Valeur initiale</value>
+  </data>
+  <data name="Attribute.PersonalReference" xml:space="preserve">
+    <value>Numérotation personnelle</value>
+  </data>
+  <data name="Attribute.Visual" xml:space="preserve">
+    <value>Visuels</value>
+  </data>
+  <data name="Attribute.LastName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Attribute.FirstName" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="Attribute.Pseudonym" xml:space="preserve">
+    <value>Pseudonyme</value>
+  </data>
+  <data name="Attribute.Biography" xml:space="preserve">
+    <value>Biographie</value>
+  </data>
+  <data name="Attribute.Nationality" xml:space="preserve">
+    <value>Nationalité</value>
+  </data>
+  <data name="Attribute.Name" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Attribute.Website" xml:space="preserve">
+    <value>Site web</value>
+  </data>
+  <data name="Attribute.Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Attribute.ParentUniverse" xml:space="preserve">
+    <value>Univers parent</value>
+  </data>
+  <data name="Attribute.Label" xml:space="preserve">
+    <value>Libellé</value>
+  </data>
+  <data name="Attribute.SearchedEntity" xml:space="preserve">
+    <value>Fiches recherchées</value>
+  </data>
+  <data name="Attribute.SearchCriteria" xml:space="preserve">
+    <value>Critères</value>
+  </data>
+  <data name="Attribute.SearchVariables" xml:space="preserve">
+    <value>Variables</value>
+  </data>
+  <data name="Attribute.AlbumLabelFormat" xml:space="preserve">
+    <value>Libellé des albums</value>
+  </data>
+  <data name="Attribute.DisplayCulture" xml:space="preserve">
+    <value>Culture d'affichage</value>
+  </data>
+  <data name="Attribute.AcceptedIsbn" xml:space="preserve">
+    <value>ISBN dont l'erreur est acceptée</value>
+  </data>
+  <data name="EditionOf" xml:space="preserve">
+    <value>Édition de {0}</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="Contribution" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Visual.Numbered" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="Criteria.One" xml:space="preserve">
+    <value>1 critère</value>
+  </data>
+  <data name="Criteria.Other" xml:space="preserve">
+    <value>{0} critères</value>
+  </data>
+  <data name="Variables.None" xml:space="preserve">
+    <value>Aucune variable</value>
+  </data>
+  <data name="Secret" xml:space="preserve">
+    <value>renouvelée, valeur non consignée</value>
+  </data>
+  <data name="Removed" xml:space="preserve">
+    <value>retiré</value>
+  </data>
+</root>

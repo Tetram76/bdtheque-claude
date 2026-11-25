@@ -71,7 +71,7 @@ public sealed class ApplicationSettingsEndpointsTests : IClassFixture<ApiWebAppl
         var updated = await UpdateAsync(AlbumLabelFormat.VolumeTitleSeries, form.Version);
         await RestoreAsync(form, updated.Version);
 
-        var entries = (await _client.GetFromJsonAsync<Page<ChangeLogEntryItem>>("/admin/change-log?pageSize=2"))!.Items;
+        var entries = (await _client.GetFromJsonAsync<ChangeLogList>("/admin/change-log?pageSize=2"))!.Entries.Items;
 
         // The most recent first: the restoration, then the modification.
         Assert.All(entries, e => Assert.Equal((RecordType.ApplicationSettings, ChangeLogOperation.Modification, (RecordLabel)new ApplicationSettingsLabel()),

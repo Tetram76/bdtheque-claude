@@ -106,7 +106,8 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
     private static AlbumLabel LabelOf(AlbumSummary album) => new(album.Title, album.SeriesTitle, album.Type, album.IsSpecialIssue,
         album.VolumeNumber, album.StartVolumeNumber, album.EndVolumeNumber);
 
-    private string Album(AlbumLabel album, AlbumLabelFormat format)
+    /// <summary>The label of an album from what the change log kept of it (<see cref="Album(AlbumSummary, AlbumLabelFormat)"/>).</summary>
+    public string Album(AlbumLabel album, AlbumLabelFormat format)
     {
         var series = album.SeriesTitle;
         var title = album.Title;
@@ -133,6 +134,10 @@ public sealed class RecordLabels(IStringLocalizer<RecordLabels> texts, IsbnForma
             },
         };
     }
+
+    /// <summary>The label of an edition from what the change log kept of it, without its album.</summary>
+    public string Edition(EditionLabel edition) =>
+        Edition(edition.PublisherName, edition.PublisherCollectionName, edition.PublicationYear, edition.Isbn);
 
     private string Edition(string publisher, string? collectionName, int? publicationYear, string? isbn) =>
         publisher + AfterThePublisher(collectionName, publicationYear, isbn);

@@ -24,4 +24,7 @@
   <data name="Checks" xml:space="preserve">
     <value>Contrôles</value>
   </data>
+  <data name="Journal" xml:space="preserve">
+    <value>Journal</value>
+  </data>
 </root>

@@ -3,6 +3,7 @@ using Bdtheque.Api.Search;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Contract = Bdtheque.Contracts.Admin;
 using ContractEnums = Bdtheque.Contracts.Enums;
@@ -26,19 +27,115 @@ internal static class ChangeLogEndpoints
         admin.MapGet("/change-log/latest-records", LatestRecordsAsync);
     }
 
-    // From the latest entry to the oldest; the entries of a same save share their date, and follow
-    // the order of their time-ordered identifiers.
-    private static async Task<Page<Contract.ChangeLogEntryItem>> ListAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, int page = 1, int pageSize = Paging.DefaultSize)
+    // From the latest entry to the oldest; the entries of a same save share their date, and follow the order of their
+    // time-ordered identifiers (visuel/journal/journal-des-modifications.md). Its criteria combine: the search on the label of
+    // the records, their type, the operation, the period (two days, both included, in the time zone of the browser, as an
+    // advanced search compares a date and time by its day) and a single record.
+    private static async Task<Contract.ChangeLogList> ListAsync(
+        BdthequeDbContext context,
+        CancellationToken cancellationToken,
+        string? q = null,
+        ContractEnums.RecordType? recordType = null,
+        ContractEnums.ChangeLogOperation? operation = null,
+        DateOnly? from = null,
+        DateOnly? to = null,
+        Guid? record = null,
+        int page = 1,
+        int pageSize = Paging.DefaultSize,
+        [FromQuery(Name = AdvancedSearchQuery.TimeZoneParameter)] string? timeZone = null)
     {
-        var entries = await context.ChangeLog.AsNoTracking()
+        var zone = SearchTimeZones.Resolve(timeZone);
+        var entries = Searched(context, q).AsNoTracking();
+        if (recordType is { } type)
+        {
+            var domainType = EnumMapping.Map<DomainEnums.RecordType>(type)!.Value;
+            entries = entries.Where(e => e.RecordType == domainType);
+        }
+
+        if (operation is { } kind)
+        {
+            var domainOperation = EnumMapping.Map<DomainEnums.ChangeLogOperation>(kind)!.Value;
+            entries = entries.Where(e => e.Operation == domainOperation);
+        }
+
+        if (from is { } first)
+        {
+            var start = InstantField.StartOf(first, zone);
+            entries = entries.Where(e => e.CreatedAt >= start);
+        }
+
+        if (to is { } last)
+        {
+            var end = InstantField.StartOf(last.AddDays(1), zone);
+            entries = entries.Where(e => e.CreatedAt < end);
+        }
+        if (record is { } id)
+            entries = entries.Where(e => e.RecordId == id);
+
+        var found = await entries
             .OrderByDescending(e => e.CreatedAt)
             .ThenByDescending(e => e.Id)
             .ToPageAsync(page, pageSize, e => e, cancellationToken);
-        var parents = await ReadParentsAsync(context, entries.Items, cancellationToken);
+        var parents = await ReadParentsAsync(context, found.Items, cancellationToken);
+        var deleted = await ReadDeletedAsync(context, found.Items, cancellationToken);
+        var wholeCount = await context.ChangeLog.CountAsync(cancellationToken);
+        var filtered = record is { } recordId ? await ReadRecordAsync(context, recordId, cancellationToken) : null;
 
-        return new Page<Contract.ChangeLogEntryItem>(
-            entries.Items.Select(e => ToItem(e, parents)).ToList(), entries.Number, entries.Size, entries.TotalCount);
+        return new Contract.ChangeLogList(
+            new Page<Contract.ChangeLogEntryItem>(
+                found.Items.Select(e => ToItem(e, parents, !deleted.Contains(e.RecordId))).ToList(), found.Number, found.Size, found.TotalCount),
+            wholeCount,
+            filtered);
+    }
+
+    /// <summary>
+    /// The entries whose label contains <paramref name="text"/>, ignoring case and accents, as the lists search
+    /// (choix-implementation/api/recherche.md); all of them if it is blank. The label is stored in <c>jsonb</c> by its
+    /// components: every text of it is looked into, those of the labels it holds too (the album of an edition or of a purchase
+    /// intent), never the kinds that tell them apart, nor its numbers and flags.
+    /// </summary>
+    private static IQueryable<Model.ChangeLogEntry> Searched(BdthequeDbContext context, string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return context.ChangeLog;
+
+        var pattern = $"%{CatalogFilters.EscapeLike(text.Trim())}%";
+        // EF Core translates no JSON path over a converted column: the condition is written in SQL, a parameter carrying the
+        // pattern, and the rest of the query composed over it.
+        return context.ChangeLog.FromSqlRaw(
+            $$"""
+            SELECT * FROM "ChangeLogEntries"
+            WHERE jsonb_path_query_array("Label", '{{LabelTextsPath}}')::text COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
+            """,
+            pattern);
+    }
+
+    // Every string of the label, in any of its objects, the kind of each excepted.
+    private const string LabelTextsPath =
+        "strict $.** ? (@.type() == \"object\").keyvalue() ? (@.key != \"kind\" && @.value.type() == \"string\").value";
+
+    /// <summary>The records of the entries deleted since: an identifier is never given again, so any deletion is the last.</summary>
+    private static async Task<HashSet<Guid>> ReadDeletedAsync(
+        BdthequeDbContext context, IReadOnlyCollection<Model.ChangeLogEntry> entries, CancellationToken cancellationToken)
+    {
+        var ids = entries.Select(e => e.RecordId).Distinct().ToList();
+        return (await context.ChangeLog
+            .Where(e => ids.Contains(e.RecordId) && e.Operation == DomainEnums.ChangeLogOperation.Deletion)
+            .Select(e => e.RecordId)
+            .ToListAsync(cancellationToken)).ToHashSet();
+    }
+
+    // The record of a filter, by its latest entry.
+    private static async Task<Contract.ChangeLogRecord?> ReadRecordAsync(BdthequeDbContext context, Guid id, CancellationToken cancellationToken)
+    {
+        var latest = await context.ChangeLog.AsNoTracking()
+            .Where(e => e.RecordId == id)
+            .OrderByDescending(e => e.CreatedAt)
+            .ThenByDescending(e => e.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+        return latest is null
+            ? null
+            : new Contract.ChangeLogRecord(EnumMapping.Map<ContractEnums.RecordType>(latest.RecordType)!.Value, ToLabel(latest.Label));
     }
 
     /// <summary>
@@ -76,7 +173,7 @@ internal static class ChangeLogEndpoints
         var latest = records.Select(r => entries.First(e => e.RecordType == r.RecordType && e.RecordId == r.RecordId)).ToList();
         var parents = await ReadParentsAsync(context, latest, cancellationToken);
 
-        return latest.Select(e => ToItem(e, parents)).ToList();
+        return latest.Select(e => ToItem(e, parents, recordExists: true)).ToList();
     }
 
     /// <summary>
@@ -122,13 +219,15 @@ internal static class ChangeLogEndpoints
     private static List<Guid> IdsOf(IEnumerable<Model.ChangeLogEntry> entries, DomainEnums.RecordType type) =>
         entries.Where(e => e.RecordType == type).Select(e => e.RecordId).Distinct().ToList();
 
-    private static Contract.ChangeLogEntryItem ToItem(Model.ChangeLogEntry entry, IReadOnlyDictionary<Guid, Guid> parents) =>
+    private static Contract.ChangeLogEntryItem ToItem(
+        Model.ChangeLogEntry entry, IReadOnlyDictionary<Guid, Guid> parents, bool recordExists) =>
         new(
             entry.Id,
             entry.CreatedAt,
             EnumMapping.Map<ContractEnums.RecordType>(entry.RecordType)!.Value,
             entry.RecordId,
             parents.TryGetValue(entry.RecordId, out var parent) ? parent : null,
+            recordExists,
             ToLabel(entry.Label),
             EnumMapping.Map<ContractEnums.ChangeLogOperation>(entry.Operation)!.Value,
             entry.Changes.Select(ToChange).ToList());

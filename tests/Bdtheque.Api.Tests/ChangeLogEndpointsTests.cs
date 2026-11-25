@@ -22,7 +22,7 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
             $"/admin/albums/{album.Id}", new UpdateAlbumRequest(Content("Les Cigares du pharaon", AlbumRating.VeryGood), album.Version));
         response.EnsureSuccessStatusCode();
 
-        var entries = (await ReadAsync("pageSize=100")).Items.Where(e => e.RecordId == album.Id).ToList();
+        var entries = (await ReadAsync($"record={album.Id}")).Entries.Items.ToList();
 
         Assert.Equal([ChangeLogOperation.Modification, ChangeLogOperation.Creation], entries.Select(e => e.Operation));
         Assert.All(entries, e => Assert.Equal(RecordType.Album, e.RecordType));
@@ -56,12 +56,12 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
         await CreateAlbumAsync("Coke en stock", null);
         await CreateAlbumAsync("Vol 714 pour Sydney", null);
 
-        var page = await ReadAsync("pageSize=1");
+        var page = (await ReadAsync("pageSize=1")).Entries;
 
         var latest = Assert.Single(page.Items);
         Assert.Equal(1, page.Size);
         Assert.True(page.TotalCount >= 2);
-        Assert.Equal(latest.Id, (await ReadAsync("pageSize=100")).Items[0].Id);
+        Assert.Equal(latest.Id, (await ReadAsync("pageSize=100")).Entries.Items[0].Id);
     }
 
     [Fact]
@@ -72,8 +72,112 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
         await ProblemAssert.IsProblemAsync(response, HttpStatusCode.InternalServerError, ProblemTypes.Technical);
     }
 
-    private async Task<Page<ChangeLogEntryItem>> ReadAsync(string query) =>
-        (await _client.GetFromJsonAsync<Page<ChangeLogEntryItem>>($"/admin/change-log?{query}"))!;
+    // The search looks into every text of the label, those of the album of an edition too, ignoring case and accents, and finds
+    // the records deleted since (visuel/journal/journal-des-modifications.md); never the kinds of the label.
+    [Fact]
+    public async Task Search_LooksIntoTheTextsOfTheLabel_IgnoringCaseAndAccents()
+    {
+        var album = await CreateAlbumAsync("Les Bijoux de la Castafiore", null);
+        var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new("Moulinsart", null, []));
+        var edition = await PostAsync<CreateEditionRequest, EditionForm>(
+            $"/admin/albums/{album.Id}/editions", new(Edition(publisher.Id), album.Version));
+        var genre = await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new("Castafiore lyrique"));
+        await DeleteAsync($"/admin/genres/{genre.Id}", genre.Version);
+
+        var found = (await ReadAsync("q=CASTAFIORÉ&pageSize=100")).Entries.Items;
+
+        Assert.Equal(
+            [(genre.Id, ChangeLogOperation.Deletion), (genre.Id, ChangeLogOperation.Creation), (edition.Id, ChangeLogOperation.Creation),
+                (album.Id, ChangeLogOperation.Creation)],
+            found.Where(e => e.RecordId == genre.Id || e.RecordId == edition.Id || e.RecordId == album.Id).Select(e => (e.RecordId, e.Operation)));
+        Assert.Empty((await ReadAsync("q=purchaseIntent&pageSize=100")).Entries.Items);
+        Assert.DoesNotContain((await ReadAsync("q=edition&pageSize=100")).Entries.Items, e => e.RecordId == edition.Id);
+        // The wildcards of LIKE are looked for as they are.
+        Assert.Empty((await ReadAsync("q=Castafiore%25lyrique")).Entries.Items);
+    }
+
+    [Fact]
+    public async Task Filters_OnTypeOperationAndRecord_Combine()
+    {
+        var genre = await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new("Fantastique urbain"));
+        (await _client.PutAsJsonAsync($"/admin/genres/{genre.Id}", new UpdateGenreRequest("Fantastique", genre.Version))).EnsureSuccessStatusCode();
+        await CreateAlbumAsync("Le Temple du Soleil", null);
+
+        var all = await ReadAsync($"record={genre.Id}");
+        var modifications = await ReadAsync($"record={genre.Id}&recordType=Genre&operation=Modification");
+        var albumsOnly = await ReadAsync($"record={genre.Id}&recordType=Album");
+
+        Assert.Equal(2, all.Entries.TotalCount);
+        Assert.Equal(new ChangeLogRecord(RecordType.Genre, new NameLabel("Fantastique")), all.Record);
+        Assert.Equal(ChangeLogOperation.Modification, Assert.Single(modifications.Entries.Items).Operation);
+        Assert.Empty(albumsOnly.Entries.Items);
+        Assert.True(albumsOnly.WholeCount >= 3);
+    }
+
+    // A period is two days, both included, in the time zone of the browser: the day of an entry is that of its date there.
+    [Theory]
+    [InlineData(null)]
+    [InlineData("Pacific/Kiritimati")]
+    [InlineData("Pacific/Pago_Pago")]
+    public async Task Period_IsTwoDaysIncluded_InTheTimeZoneOfTheBrowser(string? timeZone)
+    {
+        var genre = await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new($"Western {timeZone}"));
+        var date = Assert.Single((await ReadAsync($"record={genre.Id}")).Entries.Items).Date;
+        var zone = timeZone is null ? TimeZoneInfo.Utc : TimeZoneInfo.FindSystemTimeZoneById(timeZone);
+        var day = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(date, zone).DateTime);
+        var inZone = timeZone is null ? "" : $"&timeZone={Uri.EscapeDataString(timeZone)}";
+        string Day(DateOnly d) => d.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+
+        Assert.Single((await ReadAsync($"record={genre.Id}&from={Day(day)}&to={Day(day)}{inZone}")).Entries.Items);
+        Assert.Single((await ReadAsync($"record={genre.Id}&from={Day(day)}{inZone}")).Entries.Items);
+        Assert.Single((await ReadAsync($"record={genre.Id}&to={Day(day)}{inZone}")).Entries.Items);
+        Assert.Empty((await ReadAsync($"record={genre.Id}&to={Day(day.AddDays(-1))}{inZone}")).Entries.Items);
+        Assert.Empty((await ReadAsync($"record={genre.Id}&from={Day(day.AddDays(1))}{inZone}")).Entries.Items);
+    }
+
+    [Fact]
+    public async Task Record_UnknownToTheChangeLog_IsNamedByNothing()
+    {
+        var list = await ReadAsync($"record={Guid.CreateVersion7()}");
+
+        Assert.Empty(list.Entries.Items);
+        Assert.Null(list.Record);
+    }
+
+    // A record deleted since leads nowhere: every entry of it says so, not only its deletion.
+    [Fact]
+    public async Task Entries_TellWhetherTheirRecordStillExists()
+    {
+        var deleted = await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new("Péplum"));
+        var kept = await PostAsync<CreateGenreRequest, GenreForm>("/admin/genres", new("Uchronie"));
+        await DeleteAsync($"/admin/genres/{deleted.Id}", deleted.Version);
+
+        var entries = (await ReadAsync("recordType=Genre&pageSize=100")).Entries.Items;
+
+        Assert.All(entries.Where(e => e.RecordId == deleted.Id), e => Assert.False(e.RecordExists));
+        Assert.True(Assert.Single(entries, e => e.RecordId == kept.Id).RecordExists);
+    }
+
+    private async Task<ChangeLogList> ReadAsync(string query) =>
+        (await _client.GetFromJsonAsync<ChangeLogList>($"/admin/change-log?{query}"))!;
+
+    private async Task<TResponse> PostAsync<TRequest, TResponse>(string path, TRequest request)
+    {
+        var response = await _client.PostAsJsonAsync(path, request);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<TResponse>())!;
+    }
+
+    // A deletion confirms the impact it was shown, by its fingerprint.
+    private async Task DeleteAsync(string path, uint version)
+    {
+        var impact = await _client.GetFromJsonAsync<Contracts.Deletion.DeletionImpact>($"{path}/deletion-impact");
+        (await _client.DeleteAsync($"{path}?version={version}&fingerprint={Uri.EscapeDataString(impact!.Fingerprint)}")).EnsureSuccessStatusCode();
+    }
+
+    private static EditionContent Edition(Guid publisher) =>
+        new(publisher, null, 2001, null, null, null, null, null, null, null, false, true, null,
+            AcquisitionMode.Purchase, false, null, null, null, false, null, null, null, null);
 
     private async Task<AlbumForm> CreateAlbumAsync(string title, AlbumRating? rating)
     {

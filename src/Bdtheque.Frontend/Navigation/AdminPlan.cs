@@ -18,7 +18,8 @@ public static class AdminPlan
             new("Admin.Editions", AppPaths.AdminEditions), new("Admin.PurchaseIntents", AppPaths.AdminPurchaseIntents)]),
         new("AuthorsAndPublishers", [new("Admin.Authors", AppPaths.AdminAuthors), new("Admin.Publishers", AppPaths.AdminPublishers)]),
         new("Referentials", [new("Admin.Genres", AppPaths.AdminGenres), new("Admin.Universes", AppPaths.AdminUniverses)]),
-        new("Settings", [new("Admin.Settings", AppPaths.AdminSettings), new("Admin.Statistics", AppPaths.AdminStatistics)]),
+        new("Settings", [new("Admin.Settings", AppPaths.AdminSettings), new("Admin.Statistics", AppPaths.AdminStatistics),
+            new("Admin.ChangeLog", AppPaths.AdminChangeLog)]),
     ];
 
     private static readonly string[] Paths = [.. Groups.SelectMany(group => group.Entries).Select(entry => entry.Path)];

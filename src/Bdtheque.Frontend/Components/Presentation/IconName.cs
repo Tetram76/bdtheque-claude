@@ -21,6 +21,9 @@ public enum IconName
     Logout,
     Exclamation,
     Reload,
+
+    /// <summary>The history of a record: a clock whose hand turns back.</summary>
+    History,
     Wrench,
     Album,
     Edition,

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Journal des modifications</value>
+  </data>
+  <data name="ListTitle" xml:space="preserve">
+    <value>Entrées du journal des modifications</value>
+  </data>
+  <data name="Search.Label" xml:space="preserve">
+    <value>Rechercher dans le journal</value>
+  </data>
+  <data name="Search.Placeholder" xml:space="preserve">
+    <value>Libellé de la fiche…</value>
+  </data>
+  <data name="Order" xml:space="preserve">
+    <value>De la plus récente à la plus ancienne</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>Entrées</value>
+  </data>
+  <data name="Count.None" xml:space="preserve">
+    <value>Aucune entrée</value>
+  </data>
+  <data name="Count.One" xml:space="preserve">
+    <value>1 entrée</value>
+  </data>
+  <data name="Count.Other" xml:space="preserve">
+    <value>{0} entrées</value>
+  </data>
+  <data name="Column.Time" xml:space="preserve">
+    <value>Heure</value>
+  </data>
+  <data name="Column.Record" xml:space="preserve">
+    <value>Fiche</value>
+  </data>
+  <data name="Column.Operation" xml:space="preserve">
+    <value>Opération</value>
+  </data>
+  <data name="Column.Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Day.Today" xml:space="preserve">
+    <value>Aujourd'hui, {0}</value>
+  </data>
+  <data name="Day.Yesterday" xml:space="preserve">
+    <value>Hier, {0}</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Autres actions : {0}</value>
+  </data>
+  <data name="Menu.Edit" xml:space="preserve">
+    <value>Modifier la fiche</value>
+  </data>
+  <data name="Menu.History" xml:space="preserve">
+    <value>Historique de cette fiche</value>
+  </data>
+  <data name="Menu.View" xml:space="preserve">
+    <value>Voir dans la consultation</value>
+  </data>
+  <data name="Becomes" xml:space="preserve">
+    <value>devient</value>
+  </data>
+  <data name="Empty.Value" xml:space="preserve">
+    <value>Non renseigné</value>
+  </data>
+  <data name="Empty.Text" xml:space="preserve">
+    <value>Aucune entrée ne correspond à « {0} ».</value>
+  </data>
+  <data name="Empty.SearchedIn" xml:space="preserve">
+    <value>le libellé des fiches</value>
+  </data>
+  <data name="Empty.Clear" xml:space="preserve">
+    <value>Effacer la recherche</value>
+  </data>
+  <data name="Empty.Criteria" xml:space="preserve">
+    <value>Aucune entrée ne correspond à ces critères.</value>
+  </data>
+  <data name="Empty.ClearFilters" xml:space="preserve">
+    <value>Effacer les filtres</value>
+  </data>
+  <data name="Empty.None" xml:space="preserve">
+    <value>Aucune modification n'est encore consignée.</value>
+  </data>
+  <data name="Filter.RecordType" xml:space="preserve">
+    <value>Type de fiche</value>
+  </data>
+  <data name="Filter.Operation" xml:space="preserve">
+    <value>Opération</value>
+  </data>
+  <data name="Filter.From" xml:space="preserve">
+    <value>Du</value>
+  </data>
+  <data name="Filter.To" xml:space="preserve">
+    <value>Au</value>
+  </data>
+  <data name="Filter.Record" xml:space="preserve">
+    <value>Fiche</value>
+  </data>
+  <data name="Filter.Record.Unknown" xml:space="preserve">
+    <value>inconnue du journal</value>
+  </data>
+  <data name="Filter.Any.RecordType" xml:space="preserve">
+    <value>Tous les types</value>
+  </data>
+  <data name="Filter.Any.Operation" xml:space="preserve">
+    <value>Toutes les opérations</value>
+  </data>
+  <data name="Filters.Note" xml:space="preserve">
+    <value>L'historique d'une seule fiche s'obtient depuis le menu « ⋯ » de l'une de ses entrées.</value>
+  </data>
+</root>

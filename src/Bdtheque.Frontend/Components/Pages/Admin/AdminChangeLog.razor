@@ -1,0 +1,259 @@
+@attribute [Route(AppPaths.AdminChangeLog)]
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using System.Globalization
+@inject IStringLocalizer<AdminChangeLog> L
+@inject ApiClient Api
+@inject ChangeLogTexts Texts
+@inject DisplayFormatter Format
+@inject BrowserTimeZone TimeZone
+@inject TimeProvider Clock
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The whole change log (visuel/journal/journal-des-modifications.md), in read only: from the latest entry to the oldest, grouped
+   by day in the time zone of the browser, each modification with its changes. Its search, its filters and the history of a single
+   record are carried by its address (Lists/ChangeLogQuery.cs), as the criteria of any list of the administration; it has no
+   navigation by initial, being in the order of time. Each entry leads by its menu to its record, as long as it exists. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminChangeLog" />
+
+<ListLayout Title="@L["ListTitle"]" Set="RecordSet.Journal" Problem="_problem" Loaded="@(_list is not null)">
+    <Heading>
+        <ListHeading Title="@L["Title"]" TotalCount="_list?.WholeCount" />
+    </Heading>
+    <ChildContent>
+        <ListSearch Action="@AppPaths.AdminChangeLog" FieldId="change-log-search" TextName="@ListQuery.TextName" Text="@_query.Text"
+                    SearchLabel="@L["Search.Label"]" Placeholder="@L["Search.Placeholder"]" ClearHref="@_query.WithoutSearchHref()" PanelId="change-log-filters"
+                    FiltersName="@ListQuery.FiltersName" FiltersOpenValue="@ListQuery.FiltersOpenValue"
+                    FiltersOpen="_query.FiltersOpen" FilterCount="_query.ActiveFilterCount" Panel="FiltersPanel" HiddenFilters="KeptFilters" />
+
+        <ActiveFilters Filters="ActiveFilterTags()" ClearHref="@_query.WithoutFilters().Href()" />
+
+        <ListSummary Count="@CountText()" Narrowed="@_query.IsNarrowed" WholeCount="@_list!.WholeCount" Order="@L["Order"]" />
+
+        @if (_list.Entries.Items.Count == 0)
+        {
+            switch (_query.EmptyReason)
+            {
+                case EmptyListReason.Search:
+                    <EmptyList Message="@L["Empty.Text", _query.Text!]" SearchedIn="@L["Empty.SearchedIn"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutSearchHref()" Label="@L["Empty.Clear"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                case EmptyListReason.Filters:
+                    <EmptyList Message="@L["Empty.Criteria"]">
+                        <Actions>
+                            <Button Href="@_query.WithoutFilters().Href()" Label="@L["Empty.ClearFilters"]" />
+                        </Actions>
+                    </EmptyList>
+                    break;
+                default:
+                    <EmptyList Message="@L["Empty.None"]" />
+                    break;
+            }
+        }
+        else
+        {
+            @* Its days and times in the time zone of the browser: marked for the script that renders the page again once it knows
+               it (wwwroot/browser-time-zone.js). *@
+            <div class="log-rows" role="table" aria-label="@L["Title"]" data-local>
+                <div class="log-row log-row-head" role="row">
+                    <span class="log-time" role="columnheader">@L["Column.Time"]</span>
+                    <span class="log-main" role="columnheader">@L["Column.Record"]</span>
+                    <span class="log-operation" role="columnheader">@L["Column.Operation"]</span>
+                    <span class="log-actions" role="columnheader"><span class="visually-hidden">@L["Column.Actions"]</span></span>
+                </div>
+                @foreach (var day in _list.Entries.Items.GroupBy(e => DayOf(e.Date)))
+                {
+                    <div class="log-day" role="row">
+                        <span role="rowheader">@DayText(day.Key)</span>
+                    </div>
+                    @foreach (var entry in day)
+                    {
+                        var label = Texts.LabelOf(entry.Label, _settings!.AlbumLabelFormat);
+                        <div class="log-row" role="row">
+                            <span class="log-time" role="cell">@TimeZone.ToLocal(entry.Date).ToString("t", CultureInfo.CurrentCulture)</span>
+                            <span class="log-main" role="cell">
+                                <RowEntry Detail="@Texts.TypeOf(entry.Label, entry.RecordType, _settings.AlbumLabelFormat)"><LabelText Text="@label" /></RowEntry>
+                            </span>
+                            <span class="log-operation" role="cell">
+                                <Tag Text="@Texts.Of(entry.Operation)" Variant="@OperationVariant(entry.Operation)" />
+                            </span>
+                            <span class="log-actions" role="cell">
+                                @* A record deleted since, in its own history, has nowhere left to lead: no menu rather than an empty one. *@
+                                @if (entry.RecordExists || _query.RecordId is null)
+                                {
+                                    <ActionsMenu Id="@($"log-actions-{entry.Id:N}")" Label="@L["More", label]">
+                                        @if (entry.RecordExists)
+                                        {
+                                            <MenuItem Href="@AppPaths.AdminEdit(entry.RecordType, entry.RecordId, entry.ParentId)" Icon="IconName.Edit" Label="@L["Menu.Edit"]" />
+                                        }
+                                        @if (_query.RecordId is null)
+                                        {
+                                            <MenuItem Href="@(new ChangeLogQuery(RecordId: entry.RecordId).Href())" Icon="IconName.History" Label="@L["Menu.History"]" />
+                                        }
+                                        @if (entry.RecordExists && AppPaths.ConsultationRecord(entry.RecordType, entry.RecordId) is { } consultation)
+                                        {
+                                            <MenuItem Href="@consultation" Icon="IconName.Exit" Label="@L["Menu.View"]" />
+                                        }
+                                    </ActionsMenu>
+                                }
+                            </span>
+                            @if (entry.Changes.Count > 0)
+                            {
+                                <ul class="log-changes" role="cell">
+                                    @foreach (var change in entry.Changes)
+                                    {
+                                        <li class="log-change">
+                                            <span class="log-attribute">@Texts.Of(change.Attribute)</span>
+                                            <span class="log-values">@ChangeText(change)</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+            <Pagination Number="_list.Entries.Number" Size="_list.Entries.Size" TotalCount="_list.Entries.TotalCount"
+                        ItemsLabel="@L["Items"]" PageHref="@(page => (_query with { Page = page }).Href())" />
+        }
+    </ChildContent>
+</ListLayout>
+
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private ChangeLogQuery _query = new();
+    private ApplicationSettings? _settings;
+    private ChangeLogList? _list;
+    private ApiProblem? _problem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _query = ChangeLogQuery.Parse(new Uri(Navigation.Uri).Query);
+        try
+        {
+            _settings = await Api.GetAsync<ApplicationSettings>("/catalog/settings");
+            _list = await Api.GetAsync<ChangeLogList>(_query.ApiPath(TimeZone.Zone.HasIanaId ? TimeZone.Zone.Id : null));
+            // A page beyond the last one (an old address) leads to the last page, with the same criteria.
+            if (_list.Entries is { Items.Count: 0, TotalCount: > 0 } entries && _query.Page > 1)
+            {
+                Navigation.NavigateTo((_query with { Page = (entries.TotalCount + entries.Size - 1) / entries.Size }).Href());
+                return;
+            }
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _list = null;
+            return;
+        }
+
+        if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
+            await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // The operation, told apart at first glance: a creation filled, a modification outlined, a deletion in the color of the
+    // deletions (visuel/journal/journal-des-modifications.md, Entrées).
+    private static TagVariant OperationVariant(ChangeLogOperation operation) => operation switch
+    {
+        ChangeLogOperation.Creation => TagVariant.Filled,
+        ChangeLogOperation.Deletion => TagVariant.Deletion,
+        _ => TagVariant.Outlined,
+    };
+
+    private DateOnly DayOf(DateTimeOffset date) => DateOnly.FromDateTime(TimeZone.ToLocal(date).DateTime);
+
+    // « Aujourd'hui, mercredi 25 novembre 2026 », « Hier, … », or the whole date; today unknown as long as the browser has not
+    // given its time zone, every day then named by its date.
+    private string DayText(DateOnly day)
+    {
+        var date = day.ToString("D", CultureInfo.CurrentCulture);
+        var today = TimeZone.Today(Clock);
+        if (day == today)
+            return L["Day.Today", date];
+        if (day == today?.AddDays(-1))
+            return L["Day.Yesterday", date];
+        return CultureInfo.CurrentCulture.TextInfo.ToUpper(date[0]) + date[1..];
+    }
+
+    // « Bien → Très bien », « + Humour », « Albert Uderzo (Dessin) retiré », or a secret renewed without its values.
+    private RenderFragment ChangeText(ChangeLogChange change) => (change.Before, change.After) switch
+    {
+        (null, null) => @<span class="log-secret">@Texts.Secret</span>,
+        (null, { } added) => @<strong>+ @Value(added)</strong>,
+        ({ } removed, null) => @<span class="log-before"><s>@Value(removed)</s> @Texts.Removed</span>,
+        ({ } before, { } after) => @<span><span class="log-before">@Value(before)</span> <span class="log-arrow" aria-label="@L["Becomes"]">→</span> <strong>@Value(after)</strong></span>,
+    };
+
+    // A text left empty reads as a data absent.
+    private RenderFragment Value(ChangeLogValue value) => Texts.Value(value, _settings!.AlbumLabelFormat) is { Length: > 0 } text
+        ? @<LabelText Text="@text" />
+        : @<NotSet Brief="true" Mention="@L["Empty.Value"]" />;
+
+    // « 12 408 entrées », « 1 entrée », « Aucune entrée ».
+    private string CountText() => _list!.Entries.TotalCount switch
+    {
+        0 => L["Count.None"],
+        1 => L["Count.One"],
+        var count => L["Count.Other", Format.Number(count)],
+    };
+
+    // The filters chosen, each with the change log without it.
+    private IReadOnlyList<ActiveFilters.ActiveFilter> ActiveFilterTags()
+    {
+        var tags = new List<ActiveFilters.ActiveFilter>();
+        void Add(string name, string? value, ChangeLogQuery without)
+        {
+            if (value is not null)
+                tags.Add(new(L[$"Filter.{name}"].Value, value, (without with { Page = 1 }).Href()));
+        }
+
+        Add("RecordType", _query.RecordType is { } type ? Texts.Of(type) : null, _query with { RecordType = null });
+        Add("Operation", _query.Operation is { } operation ? Texts.Of(operation) : null, _query with { Operation = null });
+        Add("From", _query.From is { } from ? Format.Date(from) : null, _query with { From = null });
+        Add("To", _query.To is { } to ? Format.Date(to) : null, _query with { To = null });
+        // The record by its type and its label at its latest entry; one no entry knows, by nothing but the filter itself.
+        Add("Record", _query.RecordId is null ? null
+            : _list?.Record is { } record ? $"{Texts.Of(record.RecordType)} {Texts.LabelOf(record.Label, _settings!.AlbumLabelFormat)}"
+            : L["Filter.Record.Unknown"], _query with { RecordId = null });
+        return tags;
+    }
+
+    // The type of record and the operation chosen in a list, the period by two days; the record of a history, which no field of
+    // the panel chooses, kept as it is.
+    private RenderFragment FiltersPanel => @<ListFilters Note="@L["Filters.Note"]">
+            @if (_query.RecordId is { } record)
+            {
+                <input type="hidden" name="@ChangeLogQuery.RecordName" value="@record" />
+            }
+            <Field Id="filter-record-type" Label="@L["Filter.RecordType"]" Context="control">
+                <FilterSelect Id="@control.Id" Name="@ChangeLogQuery.RecordTypeName" Selected="@(_query.RecordType?.ToString() ?? "")" Options="@RecordTypeOptions" />
+            </Field>
+            <Field Id="filter-operation" Label="@L["Filter.Operation"]" Context="control">
+                <FilterSelect Id="@control.Id" Name="@ChangeLogQuery.OperationName" Selected="@(_query.Operation?.ToString() ?? "")" Options="@OperationOptions" />
+            </Field>
+            <Field Id="filter-from" Label="@L["Filter.From"]" Context="control">
+                <input id="@control.Id" type="date" name="@ChangeLogQuery.FromName" value="@ChangeLogQuery.Day(_query.From)" />
+            </Field>
+            <Field Id="filter-to" Label="@L["Filter.To"]" Context="control">
+                <input id="@control.Id" type="date" name="@ChangeLogQuery.ToName" value="@ChangeLogQuery.Day(_query.To)" />
+            </Field>
+        </ListFilters>;
+
+    private IReadOnlyList<FilterSelect.FilterOption> RecordTypeOptions =>
+        [new("", L["Filter.Any.RecordType"]), .. Enum.GetValues<RecordType>().Select(t => new FilterSelect.FilterOption(t.ToString(), Texts.Of(t)))];
+
+    private IReadOnlyList<FilterSelect.FilterOption> OperationOptions =>
+        [new("", L["Filter.Any.Operation"]), .. Enum.GetValues<ChangeLogOperation>().Select(o => new FilterSelect.FilterOption(o.ToString(), Texts.Of(o)))];
+
+    // The filters chosen, kept by the search while their panel is folded.
+    private RenderFragment KeptFilters => @<QueryFields Parameters="@((_query with { Text = null, Page = 1 }).Parameters())" />;
+}

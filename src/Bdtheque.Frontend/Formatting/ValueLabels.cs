@@ -10,6 +10,16 @@ public sealed class ValueLabels(IStringLocalizer<ValueLabels> texts)
 {
     public string Of<TEnum>(TEnum value) where TEnum : struct, Enum => texts[Key(value)];
 
+    /// <summary>
+    /// A member of an enumeration by the names the change log keeps (<c>EnumValue</c>); a member retired since the entry was
+    /// written, which the API gives by its number, by that number.
+    /// </summary>
+    public string Of(string enumeration, string member)
+    {
+        var text = texts[$"{enumeration}.{member}"];
+        return text.ResourceNotFound ? member : text;
+    }
+
     /// <summary>Whether a value has no label: what the tests check of every value of the enumerations presented.</summary>
     public bool ResourceNotFound(Enum value) => texts[Key(value)].ResourceNotFound;
 
