@@ -101,7 +101,6 @@
             @* Its dates in the time zone of the browser: marked for the script that renders the page again once it knows it
                (wwwroot/browser-time-zone.js). *@
             <Block Title="@L["Latest.Title"]" Kicker="@Sets[nameof(RecordSet.Journal)]" data-local>
-                <p class="admin-home-more"><a href="@AppPaths.AdminChangeLog">@L["Latest.All"]</a></p>
                 @if (_latest!.Count == 0)
                 {
                     <p class="admin-home-note">@L["Latest.None"]</p>
@@ -121,6 +120,7 @@
                         }
                     </ul>
                 }
+                <p class="admin-home-more"><a href="@AppPaths.AdminChangeLog">@L["Latest.All"]</a></p>
             </Block>
         </div>
 

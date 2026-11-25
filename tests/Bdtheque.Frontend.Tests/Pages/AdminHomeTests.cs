@@ -182,12 +182,15 @@ public sealed class AdminHomeTests : BunitContext, IDisposable
     }
 
     [Fact]
-    // At the head of the block, the link to the whole change log; the block bears the mention of the change log, the same set.
+    // Under the list, the link to the whole change log; the block bears the mention of the change log, the same set.
     public void LatestChanges_LeadToTheWholeChangeLog()
     {
         var block = BlockOf(Render<AdminHome>(), "Dernières modifications");
 
-        var link = block.QuerySelector("p.admin-home-more a")!;
+        var more = block.QuerySelector("p.admin-home-more")!;
+        Assert.True(more.PreviousElementSibling!.Matches("ul.admin-rows, p.admin-home-note"));
+        Assert.Null(more.NextElementSibling);
+        var link = more.QuerySelector("a")!;
         Assert.Equal(("Tout le journal", AppPaths.AdminChangeLog), (link.TextContent.Trim(), link.GetAttribute("href")));
         Assert.Equal("Journal", block.QuerySelector(".block-kicker")!.TextContent.Trim());
     }
