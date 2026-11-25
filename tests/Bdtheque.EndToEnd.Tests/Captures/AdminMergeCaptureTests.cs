@@ -58,12 +58,19 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Né à Paris" }).CheckAsync();
                 await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync("Affiché : Gotlib");
             }
-            else
+            else if (state == "publishers-confirmation")
             {
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true })
                     .GetByRole(AriaRole.Radio, new() { NameRegex = StartsWithDupuis() }).CheckAsync();
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Aire Libre" })
                     .GetByRole(AriaRole.Radio, new() { NameRegex = CapitalizedAireLibre() }).CheckAsync();
+            }
+            else
+            {
+                // Every name chosen, by the value of its radio: the names differ only by their case or their accents.
+                foreach (var group in await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).AllAsync())
+                    await group.Locator("input[value=First]").CheckAsync();
+                await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
             }
 
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
@@ -74,15 +81,6 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
             // The title, the status, the completeness and the format differ; the publisher, of the first series alone, and the
             // sort key entered by hand, against the one following the title, are retained.
             await Assertions.Expect(page.GetByText("4 données restent à choisir")).ToBeAttachedAsync();
-        }
-        else if (state == "universes-confirmation")
-        {
-            // Every name chosen, by the value of its radio: the names differ only by their case or their accents.
-            foreach (var group in await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).AllAsync())
-                await group.Locator("input[value=First]").CheckAsync();
-            await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
-            await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
-            await Assertions.Expect(page.GetByRole(AriaRole.Alertdialog)).ToBeVisibleAsync();
         }
         else if (state == "universes")
         {
