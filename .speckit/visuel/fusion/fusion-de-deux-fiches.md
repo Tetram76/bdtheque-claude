@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Fusion de deux fiches'
 description: 'Écran de la fusion de deux fiches d''un même type : page dédiée, ce que garde la fiche donnée par donnée, ce qui passe à elle, barre de fusion et confirmation au futur ; à lire pour toute fusion.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-25T10:45:00Z }
 ---
 
 # Fusion de deux fiches
@@ -20,7 +20,7 @@ De haut en bas :
   - Une donnée de même valeur dans les deux fiches est présentée une seule fois, sur toute la largeur, avec « Identique dans les deux fiches ».
   - Un long texte (biographie, résumé…) est présenté sur quelques lignes.
   - Sous les données, le **résultat** calculé, comme sur la fiche de saisie (« Affiché », « Classé à », « Initiale » d'un auteur).
-  - **Fusion de deux séries** : les données sont regroupées selon les blocs de la fiche de saisie d'une série, sous leurs titres et leurs mentions, dans le même ordre ([Contenu](../saisie-serie/contenu.md), [Déclinaison par thème](../saisie-serie/declinaison-par-theme.md)), un bloc sans donnée étant omis ; l'en-tête des deux fiches surmonte chaque bloc, son détail (ce qui lui est rattaché, sa dernière modification) dans le premier seulement ; le résultat calculé (« Classé à ») est sous le bloc « La série » (décision de l'utilisateur, #645).
+  - **Blocs de la saisie** : pour un type dont la fiche de saisie est découpée en blocs, les données sont regroupées selon ces blocs, sous leurs titres et leurs mentions, dans le même ordre, un bloc sans donnée étant omis ; l'en-tête des deux fiches surmonte chaque bloc, son détail (ce qui lui est rattaché, sa dernière modification) dans le premier seulement ; le résultat calculé est sous le bloc des données dont il découle (décision de l'utilisateur, #645). Ex. la fusion de deux séries, selon les blocs de la saisie d'une série ([Contenu](../saisie-serie/contenu.md), [Déclinaison par thème](../saisie-serie/declinaison-par-theme.md)), « Classé à » sous « La série ».
 - **« Ce qui passe à la fiche »** (mention « Fiches liées ») : une ligne par type de fiche liée, dans l'ordre des types de fiche ([Ordre des types de fiche](../../fonctionnel/presentation/ordre-des-types-de-fiche.md)), son total après la fusion en gras, puis d'où il vient : « **Crédité sur 26 albums** — les 24 de Gotlib et les 3 de Marcel Gotlib, dont 1 commun aux deux fiches ». Ce qui était lié aux deux fiches n'est compté qu'une fois, et dit « commun aux deux fiches », jamais « en double » ni « retiré » : rien n'en est perdu (décision de l'utilisateur). Un auteur est crédité sur des séries comme sur des albums (décision de l'utilisateur).
 - **Barre de fusion**, figée en bas comme la barre d'enregistrement d'une fiche de saisie : ce qui reste à choisir (« 2 données restent à choisir », « Tout est choisi »), **Annuler**, qui ramène à la liste, et **Fusionner…**, inactif tant qu'une donnée reste à choisir.
 - **Confirmation** : un dialogue « Fusionner les deux auteurs ? », ouvert par « Fusionner… », qui s'ouvre sur « La fusion est définitive. », puis dit, **au futur**, ce que fera la fusion, la confirmation précédant ce qu'elle annonce (décision de l'utilisateur) : « Les deux fiches n'en feront plus qu'une : Gotlib. », « Gotlib sera crédité sur les 2 séries et les 26 albums des deux fiches. ». **Annuler**, et **Fusionner définitivement**, de la couleur d'alerte du thème, comme la confirmation d'une suppression ([Contenu](../liste-albums/contenu.md), suppression).
