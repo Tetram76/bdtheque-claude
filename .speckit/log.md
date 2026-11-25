@@ -2,6 +2,7 @@
 
 ## 2026-11-25
 
+* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, avant d'attendre la réponse à un message, ou de le renvoyer, l'expéditeur vérifie l'état de la session destinataire ; une session archivée ou supprimée ne lit plus aucun message et n'y répond jamais : l'expéditeur ne l'attend pas, ne lui renvoie rien, vérifie l'état réel et se passe de la réponse, ou s'adresse à qui peut répondre (l'orchestrateur, l'utilisateur) ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md)) (#656).
 * **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, un message entre sessions peut être lu très tard, voire perdu s'il n'est pas lu dans un délai imparti ; ni réponse immédiate espérée, ni réponse attendue indéfiniment : l'expéditeur poursuit ce qui n'en dépend pas, peut décider de se passer de la réponse s'il le peut, borne son attente, vérifie l'état réel et renvoie au besoin ; il est primordial que les sessions, l'orchestrateur compris, prennent en compte les messages qu'elles reçoivent, et leur apportent une réponse dans les plus brefs délais si nécessaire, lus le plus vite possible et, s'ils demandent une réponse, répondus aussi vite que possible ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md)) (#651).
 
 ## 2026-11-24
