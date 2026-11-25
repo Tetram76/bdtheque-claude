@@ -2,7 +2,7 @@
 
 ## 2026-11-25
 
-* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, un message entre sessions peut être lu très tard, voire perdu s'il n'est pas lu dans un délai imparti ; ni réponse immédiate espérée, ni réponse attendue indéfiniment : l'expéditeur poursuit ce qui n'en dépend pas, peut décider de se passer de la réponse s'il le peut, borne son attente, vérifie l'état réel et renvoie au besoin ; il est primordial que les sessions prennent le temps de répondre aux messages qu'elles reçoivent ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md)).
+* **Exigence de l'utilisateur** : dans un lot de chantiers en parallèle, un message entre sessions peut être lu très tard, voire perdu s'il n'est pas lu dans un délai imparti ; ni réponse immédiate espérée, ni réponse attendue indéfiniment : l'expéditeur poursuit ce qui n'en dépend pas, peut décider de se passer de la réponse s'il le peut, borne son attente, vérifie l'état réel et renvoie au besoin ; il est primordial que les sessions, l'orchestrateur compris, prennent le temps de répondre aux messages qu'elles reçoivent ([Chantiers en parallèle](gestion-projet/gouvernance/chantiers-en-parallele.md)).
 
 ## 2026-11-24
 
