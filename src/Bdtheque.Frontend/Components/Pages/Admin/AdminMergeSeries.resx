@@ -183,4 +183,7 @@
   <data name="Kicker.Template" xml:space="preserve">
     <value>Pré-remplissage</value>
   </data>
+  <data name="Confirm.Contribution" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
 </root>

@@ -6,6 +6,7 @@
 @using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<AdminMergeSeries> L
 @inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
 @inject ValueLabels Values
 @inject ApiClient Api
 @inject AudienceRecorder Recorder
@@ -14,7 +15,7 @@
 @* The merge of two series (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the series, which
    gives the series and the other one: each data the series keeps, of the one or the other, in the order of its entry form; each
    genre, universe and contribution held by one series only, retained or discarded, in the blocks of that form; the sort key the data chosen give; the albums
-   that pass to it; then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor of
+   that pass to it; then the confirmation, which sets apart what the merge will delete. Merged or cancelled, it leads back to the list. It applies no rule of the merge nor of
    a series, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
    title gives. *@
 <PageTitle>@L["Title"]</PageTitle>
@@ -30,23 +31,28 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Title, Preview.Second.Title]"
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Citation.Of(Preview.First.Title), Citation.Of(Preview.Second.Title)]"
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminSeries" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
-        {
-            <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == 0)"
-                       Second="Head(Preview.Second, index == 0)" Result="@(block.Key == SeriesBlock ? Result : null)">
-                @foreach (var row in block.Rows)
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
                 {
-                    <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
-                                 SecondRecord="@Preview.Second.Title" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
-                                 SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+                    <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == FirstShown)"
+                               Second="Head(Preview.Second, index == FirstShown)" Result="@(block.Key == SeriesBlock ? Result : null)">
+                        @foreach (var row in block.Rows)
+                        {
+                            <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
+                                         SecondRecord="@Preview.Second.Title" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
+                                         SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" Same="row.Same" />
+                        }
+                    </MergeData>
                 }
-            </MergeData>
-        }
-        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Title" SecondName="@Preview.Second.Title" Count="Count" />
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Title" SecondName="@Preview.Second.Title" Count="Count" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -58,9 +64,10 @@ else
                     <li>@Merge.OneRecord(KeptTitle)</li>
                     @if (Merge.Linked(Preview.Links) is { } linked)
                     {
-                        <li>@L["Confirm.Albums", KeptTitle, linked]</li>
+                        <li>@L["Confirm.Albums", Citation.Of(KeptTitle), linked]</li>
                     }
                 </ul>
+                <MergeRemovals Lines="Removals" />
             </ChildContent>
             <Actions>
                 <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
@@ -70,6 +77,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     // The keys of the data of a series, each the key of its row and of the choice made for it.
     private const string TitleKey = "title";
     private const string SortKeyKey = "sort-key";
@@ -115,7 +124,7 @@ else
     [PersistentState]
     public Dictionary<string, MergeSide?>? Choices { get; set; }
 
-    private MergeTexts Merge => new(MergeLocalizer);
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
 
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Series"], AppPaths.AdminSeries), new(L["Breadcrumb"])];
 
@@ -140,6 +149,9 @@ else
         ("Template", key => key is CategoryKey or ConditionKey or BindingKey or FormatKey or OrientationKey or ReadingDirectionKey or ColorKey),
     ];
 
+    // The block whose heads carry the detail of the two records: the first one presented (visuel/fusion/fusion-de-deux-fiches.md).
+    private int FirstShown => _all ? 0 : Math.Max(0, Blocks.ToList().FindIndex(b => b.Rows.Any(r => MergeView.HasChoice(r.First, r.Second, same: r.Same))));
+
     private IEnumerable<(string Key, List<Row> Rows)> Blocks
     {
         get
@@ -153,7 +165,7 @@ else
     /// A row of the merge: a data, or an element held by one series only (<paramref name="Element"/>, of the series
     /// <paramref name="Holder"/>), or by both, the same value on both sides.
     /// </summary>
-    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null);
+    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null, EntityKind? Kind = null, bool? Same = null);
 
     // In the order of the entry form of a series (visuel/saisie-serie/contenu.md).
     private IEnumerable<Row> Rows
@@ -174,9 +186,9 @@ else
             foreach (var row in ContributionRows())
                 yield return row;
             yield return new(PublisherKey, L["Data.Publisher"], PublisherText(first), PublisherText(second));
-            foreach (var row in ElementRows("genre", L["Data.Genre"], s => s.Genres.Select(g => (g.Id, g.Label))))
+            foreach (var row in ElementRows("genre", EntityKind.Genre, L["Data.Genre"], s => s.Genres.Select(g => (g.Id, g.Label))))
                 yield return row;
-            foreach (var row in ElementRows("universe", L["Data.Universe"], s => s.Universes.Select(u => (u.Universe.Id, UniverseText(u)))))
+            foreach (var row in ElementRows("universe", EntityKind.Universe, L["Data.Universe"], s => s.Universes.Select(u => (u.Universe.Id, UniverseText(u)))))
                 yield return row;
             yield return new(SummaryKey, L["Data.Summary"], first.Summary, second.Summary, Long: true);
             yield return new(NotesKey, L["Data.Notes"], first.PersonalNotes, second.PersonalNotes, Long: true);
@@ -192,7 +204,7 @@ else
     }
 
     // A genre or a universe of both series, by its identifier: once, the same on both sides; of one series only, retained or not.
-    private IEnumerable<Row> ElementRows(string kind, string label, Func<SeriesMergeRecord, IEnumerable<(Guid Id, string Text)>> elements)
+    private IEnumerable<Row> ElementRows(string kind, EntityKind entity, string label, Func<SeriesMergeRecord, IEnumerable<(Guid Id, string Text)>> elements)
     {
         var (first, second) = (elements(Preview!.First).ToList(), elements(Preview.Second).ToList());
         foreach (var (id, text) in first.Concat(second.Where(e => !first.Exists(f => f.Id == e.Id))))
@@ -205,7 +217,7 @@ else
                 (true, false) => MergeSide.First,
                 _ => MergeSide.Second,
             };
-            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null, Element: holder is null ? null : id, Holder: holder);
+            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null, Element: holder is null ? null : id, Holder: holder, Kind: entity);
         }
     }
 
@@ -220,10 +232,10 @@ else
         foreach (var credit in credits)
         {
             var name = AuthorName(credit.First().Contribution.Author);
-            var only = credit.Count() == 1 ? credit.Single() : ((SeriesMergeContribution, MergeSide)?)null;
+            var only = credit.Count() == 1 ? credit.Single() : ((MergeContribution, MergeSide)?)null;
             yield return new($"contribution-{credit.Key.Id}-{credit.Key.Role}", Values.Of(credit.Key.Role),
                 only is { Item2: MergeSide.Second } ? null : name, only is { Item2: MergeSide.First } ? null : name,
-                Element: only?.Item1.Id, Holder: only?.Item2);
+                Element: only?.Item1.Id, Holder: only?.Item2, Kind: EntityKind.Contribution);
         }
     }
 
@@ -281,16 +293,16 @@ else
             // no value of its own: one entered by hand is retained against it.
             Choices = Rows.ToDictionary(row => row.Key, row => row.Key == SortKeyKey
                 ? Initial(Preview.First.ManualSortKey, Preview.Second.ManualSortKey)
-                : Initial(row.First, row.Second));
+                : Initial(row.First, row.Second, row.Same));
         }
 
         await ReadSortKeyAsync();
     }
 
-    private static MergeSide? Initial(string? first, string? second) =>
+    private static MergeSide? Initial(string? first, string? second, bool? same = null) =>
         (first, second) switch
         {
-            _ when first == second => MergeSide.First,
+            _ when MergeView.IsSame(first, second, same) => MergeSide.First,
             (_, null) => MergeSide.First,
             (null, _) => MergeSide.Second,
             _ => null,
@@ -357,6 +369,18 @@ else
     }
 
     private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    // What the merge will delete, set apart in the confirmation (fonctionnel/regles-metier/fusion-des-fiches.md): each element
+    // of a list discarded, by type in the order of the entity types, and by the series that held it.
+    private IReadOnlyList<string> Removals =>
+    [
+        .. Merge.Discarded(
+            Rows.Where(r => r.Element is not null && Choices![r.Key] != r.Holder)
+                .Select(r => (Kind: r.Kind!.Value, Holder: r.Holder!.Value, Name: (r.Holder == MergeSide.First ? r.First : r.Second)!, r.Label))
+                .Select(d => (d.Kind, d.Holder, d.Kind == EntityKind.Contribution ? L["Confirm.Contribution", Citation.Of(d.Name), d.Label].Value : Citation.Of(d.Name))),
+            side => Of(side).Title),
+    ];
+
 
     private void OpenConfirmation()
     {

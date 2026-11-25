@@ -1,5 +1,6 @@
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Frontend.Formatting;
 using Microsoft.Extensions.Localization;
 
 namespace Bdtheque.Frontend.Components.Merge;
@@ -8,7 +9,7 @@ namespace Bdtheque.Frontend.Components.Merge;
 /// The texts every merge shares (visuel/fusion/fusion-de-deux-fiches.md), written once, so that they cannot diverge from one type
 /// of records to another: what is left to choose, and the confirmation, in the future, the confirmation preceding what it says.
 /// </summary>
-public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer)
+public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer, Citation citation)
 {
     /// <summary>« 2 données restent à choisir », « Tout est choisi ».</summary>
     public string PendingText(int pending) => pending switch
@@ -24,8 +25,8 @@ public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer)
     /// <summary>« La fusion est définitive. », which opens the confirmation as it opens that of a deletion.</summary>
     public string Definitive => localizer["Definitive"].Value;
 
-    /// <summary>« Les deux fiches n'en feront plus qu'une : Gotlib. »</summary>
-    public string OneRecord(string name) => localizer["OneRecord", name].Value;
+    /// <summary>« Les deux fiches n'en feront plus qu'une : « Gotlib ». », the name cited (fonctionnel/presentation/noms-cites-dans-un-message.md).</summary>
+    public string OneRecord(string name) => localizer["OneRecord", citation.Of(name)].Value;
 
     /// <summary>« Fusionner définitivement ».</summary>
     public string ConfirmLabel => localizer["Confirm"].Value;
@@ -49,6 +50,31 @@ public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer)
         1 => parts[0],
         _ => localizer["Last", string.Join(localizer["Comma"].Value, parts.Take(parts.Count - 1)), parts[^1]].Value,
     };
+
+    /// <summary>
+    /// The elements of a list the merge discards, which the confirmation says it will delete (visuel/fusion/fusion-de-deux-fiches.md):
+    /// a line per type, in the order of the entity types, and per record that held them, the first one first
+    /// (« 1 contribution : « Albert Uderzo » (Dessin), de « Astérix » », « 2 genres : « Humour » et « Aventure », de « Asterix » »),
+    /// each title or name cited (fonctionnel/presentation/noms-cites-dans-un-message.md).
+    /// </summary>
+    /// <param name="discarded">
+    /// Each element discarded: its type (a genre, a universe or a contribution), the record that held it, its name, already cited
+    /// (« « Humour » », « « Albert Uderzo » (Dessin) »).
+    /// </param>
+    /// <param name="recordName">The name of a merged record, which this cites.</param>
+    public IEnumerable<string> Discarded(IEnumerable<(EntityKind Kind, MergeSide Holder, string Name)> discarded, Func<MergeSide, string> recordName) =>
+        discarded
+            .GroupBy(d => (d.Kind, d.Holder))
+            .OrderBy(g => EntityKindOrder.Of(g.Key.Kind)).ThenBy(g => g.Key.Holder)
+            .Select(g => DiscardedOfARecord(g.Key.Kind, [.. g.Select(d => d.Name)], recordName(g.Key.Holder)));
+
+    private string DiscardedOfARecord(EntityKind kind, IReadOnlyList<string> names, string record)
+    {
+        var listed = Enumerate(names);
+        return names.Count == 1
+            ? localizer[$"Discarded.One.{kind}", listed, citation.Of(record)].Value
+            : localizer[$"Discarded.Other.{kind}", names.Count, listed, citation.Of(record)].Value;
+    }
 
     /// <summary>Whether a type of records is named by the texts of the merge (a test pins every type a merge links).</summary>
     public bool Names(EntityKind kind) => !localizer[$"Linked.One.{kind}"].ResourceNotFound;

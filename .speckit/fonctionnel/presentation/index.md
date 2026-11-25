@@ -6,3 +6,4 @@
 * [Libellé d'une édition](libelle-d-une-edition.md) - Libellé d'une édition : éditeur, collection, année, ISBN ; éditeur du libellé menant à son site dans la consultation.
 * [Libellés contextuels sur l'édition](libelles-contextuels-sur-l-edition.md) - Libellés de la date et du montant selon le mode d'acquisition, gratuité.
 * [Ordre des types de fiche](ordre-des-types-de-fiche.md) - Ordre unique des types de fiche partout où l'application cite les fiches liées à une fiche (suppression et son refus, fiche, liste, fusion) : du contenant au contenu.
+* [Noms cités dans un message](noms-cites-dans-un-message.md) - Titre ou nom cité dans un message de l'application mis entre guillemets de citation ; à lire pour tout texte qui cite une fiche.

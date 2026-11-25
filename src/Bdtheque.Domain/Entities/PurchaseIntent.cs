@@ -32,4 +32,14 @@ public sealed class PurchaseIntent : EntityBase
         Edition = edition;
         EditionId = edition?.Id;
     }
+
+    /// <summary>
+    /// Passes the intent to <paramref name="album"/>, with its identity, as the merge of two albums does
+    /// (<see cref="Album.TakeEditionsOf"/>): the edition it targets passes with it.
+    /// </summary>
+    internal void MoveTo(Album album)
+    {
+        Album = album;
+        AlbumId = album.Id;
+    }
 }

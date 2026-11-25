@@ -98,13 +98,17 @@ internal static class ChangeLogMappings
                 Amount(ChangeLogAttribute.InitialValue, nameof(Edition.InitialValueAmount), nameof(Edition.InitialValueCurrency)),
                 Text(ChangeLogAttribute.PersonalReference, nameof(Edition.PersonalReference)),
                 Text(ChangeLogAttribute.PersonalNotes, nameof(Edition.PersonalNotes)),
+                // Only changes by the merge of its album into another one, which designates the other one.
+                Reference<Album>(ChangeLogAttribute.Album, nameof(Edition.AlbumId)),
             ],
-            // An edition never moves to another album; it enters the collection when it becomes
-            // owned, a date set on save like the creation date, never entered.
-            [nameof(Edition.AlbumId), nameof(Edition.EnteredCollectionAt)]),
+            // It enters the collection when it becomes owned, a date set on save like the creation
+            // date, never entered.
+            [nameof(Edition.EnteredCollectionAt)]),
 
-        // An intent is never modified: a conversion replaces it by another. Its target is in its label.
-        [typeof(PurchaseIntent)] = new(RecordType.PurchaseIntent, [], [nameof(PurchaseIntent.AlbumId), nameof(PurchaseIntent.EditionId)]),
+        // An intent only moves to another album by the merge of its own into it, which designates the other one; otherwise it
+        // is never modified, a conversion replacing it by another. The edition it targets never changes, and is in its label.
+        [typeof(PurchaseIntent)] = new(
+            RecordType.PurchaseIntent, [Reference<Album>(ChangeLogAttribute.Album, nameof(PurchaseIntent.AlbumId))], [nameof(PurchaseIntent.EditionId)]),
 
         [typeof(Author)] = new(
             RecordType.Author,

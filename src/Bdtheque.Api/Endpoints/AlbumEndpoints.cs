@@ -2,6 +2,7 @@ using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
 using Bdtheque.Api.Errors;
+using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -43,6 +44,143 @@ internal static class AlbumEndpoints
         albums.MapPost("/", CreateAsync);
         albums.MapPut("/{id:guid}", UpdateAsync);
         albums.MapDeletion<Album>(DeletionLinks);
+        albums.MapGet("/merge", GetMergeAsync);
+        albums.MapPost("/merge", MergeAsync);
+    }
+
+    /// <summary>
+    /// Two albums to merge (fonctionnel/regles-metier/fusion-des-fiches.md), their editions and purchase intents, which pass to
+    /// the album that remains, and the intents on the whole album the merge withdraws.
+    /// </summary>
+    private static async Task<AlbumMergePreview> GetMergeAsync(Guid first, Guid second, BdthequeDbContext context, CancellationToken cancellationToken)
+    {
+        // A single snapshot: the counts are those of the two albums read.
+        await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
+        // Tracked, for the version of the aggregate (BdthequeDbContext.VersionOf): the context lives for this request only.
+        var albums = new List<Album>(2);
+        foreach (var id in new[] { first, second })
+        {
+            albums.Add(await WithAssociations(context.Albums).SingleOrDefaultAsync(a => a.Id == id, cancellationToken)
+                       ?? throw new EntityNotFoundException(typeof(Album), id));
+        }
+
+        var (firstAlbum, secondAlbum) = (albums[0], albums[1]);
+        var withdrawn = Album.PurchaseIntentsWithdrawnByMerge(firstAlbum, secondAlbum);
+        return new AlbumMergePreview(
+            await MergeRecordAsync(context, firstAlbum, cancellationToken),
+            await MergeRecordAsync(context, secondAlbum, cancellationToken),
+            MergeLinks(firstAlbum, secondAlbum, withdrawn),
+            [
+                .. firstAlbum.PurchaseIntents.Any(withdrawn.Contains) ? [MergeSide.First] : Array.Empty<MergeSide>(),
+                .. secondAlbum.PurchaseIntents.Any(withdrawn.Contains) ? [MergeSide.Second] : Array.Empty<MergeSide>(),
+            ]);
+    }
+
+    // What passes to the album that remains, in the order of the entity types: its owned editions, and its purchase intents, an
+    // edition targeted counted as its intent (fonctionnel/regles-metier/suppression-des-entites.md); an intent on the whole album
+    // both albums hold is the same wish, common to both, and one the merge withdraws does not pass (visuel/fusion/fusion-de-deux-fiches.md).
+    private static List<MergeLinkCount> MergeLinks(Album first, Album second, IReadOnlyList<PurchaseIntent> withdrawn)
+    {
+        static int Owned(Album album) => album.Editions.Count(e => e.AcquisitionMode is not null);
+        int Intents(Album album) => album.PurchaseIntents.Count(p => !withdrawn.Contains(p));
+        var commonIntents = first.PurchaseIntents.Concat(second.PurchaseIntents).Count(p => p.EditionId is null && !withdrawn.Contains(p)) == 2 ? 1 : 0;
+        return
+        [
+            new(EntityKind.Edition, Owned(first) + Owned(second), Owned(first), Owned(second), 0),
+            new(EntityKind.PurchaseIntent, Intents(first) + Intents(second) - commonIntents, Intents(first), Intents(second), commonIntents),
+        ];
+    }
+
+    private static async Task<AlbumMergeRecord> MergeRecordAsync(BdthequeDbContext context, Album album, CancellationToken cancellationToken) =>
+        new(
+            album.Id, album.Title, album.IsManualSortKey ? album.SortKey : null,
+            album.Series is { } series ? new SeriesListItem(series.Id, series.Title) : null, album.Series?.SortKey,
+            EnumMapping.Map<ContractEnums.AlbumType>(album.Type)!.Value, album.IsSpecialIssue, album.VolumeNumber, album.StartVolumeNumber,
+            album.EndVolumeNumber, album.FirstPublicationYear, album.FirstPublicationMonth, album.Summary, album.PersonalNotes,
+            EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating), FormReferences.Genres(album.Genres),
+            await FormReferences.UniversesInHierarchyAsync(context, album.Universes, cancellationToken),
+            [
+                .. album.Contributions
+                    .OrderBy(c => c.Role).ThenBy(c => c.Author.SortKey).ThenBy(c => c.AuthorId)
+                    .Select(c => new MergeContribution(
+                        c.Id, new AuthorListItem(c.AuthorId, c.Author.LastName, c.Author.FirstName, c.Author.Pseudonym),
+                        EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value)),
+            ],
+            album.ModifiedAt, context.VersionOf(album));
+
+    /// <summary>
+    /// Merges two albums: the album that remains keeps each data chosen, the type and the volumes an omnibus covers together, the
+    /// genres, universes and contributions retained of both, a credit both held being kept once; the editions of both are its
+    /// editions, with their intents, and an intent on the whole album is withdrawn once it has one.
+    /// </summary>
+    private static Task<MergeResult> MergeAsync(AlbumMergeRequest request, BdthequeDbContext context, CancellationToken cancellationToken) =>
+        RecordMerge.MergeAsync<Album>(
+            context, request.First, request.Second,
+            RecordMerge.KeepsFirst(
+            [
+                request.Series, request.Title, request.SortKey, request.VolumeNumber, request.Type, request.IsSpecialIssue,
+                request.FirstPublicationDate, request.Summary, request.PersonalNotes, request.Rating,
+                .. request.Genres.Select(g => g.Side), .. request.Universes.Select(u => u.Side), .. request.Contributions.Select(c => c.Side),
+            ]),
+            pair => AssignMerged(pair, request),
+            async pair =>
+            {
+                // What the album that remains takes of either album, read with them before anything changes.
+                foreach (var album in new[] { pair.First, pair.Second })
+                    await LoadChildrenAsync(context, album, cancellationToken);
+
+                // A credit both albums hold is kept once, by the contribution of the album that remains, which a saved search
+                // designating the other one designates instead (contributions are searched).
+                var replaced = pair.Kept.CreditsHeldOf(pair.Merged).Select(c => new MergeReplacement(EntityKind.Contribution, c.Removed, c.Kept)).ToList();
+                pair.Kept.TakeEditionsOf(pair.Merged);
+                return replaced;
+            },
+            cancellationToken);
+
+    // The children of an album locked for its merge, which WithAssociations reads with an album otherwise; its editions, intents
+    // and contributions are always loaded with it (AlbumConfiguration).
+    private static async Task LoadChildrenAsync(BdthequeDbContext context, Album album, CancellationToken cancellationToken)
+    {
+        var entry = context.Entry(album);
+        await entry.Collection(a => a.Genres).LoadAsync(cancellationToken);
+        await entry.Collection(a => a.Universes).LoadAsync(cancellationToken);
+        await entry.Reference(a => a.Series).LoadAsync(cancellationToken);
+        await entry.Collection(a => a.Contributions).Query().Include(c => c.Author).LoadAsync(cancellationToken);
+    }
+
+    // The data of the album that remains, each of the album chosen, read from both before it changes.
+    private static void AssignMerged(MergePair<Album> pair, AlbumMergeRequest request)
+    {
+        var kept = pair.Kept;
+        var (title, series) = (pair.Of(request.Title).Title, pair.Of(request.Series).Series);
+        // Without a title of its own, the album is filed under the sort key of its series, which no sort key entered by hand
+        // replaces (visuel/saisie-album/contenu.md): the one chosen then has nothing to apply to.
+        var sortKey = title is not null && pair.Of(request.SortKey) is { IsManualSortKey: true } manual ? manual.SortKey : null;
+        var typed = pair.Of(request.Type);
+        var (type, start, end) = (typed.Type, typed.StartVolumeNumber, typed.EndVolumeNumber);
+        var (specialIssue, volume) = (pair.Of(request.IsSpecialIssue).IsSpecialIssue, pair.Of(request.VolumeNumber).VolumeNumber);
+        var published = pair.Of(request.FirstPublicationDate);
+        var (year, month) = (published.FirstPublicationYear, published.FirstPublicationMonth);
+        var (summary, notes, rating) = (pair.Of(request.Summary).Summary, pair.Of(request.PersonalNotes).PersonalNotes, pair.Of(request.Rating).Rating);
+        var genres = RecordMerge.Retained(pair, request.Genres, a => a.Genres, g => g.Id);
+        var universes = RecordMerge.Retained(pair, request.Universes, a => a.Universes, u => u.Id);
+        var contributions = RecordMerge.Retained(pair, request.Contributions, a => a.Contributions, c => (c.AuthorId, c.Role));
+
+        kept.MergeContributions(pair.Merged, [.. contributions.Select(c => c.Id)]);
+        kept.SetTitleSeriesAndContributions(title, series, [.. kept.Contributions.Select(c => (c.Author, c.Role))]);
+        if (sortKey is not null)
+            kept.SetSortKey(sortKey);
+        else
+            kept.ResetSortKey();
+        kept.SetTypeAndVolumeRange(type, start, end);
+        kept.SetSpecialIssue(specialIssue);
+        kept.SetVolumeNumber(volume);
+        kept.SetFirstPublicationDate(year, month);
+        kept.SetSummary(summary);
+        kept.SetPersonalNotes(notes);
+        kept.SetRating(rating);
+        FormReferences.ReplaceAssociations(kept.Genres, genres, kept.AddGenre, kept.RemoveGenre);
+        FormReferences.ReplaceAssociations(kept.Universes, universes, kept.AddUniverse, kept.RemoveUniverse);
     }
 
     public static void MapAlbumCatalog(this RouteGroupBuilder catalog)

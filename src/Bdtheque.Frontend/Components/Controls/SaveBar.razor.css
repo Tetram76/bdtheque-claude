@@ -47,6 +47,13 @@
     display: none;
 }
 
+.save-bar-options {
+    display: flex;
+    flex: none;
+    margin-inline-start: auto;
+    font-size: var(--font-size-small);
+}
+
 .save-bar-actions {
     display: flex;
     flex: none;

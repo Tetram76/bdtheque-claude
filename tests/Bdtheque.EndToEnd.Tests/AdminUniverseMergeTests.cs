@@ -46,8 +46,8 @@ public sealed class AdminUniverseMergeTests(MergeApplication application) : Brow
         await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
 
         var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux univers ?" });
-        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : Star Wars {_marker}.");
-        await Assertions.Expect(confirmation).ToContainTextAsync("Les sous-univers homonymes n'en feront plus qu'un chacun : Clone Wars.");
+        await Assertions.Expect(confirmation).ToContainTextAsync($"Les deux fiches n'en feront plus qu'une : «\u00A0Star Wars {_marker}\u00A0».");
+        await Assertions.Expect(confirmation).ToContainTextAsync("Les sous-univers homonymes n'en feront plus qu'un chacun : «\u00A0Clone Wars\u00A0».");
         await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminUniverses));
@@ -68,7 +68,10 @@ public sealed class AdminUniverseMergeTests(MergeApplication application) : Brow
         var page = await OpenAsync(theme, $"{AppPaths.AdminMergeUniverses}?universe={first.Id}&other={second.Id}");
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
 
+        // Nothing to choose: left out of the reduced display, the default; presented by « Tout afficher ».
         var parent = page.GetByRole(AriaRole.Radiogroup, new() { Name = "Univers parent" });
+        await Assertions.Expect(parent).ToHaveCountAsync(0);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
         await Assertions.Expect(parent.Locator("input[value=Second]")).ToBeDisabledAsync();
         await Assertions.Expect(parent.Locator("input[value=First]")).ToBeCheckedAsync();
         await Assertions.Expect(parent).ToContainTextAsync("Impossible : l'univers qui reste en serait son propre ancêtre.");

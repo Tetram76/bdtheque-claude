@@ -5,6 +5,7 @@
 @using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<AdminMergeGenres> L
 @inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
 @inject ApiClient Api
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
@@ -26,15 +27,20 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Label, Preview.Second.Label]"
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Citation.Of(Preview.First.Label), Citation.Of(Preview.Second.Label)]"
                State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
                SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminGenres" OnSave="OpenConfirmation"
                Problem="@MergeProblem">
-        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)">
-            <MergeChoice Id="merge-label" Label="@L["Label"]" FirstRecord="@Preview.First.Label" SecondRecord="@Preview.Second.Label"
-                         First="@Preview.First.Label" Second="@Preview.Second.Label" @bind-Selected="Choices!.Label" />
-        </MergeData>
-        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Label" SecondName="@Preview.Second.Label" Count="Count" />
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)">
+                    <MergeChoice Id="merge-label" Label="@L["Label"]" FirstRecord="@Preview.First.Label" SecondRecord="@Preview.Second.Label"
+                                 First="@Preview.First.Label" Second="@Preview.Second.Label" @bind-Selected="Choices!.Label" />
+                </MergeData>
+            </MergeView>
+            <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Label" SecondName="@Preview.Second.Label" Count="Count" />
+        </ChildContent>
     </EntryForm>
 
     @if (_confirming)
@@ -46,7 +52,7 @@ else
                     <li>@Merge.OneRecord(Kept)</li>
                     @if (Merge.Linked(Preview.Links) is { } linked)
                     {
-                        <li>@L["Confirm.Classes", Kept, linked]</li>
+                        <li>@L["Confirm.Classes", Citation.Of(Kept), linked]</li>
                     }
                 </ul>
             </ChildContent>
@@ -58,6 +64,8 @@ else
 }
 
 @code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
     private ApiProblem? _loadProblem;
     private ApiProblem? _mergeProblem;
     private EntryForm? _form;
@@ -81,7 +89,7 @@ else
     [PersistentState]
     public GenreMergeChoices? Choices { get; set; }
 
-    private MergeTexts Merge => new(MergeLocalizer);
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
 
     private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Genres"], AppPaths.AdminGenres), new(L["Breadcrumb"])];
 
