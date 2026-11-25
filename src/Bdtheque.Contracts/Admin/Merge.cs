@@ -121,3 +121,37 @@ public sealed record PublisherCollectionMerge(Guid First, Guid Second, MergeSide
 /// <summary>The merge of two publishers: each data kept, of the one or the other, and the name of each pair of homonymous collections.</summary>
 public sealed record PublisherMergeRequest(
     MergedRecord First, MergedRecord Second, MergeSide Name, MergeSide Website, IReadOnlyList<PublisherCollectionMerge> Collections);
+
+/// <summary>A universe as its merge presents it, with its parent and its ancestors.</summary>
+/// <param name="Parent">Its parent with the ancestors of the latter, none at the top of the hierarchy.</param>
+/// <param name="ParentChoosable">
+/// Whether its parent can be that of the universe that remains: neither the other universe nor one of the sub-universes of
+/// either (fonctionnel/regles-metier/fusion-des-fiches.md, univers).
+/// </param>
+public sealed record UniverseMergeRecord(
+    Guid Id, string Name, string? Description, UniverseInHierarchy? Parent, bool ParentChoosable, DateTimeOffset ModifiedAt, uint Version);
+
+/// <summary>A sub-universe of a pair the merge makes homonymous, as its merge presents it.</summary>
+public sealed record UniverseMergeSubRecord(Guid Id, string Name, string? Description, DateTimeOffset ModifiedAt, uint Version);
+
+/// <summary>
+/// Two sub-universes, one under each merged universe or under a pair merged already, that the merge would make homonymous, merged
+/// with it (fonctionnel/regles-metier/fusion-des-fiches.md).
+/// </summary>
+/// <param name="Path">The names that lead to the pair under the universe that remains, the name of the pair last.</param>
+public sealed record UniverseMergePair(IReadOnlyList<string> Path, UniverseMergeSubRecord First, UniverseMergeSubRecord Second);
+
+/// <summary>
+/// Two universes to merge, their homonymous sub-universes merged with them, at every level, and the series, albums and
+/// sub-universes that pass to the universe that remains, in the order of the entity types.
+/// </summary>
+public sealed record UniverseMergePreview(
+    UniverseMergeRecord First, UniverseMergeRecord Second, IReadOnlyList<UniverseMergePair> Pairs, IReadOnlyList<MergeLinkCount> Links);
+
+/// <summary>What a pair of homonymous sub-universes keeps, of the one or the other.</summary>
+public sealed record UniverseMergePairChoice(MergedRecord First, MergedRecord Second, MergeSide Name, MergeSide Description);
+
+/// <summary>The merge of two universes: each data kept, of the one or the other, and what each pair of sub-universes keeps.</summary>
+public sealed record UniverseMergeRequest(
+    MergedRecord First, MergedRecord Second, MergeSide Name, MergeSide Description, MergeSide Parent,
+    IReadOnlyList<UniverseMergePairChoice> Pairs);

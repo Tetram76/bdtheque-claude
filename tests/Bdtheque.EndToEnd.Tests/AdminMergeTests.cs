@@ -240,7 +240,7 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
 
 /// <summary>
 /// An application whose records the merges delete, which no other test may count on, with two authors saved twice, two genres,
-/// two publishers and two series saved twice,
+/// two publishers, two series and two universes saved twice,
 /// at fixed dates, for the captures of the merge (<see cref="Captures.AdminMergeCaptureTests"/>), which write nothing.
 /// </summary>
 public sealed class MergeApplication : ApplicationHost
@@ -258,6 +258,11 @@ public sealed class MergeApplication : ApplicationHost
     public SeriesForm Asterix { get; private set; } = null!;
 
     public SeriesForm AsterixAgain { get; private set; } = null!;
+
+    /// <summary>The two universes of the captures: under two parents, with homonymous sub-universes at two levels.</summary>
+    public UniverseForm StarWars { get; private set; } = null!;
+
+    public UniverseForm StarWarsTwin { get; private set; } = null!;
 
     protected override async Task SeedAsync()
     {
@@ -337,6 +342,17 @@ public sealed class MergeApplication : ApplicationHost
         foreach (var volume in Enumerable.Range(1, 2))
             await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album(Asterix.Id, volume));
         await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album(AsterixAgain.Id, 3));
+
+        var lucasfilm = await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Lucasfilm", null, null));
+        StarWars = await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Star Wars",
+            "La saga galactique créée par George Lucas en 1977 : ses films, ses séries animées, ses romans et ses bandes dessinées.", null));
+        StarWarsTwin = await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Star wars", null, lucasfilm.Id));
+        var cloneWars = await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Clone Wars",
+            "La guerre des clones, entre les épisodes II et III.", StarWars.Id));
+        var cloneWarsTwin = await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Clone wars", null, StarWarsTwin.Id));
+        await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Les Jedi", null, cloneWars.Id));
+        await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Les Jédi", null, cloneWarsTwin.Id));
+        await PostAsync<CreateUniverseRequest, UniverseForm>(api, "/admin/universes", new("Rebels", null, StarWarsTwin.Id));
     }
 
     /// <summary>The two publishers of the captures: the first one, and the same saved again under a longer name.</summary>

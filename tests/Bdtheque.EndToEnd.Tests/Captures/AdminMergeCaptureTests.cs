@@ -17,7 +17,8 @@ namespace Bdtheque.EndToEnd.Tests.Captures;
 [Collection(MergeApplication.Name)]
 public sealed partial class AdminMergeCaptureTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
 {
-    private static readonly string[] States = ["authors", "authors-confirmation", "publishers", "publishers-confirmation", "series"];
+    private static readonly string[] States =
+        ["authors", "authors-confirmation", "publishers", "publishers-confirmation", "series", "universes", "universes-confirmation"];
 
     public static TheoryData<string, string, string> Captures
     {
@@ -37,12 +38,12 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
     public async Task Screen_LooksLikeItsReference(string theme, string state, string viewport)
     {
         var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
-        var path = state switch
+        var path = state.Split('-')[0] switch
         {
-            _ when state.StartsWith("authors", StringComparison.Ordinal) =>
-                $"{AppPaths.AdminMergeAuthors}?author={Application.Gotlib.Id}&other={Application.MarcelGotlib.Id}",
+            "authors" => $"{AppPaths.AdminMergeAuthors}?author={Application.Gotlib.Id}&other={Application.MarcelGotlib.Id}",
+            "publishers" => $"{AppPaths.AdminMergePublishers}?publisher={Application.Dupuis.Id}&other={Application.EditionsDupuis.Id}",
             "series" => $"{AppPaths.AdminMergeSeries}?series={Application.Asterix.Id}&other={Application.AsterixAgain.Id}",
-            _ => $"{AppPaths.AdminMergePublishers}?publisher={Application.Dupuis.Id}&other={Application.EditionsDupuis.Id}",
+            _ => $"{AppPaths.AdminMergeUniverses}?universe={Application.StarWars.Id}&other={Application.StarWarsTwin.Id}",
         };
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
@@ -57,12 +58,19 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Biographie" }).GetByRole(AriaRole.Radio, new() { Name = "Né à Paris" }).CheckAsync();
                 await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync("Affiché : Gotlib");
             }
-            else
+            else if (state == "publishers-confirmation")
             {
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true })
                     .GetByRole(AriaRole.Radio, new() { NameRegex = StartsWithDupuis() }).CheckAsync();
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Aire Libre" })
                     .GetByRole(AriaRole.Radio, new() { NameRegex = CapitalizedAireLibre() }).CheckAsync();
+            }
+            else
+            {
+                // Every name chosen, by the value of its radio: the names differ only by their case or their accents.
+                foreach (var group in await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Nom", Exact = true }).AllAsync())
+                    await group.Locator("input[value=First]").CheckAsync();
+                await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
             }
 
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
@@ -73,6 +81,10 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
             // The title, the status, the completeness and the format differ; the publisher, of the first series alone, and the
             // sort key entered by hand, against the one following the title, are retained.
             await Assertions.Expect(page.GetByText("4 données restent à choisir")).ToBeAttachedAsync();
+        }
+        else if (state == "universes")
+        {
+            await Assertions.Expect(page.GetByText("3 données restent à choisir")).ToBeAttachedAsync();
         }
         else
         {

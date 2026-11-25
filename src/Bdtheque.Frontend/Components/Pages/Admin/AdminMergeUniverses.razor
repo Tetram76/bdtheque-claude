@@ -1,0 +1,280 @@
+@attribute [Route(AppPaths.AdminMergeUniverses)]
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@inject IStringLocalizer<AdminMergeUniverses> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two universes (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the universes,
+   which gives the universe and the other one: each data the universe keeps, of the one or the other, its parent among them
+   unless it would make the universe its own ancestor; what each pair of homonymous sub-universes keeps; what passes to it;
+   then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge, which the API alone
+   holds: it sends, data by data, the record whose value is kept, the API saying which parent cannot be kept. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminUniverseMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Preview.First.Name, Preview.Second.Name]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminUniverses" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        <MergeData First="Head(Preview.First)" Second="Head(Preview.Second)" Result="@Result">
+            <MergeChoice Id="merge-name" Label="@L["Name"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                         First="@Preview.First.Name" Second="@Preview.Second.Name" @bind-Selected="Choices!.Name" />
+            <MergeChoice Id="merge-parent" Label="@L["Parent"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                         First="@Path(Preview.First.Parent)" Second="@Path(Preview.Second.Parent)" @bind-Selected="Choices.Parent"
+                         Impossible="ImpossibleParent" ImpossibleReason="@L["Parent.Impossible"]" />
+            <MergeChoice Id="merge-description" Label="@L["Description"]" FirstRecord="@Preview.First.Name" SecondRecord="@Preview.Second.Name"
+                         First="@Preview.First.Description" Second="@Preview.Second.Description" @bind-Selected="Choices.Description" Long="true" />
+        </MergeData>
+        @if (Preview.Pairs.Count > 0)
+        {
+            <Block Title="@L["Pairs.Title"]" Kicker="@L["Pairs.Kicker"]">
+                <p class="merge-pairs-lead">@L["Pairs.Lead"]</p>
+                @for (var index = 0; index < Preview.Pairs.Count; index++)
+                {
+                    var pair = Preview.Pairs[index];
+                    var choice = Choices!.Pairs[index];
+                    <section class="merge-pair" aria-label="@PairPath(pair)">
+                        <h3 class="merge-pair-title">@PairPath(pair)</h3>
+                        <MergeData Framed="false" First="new MergeRecordHead(pair.First.Name, null, pair.First.ModifiedAt)"
+                                   Second="new MergeRecordHead(pair.Second.Name, null, pair.Second.ModifiedAt)">
+                            <MergeChoice Id="@($"merge-pair-{index}-name")" Label="@L["Name"]" FirstRecord="@pair.First.Name" SecondRecord="@pair.Second.Name"
+                                         First="@pair.First.Name" Second="@pair.Second.Name" @bind-Selected="choice.Name" />
+                            <MergeChoice Id="@($"merge-pair-{index}-description")" Label="@L["Description"]" FirstRecord="@pair.First.Name"
+                                         SecondRecord="@pair.Second.Name" First="@pair.First.Description" Second="@pair.Second.Description"
+                                         @bind-Selected="choice.Description" Long="true" />
+                        </MergeData>
+                    </section>
+                }
+            </Block>
+        }
+        <MergeLinks Links="Preview.Links" FirstName="@Preview.First.Name" SecondName="@Preview.Second.Name" Count="Count" />
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(KeptName)</li>
+                    @if (Merge.Linked(Preview.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Gathers", KeptName, linked]</li>
+                    }
+                    @if (Preview.Pairs.Count > 0)
+                    {
+                        <li>@L["Confirm.Pairs", Merge.Enumerate([.. Preview.Pairs.Select(PairPath)])]</li>
+                    }
+                </ul>
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The universe the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "universe")]
+    public Guid? UniverseId { get; set; }
+
+    /// <summary>The other universe, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two universes as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public UniverseMergePreview? Preview { get; set; }
+
+    /// <summary>The record each data is kept from, as the user chose it.</summary>
+    [PersistentState]
+    public UniverseMergeChoices? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Universes"], AppPaths.AdminUniverses), new(L["Breadcrumb"])];
+
+    private int Pending =>
+        new[] { Choices!.Name, Choices.Description, Choices.Parent }.Concat(Choices.Pairs.SelectMany(p => new[] { p.Name, p.Description }))
+            .Count(c => c is null);
+
+    // The parent that would make the universe that remains its own ancestor, which the API says.
+    private MergeSide? ImpossibleParent => (Preview!.First.ParentChoosable, Preview.Second.ParentChoosable) switch
+    {
+        (false, _) => MergeSide.First,
+        (_, false) => MergeSide.Second,
+        _ => null,
+    };
+
+    // The name the universe keeps, that the confirmation names it by.
+    private string KeptName => Choices!.Name == MergeSide.Second ? Preview!.Second.Name : Preview!.First.Name;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is not null)
+            return;
+        if (UniverseId is not { } first || OtherId is not { } second)
+        {
+            Navigation.NavigateTo(AppPaths.AdminUniverses);
+            return;
+        }
+
+        try
+        {
+            Preview = await Api.GetAsync<UniverseMergePreview>($"/admin/universes/merge?first={first}&second={second}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _loadProblem = exception.Problem;
+            return;
+        }
+
+        // A value set on one side only, or the same on both, is retained at once; two different values wait for the user's
+        // choice: no record is favoured (fonctionnel/regles-metier/fusion-des-fiches.md). A parent that cannot be kept leaves
+        // the other one.
+        Choices = new UniverseMergeChoices
+        {
+            Name = Initial(Preview.First.Name, Preview.Second.Name),
+            Description = Initial(Preview.First.Description, Preview.Second.Description),
+            Parent = ImpossibleParent switch
+            {
+                MergeSide.First => MergeSide.Second,
+                MergeSide.Second => MergeSide.First,
+                _ => Initial(Preview.First.Parent?.Universe.Id.ToString(), Preview.Second.Parent?.Universe.Id.ToString()),
+            },
+            Pairs = [.. Preview.Pairs.Select(p => new UniversePairChoices
+            {
+                Name = Initial(p.First.Name, p.Second.Name),
+                Description = Initial(p.First.Description, p.Second.Description),
+            })],
+        };
+    }
+
+    private static MergeSide? Initial(string? first, string? second) => (first, second) switch
+    {
+        _ when first == second => MergeSide.First,
+        (_, null) => MergeSide.First,
+        (null, _) => MergeSide.Second,
+        _ => null,
+    };
+
+    // A universe with its ancestors, as the panel of a universe presents its parent (« Univers Hugo Pratt › Corto Maltese »).
+    private string? Path(UniverseInHierarchy? universe) =>
+        universe is null ? null : string.Join(L["Separator"].Value, universe.Ancestors.Select(a => a.Name).Append(universe.Universe.Name));
+
+    private string PairPath(UniverseMergePair pair) => string.Join(L["Separator"].Value, pair.Path);
+
+    // What the universe becomes: where it is classed, once its name and its parent are chosen.
+    private RenderFragment? Result
+    {
+        get
+        {
+            if (Choices!.Name is null || Choices.Parent is null)
+                return null;
+            var parent = Choices.Parent == MergeSide.Second ? Preview!.Second.Parent : Preview!.First.Parent;
+            if (parent is null)
+                return @<span>@L["Result.Classed"] : <strong>@L["Result.Top", KeptName]</strong></span>;
+            return @<span>@L["Result.Classed"] : <strong>@($"{Path(parent)}{L["Separator"]}{KeptName}")</strong></span>;
+        }
+    }
+
+    private MergeRecordHead Head(UniverseMergeRecord record)
+    {
+        var links = Preview!.Links.Select(l => (l.Kind, Count: record == Preview.First ? l.First : l.Second)).Where(l => l.Count > 0)
+            .Select(l => L[$"Links.{l.Kind}.{(l.Count == 1 ? "One" : "Other")}", l.Count].Value).ToList();
+        return new MergeRecordHead(record.Name, links.Count == 0 ? null : string.Join(" · ", links), record.ModifiedAt);
+    }
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<UniverseMergeRequest, MergeResult>("/admin/universes/merge", new UniverseMergeRequest(
+                new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+                Choices!.Name!.Value, Choices.Description!.Value, Choices.Parent!.Value,
+                [.. Preview.Pairs.Zip(Choices.Pairs, (pair, choice) => new UniverseMergePairChoice(
+                    new MergedRecord(pair.First.Id, pair.First.Version), new MergedRecord(pair.Second.Id, pair.Second.Version),
+                    choice.Name!.Value, choice.Description!.Value))]));
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminUniverseMerged);
+            Navigation.NavigateTo(AppPaths.AdminUniverses);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The universes as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+
+    /// <summary>The record each data of a universe is kept from, none while the user has not chosen.</summary>
+    public sealed class UniverseMergeChoices
+    {
+        public MergeSide? Name { get; set; }
+        public MergeSide? Description { get; set; }
+        public MergeSide? Parent { get; set; }
+        public List<UniversePairChoices> Pairs { get; set; } = [];
+    }
+
+    /// <summary>What a pair of homonymous sub-universes keeps.</summary>
+    public sealed class UniversePairChoices
+    {
+        public MergeSide? Name { get; set; }
+        public MergeSide? Description { get; set; }
+    }
+}

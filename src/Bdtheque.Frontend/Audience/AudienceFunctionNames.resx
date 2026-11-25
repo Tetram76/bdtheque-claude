@@ -615,4 +615,10 @@
   <data name="admin.series-merge.merged" xml:space="preserve">
     <value>Fusion de deux séries · fusion faite</value>
   </data>
+  <data name="admin.universe-merge" xml:space="preserve">
+    <value>Fusion de deux univers</value>
+  </data>
+  <data name="admin.universe-merge.merged" xml:space="preserve">
+    <value>Fusion de deux univers · fusion faite</value>
+  </data>
 </root>

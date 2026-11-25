@@ -271,6 +271,13 @@ public sealed class Album : EntityBase, IAggregateRoot
         SeriesId = kept.Id;
     }
 
+    /// <summary>
+    /// Attaches the album to <paramref name="kept"/> instead of <paramref name="merged"/>, as the merge of two universes does
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md); a album of both universes keeps <paramref name="kept"/> once.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same universe twice.</exception>
+    public void TransferUniverse(Universe merged, Universe kept) => _universes.Transfer(merged, kept);
+
     public void SetRating(AlbumRating? rating)
     {
         if (rating is not null)

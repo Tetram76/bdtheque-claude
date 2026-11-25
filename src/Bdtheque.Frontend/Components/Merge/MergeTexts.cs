@@ -39,13 +39,16 @@ public sealed class MergeTexts(IStringLocalizer<MergeTexts> localizer)
         var parts = links.Where(l => l.Total > 0)
             .Select(l => l.Total == 1 ? localizer[$"Linked.One.{l.Kind}"].Value : localizer[$"Linked.Other.{l.Kind}", l.Total].Value)
             .ToList();
-        return parts.Count switch
-        {
-            0 => null,
-            1 => localizer["Linked", parts[0]].Value,
-            _ => localizer["Linked", string.Join(localizer["Separator"].Value, parts[..^1]) + localizer["And"].Value + parts[^1]].Value,
-        };
+        return parts.Count == 0 ? null : localizer["Linked", Enumerate(parts)].Value;
     }
+
+    /// <summary>« a », « a et b », « a, b et c ».</summary>
+    public string Enumerate(IReadOnlyList<string> parts) => parts.Count switch
+    {
+        0 => "",
+        1 => parts[0],
+        _ => localizer["Last", string.Join(localizer["Comma"].Value, parts.Take(parts.Count - 1)), parts[^1]].Value,
+    };
 
     /// <summary>Whether a type of records is named by the texts of the merge (a test pins every type a merge links).</summary>
     public bool Names(EntityKind kind) => !localizer[$"Linked.One.{kind}"].ResourceNotFound;

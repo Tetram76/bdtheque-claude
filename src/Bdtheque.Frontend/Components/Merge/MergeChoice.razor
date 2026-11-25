@@ -60,14 +60,28 @@ else
 
     private bool IsSame => string.Equals(First, Second, StringComparison.Ordinal);
 
+    /// <summary>
+    /// The value that cannot be kept, if any (the parent of a universe that would make the universe that remains its own
+    /// ancestor): presented, not chosen, with <see cref="ImpossibleReason"/>.
+    /// </summary>
+    [Parameter]
+    public MergeSide? Impossible { get; set; }
+
+    [Parameter]
+    public string? ImpossibleReason { get; set; }
+
     private RenderFragment Option(MergeSide side, string record, string? value) =>
-        @<label class="merge-choice-option" data-selected="@(Selected == side)">
-            <input class="merge-choice-radio" type="radio" name="@Id" value="@side" checked="@(Selected == side)"
+        @<label class="merge-choice-option" data-selected="@(Selected == side)" data-impossible="@(Impossible == side)">
+            <input class="merge-choice-radio" type="radio" name="@Id" value="@side" checked="@(Selected == side)" disabled="@(Impossible == side)"
                    @onchange="() => SelectedChanged.InvokeAsync(side)" />
             <span class="merge-choice-mark" aria-hidden="true"><Icon Name="IconName.Check" /></span>
             <span class="merge-choice-text">
                 <span class="merge-choice-record">@record</span>
                 <span class="merge-choice-value" data-long="@Long">@if (value is null) { <NotSet Brief /> } else { @value }</span>
+                @if (Impossible == side)
+                {
+                    <span class="merge-choice-reason">@ImpossibleReason</span>
+                }
             </span>
         </label>;
 }

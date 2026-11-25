@@ -115,6 +115,36 @@ public sealed class Universe : EntityBase, IAggregateRoot
         AttachTo(parent);
     }
 
+    /// <summary>
+    /// Takes over <paramref name="merged"/>, as the merge of two universes does (fonctionnel/regles-metier/fusion-des-fiches.md):
+    /// its sub-universes pass under this universe, but those <paramref name="leftOut"/> (sub-universes merged in turn with one of
+    /// this universe, and this universe itself), and this universe takes <paramref name="parent"/>, which can be neither
+    /// <paramref name="merged"/> nor one of the sub-universes of either.
+    /// </summary>
+    /// <remarks>The prerequisite of <see cref="SetParent"/> applies: the whole hierarchy of both universes is loaded.</remarks>
+    /// <exception cref="ArgumentException">The same universe twice.</exception>
+    /// <exception cref="DomainRuleViolationException">
+    /// <see cref="DomainRules.UniverseHierarchyCycle"/>: <paramref name="parent"/> is <paramref name="merged"/> or one of the
+    /// sub-universes of either universe.
+    /// </exception>
+    public void Absorb(Universe merged, Universe? parent, IReadOnlyCollection<Guid> leftOut)
+    {
+        MergeGuard.EnsureDistinct(merged, this);
+        ArgumentNullException.ThrowIfNull(leftOut);
+        // The merged universe is deleted: it cannot be the parent of the one that remains, which its own ancestor walk would
+        // not see when this universe is one of its sub-universes.
+        if (parent?.Id == merged.Id)
+            throw CycleViolation();
+
+        // The parent first: this universe may stand under a sub-universe of the merged one, which can only pass under it once
+        // it has left it. A parent chosen among the sub-universes of either universe is refused all the same: under this
+        // universe, or under the merged one and moved under it next, it would then stand both above and below it.
+        if (parent?.Id != ParentId)
+            SetParent(parent);
+        foreach (var child in merged.Children.Where(c => c.Id != Id && !leftOut.Contains(c.Id)).ToList())
+            child.SetParent(this);
+    }
+
     private void AttachTo(Universe? parent)
     {
         Parent?._children.RemoveById(this);

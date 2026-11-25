@@ -48,7 +48,8 @@ internal static class RecordMerge
     /// <summary>
     /// Merges two records: both are locked and checked at the versions their data were read, what designated
     /// the other one is transferred to the record that remains, the saved searches designating the other one included, then the
-    /// record that remains takes its data and the other one is deleted, all in one transaction.
+    /// record that remains takes its data and the other one is deleted, all in one transaction: the caller's when it opened one,
+    /// which the caller then commits.
     /// </summary>
     /// <param name="keepFirst">Whether the first record remains (<see cref="KeepsFirst"/>).</param>
     /// <param name="assign">
@@ -68,7 +69,11 @@ internal static class RecordMerge
         CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        // The transaction of the caller, when it opened one to take a lock before any row lock (the hierarchy of the universes,
+        // choix-implementation/persistance/coherence-entre-tables.md), which the caller commits; otherwise one of its own.
+        await using var transaction = context.Database.CurrentTransaction is null
+            ? await context.Database.BeginTransactionAsync(cancellationToken)
+            : null;
         var (firstRoot, secondRoot) = await context.LoadAggregatesForWriteAsync<TRoot>(
             (first.Id, first.Version), (second.Id, second.Version), cancellationToken: cancellationToken);
         var pair = new MergePair<TRoot>(firstRoot, secondRoot, keepFirst);
@@ -79,17 +84,24 @@ internal static class RecordMerge
         // merged record is deleted, in the same save: the elements of the merged record the kept one retains leave it before its
         // deletion takes them along, and the change log records the kept record once. A unique value the kept record takes
         // from the other one (e.g. the display name of an author) is free, EF Core ordering the deletion that releases a value
-        // of a unique index before the update that takes it (source of EF Core, CommandBatchPreparer.AddUniqueValueEdges).
+        // of a unique index before the update that takes it (source of EF Core, CommandBatchPreparer.AddUniqueValueEdges),
+        // as a sub-universe moved to the kept universe before the deletion of its former parent.
         var replaced = (await transfer(pair)).ToList();
-        if (AdvancedSearchSchema.KindOf(typeof(TRoot)) is { } kind)
-            replaced.Add(new MergeReplacement(kind, pair.Merged.Id, pair.Kept.Id));
+        var kind = AdvancedSearchSchema.KindOf(typeof(TRoot));
+        if (kind is not null)
+            replaced.Add(new MergeReplacement(kind.Value, pair.Merged.Id, pair.Kept.Id));
         await TransferSavedSearchesAsync(context, replaced, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
 
         assign(pair);
-        context.Remove(pair.Merged);
+        // The merged record, and every other record of its type the transfer replaced by another one (the homonymous
+        // sub-universes merged with two universes), loaded by the transfer.
+        var removed = replaced.Where(r => r.Kind == kind).Select(r => r.Merged).Append(pair.Merged.Id).ToHashSet();
+        foreach (var record in context.Set<TRoot>().Local.Where(r => removed.Contains(r.Id)).ToList())
+            context.Remove(record);
         await context.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+        if (transaction is not null)
+            await transaction.CommitAsync(cancellationToken);
         return new MergeResult(pair.Kept.Id);
     }
 

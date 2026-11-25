@@ -159,4 +159,125 @@ public sealed class MergeTransferTests
 
         Assert.Throws<ArgumentException>(() => new Series("Gai-Luron").TransferAuthor(author, author));
     }
+    [Fact]
+    public void AlbumTransferUniverse_OfBothUniverses_KeepsTheKeptOneOnce()
+    {
+        var merged = new Universe("Star wars");
+        var kept = new Universe("Star Wars");
+        var album = new Album("Dark Empire", null, []);
+        album.AddUniverse(merged);
+        album.AddUniverse(kept);
+
+        album.TransferUniverse(merged, kept);
+
+        Assert.Same(kept, Assert.Single(album.Universes));
+    }
+
+    [Fact]
+    public void SeriesTransferUniverse_ReplacesTheMergedUniverseByTheKeptOne()
+    {
+        var merged = new Universe("Star wars");
+        var kept = new Universe("Star Wars");
+        var series = new Series("Clone Wars");
+        series.AddUniverse(merged);
+
+        series.TransferUniverse(merged, kept);
+
+        Assert.Same(kept, Assert.Single(series.Universes));
+    }
+
+    [Fact]
+    public void UniverseAbsorb_TakesTheSubUniversesOfTheMergedOneButThoseLeftOut()
+    {
+        var kept = new Universe("Star Wars");
+        var merged = new Universe("Star wars");
+        var moved = new Universe("Rebels");
+        var paired = new Universe("Clone wars");
+        moved.SetParent(merged);
+        paired.SetParent(merged);
+
+        kept.Absorb(merged, parent: null, leftOut: [paired.Id]);
+
+        Assert.Same(kept, moved.Parent);
+        Assert.Same(merged, paired.Parent);
+        Assert.Same(moved, Assert.Single(kept.Children));
+    }
+
+    [Fact]
+    public void UniverseAbsorb_TakesTheParentChosen()
+    {
+        var lucasfilm = new Universe("Lucasfilm");
+        var kept = new Universe("Star Wars");
+        var merged = new Universe("Star wars");
+        merged.SetParent(lucasfilm);
+
+        kept.Absorb(merged, lucasfilm, leftOut: []);
+
+        Assert.Same(lucasfilm, kept.Parent);
+    }
+
+    [Fact]
+    public void UniverseAbsorb_OfOneOfItsSubUniverses_KeepsItsSubUniversesUnderItself()
+    {
+        var pratt = new Universe("Univers Hugo Pratt");
+        var kept = new Universe("Corto Maltese");
+        var merged = new Universe("Corto");
+        var child = new Universe("Jeunesse");
+        kept.SetParent(pratt);
+        merged.SetParent(kept);
+        child.SetParent(merged);
+
+        kept.Absorb(merged, pratt, leftOut: []);
+
+        Assert.Same(kept, child.Parent);
+        Assert.Same(pratt, kept.Parent);
+    }
+
+    // The universe that remains stands deeper under the merged one, below a sub-universe of the latter, which passes under it:
+    // Pratt › Corto › Jeunesse › Corto Maltese becomes Pratt › Corto Maltese › Jeunesse.
+    [Fact]
+    public void UniverseAbsorb_OfAnAncestorAboveASubUniverse_TakesThatSubUniverseUnderItself()
+    {
+        var pratt = new Universe("Univers Hugo Pratt");
+        var merged = new Universe("Corto");
+        var child = new Universe("Jeunesse");
+        var kept = new Universe("Corto Maltese");
+        merged.SetParent(pratt);
+        child.SetParent(merged);
+        kept.SetParent(child);
+
+        kept.Absorb(merged, pratt, leftOut: []);
+
+        Assert.Same(pratt, kept.Parent);
+        Assert.Same(kept, child.Parent);
+    }
+
+    [Fact]
+    public void UniverseAbsorb_UnderTheMergedUniverse_Violates()
+    {
+        var kept = new Universe("Corto");
+        var merged = new Universe("Corto Maltese");
+        kept.SetParent(merged);
+
+        DomainAssert.Violates<Universe>(DomainRules.UniverseHierarchyCycle, nameof(Universe.ParentId), () => kept.Absorb(merged, merged, leftOut: []));
+    }
+
+    [Fact]
+    public void UniverseAbsorb_UnderASubUniverseOfTheMergedOne_Violates()
+    {
+        var kept = new Universe("Star Wars");
+        var merged = new Universe("Star wars");
+        var sub = new Universe("Rebels");
+        sub.SetParent(merged);
+
+        DomainAssert.Violates<Universe>(DomainRules.UniverseHierarchyCycle, nameof(Universe.ParentId), () => kept.Absorb(merged, sub, leftOut: []));
+    }
+
+    [Fact]
+    public void UniverseAbsorb_ItSelf_Throws()
+    {
+        var universe = new Universe("Star Wars");
+
+        Assert.Throws<ArgumentException>(() => universe.Absorb(universe, null, []));
+    }
 }

@@ -195,6 +195,13 @@ public sealed class Series : EntityBase, IAggregateRoot
     }
 
     /// <summary>
+    /// Attaches the series to <paramref name="kept"/> instead of <paramref name="merged"/>, as the merge of two universes does
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md); a series of both universes keeps <paramref name="kept"/> once.
+    /// </summary>
+    /// <exception cref="ArgumentException">The same universe twice.</exception>
+    public void TransferUniverse(Universe merged, Universe kept) => _universes.Transfer(merged, kept);
+
+    /// <summary>
     /// The contributions the series gives an album attached to it
     /// (fonctionnel/regles-metier/initialisation-des-contributions-depuis-la-serie.md): those of its template, for an album that
     /// has none yet, or, being created, whose authors are still exactly those of the series chosen before, which they replace;

@@ -130,6 +130,37 @@ public sealed class MergeTests : BunitContext
         Assert.Empty(data.FindAll(".merge-data-head-detail"));
     }
 
+    [Fact]
+    public void Choice_OfAnImpossibleValue_PresentsIt_WithoutLettingItBeChosen_AndSaysWhy()
+    {
+        var choice = Render<MergeChoice>(parameters => parameters
+            .Add(p => p.Id, "merge-parent").Add(p => p.Label, "Univers parent").Add(p => p.FirstRecord, "Corto Maltese").Add(p => p.SecondRecord, "Corto")
+            .Add(p => p.First, "Univers Hugo Pratt").Add(p => p.Second, "Univers Hugo Pratt › Corto Maltese")
+            .Add(p => p.Selected, MergeSide.First).Add(p => p.Impossible, MergeSide.Second).Add(p => p.ImpossibleReason, "Impossible."));
+
+        Assert.True(choice.Find("input[value=Second]").HasAttribute("disabled"));
+        Assert.False(choice.Find("input[value=First]").HasAttribute("disabled"));
+        Assert.Equal(["Impossible."], choice.FindAll(".merge-choice-reason").Select(r => r.TextContent));
+    }
+
+    [Fact]
+    public void Links_OfSubUniverses_SayTheHomonymsCommon()
+    {
+        var links = Render<MergeLinks>(parameters => parameters
+            .Add(p => p.Links, [new MergeLinkCount(EntityKind.Universe, 3, 2, 3, 2)])
+            .Add(p => p.FirstName, "Star Wars").Add(p => p.SecondName, "Star wars")
+            .Add(p => p.Count, link => $"{link.Total} sous-univers"));
+
+        Assert.Equal("les 2 de Star Wars et les 3 de Star wars, dont 2 communs aux deux fiches", links.Find(".merge-links-detail").TextContent);
+    }
+
+    [Fact]
+    public void Confirmation_EnumeratesMoreThanTwoTypes()
+    {
+        Assert.Equal("les 5 séries, les 38 albums et les 5 sous-univers des deux fiches", Texts.Linked(
+            [new MergeLinkCount(EntityKind.Series, 5, 4, 2, 1), new MergeLinkCount(EntityKind.Album, 38, 31, 9, 2), new MergeLinkCount(EntityKind.Universe, 5, 3, 4, 2)]));
+    }
+
     // Every type a merge links is named by the texts of the merge.
     [Theory]
     [InlineData(EntityKind.Series)]
@@ -137,5 +168,6 @@ public sealed class MergeTests : BunitContext
     [InlineData(EntityKind.PublisherCollection)]
     [InlineData(EntityKind.Edition)]
     [InlineData(EntityKind.PurchaseIntent)]
+    [InlineData(EntityKind.Universe)]
     public void Texts_NameEveryTypeAMergeLinks(EntityKind kind) => Assert.True(Texts.Names(kind));
 }
