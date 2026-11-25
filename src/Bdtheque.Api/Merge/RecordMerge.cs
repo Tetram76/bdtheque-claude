@@ -48,7 +48,8 @@ internal static class RecordMerge
     /// <summary>
     /// Merges two records: both are locked and checked at the versions their data were read, what designated
     /// the other one is transferred to the record that remains, the saved searches designating the other one included, then the
-    /// record that remains takes its data and the other one is deleted, all in one transaction.
+    /// record that remains takes its data and the other one is deleted, all in one transaction: the caller's when it opened one,
+    /// which the caller then commits.
     /// </summary>
     /// <param name="keepFirst">Whether the first record remains (<see cref="KeepsFirst"/>).</param>
     /// <param name="assign">
@@ -65,14 +66,14 @@ internal static class RecordMerge
     /// <exception cref="DbUpdateConcurrencyException">One of the records was modified since its data were read.</exception>
     public static async Task<MergeResult> MergeAsync<TRoot>(
         BdthequeDbContext context, MergedRecord first, MergedRecord second, bool keepFirst, Action<MergePair<TRoot>> assign, Func<MergePair<TRoot>, Task<IReadOnlyList<MergeReplacement>>> transfer,
-        CancellationToken cancellationToken, Func<CancellationToken, Task>? lockFirst = null)
+        CancellationToken cancellationToken)
         where TRoot : EntityBase, IAggregateRoot
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        // The lock some merges take before any row lock (the hierarchy of the universes,
-        // choix-implementation/persistance/coherence-entre-tables.md).
-        if (lockFirst is not null)
-            await lockFirst(cancellationToken);
+        // The transaction of the caller, when it opened one to take a lock before any row lock (the hierarchy of the universes,
+        // choix-implementation/persistance/coherence-entre-tables.md), which the caller commits; otherwise one of its own.
+        await using var transaction = context.Database.CurrentTransaction is null
+            ? await context.Database.BeginTransactionAsync(cancellationToken)
+            : null;
         var (firstRoot, secondRoot) = await context.LoadAggregatesForWriteAsync<TRoot>(
             (first.Id, first.Version), (second.Id, second.Version), cancellationToken: cancellationToken);
         var pair = new MergePair<TRoot>(firstRoot, secondRoot, keepFirst);
@@ -99,7 +100,8 @@ internal static class RecordMerge
         foreach (var record in context.Set<TRoot>().Local.Where(r => removed.Contains(r.Id)).ToList())
             context.Remove(record);
         await context.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
+        if (transaction is not null)
+            await transaction.CommitAsync(cancellationToken);
         return new MergeResult(pair.Kept.Id);
     }
 
