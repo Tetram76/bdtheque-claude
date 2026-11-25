@@ -274,7 +274,7 @@ public static class AppPaths
     /// The merge of two universes (visuel/fusion/fusion-de-deux-fiches.md): it receives the universe and the other one,
     /// <c>universe</c> and <c>other</c>.
     /// </summary>
-    public const string AdminMergeUniverses = AdminUniverses + "/merge";
+    public const string AdminMergeUniverses = AdminUniverses + MergeSegment;
 
     /// <summary>The saved searches of the administration (fonctionnel/recherche-avancee/recherches-enregistrees.md).</summary>
     public const string AdminSavedSearches = NotYetImplemented;
