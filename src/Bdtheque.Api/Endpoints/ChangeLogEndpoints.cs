@@ -72,8 +72,11 @@ internal static class ChangeLogEndpoints
         if (record is { } id)
             entries = entries.Where(e => e.RecordId == id);
 
+        // The entries of one write share its instant: they follow the types of their records, a fixed order, before their
+        // identifiers, whose time-ordered part is that same instant and whose rest is random.
         var found = await entries
             .OrderByDescending(e => e.CreatedAt)
+            .ThenByDescending(e => e.RecordType)
             .ThenByDescending(e => e.Id)
             .ToPageAsync(page, pageSize, e => e, cancellationToken);
         var parents = await ReadParentsAsync(context, found.Items, cancellationToken);

@@ -116,6 +116,25 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
         Assert.DoesNotContain((await ReadAsync("q=Uderzo%22,&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
     }
 
+    // The entries of one write share its instant: they come in a fixed order, by the type of their records, never by the
+    // random part of their identifiers.
+    [Fact]
+    public async Task EntriesOfOneWrite_ComeInTheOrderOfTheirTypes()
+    {
+        var album = await CreateAlbumAsync("Les Voleurs de Marsupilamis", null);
+        var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new("Marsu Productions", null, []));
+        var intents = await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents",
+            new(new PurchaseIntentEditionContent(publisher.Id, null, null, null, null, null, null, null, null, null, true), album.Version));
+        var intent = intents.Intents.Single();
+
+        var found = (await ReadAsync("q=Voleurs de Marsupilamis&pageSize=100")).Entries.Items;
+
+        Assert.Equal(
+            [(RecordType.PurchaseIntent, intent.Id), (RecordType.Edition, intent.EditionId!.Value), (RecordType.Album, album.Id)],
+            found.Select(e => (e.RecordType, e.RecordId)));
+        Assert.Equal(found[0].Date, found[1].Date);
+    }
+
     [Fact]
     public async Task Filters_OnTypeOperationAndRecord_Combine()
     {
