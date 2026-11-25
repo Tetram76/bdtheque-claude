@@ -46,7 +46,7 @@ else
                         {
                             <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@Preview.First.Title"
                                          SecondRecord="@Preview.Second.Title" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
-                                         SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" />
+                                         SelectedChanged="side => Choose(row.Key, side)" Long="row.Long" Same="row.Same" />
                         }
                     </MergeData>
                 }
@@ -150,7 +150,7 @@ else
     ];
 
     // The block whose heads carry the detail of the two records: the first one presented (visuel/fusion/fusion-de-deux-fiches.md).
-    private int FirstShown => _all ? 0 : Math.Max(0, Blocks.ToList().FindIndex(b => b.Rows.Any(r => MergeView.HasChoice(r.First, r.Second))));
+    private int FirstShown => _all ? 0 : Math.Max(0, Blocks.ToList().FindIndex(b => b.Rows.Any(r => MergeView.HasChoice(r.First, r.Second, same: r.Same))));
 
     private IEnumerable<(string Key, List<Row> Rows)> Blocks
     {
@@ -165,7 +165,7 @@ else
     /// A row of the merge: a data, or an element held by one series only (<paramref name="Element"/>, of the series
     /// <paramref name="Holder"/>), or by both, the same value on both sides.
     /// </summary>
-    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null, EntityKind? Kind = null);
+    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, Guid? Element = null, MergeSide? Holder = null, EntityKind? Kind = null, bool? Same = null);
 
     // In the order of the entry form of a series (visuel/saisie-serie/contenu.md).
     private IEnumerable<Row> Rows
@@ -293,16 +293,16 @@ else
             // no value of its own: one entered by hand is retained against it.
             Choices = Rows.ToDictionary(row => row.Key, row => row.Key == SortKeyKey
                 ? Initial(Preview.First.ManualSortKey, Preview.Second.ManualSortKey)
-                : Initial(row.First, row.Second));
+                : Initial(row.First, row.Second, row.Same));
         }
 
         await ReadSortKeyAsync();
     }
 
-    private static MergeSide? Initial(string? first, string? second) =>
+    private static MergeSide? Initial(string? first, string? second, bool? same = null) =>
         (first, second) switch
         {
-            _ when first == second => MergeSide.First,
+            _ when MergeView.IsSame(first, second, same) => MergeSide.First,
             (_, null) => MergeSide.First,
             (null, _) => MergeSide.Second,
             _ => null,

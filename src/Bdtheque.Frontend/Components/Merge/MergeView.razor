@@ -31,6 +31,14 @@
     /// Whether a data has a choice to make, the one rule of the reduced display: two different values, either of them possible.
     /// A page that lays out its own groups (the heads of the two records in the first group presented) asks it too.
     /// </summary>
-    public static bool HasChoice(string? first, string? second, bool impossible = false) =>
-        !impossible && !string.Equals(first, second, StringComparison.Ordinal);
+    /// <param name="same">
+    /// Whether the two values are the same, when their texts cannot tell (two homonymous series of two albums are two values);
+    /// by default, the same text.
+    /// </param>
+    public static bool HasChoice(string? first, string? second, bool impossible = false, bool? same = null) =>
+        !impossible && !IsSame(first, second, same);
+
+    /// <summary>Whether the two values of a data are the same: by <paramref name="same"/> when given, else by their texts.</summary>
+    public static bool IsSame(string? first, string? second, bool? same = null) =>
+        same ?? string.Equals(first, second, StringComparison.Ordinal);
 }

@@ -116,6 +116,20 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public void Series_TwoSeriesOfTheSameTitle_AreTwoValuesToChoose()
+    {
+        // Two series of the same title are two series (modele-metier/serie.md): never « the same » by their title alone.
+        var homonym = new SeriesListItem(Guid.Parse("01900000-0000-7000-8000-0000000000f2"), BlakeEtMortimer.Title);
+        _api.Answers[$"/admin/albums/merge?first={First}&second={Second}"] =
+            Preview with { Second = Preview.Second with { Series = homonym, SeriesSortKey = "Blake et Mortimer" } };
+
+        var page = Open();
+
+        Assert.Equal(2, page.FindAll("input[name=merge-series]").Count);
+        Assert.Null(Checked(page, "merge-series"));
+    }
+
+    [Fact]
     public async Task ReducedDisplay_ByDefault_LeavesOutTheDataWithNothingToChoose_UntilEverythingIsShown()
     {
         var page = Open();

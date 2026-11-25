@@ -7,7 +7,7 @@
    name and its values are cells of the grid, the values side by side under the record they come from, or, on a smartphone,
    one under the other, each preceded by the name of its record. *@
 @* Left out of the reduced display when there is nothing to choose (MergeView). *@
-@if (Reduced && !MergeView.HasChoice(First, Second, Impossible is not null))
+@if (Reduced && !MergeView.HasChoice(First, Second, Impossible is not null, Same))
 {
     return;
 }
@@ -67,7 +67,14 @@ else
 
     private string LabelId => $"{Id}-label";
 
-    private bool IsSame => string.Equals(First, Second, StringComparison.Ordinal);
+    /// <summary>
+    /// Whether the two values are the same, when their texts cannot tell: two series of the same title are two values
+    /// (modele-metier/serie.md). By default, the same text.
+    /// </summary>
+    [Parameter]
+    public bool? Same { get; set; }
+
+    private bool IsSame => MergeView.IsSame(First, Second, Same);
 
     /// <summary>
     /// The value that cannot be kept, if any (the parent of a universe that would make the universe that remains its own
