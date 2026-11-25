@@ -339,14 +339,15 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
         // A universe saved again under another parent, to merge (visuel/fusion/fusion-de-deux-fiches.md): « ombrelune », under
         // the Far West, whose sub-universes « archipel des brumes » and « Port-grisé » are homonyms of those of Ombrelune at two
-        // levels, the second with a description, and whose « Lune cendrée » is its own; an album of the latter. And a sub-universe
-        // of Ombrelune named like it, « Ombrelune (ancienne) », whose merge with Ombrelune cannot keep its parent.
+        // levels, the second with a description, and whose « Lune cendrée » is its own; an album of the latter. And a duplicate of
+        // Ombrelune, « Ombrelune (ancienne) », under its « Cité des Veilleurs »: its merge with Ombrelune cannot keep its parent,
+        // and, when it remains, takes the Cité under itself.
         var ombreluneTwin = await data.UniverseAsync(TwinUniverse, null, wildWest);
         var archipelagoTwin = await data.UniverseAsync("archipel des brumes", null, ombreluneTwin);
         await data.UniverseAsync("Port-grisé", "Port de pêche noyé de brume.", archipelagoTwin);
         var ashMoon = await data.UniverseAsync("Lune cendrée", null, ombreluneTwin);
         await data.AlbumAsync(OneShot("La Marée rousse", 2022, 9, [], [ashMoon, archipelagoTwin], [Credit(arnaud, ContributionRole.Scenarist)]));
-        await data.UniverseAsync(NestedTwinUniverse, "Ombrelune avant sa refonte.", ombrelune);
+        await data.UniverseAsync(NestedTwinUniverse, "Ombrelune avant sa refonte.", watchersCity);
 
         // Wished for in one edition, the only one of the album, outside the collection: the intent may turn into one on the
         // whole album (visuel/listes/saisie-selon-l-entite.md). Its edition, with a cover, gives the album its cover, on
@@ -417,7 +418,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
     /// <summary>The universe « Ombrelune » saved again, under another parent, to merge with it.</summary>
     public const string TwinUniverse = "ombrelune";
 
-    /// <summary>A sub-universe of « Ombrelune » saved as a duplicate of it, to merge with it: its parent cannot be kept.</summary>
+    /// <summary>
+    /// A duplicate of « Ombrelune » saved under one of its sub-universes, to merge with it: its parent cannot be kept.
+    /// </summary>
     public const string NestedTwinUniverse = "Ombrelune (ancienne)";
 
     /// <summary>A genre created then deleted, which the latest changes leave out.</summary>
