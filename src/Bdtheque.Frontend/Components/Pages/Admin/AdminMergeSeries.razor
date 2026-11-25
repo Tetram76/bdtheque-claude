@@ -198,8 +198,14 @@ else
         foreach (var (id, text) in first.Concat(second.Where(e => !first.Exists(f => f.Id == e.Id))))
         {
             var (inFirst, inSecond) = (first.Exists(e => e.Id == id), second.Exists(e => e.Id == id));
-            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null,
-                Element: inFirst && inSecond ? null : id, Holder: inFirst && inSecond ? null : inFirst ? MergeSide.First : MergeSide.Second);
+            // The series holding the element alone, none when both hold it.
+            MergeSide? holder = (inFirst, inSecond) switch
+            {
+                (true, true) => null,
+                (true, false) => MergeSide.First,
+                _ => MergeSide.Second,
+            };
+            yield return new($"{kind}-{id}", label, inFirst ? text : null, inSecond ? text : null, Element: holder is null ? null : id, Holder: holder);
         }
     }
 
