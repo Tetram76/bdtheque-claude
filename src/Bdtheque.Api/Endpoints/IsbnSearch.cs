@@ -13,7 +13,7 @@ internal static class IsbnSearch
 {
     // Spaces (ordinary, non-breaking, narrow non-breaking, thin) and hyphens (hyphen-minus, hyphen, non-breaking hyphen,
     // figure dash, en dash).
-    private static readonly string[] Separators = [" ", "\u00A0", "\u202F", "\u2009", "-", "\u2010", "\u2011", "\u2012", "\u2013"];
+    internal static readonly string[] Separators = [" ", "\u00A0", "\u202F", "\u2009", "-", "\u2010", "\u2011", "\u2012", "\u2013"];
 
     private static readonly MethodInfo Replace = typeof(string).GetMethod(nameof(string.Replace), [typeof(string), typeof(string)])!;
 

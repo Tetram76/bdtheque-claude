@@ -96,6 +96,26 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
         Assert.Empty((await ReadAsync("q=Castafiore%25lyrique")).Entries.Items);
     }
 
+    // As in the lists (choix-implementation/api/recherche.md): an author by the full name in its two orders, a text by its own
+    // characters, never those of its storage, and an ISBN without its separators, on both sides.
+    [Fact]
+    public async Task Search_FindsWhatIdentifiesTheRecord_AsTheListsDo()
+    {
+        var author = await PostAsync<CreateAuthorRequest, AuthorForm>("/admin/authors", new("Uderzo", "Albert", null, null, null));
+        var quoted = await CreateAlbumAsync("Le \"Grand\" fossé", null);
+        var publisher = await PostAsync<PublisherContent, PublisherForm>("/admin/publishers", new("Dargaud", null, []));
+        var edition = await PostAsync<CreateEditionRequest, EditionForm>(
+            $"/admin/albums/{quoted.Id}/editions", new(Edition(publisher.Id) with { Isbn = "978-2-205-04600-5" }, quoted.Version));
+
+        Assert.Contains((await ReadAsync("q=albert uderzo&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
+        Assert.Contains((await ReadAsync("q=Uderzo Albert&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
+        Assert.Contains((await ReadAsync("q=%22Grand%22&pageSize=100")).Entries.Items, e => e.RecordId == quoted.Id);
+        Assert.Contains((await ReadAsync("q=978 2205 046005&pageSize=100")).Entries.Items, e => e.RecordId == edition.Id);
+        Assert.Contains((await ReadAsync("q=2-205-04600&pageSize=100")).Entries.Items, e => e.RecordId == edition.Id);
+        // Two texts of a label are searched apart, never their storage between them.
+        Assert.DoesNotContain((await ReadAsync("q=Uderzo%22,&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
+    }
+
     [Fact]
     public async Task Filters_OnTypeOperationAndRecord_Combine()
     {

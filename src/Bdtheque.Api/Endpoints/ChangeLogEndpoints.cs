@@ -89,10 +89,11 @@ internal static class ChangeLogEndpoints
     }
 
     /// <summary>
-    /// The entries whose label contains <paramref name="text"/>, ignoring case and accents, as the lists search
-    /// (choix-implementation/api/recherche.md); all of them if it is blank. The label is stored in <c>jsonb</c> by its
-    /// components: every text of it is looked into, those of the labels it holds too (the album of an edition or of a purchase
-    /// intent), never the kinds that tell them apart, nor its numbers and flags.
+    /// The entries whose label contains <paramref name="text"/>, ignoring case and accents, by what identifies each record in
+    /// the lists (choix-implementation/api/recherche.md); all of them if it is blank. The label is stored in <c>jsonb</c> by its
+    /// components, each text compared on its own, decoded: every text of it, those of the labels it holds too (the album of an
+    /// edition or of a purchase intent), never the kinds that tell them apart, nor its numbers and flags; the full name of an
+    /// author in its two orders; an ISBN without its separators, on both sides.
     /// </summary>
     private static IQueryable<Model.ChangeLogEntry> Searched(BdthequeDbContext context, string? text)
     {
@@ -100,19 +101,39 @@ internal static class ChangeLogEndpoints
             return context.ChangeLog;
 
         var pattern = $"%{CatalogFilters.EscapeLike(text.Trim())}%";
-        // EF Core translates no JSON path over a converted column: the condition is written in SQL, a parameter carrying the
-        // pattern, and the rest of the query composed over it.
-        return context.ChangeLog.FromSqlRaw(
-            $$"""
-            SELECT * FROM "ChangeLogEntries"
-            WHERE jsonb_path_query_array("Label", '{{LabelTextsPath}}')::text COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
-            """,
-            pattern);
+        // Without a character of its own, the ISBN searched is the text itself: a separator alone finds no ISBN by its absence.
+        var isbn = IsbnSearch.Normalize(text.Trim());
+        var isbnPattern = isbn.Length == 0 ? pattern : $"%{CatalogFilters.EscapeLike(isbn)}%";
+        // EF Core translates no JSON path over a converted column: the condition is written in SQL, parameters carrying the
+        // patterns, and the rest of the query composed over it.
+        return context.ChangeLog.FromSqlRaw(SearchSql, pattern, isbnPattern);
     }
 
-    // Every string of the label, in any of its objects, the kind of each excepted.
-    private const string LabelTextsPath =
-        "strict $.** ? (@.type() == \"object\").keyvalue() ? (@.key != \"kind\" && @.value.type() == \"string\").value";
+    // Each text of the label, decoded (->>), with whether it is an ISBN; {0} the pattern of the text, {1} that of an ISBN, any
+    // other brace being read as a parameter. Composed once, of constants only: the values searched are parameters.
+    private static readonly string SearchSql =
+        $$"""
+        SELECT * FROM "ChangeLogEntries" AS entry
+        WHERE EXISTS (
+            SELECT 1
+            FROM jsonb_path_query(entry."Label", 'strict $.** ? (@.type() == "object")') AS label(part)
+            CROSS JOIN LATERAL (
+                SELECT label.part ->> key, key = 'isbn' FROM jsonb_each(label.part)
+                WHERE key <> 'kind' AND jsonb_typeof(value) = 'string'
+                UNION ALL
+                SELECT concat_ws(' ', label.part ->> 'firstName', label.part ->> 'lastName'), false
+                WHERE label.part ->> 'kind' = 'author'
+                UNION ALL
+                SELECT concat_ws(' ', label.part ->> 'lastName', label.part ->> 'firstName'), false
+                WHERE label.part ->> 'kind' = 'author'
+            ) AS searched(text, isbn)
+            WHERE searched.text COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
+                OR (searched.isbn AND {{IsbnWithoutSeparators("searched.text")}} LIKE {1} ESCAPE '\'))
+        """;
+
+    // The ISBN of a label without its separators, as the lists compare it (IsbnSearch).
+    private static string IsbnWithoutSeparators(string isbn) =>
+        IsbnSearch.Separators.Aggregate(isbn, (sql, separator) => $"replace({sql}, '{separator}', '')");
 
     /// <summary>The records of the entries deleted since: an identifier is never given again, so any deletion is the last.</summary>
     private static async Task<HashSet<Guid>> ReadDeletedAsync(
