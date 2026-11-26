@@ -14,14 +14,12 @@ namespace Bdtheque.Api.Tests;
 /// The list covers the whole base, shared by the tests of the class: each test names its records with a marker of its own, and
 /// narrows the list to it by searching it.
 /// </remarks>
-public sealed class CatalogAuthorListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class CatalogAuthorListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public CatalogAuthorListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Row_CarriesTheIdentityTheNationalityTheAlbumsCreditedThoseInTheCollectionAndTheRoles()

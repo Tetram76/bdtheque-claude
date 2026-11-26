@@ -7,7 +7,6 @@ using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 using Bdtheque.Infrastructure;
-using Bdtheque.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ContractEnums = Bdtheque.Contracts.Enums;
@@ -20,16 +19,10 @@ namespace Bdtheque.Api.Tests;
 /// retained of both; the editions of both are its editions, with their intents, an intent on the whole album being withdrawn once
 /// it has one.
 /// </summary>
-public sealed class AlbumMergeEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AlbumMergeEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public AlbumMergeEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task AlbumMergePreview_PresentsBothAlbumsAndCountsTheirEditionsAndIntents()
@@ -366,6 +359,6 @@ public sealed class AlbumMergeEndpointsTests : IClassFixture<ApiWebApplicationFa
     {
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-        return (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId).ToList();
+        return [.. (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId)];
     }
 }

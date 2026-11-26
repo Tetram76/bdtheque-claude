@@ -45,18 +45,18 @@ public sealed class ChangeLogEntryTests
     public void Modification_WithoutChange_IsRefused()
     {
         // Nothing changed means nothing was written: an empty modification is a programming error.
-        Assert.Throws<ArgumentException>(() => ChangeLogEntry.Modification(RecordType.Genre, Guid.CreateVersion7(), Label, []));
+        DomainAssert.Throws<ArgumentException>(() => ChangeLogEntry.Modification(RecordType.Genre, Guid.CreateVersion7(), Label, []));
     }
 
     [Fact]
     public void Change_WithNeitherValueBeforeNorAfter_IsRefused()
     {
-        Assert.Throws<ArgumentException>(() => new ChangeLogChange(ChangeLogAttribute.Label, null, null));
+        DomainAssert.Throws<ArgumentException>(() => new ChangeLogChange(ChangeLogAttribute.Label, null, null));
     }
 
     [Fact]
     public void Entry_RequiresItsLabel()
     {
-        Assert.Throws<ArgumentNullException>(() => ChangeLogEntry.Creation(RecordType.Genre, Guid.CreateVersion7(), null!));
+        DomainAssert.Throws<ArgumentNullException>(() => ChangeLogEntry.Creation(RecordType.Genre, Guid.CreateVersion7(), null!));
     }
 }

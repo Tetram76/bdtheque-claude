@@ -24,6 +24,6 @@ public sealed class RgbColorTests
     [InlineData(0x1000000)]
     public void FromValue_BeyondTwentyFourBits_Throws(int value)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => RgbColor.FromValue(value));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => RgbColor.FromValue(value));
     }
 }

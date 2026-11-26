@@ -15,16 +15,10 @@ using DomainEnums = Bdtheque.Domain.Enums;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>Administration of the albums (<c>/admin/albums</c>), including their deletion.</summary>
-public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AlbumEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public AlbumEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Create_WithTheTitleOnly_AppliesTheDefaultsAndAComputedSortKey()
@@ -227,7 +221,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var updated = await UpdateAsync(created, created.Content with { Type = AlbumType.Regular, StartVolumeNumber = null, EndVolumeNumber = null });
 
-        Assert.Equal((AlbumType.Regular, (int?)null, (int?)null), (updated.Content.Type, updated.Content.StartVolumeNumber, updated.Content.EndVolumeNumber));
+        Assert.Equal((AlbumType.Regular, null, null), (updated.Content.Type, updated.Content.StartVolumeNumber, updated.Content.EndVolumeNumber));
     }
 
     [Fact]
@@ -238,7 +232,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
 
         var updated = await UpdateAsync(created, created.Content with { Title = null, SeriesId = series.Id });
 
-        Assert.Equal(((string?)null, (Guid?)series.Id), (updated.Content.Title, updated.Content.SeriesId));
+        Assert.Equal((null, (Guid?)series.Id), (updated.Content.Title, updated.Content.SeriesId));
     }
 
     [Fact]
@@ -719,10 +713,10 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         $"/admin/albums/{album.Id}?version={album.Version}&fingerprint={Uri.EscapeDataString(fingerprint)}";
 
     // The associations come back in a stable order, whichever order the form listed them in.
-    private static List<Guid> Sorted(IReadOnlyList<Guid> ids) => ids.Order().ToList();
+    private static List<Guid> Sorted(IReadOnlyList<Guid> ids) => [.. ids.Order()];
 
     private static List<ContributionContent> Sorted(IReadOnlyList<ContributionContent> contributions) =>
-        contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId).ToList();
+        [.. contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId)];
 
     private static AlbumContent Content(string? title) =>
         new(title, null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [], [], []);
@@ -742,7 +736,7 @@ public sealed class AlbumEndpointsTests : IClassFixture<ApiWebApplicationFactory
         PostAsync<SeriesForm>("/admin/series", new SeriesContent(
             $"Série {Guid.NewGuid():N}", null, null, null, false, false, false, null, null,
             new SeriesEditionTemplate(null, null, null, null, null, null, null, null, null), [], [],
-            contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId).ToList()));
+            [.. contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId)]));
 
     private Task<GenreForm> CreateGenreAsync() =>
         PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Genre {Guid.NewGuid():N}"));

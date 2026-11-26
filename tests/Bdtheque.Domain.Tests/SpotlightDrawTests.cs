@@ -1,5 +1,3 @@
-using Bdtheque.Domain.Common;
-
 namespace Bdtheque.Domain.Tests;
 
 /// <summary>
@@ -99,13 +97,13 @@ public sealed class SpotlightDrawTests
     [InlineData(1.0)]
     public void Pick_ARollOutsideZeroToOne_IsRefused(double roll)
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => SpotlightDraw.Pick([Candidate()], roll));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => SpotlightDraw.Pick([Candidate()], roll));
     }
 
     [Fact]
     public void Pick_WithoutCandidate_IsRefused()
     {
-        Assert.Throws<ArgumentException>(() => SpotlightDraw.Pick([], 0.5));
+        DomainAssert.Throws<ArgumentException>(() => SpotlightDraw.Pick([], 0.5));
     }
 
     private static SpotlightCandidate Candidate(int spotlightCount = 0, bool isRecent = false, bool hasCover = true) =>

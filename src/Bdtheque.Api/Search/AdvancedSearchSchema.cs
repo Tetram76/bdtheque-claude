@@ -1,5 +1,4 @@
 using Bdtheque.Api.Endpoints;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities;
 using C = Bdtheque.Contracts.Enums;
@@ -180,7 +179,7 @@ internal static class AdvancedSearchSchema
     }.ToDictionary(e => e.Kind);
 
     /// <summary>The description of the schema, for the clients to build the form of the search.</summary>
-    public static readonly SearchSchema Description = new(Entities.Values.Select(e => e.Describe()).ToList());
+    public static readonly SearchSchema Description = new([.. Entities.Values.Select(e => e.Describe())]);
 
     /// <exception cref="ArgumentException">
     /// An entity the search never returns (the saved searches): a technical error, the client building the

@@ -4,7 +4,6 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -493,8 +492,8 @@ internal static class SeriesEndpoints
                 series.Summary,
                 series.PersonalNotes,
                 TemplateOf(series),
-                series.Genres.Select(g => g.Id).Order().ToList(),
-                series.Universes.Select(u => u.Id).Order().ToList(),
+                [.. series.Genres.Select(g => g.Id).Order()],
+                [.. series.Universes.Select(u => u.Id).Order()],
                 FormReferences.ToContents(series.TemplateContributions)),
             context.VersionOf(series),
             new SeriesFormReferences(

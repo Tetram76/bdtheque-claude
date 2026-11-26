@@ -12,11 +12,9 @@ namespace Bdtheque.Api.Tests;
 /// (choix-implementation/ecritures/suppression-des-entites-mise-en-oeuvre.md), beyond what the
 /// endpoints of each resource exercise.
 /// </summary>
-public sealed class AggregateDeletionTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AggregateDeletionTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public AggregateDeletionTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task ReferenceTheImpactMissed_IsStillABusinessRefusal()

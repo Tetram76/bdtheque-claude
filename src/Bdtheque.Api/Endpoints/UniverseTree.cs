@@ -59,7 +59,7 @@ internal sealed class UniverseTree
         if (universes.Count == 0)
             return [];
         var tree = await LoadAsync(context, cancellationToken);
-        return universes.Select(u => tree.InHierarchy(u)).ToList();
+        return [.. universes.Select(u => tree.InHierarchy(u))];
     }
 
     /// <exception cref="EntityNotFoundException">No such universe: a functional error, the universe being addressed.</exception>

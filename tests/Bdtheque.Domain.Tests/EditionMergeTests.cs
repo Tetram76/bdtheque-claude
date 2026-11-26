@@ -1,4 +1,3 @@
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 
@@ -59,8 +58,8 @@ public sealed class EditionMergeTests
         var album = new Album("Spirou à New York", null);
         var (kept, merged) = (new Edition(album, Dupuis), new Edition(album, Dupuis));
 
-        Assert.Throws<ArgumentException>(() => Album.MergeEditions(kept, merged, new Album("Autre", null), null, kept, []));
-        Assert.Throws<ArgumentException>(() => Album.MergeEditions(kept, kept, album, null, kept, []));
+        DomainAssert.Throws<ArgumentException>(() => Album.MergeEditions(kept, merged, new Album("Autre", null), null, kept, []));
+        DomainAssert.Throws<ArgumentException>(() => Album.MergeEditions(kept, kept, album, null, kept, []));
     }
 
     [Fact]
@@ -183,7 +182,7 @@ public sealed class EditionMergeTests
         var album = new Album("Spirou à New York", null);
         var (kept, merged) = (new Edition(album, Dupuis), new Edition(album, Dupuis));
 
-        Assert.Throws<ArgumentException>(() => Album.MergeEditions(kept, merged, album, null, kept, [Guid.CreateVersion7()]));
+        DomainAssert.Throws<ArgumentException>(() => Album.MergeEditions(kept, merged, album, null, kept, [Guid.CreateVersion7()]));
     }
 
     [Fact]
@@ -198,7 +197,7 @@ public sealed class EditionMergeTests
         undated.RecordAcquisition(kept, AcquisitionMode.Gift);
 
         // The price of the other edition was dated by its album only, which the edition leaves.
-        var exception = Assert.Throws<DomainRuleViolationException>(() => Album.MergeEditions(kept, merged, undated, null, merged, []));
+        var exception = DomainAssert.Throws<DomainRuleViolationException>(() => Album.MergeEditions(kept, merged, undated, null, merged, []));
 
         Assert.Equal(DomainRules.EditionAcquisitionPriceReferenceDateRequired, exception.Rule);
         Assert.Equal(AcquisitionMode.Gift, kept.AcquisitionMode);

@@ -4,7 +4,6 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;

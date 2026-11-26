@@ -213,9 +213,7 @@ public sealed partial class SpeckitStructureTests
 
     // Anchors as GitHub renders them, which the links of the bundle follow.
     private static HashSet<string> Anchors(string markdown) =>
-        HeadingPattern().Matches(File.ReadAllText(markdown))
-            .Select(heading => AnchorSpacePattern().Replace(AnchorDropPattern().Replace(heading.Groups["title"].Value.Trim().ToLowerInvariant(), ""), "-"))
-            .ToHashSet();
+        [.. HeadingPattern().Matches(File.ReadAllText(markdown)).Select(heading => AnchorSpacePattern().Replace(AnchorDropPattern().Replace(heading.Groups["title"].Value.Trim().ToLowerInvariant(), ""), "-"))];
 
     private static IEnumerable<string> RepositoryFilePaths()
     {

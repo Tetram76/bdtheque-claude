@@ -162,10 +162,9 @@ internal static class AggregateDeletion
 
         // In the single order of the entity types (fonctionnel/presentation/ordre-des-types-de-fiche.md), which every client presents.
         List<ImpactCount> CountsOf(LinkNature nature) =>
-            records.Where(r => r.Key.Nature == nature)
+            [.. records.Where(r => r.Key.Nature == nature)
                 .OrderBy(r => EntityKindOrder.Of(r.Key.Kind))
-                .Select(r => new ImpactCount(r.Key.Kind, r.Value.Count))
-                .ToList();
+                .Select(r => new ImpactCount(r.Key.Kind, r.Value.Count))];
     }
 
     /// <summary>

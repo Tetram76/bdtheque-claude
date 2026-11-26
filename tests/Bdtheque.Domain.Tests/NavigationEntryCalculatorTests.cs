@@ -1,5 +1,3 @@
-using Bdtheque.Domain.Common;
-
 namespace Bdtheque.Domain.Tests;
 
 public sealed class NavigationEntryCalculatorTests
@@ -116,6 +114,6 @@ public sealed class NavigationEntryCalculatorTests
     {
         // A stored sort key is never blank (domain and CHECK constraints): a blank one is a
         // programming error, not a user input to report.
-        Assert.Throws<ArgumentException>(() => NavigationEntryCalculator.Compute(sortKey));
+        DomainAssert.Throws<ArgumentException>(() => NavigationEntryCalculator.Compute(sortKey));
     }
 }

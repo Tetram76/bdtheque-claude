@@ -15,20 +15,14 @@ namespace Bdtheque.Api.Tests;
 /// its first visits reach 25 months, a public visit removed 25 months
 /// after its beginning, and the indicators of a period read the same before and after.
 /// </summary>
-public sealed class AudienceRetentionTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AudienceRetentionTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     // Closes March and May 2028 (25 months after their first day), not June; removes the public visits begun
     // before 2028-04-10.
     private static readonly DateTimeOffset Now = new(2030, 6, 10, 12, 0, 0, TimeSpan.Zero);
 
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public AudienceRetentionTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task ClosingTheMonths_KeepsTheIndicators_RemovesOnlyThePublicVisitsAtTheEndOfTheirRetention()
@@ -84,7 +78,7 @@ public sealed class AudienceRetentionTests : IClassFixture<ApiWebApplicationFact
             .ContinueWith(task => Assert.Single(task.Result!, i => i.Function == Function));
 
     private async Task<List<Guid>> VisitIdsAsync() =>
-        (await _client.GetFromJsonAsync<Page<AudienceVisitItem>>("/admin/audience/visits?pageSize=100"))!.Items.Select(v => v.Id).ToList();
+        [.. (await _client.GetFromJsonAsync<Page<AudienceVisitItem>>("/admin/audience/visits?pageSize=100"))!.Items.Select(v => v.Id)];
 
     private async Task RunRetentionAsync()
     {

@@ -73,12 +73,11 @@ internal static class FormReferences
         BdthequeDbContext context, IReadOnlyList<ContributionContent> contributions, CancellationToken cancellationToken,
         IReadOnlyDictionary<Guid, Author>? added = null)
     {
-        var authors = (await LoadAsync(context.Authors, contributions.Select(c => c.AuthorId).ToList(), cancellationToken, added))
+        var authors = (await LoadAsync(context.Authors, [.. contributions.Select(c => c.AuthorId)], cancellationToken, added))
             .ToDictionary(a => a.Id);
-        return contributions
+        return [.. contributions
             .Select(c => (added is not null && added.TryGetValue(c.AuthorId, out var author) ? author : authors[c.AuthorId],
-                EnumMapping.Map<DomainEnums.ContributionRole>(c.Role)!.Value))
-            .ToList();
+                EnumMapping.Map<DomainEnums.ContributionRole>(c.Role)!.Value))];
     }
 
     /// <summary>
@@ -131,12 +130,11 @@ internal static class FormReferences
 
     /// <summary>The authors of the contributions, each once, named as the lists name them.</summary>
     public static List<AuthorListItem> Authors(IEnumerable<Contribution> contributions) =>
-        contributions.Select(c => c.Author).DistinctBy(a => a.Id)
-            .Select(a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym)).ToList();
+        [.. contributions.Select(c => c.Author).DistinctBy(a => a.Id).Select(a => new AuthorListItem(a.Id, a.LastName, a.FirstName, a.Pseudonym))];
 
     /// <summary>The genres, named as the lists name them, in their order.</summary>
     public static List<GenreListItem> Genres(IEnumerable<Genre> genres) =>
-        genres.OrderBy(g => g.Label).ThenBy(g => g.Id).Select(g => new GenreListItem(g.Id, g.Label)).ToList();
+        [.. genres.OrderBy(g => g.Label).ThenBy(g => g.Id).Select(g => new GenreListItem(g.Id, g.Label))];
 
     /// <summary>
     /// The universes, each with its ancestors, a universe being presented with them: the hierarchy is only read for a record
@@ -148,15 +146,14 @@ internal static class FormReferences
         if (universes.Count == 0)
             return [];
         var tree = await UniverseTree.LoadAsync(context, cancellationToken);
-        return universes.OrderBy(u => u.Name).ThenBy(u => u.Id).Select(u => tree.InHierarchy(u.Id)).ToList();
+        return [.. universes.OrderBy(u => u.Name).ThenBy(u => u.Id).Select(u => tree.InHierarchy(u.Id))];
     }
 
     /// <summary>The contributions as a form lists them, in a stable order.</summary>
     public static List<ContributionContent> ToContents(IEnumerable<Contribution> contributions) =>
-        contributions
+        [.. contributions
             .OrderBy(c => c.Role).ThenBy(c => c.AuthorId)
-            .Select(c => new ContributionContent(c.AuthorId, EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value))
-            .ToList();
+            .Select(c => new ContributionContent(c.AuthorId, EnumMapping.Map<ContractEnums.ContributionRole>(c.Role)!.Value))];
 }
 
 /// <summary>The records a form added on the spot, created with the record it saves, by the key that stands for their identifier.</summary>

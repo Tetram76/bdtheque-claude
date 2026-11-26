@@ -17,16 +17,10 @@ namespace Bdtheque.Api.Tests;
 /// Administration of the purchase intents (<c>/admin/albums/{albumId}/purchase-intents</c>), children
 /// of the aggregate of their album, and confirmation of the purchase of an edition targeted.
 /// </summary>
-public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class PurchaseIntentEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public PurchaseIntentEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task New_ForAnAlbumOfASeries_TakesTheTemplateOfTheSeriesWithoutTheTraitsOfTheCopy()
@@ -326,7 +320,7 @@ public sealed class PurchaseIntentEndpointsTests : IClassFixture<ApiWebApplicati
 
         var editionId = Assert.Single(converted.Intents).EditionId!.Value;
         var edition = await _client.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{editionId}");
-        Assert.Equal((publisherId, 48, (AcquisitionMode?)null), (edition!.Content.PublisherId, edition.Content.PageCount, edition.Content.AcquisitionMode));
+        Assert.Equal((publisherId, 48, null), (edition!.Content.PublisherId, edition.Content.PageCount, edition.Content.AcquisitionMode));
         AssertSameIntents(converted, await GetIntentsAsync(album.Id));
     }
 

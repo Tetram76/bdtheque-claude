@@ -1,5 +1,3 @@
-using Bdtheque.Infrastructure;
-using Bdtheque.Testing;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Infrastructure.Tests;

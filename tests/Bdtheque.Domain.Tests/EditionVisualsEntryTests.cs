@@ -1,4 +1,3 @@
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 
@@ -65,7 +64,7 @@ public sealed class EditionVisualsEntryTests
             _ => [(cover.Id, null, VisualType.Cover), (null, pending, VisualType.Plate), (null, pending, VisualType.Plate)],
         };
 
-        Assert.Throws<ArgumentException>(() => edition.SetVisuals(entries));
+        DomainAssert.Throws<ArgumentException>(() => edition.SetVisuals(entries));
 
         Assert.Equal([("cover.jpg", VisualType.Cover)], edition.Visuals.Select(v => (v.MediaReference, v.Type)));
     }
@@ -73,7 +72,7 @@ public sealed class EditionVisualsEntryTests
     [Fact]
     public void PendingVisual_WithoutItsFile_IsRefused()
     {
-        var exception = Assert.Throws<DomainRuleViolationException>(() => new PendingVisual("  ", TestPalette.Any));
+        var exception = DomainAssert.Throws<DomainRuleViolationException>(() => new PendingVisual("  ", TestPalette.Any));
 
         Assert.Equal(DomainRules.EditionVisualMediaReferenceRequired, exception.Rule);
     }

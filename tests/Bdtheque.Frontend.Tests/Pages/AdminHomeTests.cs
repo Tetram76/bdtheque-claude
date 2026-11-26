@@ -3,7 +3,6 @@ using System.Net;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
-using Bdtheque.Frontend.Audience;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Tests.Audience;

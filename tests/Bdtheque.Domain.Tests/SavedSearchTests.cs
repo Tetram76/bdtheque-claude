@@ -47,7 +47,7 @@ public sealed class SavedSearchTests
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => search.SetSearch((EntityKind)999, Criteria, [], []));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => search.SetSearch((EntityKind)999, Criteria, [], []));
     }
 
     [Theory]
@@ -91,7 +91,7 @@ public sealed class SavedSearchTests
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.Throws<ArgumentException>(() => search.SetSearch(
+        DomainAssert.Throws<ArgumentException>(() => search.SetSearch(
             EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation), new SearchVariable("Autre", TitleLocation)], []));
     }
 
@@ -108,7 +108,7 @@ public sealed class SavedSearchTests
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.Throws<ArgumentException>(() => search.SetSearch(EntityKind.Album, Criteria, [new SearchVariable("Titre", location)], []));
+        DomainAssert.Throws<ArgumentException>(() => search.SetSearch(EntityKind.Album, Criteria, [new SearchVariable("Titre", location)], []));
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public sealed class SavedSearchTests
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [], []);
 
-        Assert.Throws<ArgumentOutOfRangeException>(
+        DomainAssert.Throws<ArgumentOutOfRangeException>(
             () => search.SetSearch(EntityKind.Album, Criteria, [], [new DesignatedRecord((EntityKind)999, Guid.CreateVersion7())]));
     }
 
@@ -214,7 +214,7 @@ public sealed class SavedSearchTests
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
 
-        Assert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Titre"] = "A", ["titre"] = "B" }));
+        DomainAssert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Titre"] = "A", ["titre"] = "B" }));
     }
 
     [Fact]
@@ -222,7 +222,7 @@ public sealed class SavedSearchTests
     {
         var search = new SavedSearch("Albums", EntityKind.Album, Criteria, [new SearchVariable("Titre", TitleLocation)], []);
 
-        Assert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Auteur"] = "Hergé" }));
+        DomainAssert.Throws<ArgumentException>(() => search.CriteriaWith(new Dictionary<string, string> { ["Auteur"] = "Hergé" }));
     }
 
     [Fact]

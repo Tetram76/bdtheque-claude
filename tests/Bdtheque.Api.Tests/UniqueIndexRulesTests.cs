@@ -12,11 +12,9 @@ namespace Bdtheque.Api.Tests;
 /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md): each one must be
 /// translated into a business error with its rule code, never left as a technical error.
 /// </summary>
-public sealed class UniqueIndexRulesTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class UniqueIndexRulesTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public UniqueIndexRulesTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public void EveryUniqueIndexOfTheModel_IsMapped_AndOnlyThem()

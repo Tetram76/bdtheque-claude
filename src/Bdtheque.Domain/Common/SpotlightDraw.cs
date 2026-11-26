@@ -36,8 +36,8 @@ public static class SpotlightDraw
 
         // Unless every edition was spotlighted within the window; then, among those kept, the editions with a cover
         // unless none has one.
-        var kept = OrAll(candidates.Where(c => !c.IsRecent).ToList(), candidates);
-        kept = OrAll(kept.Where(c => c.HasCover).ToList(), kept);
+        var kept = OrAll([.. candidates.Where(c => !c.IsRecent)], candidates);
+        kept = OrAll([.. kept.Where(c => c.HasCover)], kept);
 
         // A chance in proportion to 1 / (1 + n)²: four times as many for an edition never spotlighted as for one
         // spotlighted once, nine times as many as for one spotlighted twice.

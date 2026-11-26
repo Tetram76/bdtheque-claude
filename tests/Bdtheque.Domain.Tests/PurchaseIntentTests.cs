@@ -117,7 +117,7 @@ public sealed class PurchaseIntentTests
         var album = new Album("Le Lotus bleu", null);
         var otherEdition = new Edition(new Album("Tintin au Tibet", null), Casterman);
 
-        Assert.Throws<ArgumentException>(() => album.AddPurchaseIntent(otherEdition));
+        DomainAssert.Throws<ArgumentException>(() => album.AddPurchaseIntent(otherEdition));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public sealed class PurchaseIntentTests
     {
         var album = new Album("Le Lotus bleu", null);
 
-        Assert.Throws<ArgumentNullException>(() => album.AddPurchaseIntent(null!));
+        DomainAssert.Throws<ArgumentNullException>(() => album.AddPurchaseIntent(null!));
     }
 }
 
@@ -193,7 +193,7 @@ public sealed class AcquisitionRecordingTests
         var edition = new Edition(album, Casterman);
         var intent = album.AddPurchaseIntent(edition);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.RecordAcquisition(edition, (AcquisitionMode)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => album.RecordAcquisition(edition, (AcquisitionMode)42));
         Assert.Equal([intent], album.PurchaseIntents);
         Assert.Null(edition.AcquisitionMode);
     }
@@ -204,7 +204,7 @@ public sealed class AcquisitionRecordingTests
         var album = new Album("Le Lotus bleu", null);
         var otherEdition = new Edition(new Album("Tintin au Tibet", null), Casterman);
 
-        Assert.Throws<ArgumentException>(() => album.RecordAcquisition(otherEdition, AcquisitionMode.Purchase));
+        DomainAssert.Throws<ArgumentException>(() => album.RecordAcquisition(otherEdition, AcquisitionMode.Purchase));
     }
 }
 
@@ -245,7 +245,7 @@ public sealed class PurchaseIntentRemovalTests
         var album = new Album("Le Lotus bleu", null);
         var otherIntent = new Album("Tintin au Tibet", null).AddPurchaseIntent();
 
-        Assert.Throws<ArgumentException>(() => album.RemovePurchaseIntent(otherIntent));
+        DomainAssert.Throws<ArgumentException>(() => album.RemovePurchaseIntent(otherIntent));
     }
 
     [Fact]
@@ -267,7 +267,7 @@ public sealed class PurchaseIntentRemovalTests
         var album = new Album("Le Lotus bleu", null);
         var intent = album.AddPurchaseIntent(new Edition(album, Casterman));
 
-        Assert.Throws<ArgumentException>(() => album.ConvertPurchaseIntentToEdition(intent, new Edition(album, Casterman)));
+        DomainAssert.Throws<ArgumentException>(() => album.ConvertPurchaseIntentToEdition(intent, new Edition(album, Casterman)));
     }
 
     [Fact]
@@ -321,6 +321,6 @@ public sealed class PurchaseIntentRemovalTests
         var album = new Album("Le Lotus bleu", null);
         var intent = album.AddPurchaseIntent();
 
-        Assert.Throws<ArgumentException>(() => album.ConvertPurchaseIntentToAlbum(intent));
+        DomainAssert.Throws<ArgumentException>(() => album.ConvertPurchaseIntentToAlbum(intent));
     }
 }

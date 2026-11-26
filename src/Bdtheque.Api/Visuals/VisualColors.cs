@@ -98,10 +98,9 @@ internal static class VisualColors
             }
         }
 
-        return counts.Values
+        return [.. counts.Values
             .Select(c => new ColorCount(
-                new RgbColor((byte)(c.R / c.Count), (byte)(c.G / c.Count), (byte)(c.B / c.Count)), c.Count))
-            .ToList();
+                new RgbColor((byte)(c.R / c.Count), (byte)(c.G / c.Count), (byte)(c.B / c.Count)), c.Count))];
     }
 
     private static double HueDistance(double a, double b)

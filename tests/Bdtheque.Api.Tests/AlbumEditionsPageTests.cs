@@ -12,11 +12,9 @@ namespace Bdtheque.Api.Tests;
 /// visuel/editions-album/contenu.md): the album in brief, its editions of the collection, and its intents, an edition targeted
 /// by an intent being one of the intents, never one of the editions (fonctionnel/regles-metier/intention-d-acquisition.md).
 /// </summary>
-public sealed class AlbumEditionsPageTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AlbumEditionsPageTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly HttpClient _client;
-
-    public AlbumEditionsPageTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Page_OfAnAlbumWithoutEditionNorIntent_HasNeither()
@@ -72,7 +70,7 @@ public sealed class AlbumEditionsPageTests : IClassFixture<ApiWebApplicationFact
             (first.Cover, first.Category, first.Binding, first.PageCount, first.AcquisitionMode, first.AcquisitionYear, first.VisualCount));
         var second = page.Editions[1];
         Assert.Equal(
-            ((AlbumCover?)null, (EditionCategory?)null, (int?)null, AcquisitionMode.Gift, 0),
+            (null, null, null, AcquisitionMode.Gift, 0),
             (second.Cover, second.Category, second.AcquisitionYear, second.AcquisitionMode, second.VisualCount));
 
         var intent = Assert.Single(page.PurchaseIntents);

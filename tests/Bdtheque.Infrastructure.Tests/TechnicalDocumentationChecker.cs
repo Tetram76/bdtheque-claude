@@ -153,9 +153,7 @@ internal sealed partial class TechnicalDocumentationChecker(string repository)
 
     // Anchors as GitHub renders them, which the links follow.
     private static HashSet<string> Anchors(string markdown) =>
-        AnyHeadingPattern().Matches(File.ReadAllText(markdown))
-            .Select(heading => AnchorSpacePattern().Replace(AnchorDropPattern().Replace(heading.Groups["title"].Value.Trim().ToLowerInvariant(), ""), "-"))
-            .ToHashSet();
+        [.. AnyHeadingPattern().Matches(File.ReadAllText(markdown)).Select(heading => AnchorSpacePattern().Replace(AnchorDropPattern().Replace(heading.Groups["title"].Value.Trim().ToLowerInvariant(), ""), "-"))];
 
     private IEnumerable<string> RepositoryFilePaths()
     {

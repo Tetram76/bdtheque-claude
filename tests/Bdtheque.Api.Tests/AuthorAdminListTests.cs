@@ -15,14 +15,12 @@ namespace Bdtheque.Api.Tests;
 /// The list covers the whole base, shared by the tests of the class: each test names its records with a marker of its
 /// own, and narrows the list to it by searching it.
 /// </remarks>
-public sealed class AuthorAdminListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AuthorAdminListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public AuthorAdminListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Rows_CarryWhatTheListPresents()
@@ -54,9 +52,9 @@ public sealed class AuthorAdminListTests : IClassFixture<ApiWebApplicationFactor
 
         Assert.Equal(
             [
-                (other.Id, 1, new[] { ContributionRole.Scenarist }),
-                (author.Id, 2, new[] { ContributionRole.Scenarist, ContributionRole.Illustrator, ContributionRole.Colorist }),
-                (uncredited.Id, 0, Array.Empty<ContributionRole>()),
+                (other.Id, 1, [ContributionRole.Scenarist]),
+                (author.Id, 2, [ContributionRole.Scenarist, ContributionRole.Illustrator, ContributionRole.Colorist]),
+                (uncredited.Id, 0, []),
             ],
             rows.Select(r => (r.Id, r.CreditedAlbumCount, r.Roles.ToArray())));
     }

@@ -16,12 +16,10 @@ namespace Bdtheque.Api.Tests;
 /// <remarks>
 /// The list covers the whole base, shared by the tests of the class: each test narrows it to a publisher of its own.
 /// </remarks>
-public sealed class InvalidIsbnListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class InvalidIsbnListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public InvalidIsbnListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task List_HoldsTheEditionsWhoseIsbnIsInconsistent_OwnedOrTargetedByAnIntent()
@@ -51,7 +49,7 @@ public sealed class InvalidIsbnListTests : IClassFixture<ApiWebApplicationFactor
 
         Assert.Equal((album.Id, edition.Id, "978-2-203-00120-7"), (row.Album.Id, row.Edition.Id, row.Edition.Isbn));
         Assert.Equal("978-2-203-00120-6", row.CorrectedIsbn);
-        Assert.Equal((true, (AcquisitionMode?)AcquisitionMode.Gift, (int?)2008, false), (row.IsOwned, row.AcquisitionMode, row.AcquisitionYear, row.IsAccepted));
+        Assert.Equal((true, (AcquisitionMode?)AcquisitionMode.Gift, 2008, false), (row.IsOwned, row.AcquisitionMode, row.AcquisitionYear, row.IsAccepted));
         Assert.Null(row.Cover);
         Assert.Equal(version, row.AlbumVersion);
         Assert.NotEqual(default, row.ModifiedAt);

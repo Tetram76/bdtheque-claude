@@ -5,10 +5,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
-using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
-using frontend::Bdtheque.Frontend.Theming;
 using SkiaSharp;
 
 namespace Bdtheque.EndToEnd.Tests;

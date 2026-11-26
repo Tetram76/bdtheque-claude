@@ -98,9 +98,8 @@ internal static class AudienceEndpoints
             new AudienceVisitItem(
                 visit.Id, visit.CreatedAt, visit.IsAdministrator, EnumMapping.Map<ContractEnums.DeviceType>(visit.DeviceType)!.Value,
                 EnumMapping.Map<ContractEnums.RenderingEngine>(visit.RenderingEngine)!.Value, visit.EngineVersion, usages.Count),
-            usages.Select(u => new AudienceUsageItem(
-                    u.Id, u.CreatedAt, u.Function, ToRecord(u.PresentedRecord), u.Parameters, u.IsRepeat))
-                .ToList());
+            [.. usages.Select(u => new AudienceUsageItem(
+                    u.Id, u.CreatedAt, u.Function, ToRecord(u.PresentedRecord), u.Parameters, u.IsRepeat))]);
     }
 
     private static Model.FunctionUse ToUse(FunctionUse use) =>

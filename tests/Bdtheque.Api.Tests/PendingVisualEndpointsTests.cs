@@ -18,16 +18,10 @@ namespace Bdtheque.Api.Tests;
 /// new one, makes one of its visuals, in the order and with the types of its entry, the visuals it leaves out being removed with
 /// their files; the pending visuals no longer kept and their files removed by the reconciliation.
 /// </summary>
-public sealed class PendingVisualEndpointsTests : IClassFixture<ApiWebApplicationFactory>, IDisposable
+public sealed class PendingVisualEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>, IDisposable
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public PendingVisualEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     public void Dispose() => _factory.Clock.UtcNow = null;
 
@@ -278,7 +272,7 @@ public sealed class PendingVisualEndpointsTests : IClassFixture<ApiWebApplicatio
 
     private List<string> VolumeFiles() =>
         Directory.Exists(_factory.VisualsRoot)
-            ? Directory.EnumerateFiles(_factory.VisualsRoot, "*", SearchOption.AllDirectories).Order().ToList()
+            ? [.. Directory.EnumerateFiles(_factory.VisualsRoot, "*", SearchOption.AllDirectories).Order()]
             : [];
 
     private async Task<EditionVisualsForm> GetVisualsAsync(EditionForm edition) =>

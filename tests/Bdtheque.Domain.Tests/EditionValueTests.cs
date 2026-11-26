@@ -1,4 +1,3 @@
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 
@@ -81,7 +80,7 @@ public sealed class EditionValueTests
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetPublicationYearAndAcquisition(null, Acquisition((AcquisitionMode)42)));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetPublicationYearAndAcquisition(null, Acquisition((AcquisitionMode)42)));
     }
 
     [Fact]
@@ -100,7 +99,7 @@ public sealed class EditionValueTests
         // aggregate sees: it must go through Album.RecordAcquisition.
         var edition = CreateEdition();
 
-        Assert.Throws<InvalidOperationException>(() => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase)));
+        DomainAssert.Throws<InvalidOperationException>(() => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase)));
         Assert.Null(edition.AcquisitionMode);
     }
 
@@ -332,7 +331,7 @@ public sealed class EditionValueTests
         Assert.Equal((null, new DateOnly(2020, 1, 1)), (edition.PublicationYear, edition.AcquisitionDate));
 
         edition.SetPublicationYearAndAcquisition(2019, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR"));
-        Assert.Equal((2019, (DateOnly?)null), (edition.PublicationYear, edition.AcquisitionDate));
+        Assert.Equal((2019, null), (edition.PublicationYear, edition.AcquisitionDate));
     }
 
     [Fact]

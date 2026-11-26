@@ -2,7 +2,6 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
-using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using frontend::Bdtheque.Frontend.Navigation;
 

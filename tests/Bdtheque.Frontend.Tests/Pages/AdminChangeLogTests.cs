@@ -322,7 +322,7 @@ public sealed class AdminChangeLogTests : BunitContext, IDisposable
     private static IReadOnlyList<IElement> Rows(IRenderedComponent<AdminChangeLog> page) => page.FindAll(".log-row:not(.log-row-head)");
 
     private static List<(string, string?)> MenuOf(IElement row) =>
-        row.QuerySelectorAll(".actions-menu-panel .menu-item").Select(item => (Text(item), item.GetAttribute("href"))).ToList();
+        [.. row.QuerySelectorAll(".actions-menu-panel .menu-item").Select(item => (Text(item), item.GetAttribute("href")))];
 
     private static string Text(IElement element) => string.Join(' ', element.TextContent.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
 }

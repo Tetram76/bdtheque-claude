@@ -3,7 +3,6 @@ using Bdtheque.Api.Search;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Contract = Bdtheque.Contracts.Admin;
 using ContractEnums = Bdtheque.Contracts.Enums;
@@ -51,7 +50,7 @@ internal static class ChangeLogEndpoints
 
         return new Contract.ChangeLogList(
             new Page<Contract.ChangeLogEntryItem>(
-                found.Items.Select(e => ToItem(e, parents, !deleted.Contains(e.RecordId))).ToList(), found.Number, found.Size, found.TotalCount),
+                [.. found.Items.Select(e => ToItem(e, parents, !deleted.Contains(e.RecordId)))], found.Number, found.Size, found.TotalCount),
             wholeCount,
             filtered);
     }
@@ -61,10 +60,10 @@ internal static class ChangeLogEndpoints
         BdthequeDbContext context, IReadOnlyCollection<Model.ChangeLogEntry> entries, CancellationToken cancellationToken)
     {
         var ids = entries.Select(e => e.RecordId).Distinct().ToList();
-        return (await context.ChangeLog
+        return [.. (await context.ChangeLog
             .Where(e => ids.Contains(e.RecordId) && e.Operation == DomainEnums.ChangeLogOperation.Deletion)
             .Select(e => e.RecordId)
-            .ToListAsync(cancellationToken)).ToHashSet();
+            .ToListAsync(cancellationToken))];
     }
 
     // The record of a filter, by its latest entry.
@@ -115,7 +114,7 @@ internal static class ChangeLogEndpoints
         var latest = records.Select(r => entries.First(e => e.RecordType == r.RecordType && e.RecordId == r.RecordId)).ToList();
         var parents = await ReadParentsAsync(context, latest, cancellationToken);
 
-        return latest.Select(e => ToItem(e, parents, recordExists: true)).ToList();
+        return [.. latest.Select(e => ToItem(e, parents, recordExists: true))];
     }
 
     /// <summary>
@@ -159,7 +158,7 @@ internal static class ChangeLogEndpoints
     }
 
     private static List<Guid> IdsOf(IEnumerable<Model.ChangeLogEntry> entries, DomainEnums.RecordType type) =>
-        entries.Where(e => e.RecordType == type).Select(e => e.RecordId).Distinct().ToList();
+        [.. entries.Where(e => e.RecordType == type).Select(e => e.RecordId).Distinct()];
 
     private static Contract.ChangeLogEntryItem ToItem(
         Model.ChangeLogEntry entry, IReadOnlyDictionary<Guid, Guid> parents, bool recordExists) =>
@@ -172,7 +171,7 @@ internal static class ChangeLogEndpoints
             recordExists,
             ToLabel(entry.Label),
             EnumMapping.Map<ContractEnums.ChangeLogOperation>(entry.Operation)!.Value,
-            entry.Changes.Select(ToChange).ToList());
+            [.. entry.Changes.Select(ToChange)]);
 
     private static Contract.ChangeLogChange ToChange(Model.ChangeLogChange change) =>
         new(
@@ -198,7 +197,7 @@ internal static class ChangeLogEndpoints
                 visual.Id, EnumMapping.Map<ContractEnums.VisualType>(visual.Type)!.Value, visual.DisplayOrder),
             Model.SearchCriteriaValue criteria => new Contract.SearchCriteriaValue(SearchCriteriaJson.Deserialize(criteria.Criteria)),
             Model.SearchVariablesValue variables => new Contract.SearchVariablesValue(
-                variables.Variables.Select(v => new SavedSearchVariable(v.Name, v.Location, v.DefaultValue)).ToList()),
+                [.. variables.Variables.Select(v => new SavedSearchVariable(v.Name, v.Location, v.DefaultValue))]),
             _ => throw new ArgumentOutOfRangeException(nameof(value), value.GetType().Name, "Unknown kind of change log value."),
         };
 

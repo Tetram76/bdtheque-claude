@@ -52,11 +52,10 @@ public sealed class ContractEnumTests
     }
 
     private static Type[] EnumsOf(Assembly assembly, string @namespace) =>
-        assembly.GetTypes().Where(t => t.IsEnum && t.IsPublic && t.Namespace == @namespace).ToArray();
+        [.. assembly.GetTypes().Where(t => t.IsEnum && t.IsPublic && t.Namespace == @namespace)];
 
     private static List<(string Name, long Value)> Members(Type enumType) =>
-        Enum.GetNames(enumType)
+        [.. Enum.GetNames(enumType)
             .Select(name => (name, Convert.ToInt64(Enum.Parse(enumType, name))))
-            .OrderBy(m => m.name, StringComparer.Ordinal)
-            .ToList();
+            .OrderBy(m => m.name, StringComparer.Ordinal)];
 }

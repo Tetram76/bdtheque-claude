@@ -174,7 +174,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     private static (JsonArray Values, int Index) ConstantAt(JsonObject tree, string location)
     {
         if (string.IsNullOrEmpty(location) || location[0] != '/')
-            throw new ArgumentException($"{location} is not a JSON pointer into the criteria.", nameof(location));
+            throw new ArgumentException($"'{location}' is not a JSON pointer into the criteria.", nameof(location));
 
         var tokens = location[1..].Split('/').Select(t => t.Replace("~1", "/", StringComparison.Ordinal).Replace("~0", "~", StringComparison.Ordinal)).ToArray();
         JsonNode? node = tree;
@@ -237,11 +237,9 @@ public sealed class SavedSearchDesignation
 public sealed record SearchVariable(string Name, string Location);
 
 /// <summary>The variables of a saved search, in their order, compared by value.</summary>
-public sealed class SearchVariables : IReadOnlyList<SearchVariable>, IEquatable<SearchVariables>
+public sealed class SearchVariables(IEnumerable<SearchVariable> variables) : IReadOnlyList<SearchVariable>, IEquatable<SearchVariables>
 {
-    private readonly SearchVariable[] _variables;
-
-    public SearchVariables(IEnumerable<SearchVariable> variables) => _variables = variables.ToArray();
+    private readonly SearchVariable[] _variables = [.. variables];
 
     public static SearchVariables Empty { get; } = new([]);
 

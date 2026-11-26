@@ -32,7 +32,7 @@ public sealed class ApplicationSettingsTests
     {
         var settings = new ApplicationSettings();
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => settings.Set((AlbumLabelFormat)99, DisplayCulture.FrenchFrance));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => settings.Set((AlbumLabelFormat)99, DisplayCulture.FrenchFrance));
         Assert.Equal(AlbumLabelFormat.TitleSeriesVolume, settings.AlbumLabelFormat);
     }
 
@@ -41,7 +41,7 @@ public sealed class ApplicationSettingsTests
     {
         var settings = new ApplicationSettings();
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => settings.Set(AlbumLabelFormat.VolumeTitleSeries, (DisplayCulture)99));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => settings.Set(AlbumLabelFormat.VolumeTitleSeries, (DisplayCulture)99));
         Assert.Equal(AlbumLabelFormat.TitleSeriesVolume, settings.AlbumLabelFormat);
     }
 }

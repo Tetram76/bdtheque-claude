@@ -1,4 +1,3 @@
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 
 namespace Bdtheque.Domain.Tests;

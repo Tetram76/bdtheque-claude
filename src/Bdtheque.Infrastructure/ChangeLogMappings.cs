@@ -160,9 +160,7 @@ internal static class ChangeLogMappings
                 new(ChangeLogAttribute.SearchVariables, [nameof(SavedSearch.Criteria), nameof(SavedSearch.Variables)],
                     (values, _, _) => ValueTask.FromResult<ChangeLogValue?>(
                         values is [string criteria, SearchVariables variables]
-                            ? new SearchVariablesValue(variables
-                                .Select(v => new SearchVariableValue(v.Name, v.Location, SavedSearch.DefaultValueOf(criteria, v)))
-                                .ToList())
+                            ? new SearchVariablesValue([.. variables.Select(v => new SearchVariableValue(v.Name, v.Location, SavedSearch.DefaultValueOf(criteria, v)))])
                             : null)),
             ],
             []),

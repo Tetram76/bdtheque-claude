@@ -1,5 +1,3 @@
-using Bdtheque.Domain.Common;
-
 namespace Bdtheque.Domain.Tests;
 
 public sealed class IsbnTextTests

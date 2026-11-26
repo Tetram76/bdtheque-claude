@@ -16,16 +16,10 @@ namespace Bdtheque.Api.Tests;
 /// Administration of the collections of a publisher (<c>/admin/publishers/{id}/collections</c>): they
 /// belong to the aggregate of their publisher, whose version guards every write on them.
 /// </summary>
-public sealed class PublisherCollectionEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class PublisherCollectionEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public PublisherCollectionEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Create_ReturnsTheCollectionAsStoredAndTheNewVersionOfThePublisher()

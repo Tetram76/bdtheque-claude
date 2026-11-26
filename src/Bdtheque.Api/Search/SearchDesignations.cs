@@ -15,7 +15,7 @@ internal static class SearchDesignations
     /// identifiers.
     /// </remarks>
     public static IReadOnlyList<(EntityKind Kind, Guid Id)> Of(SearchEntityDefinition entity, SearchCondition criteria) =>
-        Read(entity, criteria).Distinct().ToList();
+        [.. Read(entity, criteria).Distinct()];
 
     /// <summary>
     /// The same criteria, every value designating the record <paramref name="merged"/> of <paramref name="kind"/> designating

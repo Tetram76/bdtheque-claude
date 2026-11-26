@@ -13,13 +13,11 @@ namespace Bdtheque.Api.Tests;
 /// of an author, whole, without filter (fonctionnel/structure-de-l-application.md).
 /// </summary>
 /// <remarks>Each test attaches its records to universes of its own, which narrows the records to them.</remarks>
-public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class CatalogUniverseRecordTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
-
-    public CatalogUniverseRecordTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Record_ListsItsSeriesAndAlbumsWithoutSeriesTogetherBySortKey_EachSeriesWithItsAlbumsAttached()
@@ -47,7 +45,7 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
 
         // "Astérix" < "Blake et Mortimer" < "Corto Maltese" < "Dernier Pharaon [Le]": the whole list, without pagination.
         Assert.Equal(
-            [(asterix.Id, (Guid?)null), (blake.Id, null), (corto.Id, null), (null, pharaon.Id)],
+            [(asterix.Id, null), (blake.Id, null), (corto.Id, null), (null, pharaon.Id)],
             record.Works.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));
 
         var asterixEntry = record.Works[0].Series!;
@@ -91,10 +89,10 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
         // siblings by name, each with what is attached to it, its own sub-universes included, as its own record presents it:
         // Daredevil through one of its albums.
         Assert.Equal(
-            [(marvel.Id, (Guid?)null, 3, 2), (asgard.Id, marvel.Id, 0, 0), (xMen.Id, marvel.Id, 2, 2), (mutants.Id, xMen.Id, 1, 0)],
+            [(marvel.Id, null, 3, 2), (asgard.Id, marvel.Id, 0, 0), (xMen.Id, marvel.Id, 2, 2), (mutants.Id, xMen.Id, 1, 0)],
             top.Tree.Select(u => (u.Id, u.ParentId, u.SeriesCount, u.AlbumCount)));
         Assert.Equal(
-            [(avengers.Id, (Guid?)null), (daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
+            [(avengers.Id, null), (daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
             top.Works.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));
         Assert.Equal([daredevil1.Id], top.Works[1].Series!.Albums.Select(a => a.Album.Album.Id));
         Assert.False(top.Works[1].Series!.OnSeries);
@@ -107,7 +105,7 @@ public sealed class CatalogUniverseRecordTests : IClassFixture<ApiWebApplication
         Assert.Equal([marvel.Id, asgard.Id, xMen.Id, mutants.Id], sub.Tree.Select(u => u.Id));
         // The series and albums of the parent are not those of its sub-universe.
         Assert.Equal(
-            [(daredevil.Id, (Guid?)null), (null, hulk.Id), (wolverine.Id, null)],
+            [(daredevil.Id, null), (null, hulk.Id), (wolverine.Id, null)],
             sub.Works.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));
     }
 

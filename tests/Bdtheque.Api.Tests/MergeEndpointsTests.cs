@@ -18,16 +18,10 @@ namespace Bdtheque.Api.Tests;
 /// fonctionnel/regles-metier/fusion-des-fiches.md): the record that remains keeps the data chosen, and every record designating
 /// either of them designates it, each once.
 /// </summary>
-public sealed class MergeEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class MergeEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public MergeEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task GenreMergePreview_PresentsBothGenresAndCountsWhatTheyClassOnce()
@@ -307,7 +301,7 @@ public sealed class MergeEndpointsTests : IClassFixture<ApiWebApplicationFactory
     {
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-        return (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId).ToList();
+        return [.. (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId)];
     }
 
     private async Task<(List<Guid> Albums, List<Guid> Series)> SeedAsync(Func<BdthequeDbContext, Task<(List<Guid>, List<Guid>)>> seed)

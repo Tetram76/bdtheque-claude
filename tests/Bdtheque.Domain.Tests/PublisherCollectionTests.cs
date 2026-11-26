@@ -54,7 +54,7 @@ public sealed class PublisherCollectionTests
         var publisher = new Publisher("Dargaud");
         var other = new Publisher("Dupuis").AddCollection("Repérages");
 
-        Assert.Throws<InvalidOperationException>(() => publisher.RemoveCollection(other));
+        DomainAssert.Throws<InvalidOperationException>(() => publisher.RemoveCollection(other));
     }
 
     [Fact]

@@ -18,16 +18,10 @@ namespace Bdtheque.Api.Tests;
 /// Administration of the editions (<c>/admin/albums/{albumId}/editions</c>), children of the
 /// aggregate of their album, including their deletion.
 /// </summary>
-public sealed class EditionEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class EditionEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public EditionEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task New_ForAnAlbumWithoutSeries_ProposesTheDefaultValues()

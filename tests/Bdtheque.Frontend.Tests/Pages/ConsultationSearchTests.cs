@@ -6,7 +6,6 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Frontend.Components.Pages;
 using Bdtheque.Frontend.Components.Controls;
-using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Tests.Audience;
 using Bdtheque.Frontend.Visits;

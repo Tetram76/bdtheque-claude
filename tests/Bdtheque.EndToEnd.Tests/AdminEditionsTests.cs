@@ -6,7 +6,6 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
-using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests;
 

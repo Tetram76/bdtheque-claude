@@ -6,7 +6,6 @@ using Bdtheque.Api.Merge;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -235,7 +234,7 @@ internal static class EditionEndpoints
                 PurchaseIntent = e.PurchaseIntentOf(),
             }))
             .ToListAsync(cancellationToken);
-        return editions.Select(e => ToDetail(e.Edition, e.Website, e.Entity, e.IsInCollection, e.PurchaseIntent)).ToList();
+        return [.. editions.Select(e => ToDetail(e.Edition, e.Website, e.Entity, e.IsInCollection, e.PurchaseIntent))];
     }
 
     private static EditionDetail ToDetail(

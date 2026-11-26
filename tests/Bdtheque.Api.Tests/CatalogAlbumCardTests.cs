@@ -11,13 +11,11 @@ namespace Bdtheque.Api.Tests;
 /// represented by their number of albums and the covers of their first ones, in the record of a series,
 /// the bibliography of an author and the record of a universe (visuel/fiche-serie/, visuel/fiche-auteur/, visuel/fiche-univers/).
 /// </summary>
-public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class CatalogAlbumCardTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
-
-    public CatalogAlbumCardTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Cover_IsThatOfTheOldestEditionWithACover_OwnedOrNot()
@@ -70,7 +68,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         // The user puts the second cover first (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md).
         var visuals = await GetAsync<EditionVisualsForm>(VisualsUri(album.Id, edition));
         var arrangement = visuals.Visuals.OrderBy(v => v.Id == underneath.VisualId ? 0 : 1).Select(v => new VisualArrangement(v.Id, v.Type));
-        (await _client.PutAsJsonAsync(VisualsUri(album.Id, edition), new ArrangeVisualsRequest(arrangement.ToList(), visuals.AlbumVersion)))
+        (await _client.PutAsJsonAsync(VisualsUri(album.Id, edition), new ArrangeVisualsRequest([.. arrangement], visuals.AlbumVersion)))
             .EnsureSuccessStatusCode();
 
         var card = Assert.Single((await GetAsync<SeriesDetail>($"/catalog/series/{series.Id}")).Albums);
@@ -91,7 +89,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
 
         var detail = await GetAsync<SeriesDetail>($"/catalog/series/{series.Id}");
 
-        Assert.Equal(new AlbumCover?[] { null, null }, detail.Albums.Select(a => a.Cover));
+        Assert.Equal([null, null], detail.Albums.Select(a => a.Cover));
     }
 
     [Fact]
@@ -113,7 +111,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         Assert.Equal(
             [
                 ((AlbumRating?)AlbumRating.VeryGood, true, AlbumCollectionState.InCollection),
-                ((AlbumRating?)null, false, AlbumCollectionState.PurchaseIntent),
+                (null, false, AlbumCollectionState.PurchaseIntent),
                 ((AlbumRating?)AlbumRating.Poor, false, AlbumCollectionState.PurchaseIntent),
                 (null, false, AlbumCollectionState.OutsideCollection),
             ],
@@ -185,7 +183,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         Assert.Equal([cover1, null, cover3], donjonEntry.Overview.FirstVolumeCovers);
 
         var oneShotCard = bibliography[2].Album!.Album;
-        Assert.Equal((oneShot.Id, (AlbumCover?)null), (oneShotCard.Album.Id, oneShotCard.Cover));
+        Assert.Equal((oneShot.Id, null), (oneShotCard.Album.Id, oneShotCard.Cover));
     }
 
     [Fact]
@@ -209,7 +207,7 @@ public sealed class CatalogAlbumCardTests : IClassFixture<ApiWebApplicationFacto
         Assert.Equal([firstCover, secondCover], seriesEntry.Overview.FirstVolumeCovers);
         Assert.Equal([(second.Id, (AlbumCover?)secondCover)], seriesEntry.Albums.Select(a => (a.Album.Album.Id, a.Album.Cover)));
         var oneShotCard = works[1].Album!.Album;
-        Assert.Equal((oneShot.Id, (AlbumRating?)AlbumRating.Average, (AlbumCover?)null), (oneShotCard.Album.Id, oneShotCard.Rating, oneShotCard.Cover));
+        Assert.Equal((oneShot.Id, (AlbumRating?)AlbumRating.Average, null), (oneShotCard.Album.Id, oneShotCard.Rating, oneShotCard.Cover));
     }
 
     private async Task<T> GetAsync<T>(string uri) => (await _client.GetFromJsonAsync<T>(uri))!;

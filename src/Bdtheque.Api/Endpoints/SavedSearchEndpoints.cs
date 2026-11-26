@@ -75,7 +75,7 @@ internal static class SavedSearchEndpoints
 
     /// <summary>The variables of a saved search, each with its default value: the constant of <paramref name="criteria"/> it replaces.</summary>
     private static List<SavedSearchVariable> VariablesOf(string criteria, IEnumerable<SearchVariable> variables) =>
-        variables.Select(v => new SavedSearchVariable(v.Name, v.Location, SavedSearch.DefaultValueOf(criteria, v))).ToList();
+        [.. variables.Select(v => new SavedSearchVariable(v.Name, v.Location, SavedSearch.DefaultValueOf(criteria, v)))];
 
     private static async Task<SavedSearchForm> GetAsync(Guid id, BdthequeDbContext context, CancellationToken cancellationToken) =>
         ToForm(context, await context.SavedSearches.SingleOrDefaultAsync(s => s.Id == id, cancellationToken)
@@ -135,6 +135,6 @@ internal static class SavedSearchEndpoints
             search.Id,
             new SavedSearchContent(
                 search.Name, EnumMapping.Map<EntityKind>(search.Entity)!.Value, SearchCriteriaJson.Deserialize(search.Criteria),
-                search.Variables.Select(v => new SearchVariableContent(v.Name, v.Location)).ToList()),
+                [.. search.Variables.Select(v => new SearchVariableContent(v.Name, v.Location))]),
             context.VersionOf(search));
 }

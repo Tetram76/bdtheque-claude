@@ -13,11 +13,9 @@ namespace Bdtheque.Api.Tests;
 /// produce them, the frontend
 /// building every request, so they are technical — whatever their HTTP status.
 /// </summary>
-public sealed class ErrorResponseTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class ErrorResponseTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public ErrorResponseTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task UnknownRoute_IsATechnicalProblem()

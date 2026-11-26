@@ -14,16 +14,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>Administration of the series (<c>/admin/series</c>), including their deletion.</summary>
-public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class SeriesEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public SeriesEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Create_WithTheTitleOnly_AppliesTheDefaultsAndAComputedSortKey()
@@ -749,10 +743,10 @@ public sealed class SeriesEndpointsTests : IClassFixture<ApiWebApplicationFactor
         $"/admin/series/{series.Id}?version={series.Version}&fingerprint={Uri.EscapeDataString(fingerprint)}";
 
     // The associations come back in a stable order, whichever order the form listed them in.
-    private static List<Guid> Sorted(IReadOnlyList<Guid> ids) => ids.Order().ToList();
+    private static List<Guid> Sorted(IReadOnlyList<Guid> ids) => [.. ids.Order()];
 
     private static List<ContributionContent> Sorted(IReadOnlyList<ContributionContent> contributions) =>
-        contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId).ToList();
+        [.. contributions.OrderBy(c => c.Role).ThenBy(c => c.AuthorId)];
 
     private static SeriesContent Content(string title) =>
         new(title, null, null, null, false, false, false, null, null,

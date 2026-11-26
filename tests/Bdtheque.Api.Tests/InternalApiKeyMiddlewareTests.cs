@@ -2,11 +2,9 @@ using System.Net;
 
 namespace Bdtheque.Api.Tests;
 
-public sealed class InternalApiKeyMiddlewareTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class InternalApiKeyMiddlewareTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public InternalApiKeyMiddlewareTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task Request_WithoutInternalKey_IsRejected()
