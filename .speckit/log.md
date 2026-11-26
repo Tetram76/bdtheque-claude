@@ -2,7 +2,7 @@
 
 ## 2026-11-26
 
-* **Exigences de l'utilisateur** : un jugement (coût, impact, ce que ferait un agent, mécanisme qui en compense un autre) est une affirmation, vérifiée comme les autres ; dans toute réponse à l'utilisateur, chaque affirmation porte sa source ou la mention « hypothèse non vérifiée » ([Règles de travail de l'agent](gestion-projet/gouvernance/regles-de-travail-de-l-agent.md)).
+* **Exigences de l'utilisateur** : un jugement (coût, impact, ce que ferait un agent, mécanisme qui en compense un autre) est une affirmation, vérifiée comme les autres ; dans toute réponse à l'utilisateur, chaque affirmation porte sa source ou la mention « hypothèse non vérifiée » ([Règles de travail de l'agent](gestion-projet/gouvernance/regles-de-travail-de-l-agent.md)) (#663).
 
 ## 2026-11-25
 
