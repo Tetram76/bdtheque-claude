@@ -6,6 +6,7 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.EndToEnd.Tests.Headers;
 using frontend::Bdtheque.Frontend.Navigation;
 using frontend::Bdtheque.Frontend.Theming;
+using SkiaSharp;
 
 namespace Bdtheque.EndToEnd.Tests.Theming;
 
@@ -98,6 +99,34 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
     }
 
     [Fact]
+    public async Task Stage_PaintsItsLightsBeyondTheContent_UpToTheEdgesOfTheScreen()
+    {
+        var page = await OpenAsync(AppPaths.Home);
+        var deep = (await CustomPropertyAsync(page, "--day-deep"))!;
+
+        // Lit by the reflection, to the left of the latest arrivals, and by the halo, to the right of the spotlight: the
+        // stage beside the content is never the plain deep colour that cut them at its edge (#662).
+        await page.Locator("[data-area='latest']").ScrollIntoViewIfNeededAsync();
+        var board = (await page.Locator(".home-board").BoundingBoxAsync())!;
+        var latest = (await page.Locator("[data-area='latest']").BoundingBoxAsync())!;
+        await AssertLitAsync(page, deep, board.X - 2, latest.Y + latest.Height / 2);
+        await page.Locator("[data-area='spotlight']").ScrollIntoViewIfNeededAsync();
+        board = (await page.Locator(".home-board").BoundingBoxAsync())!;
+        var spotlight = (await page.Locator("[data-area='spotlight']").BoundingBoxAsync())!;
+        await AssertLitAsync(page, deep, board.X + board.Width + 2, spotlight.Y + spotlight.Height / 2);
+        Assert.False(await ScrollsSidewaysAsync(page), "The stage makes the page scroll sideways.");
+    }
+
+    [Fact]
+    public async Task Stage_NeverMakesThePageScrollSideways_OnASmartphone()
+    {
+        var page = await NewPageInThemeAsync(ThemeCatalog.Couverture.Key, new ViewportSize { Width = 414, Height = 900 });
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
+
+        Assert.False(await ScrollsSidewaysAsync(page), "The stage makes the page scroll sideways.");
+    }
+
+    [Fact]
     public async Task HelpButton_IsADiskOfTheAccent()
     {
         var page = await OpenAsync(AppPaths.Home);
@@ -146,6 +175,29 @@ public sealed class CouvertureThemeTests(CollectionApplication application) : Br
         return page;
     }
 
+    /// <summary>
+    /// A point of the stage lit by one of its lights: the browser paints it neither of the plain deep colour, where the light
+    /// would be cut, nor of the background of the page, where the stage would not be painted at all.
+    /// </summary>
+    internal static async Task AssertLitAsync(IPage page, string deep, float x, float y)
+    {
+        var pixel = await PixelAsync(page, x, y);
+        Assert.NotEqual(Rgb(deep), pixel);
+        Assert.NotEqual(await page.EvaluateAsync<string>("() => getComputedStyle(document.body).backgroundColor"), pixel);
+    }
+
+    /// <summary>The colour of a pixel of the viewport, as the browser paints it, in the form getComputedStyle gives.</summary>
+    private static async Task<string> PixelAsync(IPage page, float x, float y)
+    {
+        var png = await page.ScreenshotAsync(new PageScreenshotOptions { Clip = new Clip { X = x, Y = y, Width = 1, Height = 1 } });
+        using var bitmap = SKBitmap.Decode(png);
+        var pixel = bitmap.GetPixel(0, 0);
+        return $"rgb({pixel.Red}, {pixel.Green}, {pixel.Blue})";
+    }
+
+    internal static Task<bool> ScrollsSidewaysAsync(IPage page) =>
+        page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
+
     internal static async Task<string?> CustomPropertyAsync(IPage page, string name) =>
         (await page.EvaluateAsync<string>("name => getComputedStyle(document.documentElement).getPropertyValue(name)", name))?.Trim();
 
@@ -171,6 +223,19 @@ public sealed class EmptyCollectionCouvertureThemeTests(EmptyCollectionApplicati
         await Assertions.Expect(page.Locator(".empty-collection-first-album")).ToBeVisibleAsync();
         await Assertions.Expect(page.Locator(".empty-collection-badge")).ToHaveTextAsync("Collection à démarrer");
         await Assertions.Expect(page.Locator(".empty-collection-shelf")).ToBeHiddenAsync();
+    }
+
+    [Fact]
+    public async Task Stage_PaintsItsReflectionBeyondTheContent_UpToTheEdgeOfTheScreen()
+    {
+        var page = await NewPageInThemeAsync(ThemeCatalog.Couverture.Key, CouvertureThemeTests.Desktop);
+        await PageReadiness.GotoAsync(page, AppPaths.Home);
+
+        // The main block, the first row, is the stage; its reflection lights the bottom left corner beyond the content (#662).
+        var board = (await page.Locator(".home-board").BoundingBoxAsync())!;
+        var main = (await page.Locator("[data-area='main']").BoundingBoxAsync())!;
+        await CouvertureThemeTests.AssertLitAsync(page, DayPalette.Own.Deep, board.X - 2, main.Y + main.Height * 0.9f);
+        Assert.False(await CouvertureThemeTests.ScrollsSidewaysAsync(page), "The stage makes the page scroll sideways.");
     }
 }
 
