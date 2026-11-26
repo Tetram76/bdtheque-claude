@@ -32,7 +32,6 @@ public sealed class ChangeLogEntry : EntityBase
     private ChangeLogEntry(
         RecordType recordType, Guid recordId, RecordLabel label, ChangeLogOperation operation, IEnumerable<ChangeLogChange> changes)
     {
-        ArgumentNullException.ThrowIfNull(label);
         RecordType = recordType;
         RecordId = recordId;
         Label = label;
@@ -50,7 +49,6 @@ public sealed class ChangeLogEntry : EntityBase
     public static ChangeLogEntry Modification(
         RecordType recordType, Guid recordId, RecordLabel label, IReadOnlyCollection<ChangeLogChange> changes)
     {
-        ArgumentNullException.ThrowIfNull(changes);
         if (changes.Count == 0)
             throw new ArgumentException("A modification records at least one change.", nameof(changes));
 

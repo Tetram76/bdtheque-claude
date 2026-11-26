@@ -75,10 +75,4 @@ public sealed class ChangeLogEntryTests
     {
         DomainAssert.Throws<ArgumentException>(() => new ChangeLogChange(ChangeLogAttribute.Label, null, null));
     }
-
-    [Fact]
-    public void Entry_RequiresItsLabel()
-    {
-        DomainAssert.Throws<ArgumentNullException>(() => ChangeLogEntry.Creation(RecordType.Genre, Guid.CreateVersion7(), null!));
-    }
 }

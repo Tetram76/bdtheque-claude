@@ -71,7 +71,6 @@ public sealed class Edition : EntityBase
     /// <summary>Creates an edition of <paramref name="album"/>, not owned until its acquisition is recorded.</summary>
     public Edition(Album album, Publisher? publisher)
     {
-        ArgumentNullException.ThrowIfNull(album);
         SetPublisher(publisher, null);
 
         Album = album;
@@ -143,7 +142,6 @@ public sealed class Edition : EntityBase
     /// </remarks>
     public void SetPublicationYearAndAcquisition(int? publicationYear, EditionAcquisition acquisition)
     {
-        ArgumentNullException.ThrowIfNull(acquisition);
         // Acquiring may realize an intent on this edition or on its album, which only the album
         // aggregate sees: a programming error to reach it from here.
         if (AcquisitionMode is null && acquisition.Mode is not null)
@@ -447,7 +445,6 @@ public sealed class Edition : EntityBase
     /// </exception>
     public void ArrangeVisuals(IReadOnlyList<(Guid VisualId, VisualType Type)> arrangement)
     {
-        ArgumentNullException.ThrowIfNull(arrangement);
         var visuals = _visuals.ToDictionary(v => v.Id);
         if (arrangement.Count != visuals.Count
             || arrangement.Select(a => a.VisualId).Distinct().Count() != visuals.Count
@@ -480,7 +477,6 @@ public sealed class Edition : EntityBase
     /// </exception>
     public IReadOnlyList<EditionVisual> SetVisuals(IReadOnlyList<(Guid? VisualId, PendingVisual? Pending, VisualType Type)> entries)
     {
-        ArgumentNullException.ThrowIfNull(entries);
         var kept = entries.Where(e => e.VisualId is not null).Select(e => e.VisualId!.Value).ToList();
         var added = entries.Where(e => e.Pending is not null).Select(e => e.Pending!).ToList();
         if (entries.Any(e => (e.VisualId is null) == (e.Pending is null))

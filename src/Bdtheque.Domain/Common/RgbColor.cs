@@ -12,6 +12,7 @@ public readonly record struct RgbColor(byte R, byte G, byte B)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(value);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(value, 0xFFFFFF);
+        // Stryker disable once Bitwise : the value is checked non-negative above, where >> and >>> shift alike
         return new RgbColor((byte)(value >> 16), (byte)(value >> 8), (byte)value);
     }
 

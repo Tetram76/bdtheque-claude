@@ -248,7 +248,6 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// <exception cref="InvalidOperationException">The collection of an edition concerned is not loaded.</exception>
     public void TransferPublisher(PublisherMerge merge)
     {
-        ArgumentNullException.ThrowIfNull(merge);
         foreach (var edition in _editions)
             edition.TransferPublisher(merge);
     }
@@ -313,8 +312,6 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// </summary>
     public static IReadOnlyList<PurchaseIntent> PurchaseIntentsWithdrawnByMerge(Album first, Album second)
     {
-        ArgumentNullException.ThrowIfNull(first);
-        ArgumentNullException.ThrowIfNull(second);
         return first._editions.Count + second._editions.Count == 0
             ? []
             : [.. first._purchaseIntents.Concat(second._purchaseIntents).Where(p => p.EditionId is null)];
@@ -362,9 +359,6 @@ public sealed class Album : EntityBase, IAggregateRoot
     /// </summary>
     public static IReadOnlyList<PurchaseIntent> PurchaseIntentsWithdrawnByEditionMerge(Edition first, Edition second, Edition acquisitionOf)
     {
-        ArgumentNullException.ThrowIfNull(first);
-        ArgumentNullException.ThrowIfNull(second);
-        ArgumentNullException.ThrowIfNull(acquisitionOf);
         return acquisitionOf.AcquisitionMode is null ? [] : [.. new[] { first, second }.Select(IntentOf).OfType<PurchaseIntent>()];
     }
 
@@ -389,9 +383,6 @@ public sealed class Album : EntityBase, IAggregateRoot
         Edition kept, Edition merged, Album album, int? publicationYear, Edition acquisitionOf, IReadOnlyCollection<Guid> retainedVisuals)
     {
         MergeGuard.EnsureDistinct(merged, kept);
-        ArgumentNullException.ThrowIfNull(album);
-        ArgumentNullException.ThrowIfNull(acquisitionOf);
-        ArgumentNullException.ThrowIfNull(retainedVisuals);
         if (album != kept.Album && album != merged.Album)
             throw new ArgumentException("The edition that remains belongs to the album of either edition.", nameof(album));
         if (acquisitionOf != kept && acquisitionOf != merged)
@@ -523,7 +514,6 @@ public sealed class Album : EntityBase, IAggregateRoot
         // Every check runs before anything is mutated: a rejected acquisition must leave the
         // aggregate untouched, or a later save would delete an intent never actually realized.
         EnsureOwnEdition(edition);
-        ArgumentNullException.ThrowIfNull(acquisition);
         if (acquisition.Mode is null)
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionModeRequired, "An acquisition requires its mode.", edition, nameof(Edition.AcquisitionMode));
@@ -531,8 +521,8 @@ public sealed class Album : EntityBase, IAggregateRoot
             throw new DomainRuleViolationException(DomainRules.EditionAlreadyOwned, "This edition is already owned.");
         edition.EnsureValid(acquisition, edition.PublicationYear);
 
-        var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id)
-                       ?? _purchaseIntents.Find(p => p.EditionId is null);
+        // At most one of them exists: an album targeted as a whole has no other edition.
+        var realized = _purchaseIntents.Find(p => p.EditionId == edition.Id || p.EditionId is null);
         if (realized is not null)
             _purchaseIntents.Remove(realized);
 
@@ -543,7 +533,6 @@ public sealed class Album : EntityBase, IAggregateRoot
     // for its intents and purchases, so no user input can reach this with a foreign edition.
     private void EnsureOwnEdition(Edition edition)
     {
-        ArgumentNullException.ThrowIfNull(edition);
         if (edition.AlbumId != Id)
             throw new ArgumentException("The edition does not belong to this album.", nameof(edition));
     }
@@ -552,7 +541,6 @@ public sealed class Album : EntityBase, IAggregateRoot
     // this album.
     private void EnsureOwnIntent(PurchaseIntent intent)
     {
-        ArgumentNullException.ThrowIfNull(intent);
         if (!_purchaseIntents.Contains(intent))
             throw new ArgumentException("The intent does not belong to this album.", nameof(intent));
     }

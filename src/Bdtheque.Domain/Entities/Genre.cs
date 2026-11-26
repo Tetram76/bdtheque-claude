@@ -8,11 +8,11 @@ namespace Bdtheque.Domain.Entities;
 /// </summary>
 public sealed class Genre : EntityBase, IAggregateRoot
 {
-    public string Label { get; private set; } = string.Empty;
+    public string Label { get; private set; } = null!;
 
     // Stored rather than computed at read time, so that the database can filter the list of the genres on it and index it
     // (choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md). Derived from the label, as sorted.
-    public string NavigationEntry { get; private set; } = string.Empty;
+    public string NavigationEntry { get; private set; } = null!;
 
     // EF Core parameterless constructor
     private Genre() { }

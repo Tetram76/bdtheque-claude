@@ -10,10 +10,10 @@ namespace Bdtheque.Domain.Entities;
 /// </summary>
 public sealed class Series : EntityBase, IAggregateRoot
 {
-    public string Title { get; private set; } = string.Empty;
-    public string SortKey { get; private set; } = string.Empty;
+    public string Title { get; private set; } = null!;
+    public string SortKey { get; private set; } = null!;
     public bool IsManualSortKey { get; private set; }
-    public string NavigationEntry { get; private set; } = string.Empty;
+    public string NavigationEntry { get; private set; } = null!;
 
     public SeriesStatus? Status { get; private set; }
     public int? TheoreticalVolumeCount { get; private set; }
@@ -62,6 +62,7 @@ public sealed class Series : EntityBase, IAggregateRoot
     {
         var series = new Series(title);
         var proposed = EditionPreset.Defaults;
+        // Stryker disable once Statement : the proposed category is none, as for any new series; set all the same, to follow the proposed values
         series.SetTemplateEditionCategory(proposed.Category);
         series.SetTemplateCondition(proposed.Condition);
         series.SetTemplateBinding(proposed.Binding);
@@ -210,7 +211,6 @@ public sealed class Series : EntityBase, IAggregateRoot
     private static bool Personalized(
         IReadOnlyCollection<(Guid AuthorId, ContributionRole Role)> albumCredits, Series? previousSeries, bool albumIsNew)
     {
-        ArgumentNullException.ThrowIfNull(albumCredits);
         return albumCredits.Count > 0
                && (!albumIsNew
                    || previousSeries is null
@@ -295,7 +295,6 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// <exception cref="InvalidOperationException">The template collection of the series is not loaded.</exception>
     public void TransferPublisher(PublisherMerge merge)
     {
-        ArgumentNullException.ThrowIfNull(merge);
         if (merge.Concerns(TemplatePublisherId, TemplatePublisherCollectionId))
             SetTemplate(merge.Kept, merge.CollectionReplacing(TemplatePublisherCollectionId, TemplatePublisherCollection));
     }

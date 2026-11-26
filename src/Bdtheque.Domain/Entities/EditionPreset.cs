@@ -33,7 +33,6 @@ public sealed record EditionPreset(
     /// </summary>
     public static EditionPreset For(Album album)
     {
-        ArgumentNullException.ThrowIfNull(album);
         if (album.SeriesId is null)
             return Defaults;
 

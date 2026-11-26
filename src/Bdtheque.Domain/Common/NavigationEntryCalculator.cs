@@ -29,7 +29,6 @@ public static class NavigationEntryCalculator
     public static IReadOnlyList<string> Entries { get; } =
         [.. Enumerable.Range('A', 26).Select(letter => ((char)letter).ToString()), DigitEntry, OtherEntry];
 
-    private static readonly CompareInfo FrenchOrder = CultureInfo.GetCultureInfo("fr-FR").CompareInfo;
     private const CompareOptions BaseLetterOnly = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace;
 
     public static string Compute(string sortKey)
@@ -54,13 +53,14 @@ public static class NavigationEntryCalculator
 
             // An initial starting with the letter itself (accented form, or an expansion such as
             // "Æ" = "ae" or "ß" = "ss") belongs to it.
-            if (FrenchOrder.IsPrefix(initial, baseLetter, BaseLetterOnly))
+            if (DomainText.FrenchOrder.IsPrefix(initial, baseLetter, BaseLetterOnly))
                 return baseLetter;
 
             // A distinct letter sorting after this one belongs to it, except after "Z": the
             // order then places it beyond every word starting with "Z" (other alphabets, Latin
             // letters with no base letter such as "Þ").
-            if (FrenchOrder.Compare(initial, baseLetter, BaseLetterOnly) > 0)
+            // Stryker disable once Equality : an initial equal to the letter, case and accents ignored, has it for prefix, returned just above
+            if (DomainText.FrenchOrder.Compare(initial, baseLetter, BaseLetterOnly) > 0)
                 return letter == 'Z' ? OtherEntry : baseLetter;
         }
 

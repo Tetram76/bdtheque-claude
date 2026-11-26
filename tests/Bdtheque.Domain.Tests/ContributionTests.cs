@@ -24,12 +24,6 @@ public sealed class ContributionTests
     }
 
     [Fact]
-    public void ContributionOfAnAlbum_NullAuthor_Throws()
-    {
-        DomainAssert.Throws<ArgumentNullException>(() => new Album("Le Lotus bleu", null, [(null!, ContributionRole.Scenarist)]));
-    }
-
-    [Fact]
     public void ContributionOfAnAlbum_UndefinedRole_Throws()
     {
         var author = new Author(null, null, "Hergé");

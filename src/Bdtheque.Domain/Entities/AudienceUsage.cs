@@ -42,7 +42,6 @@ public sealed class AudienceUsage : EntityBase
 
     private AudienceUsage(Guid visitId, FunctionUse use, bool isRepeat)
     {
-        ArgumentNullException.ThrowIfNull(use);
         VisitId = visitId;
         Function = use.Function;
         PresentedRecordType = use.Record?.Type;
@@ -57,7 +56,6 @@ public sealed class AudienceUsage : EntityBase
     /// </summary>
     public AudienceUsage Follow(FunctionUse use)
     {
-        ArgumentNullException.ThrowIfNull(use);
         return new AudienceUsage(VisitId, use, isRepeat: use == Use);
     }
 }

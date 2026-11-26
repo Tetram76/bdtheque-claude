@@ -32,6 +32,17 @@ public sealed class GenreEndpointsTests(ApiWebApplicationFactory factory) : ICla
         Assert.Equal(created, await _client.GetFromJsonAsync<GenreForm>($"/admin/genres/{created.Id}"));
     }
 
+    [Theory]
+    [InlineData("""{"label":null}""")]
+    [InlineData("{}")]
+    public async Task Create_WithoutTheLabelItsContractRequires_IsUnbindable(string body)
+    {
+        var response = await _client.PostAsync(
+            "/admin/genres", new StringContent(body, System.Text.Encoding.UTF8, "application/json"));
+
+        await ProblemAssert.IsProblemAsync(response, HttpStatusCode.BadRequest, ProblemTypes.Technical);
+    }
+
     [Fact]
     public async Task Create_WithBlankLabel_IsABusinessError()
     {

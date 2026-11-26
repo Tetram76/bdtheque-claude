@@ -9,7 +9,7 @@ namespace Bdtheque.Domain.Entities;
 /// </summary>
 public sealed class Universe : EntityBase, IAggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; private set; } = null!;
     public string? Description { get; private set; }
 
     public Guid? ParentId { get; private set; }
@@ -71,10 +71,6 @@ public sealed class Universe : EntityBase, IAggregateRoot
             return;
         }
 
-        // Compare by ID to handle detached / differently-instanced entities representing the same row.
-        if (parent.Id == Id)
-            throw CycleViolation();
-
         // Walk the ancestor chain. At each node:
         //   1. If the node is 'this', or its ParentId points back to 'this' (even though the
         //      corresponding Parent navigation is not loaded), the requested parent is one of
@@ -92,6 +88,8 @@ public sealed class Universe : EntityBase, IAggregateRoot
         var ancestor = parent;
         while (true)
         {
+            // Compared by ID to handle detached / differently-instanced entities representing the same row: the first node is
+            // the parent itself, refused when it is this universe.
             if (ancestor.Id == Id || ancestor.ParentId == Id)
                 throw CycleViolation();
 
@@ -130,7 +128,6 @@ public sealed class Universe : EntityBase, IAggregateRoot
     public void Absorb(Universe merged, Universe? parent, IReadOnlyCollection<Guid> leftOut)
     {
         MergeGuard.EnsureDistinct(merged, this);
-        ArgumentNullException.ThrowIfNull(leftOut);
         // The merged universe is deleted: it cannot be the parent of the one that remains, which its own ancestor walk would
         // not see when this universe is one of its sub-universes.
         if (parent?.Id == merged.Id)
