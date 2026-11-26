@@ -217,7 +217,7 @@ public sealed class AdminSettingsFormTests : BunitContext, IDisposable
 
     // A text as read, its spaces and line breaks of the markup reduced to single spaces.
     private static string Normalized(string text) =>
-        string.Join(' ', text.Split((char[])[' ', '\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries));
+        string.Join(' ', text.Split([' ', '\n', '\r', '\t'], StringSplitOptions.RemoveEmptyEntries));
 
     private IRenderedComponent<AdminSettingsForm> Open()
     {

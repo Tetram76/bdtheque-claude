@@ -1,18 +1,15 @@
 using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
-using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 
 namespace Bdtheque.Api.Tests;
 
 /// <summary>Reading of the change log (<c>/admin/change-log</c>).</summary>
-public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class ChangeLogEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly HttpClient _client;
-
-    public ChangeLogEndpointsTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Entries_ReadFromTheLatestToTheOldest_AsData()
@@ -169,7 +166,7 @@ public sealed class ChangeLogEndpointsTests : IClassFixture<ApiWebApplicationFac
         var zone = timeZone is null ? TimeZoneInfo.Utc : TimeZoneInfo.FindSystemTimeZoneById(timeZone);
         var day = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(date, zone).DateTime);
         var inZone = timeZone is null ? "" : $"&timeZone={Uri.EscapeDataString(timeZone)}";
-        string Day(DateOnly d) => d.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+        static string Day(DateOnly d) => d.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
 
         Assert.Single((await ReadAsync($"record={genre.Id}&from={Day(day)}&to={Day(day)}{inZone}")).Entries.Items);
         Assert.Single((await ReadAsync($"record={genre.Id}&from={Day(day)}{inZone}")).Entries.Items);

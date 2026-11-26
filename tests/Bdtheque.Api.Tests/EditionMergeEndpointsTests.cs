@@ -7,7 +7,6 @@ using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 using Bdtheque.Infrastructure;
-using Bdtheque.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ContractEnums = Bdtheque.Contracts.Enums;
@@ -19,16 +18,10 @@ namespace Bdtheque.Api.Tests;
 /// remains belongs to the album chosen and keeps each data chosen, the publisher and its collection together, the acquisition
 /// whole, and the visuals retained of both, with their identity; its intent is withdrawn once it is owned, one kept otherwise.
 /// </summary>
-public sealed class EditionMergeEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class EditionMergeEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public EditionMergeEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task EditionMergePreview_PresentsBothEditionsWithTheirAlbumAndVisuals()

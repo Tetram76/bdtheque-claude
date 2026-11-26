@@ -996,7 +996,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         Assert.Equal(HttpMethod.Put, _api.Written.Last().Method);
         Assert.Equal(
-            [(CoverId, (Guid?)null, "Cover"), (null, AddedId, "Dedication"), (FirstPlateId, null, "Plate"), (SecondPlateId, null, "Plate")],
+            [(CoverId, null, "Cover"), (null, AddedId, "Dedication"), (FirstPlateId, null, "Plate"), (SecondPlateId, null, "Plate")],
             VisualsSent());
     }
 
@@ -1018,7 +1018,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         await page.SubmitAsync("form");
 
         Assert.Equal(2, _api.Written.Count);
-        Assert.Equal([((Guid?)null, (Guid?)AddedId, "Cover")], VisualsSent());
+        Assert.Equal([(null, (Guid?)AddedId, "Cover")], VisualsSent());
     }
 
     [Fact]
@@ -1121,7 +1121,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.False(page.Find(".save-bar-actions button[type=submit]").HasAttribute("disabled"));
         await page.SubmitAsync("form");
         Assert.Equal(2, _api.Written.Count);
-        Assert.Contains(((Guid?)null, (Guid?)AddedId, "Cover"), VisualsSent());
+        Assert.Contains((null, (Guid?)AddedId, "Cover"), VisualsSent());
     }
 
     [Fact]
@@ -1153,7 +1153,7 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Contains("admin.edition-form.visual-type-changed", _audience.Functions);
         await page.SubmitAsync("form");
         Assert.Single(_api.Written);
-        Assert.Equal([(FirstPlateId, (Guid?)null, "Plate"), (SecondPlateId, null, "Plate"), (CoverId, null, "Plate")], VisualsSent());
+        Assert.Equal([(FirstPlateId, null, "Plate"), (SecondPlateId, null, "Plate"), (CoverId, null, "Plate")], VisualsSent());
     }
 
     [Fact]

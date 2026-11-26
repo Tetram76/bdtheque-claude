@@ -43,7 +43,7 @@ public sealed class SeriesMergeTests
         var series = new Series("Astérix");
         var album = new Album(null, series, []);
 
-        Assert.Throws<ArgumentException>(() => album.TransferSeries(series, series));
+        DomainAssert.Throws<ArgumentException>(() => album.TransferSeries(series, series));
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public sealed class SeriesMergeTests
         var merged = SeriesCredited("Asterix", (_uderzo, ContributionRole.Illustrator));
         var foreign = Assert.Single(SeriesCredited("Lucky Luke", (_morris, ContributionRole.Illustrator)).TemplateContributions);
 
-        Assert.Throws<ArgumentException>(() => kept.MergeTemplateContributions(merged, [foreign.Id]));
+        DomainAssert.Throws<ArgumentException>(() => kept.MergeTemplateContributions(merged, [foreign.Id]));
 
         Assert.Single(kept.TemplateContributions);
         Assert.Single(merged.TemplateContributions);
@@ -112,7 +112,7 @@ public sealed class SeriesMergeTests
     {
         var series = SeriesCredited("Astérix", (_goscinny, ContributionRole.Scenarist));
 
-        Assert.Throws<ArgumentException>(() => series.MergeTemplateContributions(series, []));
+        DomainAssert.Throws<ArgumentException>(() => series.MergeTemplateContributions(series, []));
     }
 
     private static Series SeriesCredited(string title, params (Author Author, ContributionRole Role)[] credits)

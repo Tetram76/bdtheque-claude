@@ -52,7 +52,7 @@ public static class CollationVersions
             await context.Database.ExecuteSqlRawAsync(refresh, cancellationToken);
         }
 
-        return stale.Select(c => c.Name).ToList();
+        return [.. stale.Select(c => c.Name)];
     }
 
     private sealed record StaleCollation(string Name, string QualifiedName);

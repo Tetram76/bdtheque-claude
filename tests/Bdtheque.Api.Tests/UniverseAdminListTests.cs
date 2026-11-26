@@ -13,14 +13,12 @@ namespace Bdtheque.Api.Tests;
 /// The list covers the whole base, shared by the tests of the class: each test names its records with a marker of its
 /// own, and narrows the list to it by searching it.
 /// </remarks>
-public sealed class UniverseAdminListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class UniverseAdminListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public UniverseAdminListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task List_FollowsTheHierarchy_EachUniverseFollowedByItsSubUniverses_SiblingsByName()

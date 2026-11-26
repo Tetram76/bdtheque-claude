@@ -14,11 +14,9 @@ namespace Bdtheque.Api.Tests;
 /// of criteria remains a single query, cached once, whatever its values, their number included
 /// (choix-implementation/recherche-avancee/recherche-avancee-mise-en-oeuvre.md, Traduction).
 /// </summary>
-public sealed class SearchParametersTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class SearchParametersTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public SearchParametersTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     // Each sort of value: the same criteria with two sets of values, and the values that must not be in the SQL.
     private static readonly Dictionary<string, (EntityKind Entity, SearchCondition Criteria, SearchCondition OtherValues, string[] Values)> Cases = new()

@@ -13,13 +13,11 @@ namespace Bdtheque.Api.Tests;
 /// authors have: everything known of the entity, the entities without a record it presents, the entries
 /// leading to the records it is linked with, and the dates of the record.
 /// </summary>
-public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class CatalogDetailTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
-
-    public CatalogDetailTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Album_PresentsItsDisplayedGenresAndUniversesItsContributionsEditionsAndIntents()
@@ -71,7 +69,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         // By year.
         Assert.Equal(
             [
-                (new EditionSummary(owned.Id, dupuis.Id, dupuis.Name, null, null, 1960, null), true, (Guid?)null),
+                (new EditionSummary(owned.Id, dupuis.Id, dupuis.Name, null, null, 1960, null), true, null),
                 (new EditionSummary(intended, dupuis.Id, dupuis.Name, null, null, 2010, null), false, intent),
             ],
             detail.Editions.Select(e => (e.Edition, e.IsInCollection, e.PurchaseIntent?.Id)));
@@ -116,7 +114,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal(AlbumCollectionState.PurchaseIntent, record.State);
         Assert.Equal(
             (intended, null, null, false, intent, null, null),
-            (detail.Edition.Id, detail.PublisherWebsite, (AcquisitionMode?)detail.AcquisitionMode, detail.IsInCollection,
+            (detail.Edition.Id, detail.PublisherWebsite, detail.AcquisitionMode, detail.IsInCollection,
                 detail.PurchaseIntent?.Id, detail.IsbnChecksumValid, detail.EnteredCollectionAt));
         Assert.Empty(detail.Visuals);
     }
@@ -250,7 +248,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         var farWest = Assert.Single(detail.Universes);
         Assert.Equal(new UniverseListItem(universe.Id, "Far West", america.Id, "Amérique"), farWest.Universe);
         Assert.Equal([new UniverseListItem(america.Id, "Amérique", null, null)], farWest.Ancestors);
-        Assert.Equal(("Lucky Luke", (SeriesStatus?)null, (int?)null, false), (detail.Title, detail.Status, detail.TheoreticalVolumeCount, detail.IsComplete));
+        Assert.Equal(("Lucky Luke", null, null, false), (detail.Title, detail.Status, detail.TheoreticalVolumeCount, detail.IsComplete));
     }
 
     [Fact]
@@ -293,7 +291,7 @@ public sealed class CatalogDetailTests : IClassFixture<ApiWebApplicationFactory>
         Assert.Equal(("Janolle", "Alain"), (detail.LastName, detail.FirstName));
         // Series and albums without series together, by sort key: "Babel" < "Contes du Cosmos [Les]" < "Nemesis" < "Oumpah-Pah".
         Assert.Equal(
-            [(babel.Id, (Guid?)null), (null, oneShot.Id), (nemesis.Id, null), (oumpah.Id, null)],
+            [(babel.Id, null), (null, oneShot.Id), (nemesis.Id, null), (oumpah.Id, null)],
             detail.Bibliography.Select(e => (e.Series?.Series.Id, e.Album?.Album.Album.Id)));
 
         var babelEntry = detail.Bibliography[0].Series!;

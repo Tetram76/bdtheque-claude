@@ -149,7 +149,7 @@ public sealed class MergeTransferTests
     {
         var genre = new Genre("SF");
 
-        Assert.Throws<ArgumentException>(() => new Album("Valérian", null, []).TransferGenre(genre, genre));
+        DomainAssert.Throws<ArgumentException>(() => new Album("Valérian", null, []).TransferGenre(genre, genre));
     }
 
     [Fact]
@@ -157,7 +157,7 @@ public sealed class MergeTransferTests
     {
         var author = new Author("Gotlib", "Marcel", null);
 
-        Assert.Throws<ArgumentException>(() => new Series("Gai-Luron").TransferAuthor(author, author));
+        DomainAssert.Throws<ArgumentException>(() => new Series("Gai-Luron").TransferAuthor(author, author));
     }
     [Fact]
     public void AlbumTransferUniverse_OfBothUniverses_KeepsTheKeptOneOnce()
@@ -278,6 +278,6 @@ public sealed class MergeTransferTests
     {
         var universe = new Universe("Star Wars");
 
-        Assert.Throws<ArgumentException>(() => universe.Absorb(universe, null, []));
+        DomainAssert.Throws<ArgumentException>(() => universe.Absorb(universe, null, []));
     }
 }

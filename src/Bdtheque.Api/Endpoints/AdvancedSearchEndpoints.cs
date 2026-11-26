@@ -2,7 +2,6 @@ using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Search;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;

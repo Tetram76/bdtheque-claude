@@ -4,11 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bdtheque.Api.Tests;
 
-public sealed class StartupMigrationTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class StartupMigrationTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public StartupMigrationTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task Startup_OnEmptyDatabase_AppliesEveryMigration()

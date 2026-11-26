@@ -61,7 +61,7 @@ public sealed class AudiencePersistenceTests : IAsyncLifetime
         var counter = await _fixture.Context.AudienceCounters.SingleAsync();
 
         var saved = Assert.Single(counter.Objects);
-        Assert.Equal((album, (string?)null, 2), (saved.Record, saved.Parameters, saved.UsageCount));
+        Assert.Equal((album, null, 2), (saved.Record, saved.Parameters, saved.UsageCount));
     }
 
     [Fact]

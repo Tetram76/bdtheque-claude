@@ -16,14 +16,12 @@ namespace Bdtheque.Api.Tests;
 /// The list covers the whole base, shared by the tests of the class: each test names its records with a marker of its
 /// own, and narrows the list to it by searching it.
 /// </remarks>
-public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class SeriesAdminListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public SeriesAdminListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Rows_CarryWhatTheListPresents()
@@ -66,7 +64,7 @@ public sealed class SeriesAdminListTests : IClassFixture<ApiWebApplicationFactor
         var rows = (await ListAsync($"q={_marker}")).Series.Items;
 
         Assert.Equal(
-            [(series.Id, 3, 1, (SeriesStatus?)null, false), (empty.Id, 0, 0, null, false)],
+            [(series.Id, 3, 1, null, false), (empty.Id, 0, 0, null, false)],
             rows.Select(r => (r.Id, r.Overview.AlbumCount, r.AlbumsInCollectionCount, r.Status, r.IsComplete)));
     }
 

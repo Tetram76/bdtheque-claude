@@ -1,5 +1,4 @@
 using Bdtheque.Contracts.Admin;
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.EntityFrameworkCore;

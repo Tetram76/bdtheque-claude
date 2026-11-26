@@ -26,7 +26,7 @@ public sealed class ContributionTests
     [Fact]
     public void ContributionOfAnAlbum_NullAuthor_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => new Album("Le Lotus bleu", null, [(null!, ContributionRole.Scenarist)]));
+        DomainAssert.Throws<ArgumentNullException>(() => new Album("Le Lotus bleu", null, [(null!, ContributionRole.Scenarist)]));
     }
 
     [Fact]
@@ -34,6 +34,6 @@ public sealed class ContributionTests
     {
         var author = new Author(null, null, "Hergé");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => new Album("Le Lotus bleu", null, [(author, (ContributionRole)42)]));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => new Album("Le Lotus bleu", null, [(author, (ContributionRole)42)]));
     }
 }

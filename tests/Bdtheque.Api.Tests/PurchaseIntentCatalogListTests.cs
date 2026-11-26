@@ -17,12 +17,10 @@ namespace Bdtheque.Api.Tests;
 /// The list covers the whole base, shared by the tests of the class: each test narrows it by searching a marker of its own,
 /// which the titles of its albums or series carry.
 /// </remarks>
-public sealed class PurchaseIntentCatalogListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class PurchaseIntentCatalogListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public PurchaseIntentCatalogListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Row_OfAnIntentOnTheAlbum_CarriesTheAlbumAloneItsPossessionAndTheDateOfTheIntent()

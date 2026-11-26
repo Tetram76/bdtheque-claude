@@ -195,7 +195,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetStatus((SeriesStatus)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetStatus((SeriesStatus)42));
     }
 
     [Fact]
@@ -203,7 +203,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateBinding((BindingType)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateBinding((BindingType)42));
     }
 
     [Fact]
@@ -211,7 +211,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateOrientation((BookOrientation)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateOrientation((BookOrientation)42));
     }
 
     [Fact]
@@ -219,7 +219,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateReadingDirection((ReadingDirection)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateReadingDirection((ReadingDirection)42));
     }
 
     [Fact]
@@ -227,7 +227,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateFormat((EditionFormat)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateFormat((EditionFormat)42));
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateEditionCategory((EditionCategory)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateEditionCategory((EditionCategory)42));
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateCondition((EditionCondition)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => series.SetTemplateCondition((EditionCondition)42));
     }
 
     [Fact]
@@ -411,7 +411,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentNullException>(() => series.SetTemplateContributions([(null!, ContributionRole.Scenarist)]));
+        DomainAssert.Throws<ArgumentNullException>(() => series.SetTemplateContributions([(null!, ContributionRole.Scenarist)]));
     }
 
     [Fact]
@@ -419,7 +419,7 @@ public sealed class SeriesTests
     {
         var series = new Series("Tintin");
 
-        Assert.Throws<ArgumentOutOfRangeException>(
+        DomainAssert.Throws<ArgumentOutOfRangeException>(
             () => series.SetTemplateContributions([(new Author("Hergé", null, null), (ContributionRole)42)]));
     }
 
@@ -489,7 +489,7 @@ public sealed class SeriesTests
 
         Assert.Equal("Les Vieux Fourneaux", series.Title);
         Assert.Equal(
-            (proposed.Category, proposed.Condition, proposed.Binding, proposed.Orientation, proposed.ReadingDirection, proposed.Format, (bool?)proposed.IsColor),
+            (proposed.Category, proposed.Condition, proposed.Binding, proposed.Orientation, proposed.ReadingDirection, proposed.Format, proposed.IsColor),
             (series.TemplateEditionCategory, series.TemplateCondition, series.TemplateBinding, series.TemplateOrientation,
                 series.TemplateReadingDirection, series.TemplateFormat, series.TemplateIsColor));
         Assert.Null(series.TemplatePublisherId);

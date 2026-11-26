@@ -4,7 +4,6 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
@@ -110,15 +109,14 @@ internal static class PublisherEndpoints
     /// </summary>
     private static async Task<List<PublisherCollectionHomonyms>> HomonymsAsync(
         BdthequeDbContext context, Guid first, Guid second, CancellationToken cancellationToken) =>
-        (await context.PublisherCollections.AsNoTracking()
+        [.. (await context.PublisherCollections.AsNoTracking()
             .Where(c => c.PublisherId == first)
             .Join(context.PublisherCollections.Where(c => c.PublisherId == second), c => c.Name, c => c.Name,
                 (ofFirst, ofSecond) => new { First = ofFirst.Id, FirstName = ofFirst.Name, Second = ofSecond.Id, SecondName = ofSecond.Name })
             .OrderBy(h => h.FirstName)
             .ThenBy(h => h.First)
             .ToListAsync(cancellationToken))
-        .Select(h => new PublisherCollectionHomonyms(h.First, h.FirstName, h.Second, h.SecondName))
-        .ToList();
+        .Select(h => new PublisherCollectionHomonyms(h.First, h.FirstName, h.Second, h.SecondName))];
 
     // The collections of both publishers, two homonyms counted once, as common to both: they become one.
     private static async Task<MergeLinkCount> CollectionLinkAsync(
@@ -391,7 +389,7 @@ internal static class PublisherEndpoints
             })
             .SingleOrDefaultAsync(cancellationToken)
             ?? throw new EntityNotFoundException(typeof(Publisher), rootId);
-        return publisher.Collections.Select(c => new PublisherCollectionForm(c.Id, rootId, c.Name, publisher.Version)).ToList();
+        return [.. publisher.Collections.Select(c => new PublisherCollectionForm(c.Id, rootId, c.Name, publisher.Version))];
     }
 
     private static async Task<PublisherCollectionForm> GetCollectionAsync(

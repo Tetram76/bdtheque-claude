@@ -74,12 +74,11 @@ internal static class AudienceCounting
                     o.Key.Parameters,
                     o.Usages));
 
-        return figures
+        return [.. figures
             .Select(f => new AudienceCounter(
                 f.Key.Function, new DateOnly(f.Key.Year, f.Key.Month, 1), f.Key.IsAdministrator, f.Key.DeviceType, f.Key.RenderingEngine,
                 f.Key.EngineVersion, f.Usages, f.Visits, f.Repeated, f.Last,
-                objects[(f.Key.Function, f.Key.Year, f.Key.Month, f.Key.IsAdministrator, f.Key.DeviceType, f.Key.RenderingEngine, f.Key.EngineVersion)]))
-            .ToList();
+                objects[(f.Key.Function, f.Key.Year, f.Key.Month, f.Key.IsAdministrator, f.Key.DeviceType, f.Key.RenderingEngine, f.Key.EngineVersion)]))];
     }
 
     /// <summary>The last month closed into counters, or none: every later month is still read from the visits.</summary>
@@ -130,11 +129,10 @@ internal static class AudienceCounting
             visits = visits.Where(v => v.EngineVersion == engineVersion);
 
         var counters = (await stored.ToListAsync(cancellationToken)).Concat(await CountAsync(context, visits, cancellationToken));
-        return counters
+        return [.. counters
             .GroupBy(c => c.Function)
             .OrderBy(g => g.Key, StringComparer.Ordinal)
-            .Select(Recompose)
-            .ToList();
+            .Select(Recompose)];
     }
 
     /// <summary>First instant of a month, in universal time, the time the beginnings of the visits are counted in.</summary>
@@ -150,9 +148,8 @@ internal static class AudienceCounting
             counters.Sum(c => c.RepeatedUsageCount),
             counters.SelectMany(c => c.Objects).Select(o => (o.RecordType, o.RecordId, o.Parameters)).Distinct().Count(),
             counters.Max(c => c.LastUsage),
-            counters
+            [.. counters
                 .GroupBy(c => c.Month)
                 .OrderBy(m => m.Key)
-                .Select(m => new MonthlyUsage(m.Key, m.Sum(c => c.UsageCount), m.Sum(c => c.VisitCount)))
-                .ToList());
+                .Select(m => new MonthlyUsage(m.Key, m.Sum(c => c.UsageCount), m.Sum(c => c.VisitCount)))]);
 }

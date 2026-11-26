@@ -5,7 +5,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
-using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using SkiaSharp;
 using frontend::Bdtheque.Frontend.Navigation;

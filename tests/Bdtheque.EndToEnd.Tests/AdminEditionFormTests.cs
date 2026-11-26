@@ -2,7 +2,6 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
-using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
 using SkiaSharp;
@@ -131,13 +130,13 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
 
         await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminAlbumEditions(album.Id)));
         var saved = await GetEditionAsync(album.Id, edition.Id);
-        Assert.Equal((AcquisitionMode.Gift, true, (decimal?)null), (saved.Content.AcquisitionMode, saved.Content.IsFree, saved.Content.AcquisitionAmount));
+        Assert.Equal((AcquisitionMode.Gift, true, null), (saved.Content.AcquisitionMode, saved.Content.IsFree, saved.Content.AcquisitionAmount));
     }
 
     [Theory, InEachTheme]
     public async Task NewPurchaseIntent_OnANewEdition_IsCreated_ThenModifiedFromItsMenu(string theme)
     {
-        var publisher = await CreatePublisherAsync();
+        await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
         var page = await OpenAsync(theme, AppPaths.AdminAlbumEditions(album.Id));
 
@@ -169,7 +168,7 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
     [Theory, InEachTheme]
     public async Task Isbn_Inconsistent_IsAWarning_AndTheEditionIsSavedWithIt(string theme)
     {
-        var publisher = await CreatePublisherAsync();
+        await CreatePublisherAsync();
         var album = await CreateAlbumAsync();
         var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
         await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);

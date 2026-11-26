@@ -6,7 +6,6 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Frontend.Components.Pages.Admin;
-using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Tests.Audience;
 using Bdtheque.Frontend.Visits;
@@ -119,7 +118,7 @@ public sealed class AdminSearchTests : BunitContext, IDisposable
         // (fonctionnel/presentation/ordre-des-types-de-fiche.md); each named as its list names it, with its detail under it.
         Assert.Equal(
             [
-                ("Séries", new[] { ("Astérix", (string?)null) }),
+                ("Séries", [("Astérix", null)]),
                 ("Albums", [("Le Tour de Gaule (Astérix - T. 5)", "René Goscinny · Albert Uderzo")]),
                 ("Éditeurs", [("Astéroïde", "Petits formats")]),
                 ("Collections", [("Astéroïde", "Dargaud")]),

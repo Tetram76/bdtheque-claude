@@ -26,13 +26,13 @@ public sealed class EditionVisualTests
     [Fact]
     public void Constructor_WithoutPalette_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0, null!));
+        DomainAssert.Throws<ArgumentNullException>(() => CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0, null!));
     }
 
     [Fact]
     public void Constructor_UndefinedType_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => CreateEdition().AddVisual((VisualType)42, "cover.jpg", 0, TestPalette.Any));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => CreateEdition().AddVisual((VisualType)42, "cover.jpg", 0, TestPalette.Any));
     }
 
     [Theory]
@@ -63,7 +63,7 @@ public sealed class EditionVisualTests
     {
         var visual = CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0, TestPalette.Any);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => visual.SetType((VisualType)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => visual.SetType((VisualType)42));
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public sealed class EditionVisualTests
     [Fact]
     public void AppendVisual_UndefinedType_Throws()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => CreateEdition().AppendVisual((VisualType)42, "cover.jpg", TestPalette.Any));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => CreateEdition().AppendVisual((VisualType)42, "cover.jpg", TestPalette.Any));
     }
 
     [Fact]
@@ -140,7 +140,7 @@ public sealed class EditionVisualTests
         var first = edition.AddVisual(VisualType.Cover, "a.jpg", 0, TestPalette.Any);
         edition.AddVisual(VisualType.Plate, "b.jpg", 0, TestPalette.Any);
 
-        Assert.Throws<ArgumentException>(() => edition.ArrangeVisuals([(first.Id, VisualType.Plate)]));
+        DomainAssert.Throws<ArgumentException>(() => edition.ArrangeVisuals([(first.Id, VisualType.Plate)]));
         Assert.Equal(VisualType.Cover, first.Type);
     }
 
@@ -151,7 +151,7 @@ public sealed class EditionVisualTests
         var first = edition.AddVisual(VisualType.Cover, "a.jpg", 0, TestPalette.Any);
         edition.AddVisual(VisualType.Plate, "b.jpg", 0, TestPalette.Any);
 
-        Assert.Throws<ArgumentException>(() => edition.ArrangeVisuals([(first.Id, VisualType.Cover), (first.Id, VisualType.Cover)]));
+        DomainAssert.Throws<ArgumentException>(() => edition.ArrangeVisuals([(first.Id, VisualType.Cover), (first.Id, VisualType.Cover)]));
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public sealed class EditionVisualTests
         edition.AddVisual(VisualType.Cover, "a.jpg", 0, TestPalette.Any);
         var foreign = CreateEdition().AddVisual(VisualType.Cover, "b.jpg", 0, TestPalette.Any);
 
-        Assert.Throws<ArgumentException>(() => edition.ArrangeVisuals([(foreign.Id, VisualType.Cover)]));
+        DomainAssert.Throws<ArgumentException>(() => edition.ArrangeVisuals([(foreign.Id, VisualType.Cover)]));
     }
 
     [Fact]
@@ -171,7 +171,7 @@ public sealed class EditionVisualTests
         var first = edition.AddVisual(VisualType.Cover, "a.jpg", 0, TestPalette.Any);
         var second = edition.AddVisual(VisualType.Cover, "b.jpg", 1, TestPalette.Any);
 
-        Assert.Throws<ArgumentOutOfRangeException>(
+        DomainAssert.Throws<ArgumentOutOfRangeException>(
             () => edition.ArrangeVisuals([(second.Id, VisualType.Cover), (first.Id, (VisualType)42)]));
         Assert.Equal((VisualType.Cover, 1), (second.Type, second.DisplayOrder));
     }

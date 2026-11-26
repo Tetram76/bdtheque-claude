@@ -112,12 +112,12 @@ public sealed class ChangeLogJsonTests
     {
         Assert.Equal(
             KindsOf<ChangeLogValue>(),
-            Values().Select(row => ((ChangeLogValue)row[0]).GetType()).ToHashSet());
+            [.. Values().Select(row => ((ChangeLogValue)row[0]).GetType())]);
         Assert.Equal(
             KindsOf<RecordLabel>(),
-            Labels().Select(row => ((RecordLabel)row[0]).GetType()).ToHashSet());
+            [.. Labels().Select(row => ((RecordLabel)row[0]).GetType())]);
     }
 
     private static HashSet<Type> KindsOf<TBase>() =>
-        typeof(TBase).Assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(TBase)) && !t.IsAbstract).ToHashSet();
+        [.. typeof(TBase).Assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(TBase)) && !t.IsAbstract)];
 }

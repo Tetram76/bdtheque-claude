@@ -100,7 +100,7 @@ public sealed class AlbumMergeTests
     {
         var album = new Album("Le Lotus bleu", null);
 
-        Assert.Throws<ArgumentException>(() => album.TakeEditionsOf(album));
+        DomainAssert.Throws<ArgumentException>(() => album.TakeEditionsOf(album));
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public sealed class AlbumMergeTests
         var merged = new Album("Lotus bleu", null, [(_jacobs, ContributionRole.Colorist)]);
         var foreign = Assert.Single(new Album("Tintin au Tibet", null, [(_herge, ContributionRole.Illustrator)]).Contributions);
 
-        Assert.Throws<ArgumentException>(() => kept.MergeContributions(merged, [foreign.Id]));
+        DomainAssert.Throws<ArgumentException>(() => kept.MergeContributions(merged, [foreign.Id]));
 
         Assert.Single(kept.Contributions);
         Assert.Single(merged.Contributions);

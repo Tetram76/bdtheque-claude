@@ -21,16 +21,10 @@ namespace Bdtheque.Api.Tests;
 /// included, and their media, which
 /// <c>api</c> alone serves (<c>/catalog/visuals/{id}/…</c>).
 /// </summary>
-public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class EditionVisualEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public EditionVisualEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Upload_StoresTheOriginalAndItsDisplayVersion()
@@ -452,7 +446,7 @@ public sealed class EditionVisualEndpointsTests : IClassFixture<ApiWebApplicatio
 
     private List<string> VolumeFiles() =>
         Directory.Exists(_factory.VisualsRoot)
-            ? Directory.EnumerateFiles(_factory.VisualsRoot, "*", SearchOption.AllDirectories).Order().ToList()
+            ? [.. Directory.EnumerateFiles(_factory.VisualsRoot, "*", SearchOption.AllDirectories).Order()]
             : [];
 
     private static void AssertFilesDeleted(VisualFiles files)

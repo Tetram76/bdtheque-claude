@@ -18,17 +18,11 @@ namespace Bdtheque.Api.Tests;
 /// deletion is refused while a saved search designates them, or one of the records deleted with them
 /// (fonctionnel/regles-metier/suppression-des-entites.md, line « Toute fiche »).
 /// </summary>
-public sealed class SavedSearchDesignationTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class SavedSearchDesignationTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public SavedSearchDesignationTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
 
     // The albums having a given genre: the genre is designated deep in the criteria, through a link.
     private static SearchLink AlbumsOfGenre(Guid genreId) =>

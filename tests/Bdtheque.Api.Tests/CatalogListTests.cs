@@ -17,14 +17,12 @@ namespace Bdtheque.Api.Tests;
 /// record of its own. The few tests that cannot (authors searched by their real names, editions by
 /// their ISBN) use names and ISBNs no other test uses.
 /// </remarks>
-public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class CatalogListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public CatalogListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Series_AreSortedBySortKeyAndNarrowedByNavigationEntry()
@@ -251,7 +249,7 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
 
         // Sort keys: "Moebius" < "Van Hamme Jean".
         Assert.Equal(
-            [(moebius.Id, "Giraud", "Jean", "Moebius"), (vanHamme.Id, "Van Hamme", "Jean", (string?)null)],
+            [(moebius.Id, "Giraud", "Jean", "Moebius"), (vanHamme.Id, "Van Hamme", "Jean", null)],
             (await ListAsync<AuthorCatalogListItem>("authors", "q=jean")).Select(a => (a.Id, a.LastName, a.FirstName, a.Pseudonym)));
         Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", $"q={Uri.EscapeDataString("jean van")}")));
         Assert.Equal([vanHamme.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", $"q={Uri.EscapeDataString("hamme jean")}")));
@@ -344,15 +342,17 @@ public sealed class CatalogListTests : IClassFixture<ApiWebApplicationFactory>
 
     // The lists of the albums and of the series carry their rows with the records of their filters (AlbumCatalogList,
     // SeriesCatalogList): their albums, or their series as the lists name them, are read from them.
+    // A collection expression has no target type through the cast to the list of T: ToList is kept.
+#pragma warning disable IDE0305
     private async Task<IReadOnlyList<T>> ListAsync<T>(string list, string query)
     {
         if (typeof(T) == typeof(AlbumSummary))
             return (IReadOnlyList<T>)(await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/{list}?{query}"))!.Albums.Items.Select(r => r.Album).ToList();
         if (typeof(T) == typeof(SeriesListItem))
-            return (IReadOnlyList<T>)(await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/{list}?{query}"))!.Series.Items
-                .Select(r => new SeriesListItem(r.Id, r.Title)).ToList();
+            return (IReadOnlyList<T>)(await _client.GetFromJsonAsync<SeriesCatalogList>($"/catalog/{list}?{query}"))!.Series.Items.Select(r => new SeriesListItem(r.Id, r.Title)).ToList();
         return (await _client.GetFromJsonAsync<Page<T>>($"/catalog/{list}?{query}"))!.Items;
     }
+#pragma warning restore IDE0305
 
     private static (int Number, int Size) NumberAndSize<T>(Page<T> page) => (page.Number, page.Size);
 

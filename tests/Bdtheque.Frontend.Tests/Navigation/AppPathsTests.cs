@@ -49,7 +49,7 @@ public sealed class AppPathsTests
 
     [Fact]
     public void UnknownTypeOfRecord_IsRefused() =>
-        Assert.Throws<ArgumentOutOfRangeException>(() => AppPaths.AdminEdit((RecordType)0, Record, null));
+        Assert.Throws<ArgumentOutOfRangeException>(() => AppPaths.AdminEdit(0, Record, null));
 
     // The entry forms opened from a record of the consultation say so, and nothing else: the record they lead back to is the
     // one of what they enter, never read from the address (visuel/fiche-album/contenu.md, #658).

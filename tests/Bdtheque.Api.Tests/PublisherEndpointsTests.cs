@@ -15,16 +15,10 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>Administration of the publishers (<c>/admin/publishers</c>), including their deletion.</summary>
-public sealed class PublisherEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class PublisherEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public PublisherEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Create_ReturnsThePublisherAsStored()

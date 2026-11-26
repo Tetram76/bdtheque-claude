@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities.Common;
 using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
@@ -25,7 +24,7 @@ internal sealed class SearchEntityDefinition(
     public SearchLinkDefinition Link(string key) =>
         _links.GetValueOrDefault(key) ?? throw new ArgumentException($"{kind} has no link '{key}'.", nameof(key));
 
-    public SearchEntityDescription Describe() => new(kind, fields.Select(f => f.Describe()).ToList(), links.Select(l => l.Describe()).ToList());
+    public SearchEntityDescription Describe() => new(kind, [.. fields.Select(f => f.Describe())], [.. links.Select(l => l.Describe())]);
 }
 
 /// <summary>

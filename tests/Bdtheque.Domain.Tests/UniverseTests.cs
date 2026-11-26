@@ -140,7 +140,7 @@ public sealed class UniverseTests
         SetPrivate(c, nameof(Universe.Parent), b);
         SetPrivate(c, nameof(Universe.ParentId), b.Id);
 
-        Assert.Throws<InvalidOperationException>(() => a.SetParent(b));
+        DomainAssert.Throws<InvalidOperationException>(() => a.SetParent(b));
     }
 
     private static void SetPrivate(Universe entity, string propertyName, object? value) =>

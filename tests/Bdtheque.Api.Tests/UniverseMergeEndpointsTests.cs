@@ -37,7 +37,7 @@ public sealed class UniverseMergeEndpointsTests(ApiWebApplicationFactory factory
 
         Assert.Equal(
             [(["Clone Wars"], cloneWars.Id, cloneWarsTwin.Id), (["Clone Wars", "Les Jedi"], jedi.Id, jediTwin.Id)],
-            preview.Pairs.Select(p => (p.Path.ToArray(), p.First.Id, p.Second.Id)).ToList(),
+            [.. preview.Pairs.Select(p => (p.Path.ToArray(), p.First.Id, p.Second.Id))],
             new PairComparer());
         Assert.Equal(
             [new MergeLinkCount(EntityKind.Album, 4, 3, 2, 1), new MergeLinkCount(EntityKind.Universe, 3, 2, 3, 2)],

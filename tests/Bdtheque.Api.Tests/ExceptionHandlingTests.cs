@@ -21,11 +21,9 @@ namespace Bdtheque.Api.Tests;
 /// (choix-implementation/ecritures/erreurs-metier-fonctionnelles-et-techniques.md). The handler is taken
 /// from the API's own services, with the API's own ProblemDetails configuration.
 /// </summary>
-public sealed class ExceptionHandlingTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class ExceptionHandlingTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public ExceptionHandlingTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task DomainRuleViolation_IsABusinessProblemCarryingItsRuleCode()

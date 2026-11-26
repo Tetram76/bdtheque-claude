@@ -13,11 +13,9 @@ namespace Bdtheque.Api.Tests;
 /// the application, without the database statements, and without a user's input mistake looking
 /// like an error.
 /// </summary>
-public sealed class ProductionLoggingTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class ProductionLoggingTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public ProductionLoggingTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task DatabaseStatements_AreNotLogged()

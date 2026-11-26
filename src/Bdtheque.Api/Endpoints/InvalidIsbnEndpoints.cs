@@ -86,13 +86,12 @@ internal static class InvalidIsbnEndpoints
     // The check digit is the domain's to verify (IsbnChecksumValidator), which no SQL translates: the ISBN are read, a few
     // thousand short texts at most, and checked in memory; the page is then read by the identifiers of the errors.
     private static async Task<List<IsbnError>> ReadIsbnsAsync(IQueryable<Edition> editions, CancellationToken cancellationToken) =>
-        (await editions.AsNoTracking()
+        [.. (await editions.AsNoTracking()
             .Where(e => e.Isbn != null)
             .Select(e => new { e.Id, e.Isbn, e.AcceptedIsbn })
             .ToListAsync(cancellationToken))
         .Where(e => !IsbnChecksumValidator.IsValid(e.Isbn))
-        .Select(e => new IsbnError(e.Id, HoldsFor(e.AcceptedIsbn, e.Isbn)))
-        .ToList();
+        .Select(e => new IsbnError(e.Id, HoldsFor(e.AcceptedIsbn, e.Isbn)))];
 
     // Whether an acceptance holds: it does for the ISBN accepted (modele-metier/edition.md), which the domain clears when the ISBN changes.
     private static bool HoldsFor(string? acceptedIsbn, string? isbn) => acceptedIsbn is not null && acceptedIsbn == isbn;

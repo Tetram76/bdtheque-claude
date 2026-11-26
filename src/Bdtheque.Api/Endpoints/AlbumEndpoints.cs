@@ -5,7 +5,6 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -466,8 +465,8 @@ internal static class AlbumEndpoints
                 album.Summary,
                 album.PersonalNotes,
                 EnumMapping.Map<ContractEnums.AlbumRating>(album.Rating),
-                album.Genres.Select(g => g.Id).Order().ToList(),
-                album.Universes.Select(u => u.Id).Order().ToList(),
+                [.. album.Genres.Select(g => g.Id).Order()],
+                [.. album.Universes.Select(u => u.Id).Order()],
                 FormReferences.ToContents(album.Contributions)),
             context.VersionOf(album),
             new AlbumFormReferences(

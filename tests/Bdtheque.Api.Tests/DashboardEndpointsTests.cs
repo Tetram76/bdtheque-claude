@@ -216,7 +216,7 @@ public sealed class DashboardEndpointsTests : IAsyncLifetime
 
         Assert.Equal([enteredInJune, enteredInMarch, acquiredInJanuary], entries.Select(e => e.Edition.Id));
         Assert.Equal(
-            (album.Id, publisher.Name, cover, (DateOnly?)null, new DateTimeOffset(2026, 3, 5, 9, 0, 0, TimeSpan.Zero)),
+            (album.Id, publisher.Name, cover, null, new DateTimeOffset(2026, 3, 5, 9, 0, 0, TimeSpan.Zero)),
             (entries[1].Album.Id, entries[1].Edition.PublisherName, entries[1].Cover, entries[1].AcquisitionDate, entries[1].EnteredCollectionAt));
         Assert.Equal((DateOnly?)new DateOnly(2026, 1, 10), entries[2].AcquisitionDate);
         Assert.Null(entries[0].Cover);

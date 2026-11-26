@@ -1,4 +1,3 @@
-using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 
 namespace Bdtheque.Domain.Tests;
@@ -49,7 +48,7 @@ public sealed class PublisherMergeTests
     {
         var publisher = new Publisher("Dupuis");
 
-        Assert.Throws<ArgumentException>(() => publisher.Absorb(publisher, []));
+        DomainAssert.Throws<ArgumentException>(() => publisher.Absorb(publisher, []));
     }
 
     [Fact]
@@ -60,7 +59,7 @@ public sealed class PublisherMergeTests
         var first = kept.AddCollection("Aire Libre");
         var second = kept.AddCollection("Repérages");
 
-        Assert.Throws<ArgumentException>(() => kept.Absorb(merged, [(first, second)]));
+        DomainAssert.Throws<ArgumentException>(() => kept.Absorb(merged, [(first, second)]));
         Assert.Equal(2, kept.Collections.Count);
     }
 
@@ -84,7 +83,7 @@ public sealed class PublisherMergeTests
         album.TransferPublisher(kept.Absorb(merged, [(Remaining: ofKept, Removed: ofMerged)]));
 
         Assert.Equal(
-            [(kept, ofKept), (kept, taken), (kept, (PublisherCollection?)null), (kept, ofKept)],
+            [(kept, ofKept), (kept, taken), (kept, null), (kept, ofKept)],
             album.Editions.Select(e => (e.Publisher, e.PublisherCollection)));
         Assert.All(album.Editions, e => Assert.Equal((e.Publisher.Id, e.PublisherCollection?.Id), (e.PublisherId, e.PublisherCollectionId)));
     }
@@ -140,8 +139,8 @@ public sealed class PublisherMergeTests
         withoutPublisher.TransferPublisher(merge);
 
         Assert.Equal((kept.Id, ofKept.Id), (series.TemplatePublisherId, series.TemplatePublisherCollectionId));
-        Assert.Equal((kept.Id, (Guid?)null), (withoutCollection.TemplatePublisherId, withoutCollection.TemplatePublisherCollectionId));
-        Assert.Equal(((Guid?)null, (Guid?)null), (withoutPublisher.TemplatePublisherId, withoutPublisher.TemplatePublisherCollectionId));
+        Assert.Equal((kept.Id, null), (withoutCollection.TemplatePublisherId, withoutCollection.TemplatePublisherCollectionId));
+        Assert.Equal((null, null), (withoutPublisher.TemplatePublisherId, withoutPublisher.TemplatePublisherCollectionId));
     }
 
     [Fact]
@@ -152,6 +151,6 @@ public sealed class PublisherMergeTests
         var merged = new Publisher("dupuis");
         var merge = kept.Absorb(merged, []);
 
-        Assert.Throws<InvalidOperationException>(() => merge.CollectionReplacing(Guid.CreateVersion7(), null));
+        DomainAssert.Throws<InvalidOperationException>(() => merge.CollectionReplacing(Guid.CreateVersion7(), null));
     }
 }

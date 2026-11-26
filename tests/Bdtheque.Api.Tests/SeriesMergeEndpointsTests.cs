@@ -18,16 +18,10 @@ namespace Bdtheque.Api.Tests;
 /// keeps each data chosen, the publisher and its collection together, and the genres, universes and contributions retained of
 /// both; the albums of both are its albums.
 /// </summary>
-public sealed class SeriesMergeEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class SeriesMergeEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public SeriesMergeEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task SeriesMergePreview_PresentsBothSeriesAndCountsTheirAlbums()
@@ -248,6 +242,6 @@ public sealed class SeriesMergeEndpointsTests : IClassFixture<ApiWebApplicationF
     {
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-        return (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId).ToList();
+        return [.. (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId)];
     }
 }

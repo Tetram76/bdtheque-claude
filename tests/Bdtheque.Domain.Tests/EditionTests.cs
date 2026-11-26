@@ -142,7 +142,7 @@ public sealed class EditionTests
     [Fact]
     public void Constructor_NullAlbum_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => new Edition(null!, CreatePublisher()));
+        DomainAssert.Throws<ArgumentNullException>(() => new Edition(null!, CreatePublisher()));
     }
 
     [Fact]
@@ -266,7 +266,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetBinding((BindingType)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetBinding((BindingType)42));
     }
 
     [Fact]
@@ -284,7 +284,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetOrientation((BookOrientation)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetOrientation((BookOrientation)42));
     }
 
     [Fact]
@@ -292,7 +292,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetReadingDirection((ReadingDirection)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetReadingDirection((ReadingDirection)42));
     }
 
     [Fact]
@@ -300,7 +300,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetFormat((EditionFormat)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetFormat((EditionFormat)42));
     }
 
     [Fact]
@@ -308,7 +308,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetCategory((EditionCategory)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetCategory((EditionCategory)42));
     }
 
     [Fact]
@@ -316,7 +316,7 @@ public sealed class EditionTests
     {
         var edition = new Edition(CreateAlbum(), CreatePublisher());
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => edition.SetCondition((EditionCondition)42));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => edition.SetCondition((EditionCondition)42));
     }
 
     [Fact]

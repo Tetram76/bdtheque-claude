@@ -17,16 +17,10 @@ namespace Bdtheque.Api.Tests;
 /// that remains keeps the data chosen and takes the collections of the other one, two homonymous collections becoming one, and
 /// every edition, series and saved search designating either designates it, with the collection that remains.
 /// </summary>
-public sealed class PublisherMergeEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class PublisherMergeEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public PublisherMergeEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Preview_PresentsBothPublishers_TheirHomonymousCollections_AndCountsWhatPassesToTheRecordOnce()
@@ -39,7 +33,7 @@ public sealed class PublisherMergeEndpointsTests : IClassFixture<ApiWebApplicati
         var preview = await _client.GetFromJsonAsync<PublisherMergePreview>($"/admin/publishers/merge?first={first.Id}&second={second.Id}");
 
         Assert.Equal((first.Id, first.Name, first.Website, first.Version), (preview!.First.Id, preview.First.Name, preview.First.Website, preview.First.Version));
-        Assert.Equal((second.Id, second.Name, (string?)null), (preview.Second.Id, preview.Second.Name, preview.Second.Website));
+        Assert.Equal((second.Id, second.Name, null), (preview.Second.Id, preview.Second.Name, preview.Second.Website));
         // The names compare without case nor accents, as they do among the collections of a publisher.
         Assert.Equal(
             [new PublisherCollectionHomonyms(CollectionOf(first, "Aire Libre"), "Aire Libre", CollectionOf(second, "aire libré"), "aire libré")],
@@ -216,7 +210,7 @@ public sealed class PublisherMergeEndpointsTests : IClassFixture<ApiWebApplicati
     {
         await using var scope = _factory.Services.CreateAsyncScope();
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
-        return (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId).ToList();
+        return [.. (await context.SavedSearches.SingleAsync(s => s.Id == search)).Designations.Select(d => d.RecordId)];
     }
 
     private async Task<(List<Guid> Albums, List<Guid> Series)> SeedAsync(Func<BdthequeDbContext, Task<(List<Guid>, List<Guid>)>> seed)

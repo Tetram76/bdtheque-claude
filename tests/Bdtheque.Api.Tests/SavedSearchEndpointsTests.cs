@@ -17,17 +17,11 @@ namespace Bdtheque.Api.Tests;
 /// (<c>/admin/saved-searches</c>), and their list, criteria and replay in the consultation
 /// (<c>/catalog/saved-searches</c>).
 /// </summary>
-public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class SavedSearchEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public SavedSearchEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
 
     // The albums whose title contains the marker of the test, and a given text: the variable "Titre"
     // replaces that text.
@@ -334,7 +328,7 @@ public sealed class SavedSearchEndpointsTests : IClassFixture<ApiWebApplicationF
         var log = (await _client.GetFromJsonAsync<ChangeLogList>("/admin/change-log?pageSize=100"))!;
 
         var entry = log.Entries.Items.First(e => e.RecordId == search.Id);
-        Assert.Equal((RecordType.SavedSearch, ChangeLogOperation.Modification, (RecordLabel)new NameLabel(search.Content.Name)),
+        Assert.Equal((RecordType.SavedSearch, ChangeLogOperation.Modification, new NameLabel(search.Content.Name)),
             (entry.RecordType, entry.Operation, entry.Label));
         Assert.Equal([ChangeLogAttribute.SearchCriteria, ChangeLogAttribute.SearchVariables], entry.Changes.Select(c => c.Attribute));
         AssertSameJson(new SearchCriteriaValue(content.Criteria), entry.Changes[0].After);

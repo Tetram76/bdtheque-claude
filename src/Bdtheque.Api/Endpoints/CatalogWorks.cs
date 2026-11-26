@@ -59,15 +59,14 @@ internal static class CatalogWorks
         var albumItems = (await albums.OrderInSeries().Select(albumItem).ToListAsync(cancellationToken))
             .ToLookup(a => a.Album.Album.SeriesId);
 
-        return entries
+        return [.. entries
             .Select(e => e.SeriesId is { } seriesId
                 ? new BibliographyEntry(
                     new SeriesBibliographyItem(
                         seriesItems[seriesId].Item, overviews[seriesId], seriesItems[seriesId].OnSeries, seriesItems[seriesId].Roles,
-                        albumItems[seriesId].ToList()),
+                        [.. albumItems[seriesId]]),
                     null)
-                : new BibliographyEntry(null, albumItems[null].Single(a => a.Album.Album.Id == e.AlbumId)))
-            .ToList();
+                : new BibliographyEntry(null, albumItems[null].Single(a => a.Album.Album.Id == e.AlbumId)))];
     }
 
     /// <summary>
@@ -96,11 +95,10 @@ internal static class CatalogWorks
             id => id,
             id => new SeriesOverview(
                 albums[id].Count(),
-                albums[id]
+                [.. albums[id]
                     .Where(a => a.IsRegularVolume)
                     .Take(SeriesOverview.FirstVolumeCount)
-                    .Select(a => CatalogExpressions.ToCover(a.CoverVisual))
-                    .ToList()));
+                    .Select(a => CatalogExpressions.ToCover(a.CoverVisual))]));
     }
 
     // An album of a series, with its cover among all its editions, or among its owned ones only.

@@ -118,8 +118,6 @@ internal static class EditionVisualEndpoints
 
     private static EditionVisualsForm ToForm(Edition edition, uint albumVersion) =>
         new(edition.Id,
-            edition.GetOrderedVisuals()
-                .Select(v => new EditionVisualForm(v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder))
-                .ToList(),
+            [.. edition.GetOrderedVisuals().Select(v => new EditionVisualForm(v.Id, EnumMapping.Map<ContractEnums.VisualType>(v.Type)!.Value, v.DisplayOrder))],
             albumVersion);
 }

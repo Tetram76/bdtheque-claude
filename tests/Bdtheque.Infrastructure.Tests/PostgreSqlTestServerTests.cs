@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Bdtheque.Testing;
 using Npgsql;
 
 namespace Bdtheque.Infrastructure.Tests;

@@ -1,6 +1,5 @@
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
-using Bdtheque.Testing;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bdtheque.Infrastructure.Tests;
@@ -217,7 +216,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
                 new(ChangeLogAttribute.Genre, new ReferenceValue(aventure.Id, new NameLabel("Aventure")), null),
                 new(ChangeLogAttribute.Genre, null, new ReferenceValue(humour.Id, new NameLabel("Humour"))),
             },
-            entry.Changes.ToHashSet());
+            [.. entry.Changes]);
     }
 
     [Fact]
@@ -241,7 +240,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
                 new(ChangeLogAttribute.Contribution,
                     null, new ContributionValue(jacobs.Id, new AuthorLabel("Jacobs", "Edgar P.", null), ContributionRole.Colorist)),
             },
-            entry.Changes.ToHashSet());
+            [.. entry.Changes]);
     }
 
     [Fact]
@@ -371,7 +370,7 @@ public sealed class ChangeLogTests : IAsyncLifetime
                 (RecordType.Album, album.Id), (RecordType.Edition, edition.Id), (RecordType.Edition, intended.Id),
                 (RecordType.PurchaseIntent, intent.Id),
             },
-            deletions.Select(e => (e.RecordType, e.RecordId)).ToHashSet());
+            [.. deletions.Select(e => (e.RecordType, e.RecordId))]);
         var intentLabel = Assert.IsType<PurchaseIntentLabel>(deletions.Single(e => e.RecordId == intent.Id).Label);
         Assert.Null(intentLabel.Album);
         Assert.Equal("Dupuis", intentLabel.Edition!.PublisherName);

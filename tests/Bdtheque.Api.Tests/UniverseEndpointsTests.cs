@@ -15,16 +15,10 @@ using EntityKind = Bdtheque.Contracts.Enums.EntityKind;
 namespace Bdtheque.Api.Tests;
 
 /// <summary>Administration of the universes (<c>/admin/universes</c>), including their hierarchy and deletion.</summary>
-public sealed class UniverseEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class UniverseEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public UniverseEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Hierarchy_OfAUniverse_GivesItsAncestorsFromTheTop()

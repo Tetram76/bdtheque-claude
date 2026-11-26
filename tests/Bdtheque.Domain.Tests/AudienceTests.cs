@@ -38,8 +38,8 @@ public sealed class AudienceTests
     {
         var use = new FunctionUse("dashboard", null, null);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => AudienceVisit.Open(false, (DeviceType)99, RenderingEngine.Blink, null, use));
-        Assert.Throws<ArgumentOutOfRangeException>(() => AudienceVisit.Open(false, DeviceType.Computer, (RenderingEngine)99, null, use));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => AudienceVisit.Open(false, (DeviceType)99, RenderingEngine.Blink, null, use));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => AudienceVisit.Open(false, DeviceType.Computer, (RenderingEngine)99, null, use));
     }
 
     [Fact]
@@ -85,13 +85,13 @@ public sealed class AudienceTests
     [Fact]
     public void FunctionUse_RequiresAFunction()
     {
-        Assert.Throws<ArgumentException>(() => new FunctionUse(" ", null, null));
+        DomainAssert.Throws<ArgumentException>(() => new FunctionUse(" ", null, null));
     }
 
     [Fact]
     public void FunctionUse_CarriesARecordOrParameters_NeverBoth()
     {
-        Assert.Throws<ArgumentException>(() => new FunctionUse("admin.album.save", Album, "{}"));
+        DomainAssert.Throws<ArgumentException>(() => new FunctionUse("admin.album.save", Album, "{}"));
     }
 
     [Fact]
@@ -106,7 +106,7 @@ public sealed class AudienceTests
     [Fact]
     public void PresentedRecord_RefusesAnUndefinedType()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => new PresentedRecord((RecordType)99, Guid.CreateVersion7()));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => new PresentedRecord((RecordType)99, Guid.CreateVersion7()));
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public sealed class AudienceTests
     [Fact]
     public void Counter_RefusesAMonthNotStartingOnItsFirstDay()
     {
-        Assert.Throws<ArgumentException>(() => new AudienceCounter(
+        DomainAssert.Throws<ArgumentException>(() => new AudienceCounter(
             "dashboard", new DateOnly(2026, 3, 2), false, DeviceType.Computer, RenderingEngine.Blink, null, 1, 1, 0,
             LastUsage, []));
     }
@@ -140,7 +140,7 @@ public sealed class AudienceTests
     [InlineData(2, 0, 0)] // a usage belongs to a visit
     public void Counter_RefusesInconsistentFigures(int usages, int visits, int repeated)
     {
-        Assert.Throws<ArgumentException>(() => new AudienceCounter(
+        DomainAssert.Throws<ArgumentException>(() => new AudienceCounter(
             "dashboard", new DateOnly(2026, 3, 1), false, DeviceType.Computer, RenderingEngine.Blink, null, usages, visits, repeated,
             LastUsage, []));
     }
@@ -148,8 +148,8 @@ public sealed class AudienceTests
     [Fact]
     public void CounterObject_IsARecordOrParameters_UsedAtLeastOnce()
     {
-        Assert.Throws<ArgumentException>(() => new AudienceCounterObject(null, null, 1));
-        Assert.Throws<ArgumentException>(() => new AudienceCounterObject(Album, "{}", 1));
-        Assert.Throws<ArgumentOutOfRangeException>(() => new AudienceCounterObject(Album, null, 0));
+        DomainAssert.Throws<ArgumentException>(() => new AudienceCounterObject(null, null, 1));
+        DomainAssert.Throws<ArgumentException>(() => new AudienceCounterObject(Album, "{}", 1));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => new AudienceCounterObject(Album, null, 0));
     }
 }

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Contracts.Search;
@@ -20,19 +19,13 @@ namespace Bdtheque.Api.Tests;
 /// The search covers the whole base, shared by the tests of the class: each test names its records with a
 /// marker of its own, and narrows every search to it.
 /// </remarks>
-public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AdvancedSearchTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
     private static readonly SeriesEditionTemplate NoTemplate = new(null, null, null, null, null, null, null, null, null);
 
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public AdvancedSearchTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
 
     [Fact]
     public async Task Schema_LeavesOutTheMediaReferenceOfAVisual()
@@ -73,7 +66,7 @@ public sealed class AdvancedSearchTests : IClassFixture<ApiWebApplicationFactory
         Assert.Equal(
             new SearchFieldDescription("rating", SearchDataType.Enumeration, true, [Is, IsNot, IsOneOf, IsNoneOf, IsSet, IsNotSet], [Is, IsNot], null,
                 nameof(AlbumRating), Enum.GetNames<AlbumRating>()),
-            rating with { Comparisons = rating.Comparisons.ToList(), Members = rating.Members!.ToList() },
+            rating with { Comparisons = [.. rating.Comparisons], Members = [.. rating.Members!] },
             new RecordComparer());
         Assert.Contains(new SearchLinkDescription("editions", EntityKind.Edition, true), album.Links);
         Assert.Contains(new SearchLinkDescription("series", EntityKind.Series, false), album.Links);

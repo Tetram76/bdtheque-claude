@@ -12,16 +12,10 @@ namespace Bdtheque.Api.Tests;
 /// indicators in the administration (<c>/admin/audience</c>), while the months are still open: every indicator is
 /// computed from the detail of the visits.
 /// </summary>
-public sealed class AudienceEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class AudienceEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-    private readonly HttpClient _client;
-
-    public AudienceEndpointsTests(ApiWebApplicationFactory factory)
-    {
-        _factory = factory;
-        _client = factory.CreateApiClient();
-    }
+    private readonly ApiWebApplicationFactory _factory = factory;
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task AVisit_IsOpenedWithItsFirstUsage_ThenFollowed_AndReadAsItsPath()

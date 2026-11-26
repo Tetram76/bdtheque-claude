@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Infrastructure;
-using Bdtheque.EndToEnd.Tests.Captures;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Api;
 using frontend::Bdtheque.Frontend.Formatting;

@@ -42,7 +42,7 @@ internal static class SearchTranslator
     private static Expression Build(SearchEntityDefinition entity, Expression record, SearchCondition condition, SearchScope scope) =>
         condition switch
         {
-            SearchGroup group => Combine(group, group.Conditions.Select(c => Build(entity, record, Required(c), scope)).ToList()),
+            SearchGroup group => Combine(group, [.. group.Conditions.Select(c => Build(entity, record, Required(c), scope))]),
             SearchNot not => Expression.Not(Build(entity, record, Required(not.Condition), scope)),
             SearchCriterion criterion => entity.Field(criterion.Field).Build(record, criterion, scope),
             SearchLink link => Follow(entity.Link(link.Link), record, link, scope),
@@ -71,11 +71,11 @@ internal static class SearchTranslator
         var (target, related) = Related(definition, record, scope);
         if (related.Type == target.ClrType)
             return Expression.AndAlso(
-                Expression.NotEqual(related, Expression.Constant(null, related.Type)), Reach(target, related, links.Skip(1).ToList(), scope, condition));
+                Expression.NotEqual(related, Expression.Constant(null, related.Type)), Reach(target, related, [.. links.Skip(1)], scope, condition));
         var relatedRecord = Expression.Parameter(target.ClrType, "related");
         return Call(
             nameof(Enumerable.Any), related, target.ClrType,
-            Expression.Lambda(Reach(target, relatedRecord, links.Skip(1).ToList(), scope, condition), relatedRecord));
+            Expression.Lambda(Reach(target, relatedRecord, [.. links.Skip(1)], scope, condition), relatedRecord));
     }
 
     // Empty, AND holds for every record, and OR for none: the neutral element of each.

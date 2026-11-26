@@ -5,8 +5,6 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Api;
-using Bdtheque.Frontend.Audience;
-using Bdtheque.Frontend.Components.Dashboard;
 using Bdtheque.Frontend.Components.Layout;
 using Bdtheque.Frontend.Components.Pages;
 using Bdtheque.Frontend.Formatting;

@@ -4,7 +4,6 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Visuals;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -249,6 +248,6 @@ internal static class PurchaseIntentEndpoints
 
     private static PurchaseIntentsForm ToForm(Album album, uint albumVersion) =>
         new(album.Id,
-            album.PurchaseIntents.OrderBy(p => p.Id).Select(p => new PurchaseIntentForm(p.Id, p.EditionId)).ToList(),
+            [.. album.PurchaseIntents.OrderBy(p => p.Id).Select(p => new PurchaseIntentForm(p.Id, p.EditionId))],
             albumVersion);
 }

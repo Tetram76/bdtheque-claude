@@ -213,7 +213,7 @@ public sealed class AlbumTests
 
         album.SetTypeAndVolumeRange(AlbumType.Regular, null, null);
 
-        Assert.Equal((AlbumType.Regular, (int?)null, (int?)null), (album.Type, album.StartVolumeNumber, album.EndVolumeNumber));
+        Assert.Equal((AlbumType.Regular, null, null), (album.Type, album.StartVolumeNumber, album.EndVolumeNumber));
     }
 
     [Fact]
@@ -232,7 +232,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetTypeAndVolumeRange((AlbumType)42, null, null));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => album.SetTypeAndVolumeRange((AlbumType)42, null, null));
     }
 
     [Fact]
@@ -326,7 +326,7 @@ public sealed class AlbumTests
     {
         var album = new Album("Tintin", null);
 
-        Assert.Throws<ArgumentOutOfRangeException>(() => album.SetRating((AlbumRating)99));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => album.SetRating((AlbumRating)99));
     }
 
     [Fact]
@@ -495,7 +495,7 @@ public sealed class AlbumTests
 
         album.SetTitleSeriesAndContributions("Le Lotus bleu", null, []);
 
-        Assert.Equal(("Le Lotus bleu", (Guid?)null, "Lotus bleu [Le]"), (album.Title, album.SeriesId, album.SortKey));
+        Assert.Equal(("Le Lotus bleu", null, "Lotus bleu [Le]"), (album.Title, album.SeriesId, album.SortKey));
     }
 
     [Fact]
@@ -593,8 +593,8 @@ public sealed class AlbumTests
         album.SetTitleSeriesAndContributions(album.Title, series, CreditsOf(album));
 
     private static List<(Author Author, ContributionRole Role)> CreditsOf(Album album) =>
-        album.Contributions.Select(c => (c.Author, c.Role)).ToList();
+        [.. album.Contributions.Select(c => (c.Author, c.Role))];
 
     private static List<(Guid AuthorId, ContributionRole Role)> Credits(Album album) =>
-        album.Contributions.Select(c => (c.AuthorId, c.Role)).OrderBy(c => c.Role).ToList();
+        [.. album.Contributions.Select(c => (c.AuthorId, c.Role)).OrderBy(c => c.Role)];
 }

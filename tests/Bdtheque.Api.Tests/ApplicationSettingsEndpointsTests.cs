@@ -12,11 +12,9 @@ namespace Bdtheque.Api.Tests;
 /// startup, read by the consultation and modified by the administration under its version.
 /// </summary>
 /// <remarks>The setting being a single record, each test reads the version it modifies.</remarks>
-public sealed class ApplicationSettingsEndpointsTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class ApplicationSettingsEndpointsTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly HttpClient _client;
-
-    public ApplicationSettingsEndpointsTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
+    private readonly HttpClient _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Read_OnAFreshDeployment_GivesTheDefaults()
@@ -74,7 +72,7 @@ public sealed class ApplicationSettingsEndpointsTests : IClassFixture<ApiWebAppl
         var entries = (await _client.GetFromJsonAsync<ChangeLogList>("/admin/change-log?pageSize=2"))!.Entries.Items;
 
         // The most recent first: the restoration, then the modification.
-        Assert.All(entries, e => Assert.Equal((RecordType.ApplicationSettings, ChangeLogOperation.Modification, (RecordLabel)new ApplicationSettingsLabel()),
+        Assert.All(entries, e => Assert.Equal((RecordType.ApplicationSettings, ChangeLogOperation.Modification, new ApplicationSettingsLabel()),
             (e.RecordType, e.Operation, e.Label)));
         Assert.Equal(
             new ChangeLogChange(

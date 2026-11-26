@@ -2,11 +2,9 @@ using System.Net;
 
 namespace Bdtheque.Api.Tests;
 
-public sealed class HealthEndpointTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class HealthEndpointTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly ApiWebApplicationFactory _factory;
-
-    public HealthEndpointTests(ApiWebApplicationFactory factory) => _factory = factory;
+    private readonly ApiWebApplicationFactory _factory = factory;
 
     [Fact]
     public async Task GetHealth_ReturnsOk_WithoutSharedKey()

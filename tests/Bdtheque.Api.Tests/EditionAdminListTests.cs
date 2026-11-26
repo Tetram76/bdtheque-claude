@@ -15,12 +15,10 @@ namespace Bdtheque.Api.Tests;
 /// The list covers the whole base, shared by the tests of the class: each test narrows it to a publisher, an album or an ISBN
 /// of its own.
 /// </remarks>
-public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFactory>
+public sealed class EditionAdminListTests(ApiWebApplicationFactory factory) : IClassFixture<ApiWebApplicationFactory>
 {
-    private readonly HttpClient _client;
+    private readonly HttpClient _client = factory.CreateApiClient();
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
-
-    public EditionAdminListTests(ApiWebApplicationFactory factory) => _client = factory.CreateApiClient();
 
     [Fact]
     public async Task Rows_CarryWhatTheListPresents()
@@ -46,7 +44,7 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
             row.Edition);
         Assert.Equal(cover, row.Cover);
         Assert.Equal((EditionCategory?)EditionCategory.FirstEdition, row.Category);
-        Assert.Equal((AcquisitionMode.Gift, (int?)2005), (row.AcquisitionMode, row.AcquisitionYear));
+        Assert.Equal((AcquisitionMode.Gift, 2005), (row.AcquisitionMode, row.AcquisitionYear));
         // The version of the album, which the deletion of its edition sends back.
         Assert.Equal(version, row.AlbumVersion);
         Assert.NotEqual(default, row.ModifiedAt);
@@ -61,7 +59,7 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
 
         var row = Assert.Single((await ListAsync($"albumId={album.Id}")).Editions.Items);
 
-        Assert.Equal(((AlbumCover?)null, (EditionCategory?)null, AcquisitionMode.Trade, (int?)null),
+        Assert.Equal((null, null, AcquisitionMode.Trade, null),
             (row.Cover, row.Category, row.AcquisitionMode, row.AcquisitionYear));
     }
 

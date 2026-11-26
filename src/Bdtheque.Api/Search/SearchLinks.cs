@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Entities.Common;

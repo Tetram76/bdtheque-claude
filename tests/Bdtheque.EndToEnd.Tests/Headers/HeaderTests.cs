@@ -3,7 +3,6 @@ extern alias frontend;
 using System.Text.RegularExpressions;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
-using frontend::Bdtheque.Frontend.Theming;
 
 namespace Bdtheque.EndToEnd.Tests.Headers;
 
