@@ -4,7 +4,7 @@ title: 'Contrôle qualité hebdomadaire'
 description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité par urgence (critique, prioritaire, au fil de l''eau), traitement borné à une Pull Request par semaine ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:07:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:10:37Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -16,7 +16,7 @@ La porte de qualité de SonarQube Cloud ne juge que le nouveau code d'une Pull R
 Chaque semaine, et à la demande, sur `main` :
 
 - **SonarQube Cloud, code global** : les problèmes ouverts de l'analyse de `main`, dont les méthodes à la complexité cognitive au-delà du seuil de la règle `S3776` du profil de qualité ; les points sensibles de sécurité non revus ; les conditions en échec de la porte de qualité de `main`, pour désigner les problèmes qui les font échouer.
-- **Règles de style .NET** (catégorie *Style*) qui n'expriment pas une préférence de forme, listées dans le workflow : celles d'un **défaut**, code sans effet, redondant ou trompeur (ex. `IDE0005`, `IDE0004`, `IDE0060`, `IDE0059`), et celles d'une **syntaxe plus récente** du langage non employée là où elle dit la même chose plus directement (ex. `IDE0300` à `IDE0306`, `IDE0290`), ce que demande [Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md). Les règles de préférence (`var`, accolades, corps d'expression, forme du namespace, `new` ciblé…) en sont exclues, sauf celles qui relèveraient ce qui va contre l'optimisation du code pour l'agent ([Qualité du code](../gouvernance/qualite-du-code.md), code optimisé pour l'agent) : la liste des règles relevées peut être adaptée à cette fin (exigence de l'utilisateur).
+- **Règles de style .NET** (catégorie *Style*) qui n'expriment pas une préférence de forme, listées dans le workflow : celles d'un **défaut**, code sans effet, redondant ou trompeur (ex. `IDE0005`, `IDE0004`, `IDE0060`, `IDE0059`), et celles d'une **syntaxe plus récente** du langage non employée là où elle dit la même chose plus directement (ex. `IDE0300` à `IDE0306`, `IDE0290`), ce que demande [Exploitation des technologies retenues](../../contraintes-techniques/exploitation-des-technologies-retenues.md). Les règles de préférence (`var`, accolades, corps d'expression, forme du namespace, `new` ciblé…) en sont exclues ; la liste des règles relevées peut toutefois être adaptée, pour toute règle, règles de préférence comprises ([Qualité du code](../gouvernance/qualite-du-code.md), harnais adaptables) (exigence de l'utilisateur).
 - **Tests de mutation** : les mutants survivants ou qu'aucun test ne couvre, chacun un test qui manque, d'abord sur `Bdtheque.Domain` ; d'autres projets s'y ajoutent selon ce qu'il apprend.
 
 ## Rien ne bloque

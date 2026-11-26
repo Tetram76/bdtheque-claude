@@ -3,7 +3,7 @@ type: Gouvernance
 title: 'Qualité du code'
 description: 'Exigence de rigueur (même exigence pour tout le code, usage documenté des outils, code écrit avant tout pour l''application, sans que les tests dictent sa conception, ressources libérées, cause de fond de tout problème, son propre code d''abord, relecture exigeante, rendu vérifié par l''agent), pragmatisme (pas de code parfait), KISS, DRY, YAGNI (jamais un code naïf, échecs de ce que l''application ne maîtrise pas traités dès la première version), SOLID, bonnes pratiques, TDD, non-régression, tests qui ont un facteur temps validés sur plusieurs exécutions, tests indépendants du thème tiré au hasard et exécutés dans chaque thème, code optimisé pour l''agent, son principal lecteur et seul producteur (tokens à la lecture et à l''écriture, sans économie à outrance, lisible par un humain, harnais adaptables), commentaires, langue des fichiers techniques ; s''applique à tout code.'
 tags: [socle]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:02:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:10:37Z }
 ---
 
 # Qualité du code
@@ -37,6 +37,6 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:02:19Z }
   - **Optimiser ne veut pas dire économiser à outrance** : un code plus court n'est pas pour autant optimisé. Ce qui raccourcit le code mais oblige l'agent à aller chercher ailleurs l'information qu'il masque coûte plus qu'il n'épargne (ex. `var` limite la taille du code, donc les tokens de sa lecture, mais, employé abusivement, masque le type d'une variable et oblige à aller lire la définition d'une méthode pour le connaître).
   - **Plusieurs axes**, liste non restrictive : mots-clés correctement utilisés, taille des fichiers maîtrisée, organisation du code dans le fichier.
   - **Lisible et compréhensible par un humain** : le projet visant à valider la compétence de l'agent, plus ou moins autonome ([Objectifs du projet](objectifs-du-projet.md)), le code reste lisible et compréhensible par l'utilisateur ; l'optimisation pour l'agent ne s'obtient jamais à ses dépens.
-  - **Harnais adaptables** : les harnais en place peuvent être adaptés sur les règles qu'ils contrôlent, pour relever ce qui va contre cette optimisation ([Contrôle qualité hebdomadaire](../depot/controle-qualite-hebdomadaire.md)).
+  - **Harnais adaptables** : les harnais en place peuvent être adaptés sur les règles qu'ils contrôlent, quelles qu'elles soient ([Contrôle qualité hebdomadaire](../depot/controle-qualite-hebdomadaire.md)).
 - **Règle de commentaires** : les commentaires expliquent le **pourquoi** (intention, contrainte, décision de conception), jamais le **quoi** (ce que le code fait — le code se lit de lui-même).
 - **Langue des fichiers techniques** : tout le contenu technique (code, noms de fonctions/classes/variables/constantes, commentaires, messages de log, noms de fichiers de configuration) est rédigé en **anglais**. Seule la documentation du projet (`.speckit/`, `README.md`, `README.dev.md`, etc.) est rédigée en **français**. Les messages destinés à l'utilisateur final sont produits par le système de traduction du frontend (cf. [Internationalisation](../../choix-implementation/socle/transverse/internationalisation.md)), pas codés en dur dans une langue donnée.
