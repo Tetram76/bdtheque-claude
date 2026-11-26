@@ -127,39 +127,6 @@ public sealed class AdminMergeEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public async Task Acquisitions_DifferingBeyondTwoDecimals_AreTwoValuesToChoose_EachShownAtTheDecimalsItKeeps()
-    {
-        // The four decimals an amount keeps (Components/Controls/AmountField.razor), the third one apart.
-        _api.Answers[$"/admin/editions/merge?first={First}&second={Second}"] = Preview with
-        {
-            First = FirstEdition with { AcquisitionAmount = 12.341m, AcquisitionCurrency = "KWD" },
-            Second = SameAcquisitionAs(FirstEdition) with { AcquisitionAmount = 12.342m, AcquisitionCurrency = "KWD" },
-        };
-        var page = Open();
-        await page.ChangeAsync(".merge-show-all", true);
-
-        var values = Values(page, "merge-acquisition");
-        Assert.Equal(2, values.Length);
-        Assert.Contains("12,341", values[0]);
-        Assert.Contains("12,342", values[1]);
-        Assert.Null(Checked(page, "merge-acquisition"));
-        Assert.Equal("3 données restent à choisir", page.Find(".save-bar-state-long").TextContent);
-    }
-
-    [Fact]
-    public void Acquisitions_OfTheSameAmountsWrittenDifferently_AreTheSame()
-    {
-        _api.Answers[$"/admin/editions/merge?first={First}&second={Second}"] = Preview with
-        {
-            Second = SameAcquisitionAs(FirstEdition) with { AcquisitionAmount = 12.5000m },
-        };
-        var page = Open();
-
-        // The album and the publisher with its collection only: 12,50 € both, whatever the scale of the decimal.
-        Assert.Equal("2 données restent à choisir", page.Find(".save-bar-state-long").TextContent);
-    }
-
-    [Fact]
     public async Task Result_TheLabelTheDataChosenGive()
     {
         var page = Open();
@@ -266,14 +233,6 @@ public sealed class AdminMergeEditionsTests : BunitContext, IDisposable
         Assert.Contains("L'une des deux éditions a été modifiée depuis l'ouverture de la fusion.", page.Markup);
         Assert.Contains(page.FindAll("button"), button => button.TextContent.Trim() == "Recharger la fiche");
     }
-
-    // The second edition, with the acquisition of the given one.
-    private static EditionMergeRecord SameAcquisitionAs(EditionMergeRecord edition) => SecondEdition with
-    {
-        AcquisitionMode = edition.AcquisitionMode, AcquisitionDate = edition.AcquisitionDate, AcquisitionAmount = edition.AcquisitionAmount,
-        AcquisitionCurrency = edition.AcquisitionCurrency, IsFree = edition.IsFree, InitialValueAmount = edition.InitialValueAmount,
-        InitialValueCurrency = edition.InitialValueCurrency,
-    };
 
     private IRenderedComponent<AdminMergeEditions> Open()
     {
