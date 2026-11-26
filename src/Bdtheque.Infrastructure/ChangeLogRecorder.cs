@@ -107,7 +107,7 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
             var carried = entry.Entity switch
             {
                 Contribution => ContributionChanges(entry),
-                EditionVisual => [VisualChange(entry)],
+                EditionVisual => VisualChanges(entry),
                 _ when entry.Metadata.IsPropertyBag && AssociationChange(entry) is { } association => [association],
                 _ => [],
             };
@@ -158,6 +158,21 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
             ChangeLogAttribute.Contribution,
             new ContributionValue(before, await _labels.AuthorAsync(before, cancellationToken), role),
             new ContributionValue(after, await _labels.AuthorAsync(after, cancellationToken), role)));
+    }
+
+    // A visual is added, removed or rearranged in its edition; or, kept by the merge of two editions, as a saved search may
+    // designate it (fonctionnel/regles-metier/fusion-des-fiches.md), passed to the edition that remains, removed from the one and
+    // added to the other.
+    private static IEnumerable<CarriedChange> VisualChanges(EntityEntry entry)
+    {
+        var (before, after) = (entry.OriginalValues.GetValue<Guid>(nameof(EditionVisual.EditionId)), entry.CurrentValues.GetValue<Guid>(nameof(EditionVisual.EditionId)));
+        if (entry.State != EntityState.Modified || before == after)
+            return [VisualChange(entry)];
+        return
+        [
+            new CarriedChange(before, _ => ValueTask.FromResult<ChangeLogChange?>(new(ChangeLogAttribute.Visual, VisualOf(entry, entry.OriginalValues), null))),
+            new CarriedChange(after, _ => ValueTask.FromResult<ChangeLogChange?>(new(ChangeLogAttribute.Visual, null, VisualOf(entry, entry.CurrentValues)))),
+        ];
     }
 
     private static CarriedChange VisualChange(EntityEntry entry)
@@ -231,8 +246,11 @@ internal sealed class ChangeLogRecorder(BdthequeDbContext context)
             var dependentType = composition.DeclaringEntityType.ClrType;
             var foreignKey = composition.Properties[0];
             var ids = await DependentIdsAsync(dependentType, foreignKey.Name, foreignKey.ClrType, deleted.Entity.Id, cancellationToken);
+            // A composition deleted by this save, or passed by it to another record (an intent the merge of two editions gives to
+            // the edition that remains), whose update EF Core orders before the deletion, is not deleted by the cascade.
             var untracked = ids.Where(id => !context.ChangeTracker.Entries<EntityBase>()
-                .Any(e => e.Entity.Id == id && e.State == EntityState.Deleted && e.Metadata.ClrType == dependentType)).ToList();
+                .Any(e => e.Entity.Id == id && e.Metadata.ClrType == dependentType
+                          && (e.State == EntityState.Deleted || !Equals(e.CurrentValues[foreignKey.Name], deleted.Entity.Id)))).ToList();
             if (untracked.Count > 0)
                 throw new InvalidOperationException(
                     $"Deleting {deleted.Metadata.ClrType.Name} {deleted.Entity.Id} would delete by cascade {untracked.Count} {dependentType.Name} " +

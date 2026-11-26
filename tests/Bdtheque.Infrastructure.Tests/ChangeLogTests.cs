@@ -294,6 +294,30 @@ public sealed class ChangeLogTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task VisualPassedToAnotherEdition_IsAddedToTheEditionThatReceivesIt_AndRemovedFromTheOther()
+    {
+        // The merge of two editions passes a visual of the one to the other with its identity
+        // (fonctionnel/regles-metier/fusion-des-fiches.md): a change of both editions, the one gaining it, the other losing it.
+        var (album, kept) = await CreateOwnedEditionAsync();
+        var merged = new Edition(album, kept.Publisher);
+        album.RecordAcquisition(merged, AcquisitionMode.Purchase);
+        var cover = merged.AppendVisual(VisualType.Cover, "cover.jpg", TestPalette.Any);
+        var plate = kept.AppendVisual(VisualType.Plate, "plate.jpg", TestPalette.Any);
+        await Context.SaveChangesAsync();
+
+        Album.MergeEditions(kept, merged, album, 1985, kept, [cover.Id, plate.Id]);
+        await Context.SaveChangesAsync();
+
+        var visual = new VisualValue(cover.Id, VisualType.Cover, 0);
+        var entries = await EntriesAsync();
+        Assert.Equal(
+            [new ChangeLogChange(ChangeLogAttribute.Visual, null, visual)],
+            entries.Last(e => e.RecordId == kept.Id && e.Operation == ChangeLogOperation.Modification).Changes);
+        Assert.Contains(entries, e => e.RecordId == merged.Id && e.Operation == ChangeLogOperation.Deletion);
+        Assert.Equal(cover.Id, (await Context.EditionVisuals.AsNoTracking().SingleAsync(v => v.EditionId == kept.Id && v.Type == VisualType.Cover)).Id);
+    }
+
+    [Fact]
     public async Task EditionCreatedInItsAlbum_IsRecordedWithTheLabelsOfItsAlbumAndPublisher()
     {
         var (album, edition) = await CreateOwnedEditionAsync();

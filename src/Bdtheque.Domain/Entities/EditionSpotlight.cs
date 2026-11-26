@@ -19,4 +19,12 @@ public sealed class EditionSpotlight
 
     // EF Core parameterless constructor
     private EditionSpotlight() { }
+
+    // Only reachable through Edition.PassSpotlightsTo: the merge of two editions makes the days of the other one days of the
+    // edition that remains.
+    internal void MoveTo(Edition edition)
+    {
+        Edition = edition;
+        EditionId = edition.Id;
+    }
 }

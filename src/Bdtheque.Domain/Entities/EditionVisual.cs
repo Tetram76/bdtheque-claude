@@ -43,6 +43,14 @@ public sealed class EditionVisual : EntityBase
         Palette = palette;
     }
 
+    // Only reachable through Edition.TakeVisualsOf, the merge of two editions passing a visual retained of the other one to the
+    // edition that remains, with its identity, which a saved search may designate.
+    internal void MoveTo(Edition edition)
+    {
+        Edition = edition;
+        EditionId = edition.Id;
+    }
+
     // Type and rank change through Edition.ArrangeVisuals only, which ranks the visuals of each type
     // without gap nor duplicate.
     internal void SetType(VisualType type)
