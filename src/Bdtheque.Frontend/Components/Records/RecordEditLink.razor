@@ -1,0 +1,17 @@
+@* The link to the entry form of a part of a record of the consultation, for the authenticated administrator only, which the
+   record decides: an edition or a purchase intent of the record of an album (visuel/fiche-album/contenu.md, decisions of the
+   user, #658), marked with the pencil of « Modifier » of the administration. Written once, so that both look alike. *@
+<a class="record-edit-link" href="@Href" data-part="@Part"><Icon Name="IconName.Edit" />@Label</a>
+
+@code {
+    /// <summary>The entry form, which leads back to the record (<see cref="AppPaths.FromRecord"/>).</summary>
+    [Parameter, EditorRequired]
+    public string Href { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = null!;
+
+    /// <summary>What the link enters, for the tests and the audience measurement to tell the links apart.</summary>
+    [Parameter, EditorRequired]
+    public string Part { get; set; } = null!;
+}

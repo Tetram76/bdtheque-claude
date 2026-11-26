@@ -1,0 +1,232 @@
+@using Bdtheque.Contracts.Admin
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IStringLocalizer<AuthorEntryPanel> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> Rules
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The side panel of an author, changed or new (visuel/saisie-auteur/contenu.md), over the page that its address opens: the
+   list of the authors, or the record of the author in the consultation, which stays under the panel (decisions of the user,
+   #658). Its form is sent to that page, rendered statically, whose error is presented in place. For the authenticated
+   administrator only: the record being public, a visitor sees no panel, and a form sent without authentication saves nothing. *@
+@if (Open)
+{
+    <form class="side-panel-form" method="post" @formname="@FormName" @onsubmit="SaveAsync">
+        <AntiforgeryToken />
+        @if (AuthorId is not null)
+        {
+            <input type="hidden" name="@VersionName" value="@EntryVersion" />
+        }
+        <SidePanel Id="author-panel" Title="@(AuthorId is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@CloseHref">
+            <ChildContent>
+                @* The error of the saving, as on an entry form (visuel/listes/saisie-selon-l-entite.md): an author deleted
+                   meanwhile keeps the panel open, with what was typed. *@
+                @if (_problem is { } problem)
+                {
+                    <SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
+                               Technical="@L["Problem.Technical.Text"]" CanReload="@(AuthorId is not null)" StaticForm="true"
+                               ReloadHref="@ReloadHref" />
+                }
+                @if (_author is not null)
+                {
+                    <p class="side-panel-dates">
+                        @L["Dates.Created"] <LocalDateTime Value="_author.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_author.ModifiedAt" />.
+                    </p>
+                }
+                <div class="author-panel-names">
+                    <Field Id="author-first-name" Label="@L["FirstName"]" Error="@Errors.For(FirstNameField)" Context="control">
+                        <input id="@control.Id" type="text" name="@FirstNameName" autofocus="@(Focused == FirstNameField)" tabindex="0"
+                               aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryFirstName" />
+                    </Field>
+                    <Field Id="author-last-name" Label="@L["LastName"]" Error="@Errors.For(LastNameField)" Context="control">
+                        <input id="@control.Id" type="text" name="@LastNameName" autofocus="@(Focused == LastNameField)" tabindex="0"
+                               aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryLastName" />
+                    </Field>
+                </div>
+                <Field Id="author-pseudonym" Label="@L["Pseudonym"]" Help="@L["Pseudonym.Help"]" Error="@Errors.For(PseudonymField)" Context="control">
+                    @* An author without last name nor pseudonym, said once under the last name, concerns the pseudonym as much:
+                       bordered, and described by it too (visuel/saisie-auteur/contenu.md). *@
+                    <input id="@control.Id" type="text" name="@PseudonymName" autofocus="@(Focused == PseudonymField)" tabindex="0"
+                           aria-describedby="@PseudonymDescribedBy(control.DescribedBy)"
+                           aria-invalid="@(control.Invalid ?? (WithoutName ? "true" : null))" @bind="EntryPseudonym" />
+                </Field>
+                <Field Id="author-nationality" Label="@L["Nationality"]" Characters="18" Error="@Errors.For(NationalityField)" Context="control">
+                    <input id="@control.Id" type="text" name="@NationalityName" autofocus="@(Focused == NationalityField)" tabindex="0"
+                           aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryNationality" />
+                </Field>
+                <Field Id="author-biography" Label="@L["Biography"]" Error="@Errors.For(BiographyField)" Context="control">
+                    <textarea id="@control.Id" name="@BiographyName" rows="6" placeholder="@L["Biography.Placeholder"]"
+                              autofocus="@(Focused == BiographyField)" tabindex="0" aria-describedby="@control.DescribedBy"
+                              aria-invalid="@control.Invalid">@EntryBiography</textarea>
+                </Field>
+            </ChildContent>
+            <Actions>
+                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(AuthorId is null ? L["Create"] : L["Save"])" />
+            </Actions>
+        </SidePanel>
+    </form>
+}
+
+@code {
+    private const string FormName = "author-entry";
+    private const string LastNameName = "lastName";
+    private const string FirstNameName = "firstName";
+    private const string PseudonymName = "pseudonym";
+    private const string NationalityName = "nationality";
+    private const string BiographyName = "biography";
+    private const string VersionName = "version";
+
+    /// <summary>The author changed; none for a new author.</summary>
+    [Parameter]
+    public Guid? AuthorId { get; set; }
+
+    /// <summary>The text searched in vain in the list, which a new author takes as its name (« Créer l'auteur « … » »).</summary>
+    [Parameter]
+    public string? Searched { get; set; }
+
+    /// <summary>Where the closing of the panel leads: the page under it.</summary>
+    [Parameter, EditorRequired]
+    public string CloseHref { get; set; } = null!;
+
+    /// <summary>Where the author saved leads: the page under the panel, without it.</summary>
+    [Parameter, EditorRequired]
+    public string SavedHref { get; set; } = null!;
+
+    /// <summary>The page with the panel of the author read anew, which « Recharger la fiche » leads to.</summary>
+    [Parameter]
+    public string? ReloadHref { get; set; }
+
+    /// <summary>
+    /// The action the opening of the panel is, recorded by the panel when the page under it does not record it from its own
+    /// address (the record of the author; the list records it); none otherwise.
+    /// </summary>
+    [Parameter]
+    public AudienceFunction? Opening { get; set; }
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? Authentication { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName, Name = LastNameName)]
+    private string? EntryLastName { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName, Name = FirstNameName)]
+    private string? EntryFirstName { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName, Name = PseudonymName)]
+    private string? EntryPseudonym { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName, Name = NationalityName)]
+    private string? EntryNationality { get; set; }
+
+    [SupplyParameterFromForm(FormName = FormName, Name = BiographyName)]
+    private string? EntryBiography { get; set; }
+
+    /// <summary>The version of the author changed, as its panel read it.</summary>
+    [SupplyParameterFromForm(FormName = FormName, Name = VersionName)]
+    private uint? EntryVersion { get; set; }
+
+    private bool _administrator;
+    private AuthorForm? _author;
+    private ApiProblem? _problem;
+
+    // A form sent back, whose fields, even emptied, are those typed.
+    private bool IsPost => HttpContext is { } context && HttpMethods.IsPost(context.Request.Method);
+
+    // The panel of a new author, or of the author changed: read, or sent back with its version, which keeps it open over an
+    // author deleted meanwhile, to present the error with what was typed. An address on an author deleted opens none.
+    private bool Open => _administrator && (AuthorId is null || _author is not null || EntryVersion is not null);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // The only authenticated user is the administrator (contraintes-techniques/architecture-deploiement/authentification.md).
+        _administrator = Authentication is not null && (await Authentication).User.Identity?.IsAuthenticated == true;
+        if (!_administrator)
+            return;
+
+        if (AuthorId is { } edited)
+            _author = await FindAsync(edited);
+        if (Opening is { } opening && _author is not null && HttpContext is { } context && HttpMethods.IsGet(context.Request.Method))
+            await Recorder.RecordActionAsync(opening, $"author={_author.Id}", context.RequestAborted);
+        // Read once, from the author; a form sent back keeps what was typed, the version always among it.
+        if (_author is not null && EntryVersion is null)
+        {
+            (EntryLastName, EntryFirstName, EntryPseudonym) = (_author.LastName, _author.FirstName, _author.Pseudonym);
+            (EntryNationality, EntryBiography, EntryVersion) = (_author.Nationality, _author.Biography, _author.Version);
+        }
+        // A new author opened on a search that finds none is the author searched, its name split as when created on the spot,
+        // unless names sent back, even emptied, are to be corrected.
+        if (AuthorId is null && Searched is { } searched && !IsPost)
+            (EntryFirstName, EntryLastName) = AuthorNames.Split(searched);
+    }
+
+    // The author, or none if it no longer exists: the page is then shown without its panel.
+    private async Task<AuthorForm?> FindAsync(Guid id)
+    {
+        try
+        {
+            return await Api.GetAsync<AuthorForm>($"/admin/authors/{id}");
+        }
+        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
+        {
+            return null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        // The API knows no user (docs/tech/mecanismes/authentification-et-appels-internes.md): over a public page, a form sent
+        // without the authentication of the administrator writes nothing.
+        if (!_administrator)
+            return;
+
+        AuthorForm saved;
+        try
+        {
+            // The author changed, as its panel read it, even deleted meanwhile: the API then says so, never a new author.
+            saved = AuthorId is { } edited
+                ? await Api.PutAsync<UpdateAuthorRequest, AuthorForm>(
+                    $"/admin/authors/{edited}",
+                    new UpdateAuthorRequest(EntryLastName, EntryFirstName, EntryPseudonym, EntryBiography, EntryNationality, EntryVersion.GetValueOrDefault()))
+                : await Api.PostAsync<CreateAuthorRequest, AuthorForm>(
+                    "/admin/authors", new CreateAuthorRequest(EntryLastName, EntryFirstName, EntryPseudonym, EntryBiography, EntryNationality));
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            return;
+        }
+
+        await Recorder.RecordActionAsync(
+            AuthorId is null ? AudienceFunctions.AdminAuthorCreated : AudienceFunctions.AdminAuthorSaved, $"author={saved.Id}",
+            HttpContext?.RequestAborted ?? default);
+        Navigation.NavigateTo(SavedHref);
+    }
+
+    // The fields of the content the panel enters, in their order in the panel.
+    private const string FirstNameField = "/firstName";
+    private const string LastNameField = "/lastName";
+    private const string PseudonymField = "/pseudonym";
+    private const string NationalityField = "/nationality";
+    private const string BiographyField = "/biography";
+    private static readonly string[] PanelFields = [FirstNameField, LastNameField, PseudonymField, NationalityField, BiographyField];
+
+    // The fields a refused saving designates (choix-implementation/socle/frontend.md, champ d'une erreur métier): a display name
+    // already taken at the field it comes from (visuel/saisie-auteur/contenu.md), its text naming the author as typed.
+    private FieldErrors Errors => new(
+        _problem, FieldTexts, Rules, RecordSearch.AuthorName(EntryLastName?.Trim(), EntryFirstName?.Trim(), EntryPseudonym?.Trim()));
+
+    // The first field to correct gets the focus, a field whose value it only clashes with never; the first field otherwise.
+    private string Focused => PanelFields.FirstOrDefault(entered => Errors.For(entered) is not null && !Errors.IsRelated(entered)) ?? FirstNameField;
+
+    // An author without last name nor pseudonym, refused at the last name, which the domain designates.
+    private bool WithoutName =>
+        _problem is { Category: ProblemCategory.Business, RuleCode: "Author.LastNameOrPseudonymRequired" };
+
+    private string? PseudonymDescribedBy(string? own) =>
+        WithoutName ? string.Join(' ', new[] { "author-last-name-error", own }.OfType<string>()) : own;
+}

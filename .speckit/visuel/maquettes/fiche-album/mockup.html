@@ -22,6 +22,7 @@ summary{cursor:pointer}
 /* « Et le reste de la série ? »: always whole in columns; on a smartphone, one column, the albums far from the one shown are
    folded behind « et N autres » until unfolded (visuel/fiche-album/contenu.md). */
 .rest-toggle{display:none !important}
+@media (max-width: 599px){.edit-link{width:34px;padding:0 !important;justify-content:center}.edit-label{display:none}}
 @media (max-width: 779px){.rest-toggle{display:inline-flex !important}.rest-list[data-folded=true] .rest-far{display:none !important}}
 </style>
 <script src="../shared/mockup.js"></script>
@@ -56,9 +57,14 @@ summary{cursor:pointer}
   </header>
 
   <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
-    <nav aria-label="Fil d'Ariane" style="margin-bottom: 12px; font-size: 13px; color: {{t.muted}}">
-      <a href="#" style="color: {{t.link}}; font-weight: 700">Albums</a> <span aria-hidden="true">›</span> <a href="#" style="color: {{t.link}}; font-weight: 700">Corto Maltese</a> <span aria-hidden="true">›</span> <span>Lointaines îles du vent</span>
+    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 16px">
+    <nav aria-label="Fil d'Ariane" style="flex: 1 1 0; min-width: 0; font-size: 13px; color: {{t.muted}}">
+      <a href="#" style="color: {{t.link}}; font-weight: 700">Albums</a> <span aria-hidden="true">›</span> <a href="#" style="color: {{t.link}}; font-weight: 700">{{crumb.series}}</a> <span aria-hidden="true">›</span> <span>{{crumb.album}}</span>
     </nav>
+    <sc-if value="{{edit.fil}}" hint-placeholder-val="{{false}}">
+      <a href="#" class="edit-link" aria-label="Modifier l'album" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; background: {{t.bg}}; color: {{t.secText}}; font-weight: 700; font-size: 13px; text-decoration: none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg><span class="edit-label">Modifier l'album</span></a>
+    </sc-if>
+    </div>
 
     <main style="display: flex; flex-direction: column; gap: 22px">
 
@@ -270,7 +276,7 @@ summary{cursor:pointer}
             </div>
           </sc-for>
         </div>
-        <p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{cur.meta}}</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px"><p style="margin: 0; font-size: 12px; color: {{t.muted}}">{{cur.meta}}</p><sc-if value="{{edit.fil}}" hint-placeholder-val="{{false}}"><a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: {{t.link}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg>Modifier l'édition</a></sc-if></div>
         </sc-if>
         <sc-if value="{{hasIntents}}" hint-placeholder-val="{{false}}">
           <div style="display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 2px dashed {{t.line}}; border-radius: {{t.tR}}; font-size: 14px">
@@ -282,7 +288,7 @@ summary{cursor:pointer}
                     <span style="font-weight: 700; overflow-wrap: anywhere">{{i.label}}</span>
                     <span style="font-size: 12px; color: {{t.muted}}">{{i.sub}}</span>
                   </span>
-                  <span style="font-size: 12px; color: {{t.muted}}">{{i.date}}</span>
+                  <span style="display: inline-flex; align-items: center; gap: 12px"><span style="font-size: 12px; color: {{t.muted}}">{{i.date}}</span><sc-if value="{{i.editable}}" hint-placeholder-val="{{false}}"><a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: {{t.link}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg>Modifier l'intention</a></sc-if></span>
                 </li>
               </sc-for>
             </ul>
@@ -701,10 +707,17 @@ class View extends Mockup {
       })),
       prevVis: () => this.setState({ visual: (vi + visCount - 1) % visCount }),
       nextVis: () => this.setState({ visual: (vi + 1) % visCount }),
+      // A long breadcrumb wraps in its own column: the link keeps its place at the end of the line.
+      crumb: this.props.filLong
+        ? { series: 'Les Aventures extraordinaires d\'Adèle Blanc-Sec et de ses compagnons de route', album: 'Le Mystère des profondeurs, ou la véritable histoire du ptérodactyle du Jardin des Plantes' }
+        : { series: 'Corto Maltese', album: 'Lointaines îles du vent' },
+      // The links to the entry forms of the album, of each edition and of each intent aimed at an edition, for the
+      // authenticated administrator only (visuel/fiche-album/contenu.md).
+      edit: { fil: this.props.administrateur },
       hasEdition, noEdition: !hasEdition,
       hasIntents: intents.length > 0,
       intentsTitle: intents.length > 1 ? 'Intentions d\'acquisition' : 'Intention d\'acquisition',
-      intents: intents.map((v, i) => ({ ...v, sep: i > 0 ? t.rowB : '0' })),
+      intents: intents.map((v, i) => ({ ...v, sep: i > 0 ? t.rowB : '0', editable: this.props.administrateur && !scenario.albumOnly })),
       editions: OWNED.map((e, i) => ({
         label: e.label, pressed: i === edIndex ? 'true' : 'false', ...pick(i === edIndex),
         // Switching edition also shows its own visuals, from its cover.
@@ -731,7 +744,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'acquisition", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "contributions": {"label": "Contributions", "editor": "enum", "options": ["nombreuses", "courantes"], "default": "nombreuses"}, "intentions": {"label": "Intentions d'acquisition", "editor": "enum", "options": ["une", "plusieurs", "album"], "default": "une"}, "filLong": {"label": "Fil d'Ariane long", "editor": "boolean", "default": false}, "administrateur": {"label": "Administrateur authentifié", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>

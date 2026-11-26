@@ -198,6 +198,12 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         });
         await data.VisualAsync(oasis, oasisEdition, VisualType.Cover, Images.Portrait(0.13));
 
+        // A series and an album whose titles are long: the breadcrumb of the record of the album wraps in its own column, beside
+        // the link of the administrator to its entry form, at every width (visuel/fiche-album/contenu.md, #658).
+        var companions = await data.SeriesAsync(Series("Les Aventures extraordinaires du capitaine Fracasse et de ses compagnons de route", SeriesStatus.InProgress,
+            Template(bubbles.Id, null, null), [adventure], [], [Credit(kador, ContributionRole.Scenarist)]));
+        await data.AlbumAsync(Album("Le Mystère des profondeurs, ou la véritable histoire du serpent de mer de la baie d'Ombrelune", companions, 1, 2021));
+
         // A series whose title begins with a letter of another alphabet, under `@`, catalogued only.
         var omega = await data.SeriesAsync(Series("Ωmega", null, Template(null, null, null), [scienceFiction], [],
             [Credit(lund, ContributionRole.Scenarist), Credit(tanabe, ContributionRole.Illustrator)]));

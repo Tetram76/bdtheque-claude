@@ -14,6 +14,7 @@ input::placeholder{color:inherit}
 summary{cursor:pointer}
 /* The mention of the kind of a record is alone on its line, over the visual: beside the visual, the identity starts under it. */
 @media (min-width: 780px){.kind-room{padding-top:28px}}
+@media (max-width: 599px){.edit-link{width:34px;padding:0 !important;justify-content:center}.edit-label{display:none}}
 </style>
 <script src="../shared/mockup.js"></script>
 <script src="../shared/couverture-theme.js"></script>
@@ -48,9 +49,14 @@ summary{cursor:pointer}
   </header>
 
   <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
-    <nav aria-label="Fil d'Ariane" style="margin-bottom: 12px; font-size: 13px; color: {{t.muted}}">
+    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 16px">
+    <nav aria-label="Fil d'Ariane" style="flex: 1 1 0; min-width: 0; font-size: 13px; color: {{t.muted}}">
       <a href="#" style="color: {{t.link}}; font-weight: 700">Séries</a> <span aria-hidden="true">›</span> <span>{{s.title}}</span>
     </nav>
+    <sc-if value="{{admin}}" hint-placeholder-val="{{false}}">
+      <a href="#" class="edit-link" aria-label="Modifier la série" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; background: {{t.bg}}; color: {{t.secText}}; font-weight: 700; font-size: 13px; text-decoration: none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg><span class="edit-label">Modifier la série</span></a>
+    </sc-if>
+    </div>
 
     <main style="display: flex; flex-direction: column; gap: 22px">
 
@@ -497,6 +503,8 @@ class View extends Mockup {
     if (omnibus) parts.push(omnibus + (omnibus > 1 ? ' intégrales' : ' intégrale'));
     if (hs) parts.push(hs + (hs > 1 ? ' hors-séries' : ' hors-série'));
     return {
+      // The link to the entry form, for the authenticated administrator only (visuel/fiche-album/contenu.md).
+      admin: this.props.administrateur,
       t,
       // The scroll hint of the menu fades into what lies behind it: the header, or the page under a transparent one.
       hintBg: t.hBg === 'transparent' ? t.bg : t.hBg,
@@ -570,7 +578,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "exemple": {"label": "Exemple", "editor": "enum", "options": ["longue", "heads", "courte", "vide"], "default": "longue"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "exemple": {"label": "Exemple", "editor": "enum", "options": ["longue", "heads", "courte", "vide"], "default": "longue"}, "administrateur": {"label": "Administrateur authentifié", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>

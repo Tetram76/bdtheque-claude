@@ -22,7 +22,7 @@
 }
 else if (_series is { } series)
 {
-    <Breadcrumb Items="BreadcrumbItems" />
+    <RecordBreadcrumb Items="BreadcrumbItems" EditHref="@AppPaths.AdminEditSeriesFromRecord(Id)" EditLabel="@L["Edit"]" />
 
     <div class="series-record">
         <div class="series-head">

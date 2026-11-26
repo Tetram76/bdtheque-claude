@@ -355,6 +355,31 @@ public sealed class SeriesRecordTests : BunitContext, IDisposable
         Assert.Equal("functional", Open().Find("[role='alert']").GetAttribute("data-error-category"));
     }
 
+    // For the authenticated administrator only, the line of the breadcrumb leads to the entry form, which leads back to the
+    // record (visuel/fiche-serie/contenu.md, #658); a visitor has the breadcrumb alone.
+    [Fact]
+    public void Administrator_IsLedToTheEntryForm_FromTheLineOfTheBreadcrumb()
+    {
+        _catalog.Series = Series();
+        AddAuthorization().SetAuthorized("admin");
+
+        var link = Open().Find(".record-breadcrumb [data-part=edit-record]");
+
+        Assert.Equal((AppPaths.AdminEditSeriesFromRecord(SeriesId), "Modifier la série"), (link.GetAttribute("href"), link.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void Visitor_IsLedToNoEntryForm()
+    {
+        _catalog.Series = Series();
+        AddAuthorization();
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".record-breadcrumb, [data-part=edit-record]"));
+        Assert.NotNull(page.Find("nav.breadcrumb"));
+    }
+
     private IRenderedComponent<SeriesRecord> Open()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.SeriesRecord(SeriesId));

@@ -56,6 +56,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         _api = new FakeAdminApi(_audience);
         _api.AddServices(Services, _request);
+        // The pages of the administration are only ever served to the authenticated administrator (Pages/Admin/_Imports.razor).
+        AddAuthorization().SetAuthorized("admin");
         Services.AddSingleton(TimeProvider.System);
         Answer([Gibelin, Gibrat, Gomez, Gotlib], totalCount: 38);
         _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(

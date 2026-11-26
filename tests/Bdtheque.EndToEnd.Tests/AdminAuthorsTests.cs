@@ -122,6 +122,26 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         Assert.Empty((await api.GetFromJsonAsync<Page<AuthorAdminListItem>>($"/admin/authors?q={_marker}"))!.Items);
     }
 
+    // The same over the record of the author in the consultation (visuel/saisie-auteur/contenu.md, #658): the record, which no
+    // longer exists, says so, and its panel stays open over it with what was typed.
+    [Theory, InEachTheme]
+    public async Task Edit_FromItsRecord_OfAnAuthorDeletedMeanwhile_KeepsThePanelOpen_AndSaysSo(string theme)
+    {
+        var author = await CreateAuthorAsync($"Disparu {_marker}", null, null);
+        // The record being public, the administrator signs in first.
+        var page = await OpenAsync(theme, AppPaths.AdminHome);
+        await page.GotoAsync(AppPaths.AuthorRecordWithEntry(author.Id));
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await DeleteAuthorAsync(author);
+
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        await Assertions.Expect(panel.Locator("[data-error-category=functional]")).ToContainTextAsync("Fiche supprimée entre-temps");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" })).ToHaveValueAsync("Belge");
+    }
+
     // Changed meanwhile: nothing overwritten; « Recharger la fiche » presents the author as it now is.
     [Theory, InEachTheme]
     public async Task Edit_OfAnAuthorChangedMeanwhile_IsReloadedAtItsCurrentState(string theme)

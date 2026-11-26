@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using AngleSharp.Dom;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Audience;
@@ -10,6 +11,7 @@ using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Audience;
 using Bdtheque.Frontend.Components.Audience;
+using Bdtheque.Frontend.Components.Controls;
 using Bdtheque.Frontend.Components.Pages;
 using Bdtheque.Frontend.Formatting;
 using Bdtheque.Frontend.Navigation;
@@ -57,6 +59,10 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
         Services.AddScoped<DisplayFormatter>();
         Services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         Services.AddSingleton<ValueLabels>();
+        // The field of the parent, in the panel of the universe, searches the universes.
+        Services.AddScoped<RecordSearch>();
+        Services.AddSingleton(TimeProvider.System);
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     void IDisposable.Dispose()
@@ -293,9 +299,69 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
         Assert.Empty(page.FindAll(".bibliography"));
     }
 
-    private IRenderedComponent<UniverseRecord> Open()
+    // For the authenticated administrator only, the line of the breadcrumb leads to the entry form, which leads back to the
+    // record (visuel/fiche-univers/contenu.md, #658); a visitor has the breadcrumb alone.
+    [Fact]
+    public void Administrator_IsLedToTheEntryForm_FromTheLineOfTheBreadcrumb()
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.UniverseRecord(UniverseId));
+        _catalog.Universe = Universe();
+        AddAuthorization().SetAuthorized("admin");
+
+        var link = Open().Find(".record-breadcrumb [data-part=edit-record]");
+
+        Assert.Equal((AppPaths.UniverseRecordWithEntry(UniverseId), "Modifier l'univers"), (link.GetAttribute("href"), link.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void Visitor_IsLedToNoEntryForm()
+    {
+        _catalog.Universe = Universe();
+        AddAuthorization();
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".record-breadcrumb, [data-part=edit-record]"));
+        Assert.NotNull(page.Find("nav.breadcrumb"));
+    }
+
+    // The panel of the universe opens over its record, which stays under it, and leads back to it, closed or saved
+    // (visuel/listes/saisie-selon-l-entite.md, decisions of the user, #658).
+    [Fact]
+    public async Task Administrator_EntersTheUniverseInAPanelOverItsRecord_AndComesBackToIt()
+    {
+        _catalog.Universe = Universe();
+        AddAuthorization().SetAuthorized("admin");
+        var page = Open(AppPaths.UniverseRecordWithEntry(UniverseId));
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal(Universe().Name, panel.QuerySelector("input[name='name']")!.GetAttribute("value"));
+        Assert.Equal(AppPaths.UniverseRecord(UniverseId), panel.QuerySelector(".side-panel-actions a.button")!.GetAttribute("href"));
+        Assert.NotNull(page.Find("h1"));
+        Assert.Contains("admin.universes.edit", _audience.Functions);
+
+        await page.ChangeAsync("input[name='name']", "Corto");
+        await page.SubmitAsync("form.side-panel-form");
+
+        Assert.Equal(("PUT", $"/admin/universes/{UniverseId}", "Corto"), Assert.Single(_catalog.Written));
+        Assert.Equal(AppPaths.UniverseRecord(UniverseId), new Uri(Services.GetRequiredService<NavigationManager>().Uri).PathAndQuery);
+    }
+
+    // A visitor who writes the address of the panel by hand has no panel, and nothing of the administration is read.
+    [Fact]
+    public void Visitor_HasNoPanel()
+    {
+        _catalog.Universe = Universe();
+        AddAuthorization();
+
+        var page = Open(AppPaths.UniverseRecordWithEntry(UniverseId));
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.DoesNotContain(_catalog.Requested, path => path.StartsWith("/admin/", StringComparison.Ordinal));
+    }
+
+    private IRenderedComponent<UniverseRecord> Open(string? address = null)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(address ?? AppPaths.UniverseRecord(UniverseId));
         return Render<UniverseRecord>(parameters => parameters.Add(p => p.Id, UniverseId).AddCascadingValue(_request.Context));
     }
 
@@ -341,25 +407,41 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
 
         public List<string> Requested { get; } = [];
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        /// <summary>The writings of the panel of the universe: method, path and the name sent.</summary>
+        public List<(string Method, string Path, string? Name)> Written { get; } = [];
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var path = request.RequestUri!.PathAndQuery;
             if (path.StartsWith("/audience/", StringComparison.Ordinal))
-                return _audience.SendAsync(request, cancellationToken);
+                return await _audience.SendAsync(request, cancellationToken);
 
             Requested.Add(path);
+            // The universe as its panel reads and saves it, in the administration; at the top of the hierarchy, without parent.
+            if (path.StartsWith("/admin/universes/", StringComparison.Ordinal))
+            {
+                if (request.Method == HttpMethod.Put)
+                {
+                    var body = await request.Content!.ReadFromJsonAsync<JsonElement>(cancellationToken);
+                    Written.Add(("PUT", path, body.GetProperty("name").GetString()));
+                }
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = JsonContent.Create(new UniverseForm(Universe!.Id, Universe.Name, null, null, null, Created, Modified, 3)),
+                };
+            }
             if (path == "/catalog/settings")
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new ApplicationSettings(AlbumLabelFormat.TitleSeriesVolume, Contracts.Enums.DisplayCulture.FrenchFrance)),
-                });
+                };
             if (UniverseStatus != HttpStatusCode.OK)
-                return Task.FromResult(new HttpResponseMessage(UniverseStatus)
+                return new HttpResponseMessage(UniverseStatus)
                 {
                     Content = JsonContent.Create(new { type = ProblemTypes.Functional, status = (int)UniverseStatus },
                         mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
-                });
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(Universe) });
+                };
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(Universe) };
         }
     }
 }

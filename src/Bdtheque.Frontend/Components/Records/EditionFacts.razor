@@ -46,11 +46,27 @@
         </dl>
     </div>
 </div>
-<p class="edition-dates" data-local>@Dates</p>
+@if (EditHref is not null)
+{
+    @* For the administrator, the link to the entry form of the edition follows its dates, on the right
+       (visuel/fiche-album/contenu.md, decision of the user, #658). *@
+    <div class="edition-foot">
+        <p class="edition-dates" data-local>@Dates</p>
+        <RecordEditLink Href="@EditHref" Label="@L["Edit"]" Part="edit-edition" />
+    </div>
+}
+else
+{
+    <p class="edition-dates" data-local>@Dates</p>
+}
 
 @code {
     [Parameter, EditorRequired]
     public EditionDetail Edition { get; set; } = null!;
+
+    /// <summary>The entry form of the edition, for the authenticated administrator only; none for a visitor.</summary>
+    [Parameter]
+    public string? EditHref { get; set; }
 
     private bool Purchased => Edition.AcquisitionMode == AcquisitionMode.Purchase;
 

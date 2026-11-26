@@ -47,6 +47,20 @@
     color: var(--color-text-muted);
 }
 
+/* The dates, then the link to the entry form of the edition on the right, for the administrator. */
+.edition-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-xs) var(--space-l);
+    margin-block-start: var(--space-m);
+}
+
+.edition-foot .edition-dates {
+    margin: 0;
+}
+
 /* An ISBN is a single block (fonctionnel/presentation/libelle-d-une-edition.md). */
 .edition-isbn {
     white-space: nowrap;
