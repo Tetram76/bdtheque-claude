@@ -102,7 +102,7 @@ public sealed class Album : EntityBase, IAggregateRoot
         var normalizedTitle = DomainText.NullIfBlank(title);
         EnsureTitleOrSeries(normalizedTitle, series);
 
-        Contribution.Replace(_contributions, contributions, (author, role) => Contribution.ForAlbum(this, author, role));
+        Contribution.ReplaceOfAlbum(this, _contributions, contributions);
         Series = series;
         SeriesId = series?.Id;
         ApplyTitle(normalizedTitle);

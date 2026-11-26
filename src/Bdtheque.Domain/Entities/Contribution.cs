@@ -26,9 +26,9 @@ public sealed class Contribution : EntityBase
     // EF Core parameterless constructor
     private Contribution() { }
 
-    // Private: only reachable through ForAlbum/ForSeriesTemplate below, which each pass exactly
-    // one non-null owner — so the album/series exclusivity has nothing left to validate here — and
-    // a role that Replace, their only caller, has checked before changing anything.
+    // Private, and only called by Replace, once it has checked every credit: each contribution is created
+    // with a role already known to be defined, and with exactly one owner, given by ReplaceOfAlbum or
+    // ReplaceOfSeriesTemplate — so the album/series exclusivity has nothing left to validate here.
     private Contribution(Album? album, Series? series, Author author, ContributionRole role)
     {
         Album = album;
@@ -40,24 +40,22 @@ public sealed class Contribution : EntityBase
         Role = role;
     }
 
-    // Both factories are internal: a contribution belongs to its owner, which alone creates it
+    // Both are internal: a contribution belongs to its owner, which alone creates it
     // (Album.SetTitleSeriesAndContributions, Series.SetTemplateContributions) and so sees every
     // credit it holds.
 
-    /// <summary>Creates a real contribution credited on a specific album.</summary>
-    internal static Contribution ForAlbum(Album album, Author author, ContributionRole role)
-    {
-        return new Contribution(album, null, author, role);
-    }
+    /// <summary>Replaces the real contributions credited on <paramref name="album"/> (<see cref="Replace"/>).</summary>
+    internal static void ReplaceOfAlbum(
+        Album album, List<Contribution> contributions, IReadOnlyCollection<(Author Author, ContributionRole Role)> credits) =>
+        Replace(contributions, credits, (author, role) => new Contribution(album, null, author, role));
 
     /// <summary>
-    /// Creates a template contribution on a series, given to an album attached to the series
-    /// for each role where it has no author yet.
+    /// Replaces the template contributions of <paramref name="series"/>, given to an album attached to the series
+    /// for each role where it has no author yet (<see cref="Replace"/>).
     /// </summary>
-    internal static Contribution ForSeriesTemplate(Series series, Author author, ContributionRole role)
-    {
-        return new Contribution(null, series, author, role);
-    }
+    internal static void ReplaceOfSeriesTemplate(
+        Series series, List<Contribution> contributions, IReadOnlyCollection<(Author Author, ContributionRole Role)> credits) =>
+        Replace(contributions, credits, (author, role) => new Contribution(null, series, author, role));
 
     /// <summary>
     /// Replaces the contributions of an owner by <paramref name="credits"/>, as its form sends them
@@ -65,7 +63,7 @@ public sealed class Contribution : EntityBase
     /// none of them. Nothing is changed if any credit is refused.
     /// </summary>
     /// <param name="create">Creates a contribution of the owner, for a credit it does not hold yet.</param>
-    internal static void Replace(
+    private static void Replace(
         List<Contribution> contributions, IReadOnlyCollection<(Author Author, ContributionRole Role)> credits,
         Func<Author, ContributionRole, Contribution> create)
     {

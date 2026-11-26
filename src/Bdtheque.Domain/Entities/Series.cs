@@ -223,7 +223,7 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// as the form sends them whole. A contribution already credited is kept as it is; nothing is changed if any is refused.
     /// </summary>
     public void SetTemplateContributions(IReadOnlyCollection<(Author Author, ContributionRole Role)> contributions) =>
-        Contribution.Replace(_templateContributions, contributions, (author, role) => Contribution.ForSeriesTemplate(this, author, role));
+        Contribution.ReplaceOfSeriesTemplate(this, _templateContributions, contributions);
 
     public void SetTemplateBinding(BindingType? binding)
     {
