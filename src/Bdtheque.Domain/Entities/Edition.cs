@@ -297,14 +297,17 @@ public sealed class Edition : EntityBase
     /// d'intégrité). Also run by <see cref="Album.RecordAcquisition(Edition, EditionAcquisition)"/>
     /// before it touches anything.
     /// </summary>
-    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear) => EnsureValid(acquisition, publicationYear, Album);
+    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear) => EnsureValid(acquisition, publicationYear, IsAlbumDated);
 
     /// <summary>
     /// Checks the acquisition and value as <see cref="EnsureValid(EditionAcquisition, int?)"/> does, the edition belonging to
     /// <paramref name="album"/> after the write under way (the merge of two editions, <see cref="Album.MergeEditions"/>), whose
     /// first publication is the last reference date of an amount.
     /// </summary>
-    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear, Album album)
+    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear, Album album) =>
+        EnsureValid(acquisition, publicationYear, () => album.FirstPublicationYear is not null);
+
+    private void EnsureValid(EditionAcquisition acquisition, int? publicationYear, Func<bool> albumDated)
     {
         if (acquisition.Mode is not null)
             EnumGuard.EnsureDefined(acquisition.Mode.Value, nameof(acquisition));
@@ -351,8 +354,7 @@ public sealed class Edition : EntityBase
             EnsureValidCurrencyCode(acquisition.InitialValueCurrency, nameof(InitialValueCurrency));
 
         EnsurePublicationYearPositive(publicationYear);
-        EnsureAmountsDated(
-            acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, () => album.FirstPublicationYear is not null);
+        EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, albumDated);
     }
 
     /// <summary>The acquisition and value of the edition, as a whole (none but its freeness for an edition not owned).</summary>

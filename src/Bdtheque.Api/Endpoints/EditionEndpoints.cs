@@ -1,6 +1,6 @@
+using System.Data;
 using System.Linq.Expressions;
 using Bdtheque.Api.Deletion;
-using System.Data;
 using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Api.Visuals;
