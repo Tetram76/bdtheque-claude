@@ -18,14 +18,27 @@ public sealed class DisplayFormatter(IStringLocalizer<CurrencySymbols> symbols, 
     /// own currency format; any
     /// other one, which the culture does not know, is followed by its symbol, its code when it has none.
     /// </summary>
-    public string Amount(decimal amount, string currency)
+    /// <remarks>
+    /// Two decimals, unless <paramref name="exact"/>: then every decimal that counts, up to the four an amount keeps (as its
+    /// entry shows it, Components/Controls/AmountField.razor), so that two amounts that differ never read the same.
+    /// </remarks>
+    public string Amount(decimal amount, string currency, bool exact = false)
     {
         var culture = CultureInfo.CurrentCulture;
+        var decimals = exact ? Math.Max(2, SignificantDecimals(amount)) : 2;
         if (string.Equals(currency, new RegionInfo(culture.Name).ISOCurrencySymbol, StringComparison.Ordinal))
-            return amount.ToString("C", culture);
+            return amount.ToString($"C{decimals}", culture);
 
         var symbol = symbols[currency];
-        return string.Create(culture, $"{amount:N2} {(symbol.ResourceNotFound ? currency : symbol.Value)}");
+        return string.Create(culture, $"{amount.ToString($"N{decimals}", culture)} {(symbol.ResourceNotFound ? currency : symbol.Value)}");
+    }
+
+    // The decimals of an amount without its trailing zeros: 12.3410 has three.
+    private static int SignificantDecimals(decimal amount)
+    {
+        var digits = amount.ToString(CultureInfo.InvariantCulture);
+        var point = digits.IndexOf('.', StringComparison.Ordinal);
+        return point < 0 ? 0 : digits.TrimEnd('0').Length - point - 1;
     }
 
     public string Date(DateOnly date) => date.ToString("d", CultureInfo.CurrentCulture);

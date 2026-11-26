@@ -6,7 +6,7 @@ applies_to:
   - 'src/Bdtheque.Api/Merge/**'
   - 'src/Bdtheque.Frontend/Components/Merge/**'
   - 'src/Bdtheque.Contracts/Admin/Merge.cs'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T14:55:00Z }
 ---
 
 # Fusion de deux fiches : mise en œuvre
@@ -43,6 +43,7 @@ Règles : [Fusion de deux fiches](../../fonctionnel/regles-metier/fusion-des-fic
   - **Verrous des albums**, racines de l'agrégat des éditions ([Concurrence d'accès](../persistance/concurrence-d-acces.md)) : la version d'une édition est celle de son album, un seul verrou pour deux éditions d'un même album, deux sinon, dans l'ordre de leurs identifiants. L'album de chaque édition est lu sans suivi avant les verrous ; une édition passée depuis à un autre album l'a été par la fusion de deux albums, qui a changé ou supprimé l'album lu.
   - **Album de l'édition qui reste, une donnée à choisir** : l'édition qui reste passe, avec son identité et son intention, à l'album de l'autre édition quand c'est le sien qui est retenu (`Album.MergeEditions`, seule opération, avec la fusion de deux albums, qui fasse changer une édition d'album).
   - **Acquisition gardée entière, de la même édition** : mode, date, prix, gratuité et valeur initiale, liés par les contraintes d'intégrité d'une édition ([Édition](../../modele-metier/edition.md)), se gardent ensemble, comme l'éditeur et sa collection, avec la date d'entrée dans la collection de l'édition dont ils viennent, qu'une édition qui n'est plus possédée n'a plus. L'écran les présente en une seule donnée, « Acquisition », sous « L'exemplaire », le bloc « Valeur » de la saisie restant sans donnée ; la date de référence d'un montant est vérifiée sur l'album retenu, avant toute modification.
+    - **Comparée donnée par donnée, montants présentés avec toutes leurs décimales** : deux acquisitions sont la même quand chacune de leurs données l'est, et non leurs textes, un montant gardant jusqu'à quatre décimales qu'un affichage arrondit à deux ; ses montants sont présentés avec chaque décimale qui compte, comme la saisie les relit, pour que deux acquisitions différentes ne se lisent jamais de même (relevé de la revue, #647).
     - **Alternative écartée (chaque donnée de l'acquisition à choisir à part)** : un achat d'une édition et la gratuité de l'autre, ou un montant sans mode, seraient refusés à la fusion, après tous les choix, par des règles que l'écran ne peut dire sans les redire.
   - **Visuels retenus repris avec leur identité**, après ceux de leur type de l'édition qui reste, qui peut les désigner dans une recherche enregistrée ; un visuel écarté est supprimé, son fichier après la validation, comme toute suppression ([Suppression des entités : mise en œuvre](suppression-des-entites-mise-en-oeuvre.md)). Le journal consigne un visuel repris comme ajouté à l'édition qui reste ([Journal des modifications : mise en œuvre](../domaine/journal-des-modifications-mise-en-oeuvre.md)).
   - **Historique « À la une » de l'autre édition repris** par l'édition qui reste ([Édition « À la une » : mise en œuvre](../domaine/edition-a-la-une-mise-en-oeuvre.md)) : l'édition du jour reste celle qui la remplace.

@@ -214,7 +214,8 @@ else
             yield return new(ReadingDirectionKey, L["Data.ReadingDirection"], Named(first.ReadingDirection), Named(second.ReadingDirection));
             yield return new(PagesKey, L["Data.Pages"], first.PageCount?.ToString(CultureInfo.CurrentCulture), second.PageCount?.ToString(CultureInfo.CurrentCulture));
             yield return new(ColorKey, L["Data.Color"], YesNo(first.IsColor), YesNo(second.IsColor));
-            yield return new(AcquisitionKey, L["Data.Acquisition"], AcquisitionText(first), AcquisitionText(second));
+            // Compared on its data, and not on its text: its amounts keep more decimals than a display usually shows.
+            yield return new(AcquisitionKey, L["Data.Acquisition"], AcquisitionText(first), AcquisitionText(second), Same: SameAcquisition(first, second));
             yield return new(ConditionKey, L["Data.Condition"], Named(first.Condition), Named(second.Condition));
             yield return new(SecondHandKey, L["Data.SecondHand"], YesNo(first.IsSecondHand), YesNo(second.IsSecondHand));
             yield return new(DedicatedKey, L["Data.Dedicated"], YesNo(first.IsDedicated), YesNo(second.IsDedicated));
@@ -266,8 +267,14 @@ else
 
     private string? IsbnText(EditionMergeRecord edition) => edition.Isbn is { } isbn ? Isbns.Format(isbn) : null;
 
+    // The same acquisition, data by data: 12.5 and 12.5000 are the same amount, 12.341 and 12.342 two.
+    private static bool SameAcquisition(EditionMergeRecord first, EditionMergeRecord second) =>
+        (first.AcquisitionMode, first.AcquisitionDate, first.AcquisitionAmount, first.AcquisitionCurrency, first.IsFree, first.InitialValueAmount, first.InitialValueCurrency)
+        == (second.AcquisitionMode, second.AcquisitionDate, second.AcquisitionAmount, second.AcquisitionCurrency, second.IsFree, second.InitialValueAmount, second.InitialValueCurrency);
+
     // The acquisition whole, its value included: its mode and date, its amounts, its freeness; an edition targeted by an intent,
-    // not owned, presented as the intent (fonctionnel/regles-metier/intention-d-acquisition.md).
+    // not owned, presented as the intent (fonctionnel/regles-metier/intention-d-acquisition.md). Its amounts with every decimal
+    // they keep, that two different acquisitions never read the same.
     private string AcquisitionText(EditionMergeRecord edition)
     {
         if (edition.AcquisitionMode is not { } mode)
@@ -275,9 +282,9 @@ else
         var purchase = mode == AcquisitionMode.Purchase;
         List<string> parts = [edition.AcquisitionDate is { } date ? L["Data.Acquisition.On", Values.Of(mode), Display.Date(date)] : Values.Of(mode)];
         if (edition.AcquisitionAmount is { } amount)
-            parts.Add(L[purchase ? "Data.Price.Purchase" : "Data.Price.Other", Display.Amount(amount, edition.AcquisitionCurrency!)]);
+            parts.Add(L[purchase ? "Data.Price.Purchase" : "Data.Price.Other", Display.Amount(amount, edition.AcquisitionCurrency!, exact: true)]);
         if (edition.InitialValueAmount is { } initial)
-            parts.Add(L["Data.InitialValue", Display.Amount(initial, edition.InitialValueCurrency!)]);
+            parts.Add(L["Data.InitialValue", Display.Amount(initial, edition.InitialValueCurrency!, exact: true)]);
         if (edition.IsFree)
             parts.Add(L["Data.Free"]);
         return string.Join(" · ", parts);
