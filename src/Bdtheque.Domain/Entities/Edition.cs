@@ -311,6 +311,18 @@ public sealed class Edition : EntityBase
     {
         if (acquisition.Mode is not null)
             EnumGuard.EnsureDefined(acquisition.Mode.Value, nameof(acquisition));
+        EnsureAmountsPaired(acquisition);
+        EnsureModeOfAValue(acquisition);
+        if (acquisition.IsFree)
+            EnsureFreeHasNoValue(acquisition);
+        EnsureAmountsValid(acquisition);
+        EnsurePublicationYearPositive(publicationYear);
+        EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, albumDated);
+    }
+
+    // An amount and its currency go together (modele-metier/edition.md, contraintes d'intégrité).
+    private void EnsureAmountsPaired(EditionAcquisition acquisition)
+    {
         if ((acquisition.PriceAmount is null) != (acquisition.PriceCurrency is null))
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.",
@@ -319,29 +331,35 @@ public sealed class Edition : EntityBase
             throw new DomainRuleViolationException(
                 DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.",
                 this, acquisition.InitialValueCurrency is null ? nameof(InitialValueCurrency) : nameof(InitialValueAmount));
+    }
 
-        // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
-        // until the edition is acquired (fonctionnel/regles-metier/intention-d-acquisition.md).
+    // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
+    // until the edition is acquired (fonctionnel/regles-metier/intention-d-acquisition.md).
+    private void EnsureModeOfAValue(EditionAcquisition acquisition)
+    {
         if (acquisition.Mode is null
             && (acquisition.Date is not null || acquisition.PriceAmount is not null || acquisition.InitialValueAmount is not null))
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionModeRequired, "An acquisition date, price or initial value requires an acquisition mode.", this,
                 nameof(AcquisitionMode));
+    }
 
-        // A free edition has no value at all: neither price paid, nor market value, nor initial value.
-        if (acquisition.IsFree)
-        {
-            if (acquisition.PriceAmount is not null)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.", this, nameof(AcquisitionAmount));
-            if (acquisition.InitialValueAmount is not null)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.", this, nameof(InitialValueAmount));
-            if (acquisition.Mode == Enums.AcquisitionMode.Purchase)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.", this, nameof(AcquisitionMode));
-        }
+    // A free edition has no value at all: neither price paid, nor market value, nor initial value.
+    private void EnsureFreeHasNoValue(EditionAcquisition acquisition)
+    {
+        if (acquisition.PriceAmount is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.", this, nameof(AcquisitionAmount));
+        if (acquisition.InitialValueAmount is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.", this, nameof(InitialValueAmount));
+        if (acquisition.Mode == Enums.AcquisitionMode.Purchase)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.", this, nameof(AcquisitionMode));
+    }
 
+    private void EnsureAmountsValid(EditionAcquisition acquisition)
+    {
         if (acquisition.PriceAmount is <= 0)
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.", this, nameof(AcquisitionAmount));
@@ -352,9 +370,6 @@ public sealed class Edition : EntityBase
                 DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.", this, nameof(InitialValueAmount));
         if (acquisition.InitialValueCurrency is not null)
             EnsureValidCurrencyCode(acquisition.InitialValueCurrency, nameof(InitialValueCurrency));
-
-        EnsurePublicationYearPositive(publicationYear);
-        EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, albumDated);
     }
 
     /// <summary>The acquisition and value of the edition, as a whole (none but its freeness for an edition not owned).</summary>
