@@ -19,9 +19,9 @@ public sealed class Author : EntityBase, IAggregateRoot
     // authors (fonctionnel/presentation/tri-et-navigation-par-initiale.md#artistes), and keep two of
     // them from sharing a display name (modele-metier/auteur-artiste.md). Derived from the identity
     // only: never set manually.
-    public string DisplayName { get; private set; } = string.Empty;
-    public string SortKey { get; private set; } = string.Empty;
-    public string NavigationEntry { get; private set; } = string.Empty;
+    public string DisplayName { get; private set; } = null!;
+    public string SortKey { get; private set; } = null!;
+    public string NavigationEntry { get; private set; } = null!;
 
     // EF Core parameterless constructor
     private Author() { }

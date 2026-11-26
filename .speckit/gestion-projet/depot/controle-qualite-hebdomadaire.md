@@ -1,10 +1,10 @@
 ---
 type: Gouvernance
 title: 'Contrôle qualité hebdomadaire'
-description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité par urgence (critique, prioritaire, au fil de l''eau), point à corriger ou non pertinent, traitement borné à une Pull Request par semaine ; à lire quand le traitement est dû ou pour modifier le contrôle.'
+description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité par urgence (critique, prioritaire, au fil de l''eau), point à corriger ou non pertinent, réécriture examinée avant tout rejet, traitement borné à une Pull Request par semaine ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T18:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T21:10:00Z }
 ---
 
 # Contrôle qualité hebdomadaire
@@ -53,5 +53,6 @@ Au moment que fixe [Traitement du contrôle qualité à la reprise du travail](t
 - **Au fil de l'eau** (exigence de l'utilisateur) : ces entrées ne sont jamais traitées en elles-mêmes ; l'une d'elles se corrige quand un chantier modifie de toute façon le fichier concerné, dans la Pull Request de ce chantier.
 - **Report** : seulement pour une entrée que la Pull Request d'un traitement ne peut vraiment pas corriger : correction trop grosse pour elle, décision qui revient à l'utilisateur, ou dépendance non remplie ([Issues](../revue-tickets/issues.md#décision-de-créer-un-ticket)) ; une entrée que le volume du traitement laisse de côté n'est pas reportée, elle attend le traitement suivant (ci-dessus). Un ticket, qui reçoit dès sa création l'étiquette `quality-audit` ([Issues](../revue-tickets/issues.md#tickets-de-suivi-des-harnais), tickets ouverts par un harnais), porte alors la correction ; l'entrée reste relevée jusqu'à elle, au fil de l'eau.
 - **Rejet** : porté, avec sa raison, par le mécanisme de l'outil, pour que le contrôle suivant ne relève plus l'entrée : marquage dans SonarQube Cloud ([Analyse SonarQube Cloud](../revue-tickets/analyse-sonarqube-cloud.md), trace) ; suppression de la règle de style à l'endroit en cause, avec sa justification ; commentaire de désactivation de Stryker.NET sur le mutant (mutant équivalent), avec sa raison.
+  - **Réécriture examinée avant le rejet** (exigence de l'utilisateur) : avant de rejeter un point non pertinent, l'agent examine les réécritures possibles du code qui le feraient disparaître, en gardant à l'esprit que le code corrigé ne doit pas devenir « aberrant ». Une réécriture qui dit la même chose plus directement, ou retire un code redondant, est retenue et remplace le rejet ; seul un point qu'aucune réécriture de cette sorte ne fait disparaître est rejeté par le mécanisme de l'outil. Exemples : un contrôle en double retiré, ou une même définition partagée au lieu d'être répétée, plutôt que désactivés ; une équivalence arithmétique, qu'aucune réécriture naturelle n'évite, rejetée.
 - **Trace** : un problème de SonarQube Cloud reste prioritaire jusqu'à sa correction ou son marquage (rejet, ou report accepté avec son ticket, [Analyse SonarQube Cloud](../revue-tickets/analyse-sonarqube-cloud.md)), qui le retire des problèmes ouverts ; une entrée critique reste critique tant qu'elle l'est. Le ticket est un état, pas un historique ([Issues](../revue-tickets/issues.md#tickets-de-suivi-des-harnais)) : traitement acquis par le marquage dans SonarQube Cloud, ou par la fusion de la Pull Request qui corrige l'entrée ou porte son rejet dans le code.
   - **Alternative écartée (ticket séparé pour la dette existante)** : la référence du contrôle la porte déjà, dans son ticket de suivi.

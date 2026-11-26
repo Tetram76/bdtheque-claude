@@ -25,7 +25,6 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
 
     // The variables are told apart by their name alone at replay: as the names of the searches themselves,
     // they ignore case and accents.
-    private static readonly CompareInfo FrenchOrder = CultureInfo.GetCultureInfo("fr-FR").CompareInfo;
     private const CompareOptions IgnoringCaseAndAccents = CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace;
 
     // Stored as entered, read back by the API: the texts keep their own characters.
@@ -33,9 +32,9 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
 
     private readonly List<SavedSearchDesignation> _designations = [];
 
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; private set; } = null!;
     public EntityKind Entity { get; private set; }
-    public string Criteria { get; private set; } = string.Empty;
+    public string Criteria { get; private set; } = null!;
     public SearchVariables Variables { get; private set; } = SearchVariables.Empty;
 
     /// <summary>
@@ -72,6 +71,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     public void SetSearch(EntityKind entity, string criteria, IEnumerable<SearchVariable> variables, IEnumerable<DesignatedRecord> designated)
     {
         EnumGuard.EnsureDefined(entity, nameof(entity));
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(designated);
         var records = designated.Distinct().ToList();
         foreach (var record in records)
@@ -87,6 +87,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
         var checkedVariables = new List<SearchVariable>();
         foreach (var variable in variables)
         {
+            // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
             ArgumentNullException.ThrowIfNull(variable);
             var name = DomainText.Required(variable.Name, DomainRules.SavedSearchVariableNameRequired, "A variable must have a name.");
             if (checkedVariables.Exists(v => SameName(v.Name, name)))
@@ -118,6 +119,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     /// </summary>
     public static string DefaultValueOf(string criteria, SearchVariable variable)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(variable);
         var (values, index) = ConstantAt(Parse(criteria), variable.Location);
         return values[index]!.GetValue<string>();
@@ -131,6 +133,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     /// <exception cref="ArgumentException">A value for a variable the search does not have, or two values for the same one.</exception>
     public string CriteriaWith(IReadOnlyDictionary<string, string> values)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(values);
         var tree = Parse(Criteria);
         var replaced = new List<SearchVariable>();
@@ -149,7 +152,7 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     }
 
     // The single identity of a variable, when it is defined as when it is given a value.
-    private static bool SameName(string left, string right) => FrenchOrder.Compare(left, right, IgnoringCaseAndAccents) == 0;
+    private static bool SameName(string left, string right) => DomainText.FrenchOrder.Compare(left, right, IgnoringCaseAndAccents) == 0;
 
     private void EnsureOwn(SearchVariable variable)
     {

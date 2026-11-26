@@ -1,8 +1,14 @@
+using System.Globalization;
+
 namespace Bdtheque.Domain.Common;
 
 /// <summary>Normalization of user-entered text shared by every entity.</summary>
 internal static class DomainText
 {
+    /// <summary>The order of the display culture, French (fonctionnel/presentation/langue-et-culture-d-affichage.md).</summary>
+    // Stryker disable once String : ICU orders and compares letters alike in French and in its root collation, case and accents ignored (checked on the Latin, Greek and Cyrillic letters)
+    public static readonly CompareInfo FrenchOrder = CultureInfo.GetCultureInfo("fr-FR").CompareInfo;
+
     /// <summary>Trims the value; a blank one means "not provided" and is stored as <see langword="null"/>.</summary>
     public static string? NullIfBlank(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();

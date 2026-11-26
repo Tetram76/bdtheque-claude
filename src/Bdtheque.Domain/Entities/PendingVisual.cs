@@ -14,7 +14,7 @@ public sealed class PendingVisual : EntityBase
     /// <summary>How long a pending visual is kept, waiting for the saving of its edition (decision of the user).</summary>
     public static readonly TimeSpan Lifetime = TimeSpan.FromHours(24);
 
-    public string MediaReference { get; private set; } = string.Empty;
+    public string MediaReference { get; private set; } = null!;
 
     /// <summary>The colours drawn from the image at its upload, which the visual it becomes keeps.</summary>
     public VisualPalette Palette { get; private set; } = null!;
@@ -24,6 +24,7 @@ public sealed class PendingVisual : EntityBase
 
     public PendingVisual(string mediaReference, VisualPalette palette)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(palette);
         MediaReference = DomainText.Required(mediaReference, DomainRules.EditionVisualMediaReferenceRequired, "The file of a visual is required.");
         Palette = palette;

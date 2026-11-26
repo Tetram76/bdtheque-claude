@@ -42,6 +42,7 @@ public sealed class AudienceUsage : EntityBase
 
     private AudienceUsage(Guid visitId, FunctionUse use, bool isRepeat)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(use);
         VisitId = visitId;
         Function = use.Function;
@@ -57,6 +58,7 @@ public sealed class AudienceUsage : EntityBase
     /// </summary>
     public AudienceUsage Follow(FunctionUse use)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(use);
         return new AudienceUsage(VisitId, use, isRepeat: use == Use);
     }

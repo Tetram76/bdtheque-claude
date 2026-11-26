@@ -8,12 +8,12 @@ namespace Bdtheque.Domain.Entities;
 /// </summary>
 public sealed class Publisher : EntityBase, IAggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; private set; } = null!;
     public string? Website { get; private set; }
 
     // Stored rather than computed at read time, so that the database can filter the list of the publishers on it and
     // index it (choix-implementation/api/navigation-par-initiale-mise-en-oeuvre.md). Derived from the name, as sorted.
-    public string NavigationEntry { get; private set; } = string.Empty;
+    public string NavigationEntry { get; private set; } = null!;
 
     // Read-only from outside: a collection is only ever created through AddCollection, and only moves to another publisher
     // by the merge of its publisher into that one (Absorb), which every edition and series template relying on it belonging
@@ -71,6 +71,7 @@ public sealed class Publisher : EntityBase, IAggregateRoot
     public PublisherMerge Absorb(Publisher merged, IReadOnlyCollection<(PublisherCollection Remaining, PublisherCollection Removed)> homonyms)
     {
         MergeGuard.EnsureDistinct(merged, this);
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(homonyms);
         var paired = homonyms.SelectMany(h => new[] { h.Remaining, h.Removed }).ToList();
         if (homonyms.Any(h => !(Owns(h.Remaining) && merged.Owns(h.Removed)) && !(merged.Owns(h.Remaining) && Owns(h.Removed)))

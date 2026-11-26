@@ -85,6 +85,7 @@ public static class IsbnChecksumValidator
             else
                 return false;
 
+            // Stryker disable once Assignment : only a sum multiple of 11 counts, as is its opposite
             sum += digitValue * (10 - i);
         }
 
@@ -104,7 +105,9 @@ public static class IsbnChecksumValidator
             if (!char.IsAsciiDigit(characters[i]))
                 return false;
 
+            // Stryker disable once Arithmetic : adding '0' instead of removing it adds 96 to each of the 13 digits, 2400 with their weights, a multiple of 10
             var digitValue = characters[i] - '0';
+            // Stryker disable once Assignment : only a sum multiple of 10 counts, as is its opposite
             sum += i % 2 == 0 ? digitValue : digitValue * 3;
         }
 

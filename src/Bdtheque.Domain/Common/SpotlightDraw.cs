@@ -44,6 +44,7 @@ public static class SpotlightDraw
         var weights = kept.Select(c => 1.0 / ((1.0 + c.SpotlightCount) * (1.0 + c.SpotlightCount))).ToList();
         var target = roll * weights.Sum();
         var cumulated = 0.0;
+        // Stryker disable once Equality : the last candidate is drawn after the loop all the same, and a draw exactly equal to a partial sum may go to either neighbour
         for (var i = 0; i < kept.Count - 1; i++)
         {
             cumulated += weights[i];

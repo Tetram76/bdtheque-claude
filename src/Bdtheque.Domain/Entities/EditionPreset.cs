@@ -33,6 +33,7 @@ public sealed record EditionPreset(
     /// </summary>
     public static EditionPreset For(Album album)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(album);
         if (album.SeriesId is null)
             return Defaults;

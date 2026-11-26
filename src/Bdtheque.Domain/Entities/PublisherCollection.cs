@@ -9,7 +9,7 @@ namespace Bdtheque.Domain.Entities;
 /// </summary>
 public sealed class PublisherCollection : EntityBase
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; private set; } = null!;
 
     public Guid PublisherId { get; private set; }
     public Publisher Publisher { get; private set; } = null!;

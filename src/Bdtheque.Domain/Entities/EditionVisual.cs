@@ -16,7 +16,7 @@ public sealed class EditionVisual : EntityBase
     public Edition Edition { get; private set; } = null!;
 
     public VisualType Type { get; private set; }
-    public string MediaReference { get; private set; } = string.Empty;
+    public string MediaReference { get; private set; } = null!;
     public int DisplayOrder { get; private set; }
 
     /// <summary>

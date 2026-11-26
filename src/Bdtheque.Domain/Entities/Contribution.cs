@@ -30,6 +30,7 @@ public sealed class Contribution : EntityBase
     // one non-null owner — so the album/series exclusivity has nothing left to validate here.
     private Contribution(Album? album, Series? series, Author author, ContributionRole role)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(author);
         EnumGuard.EnsureDefined(role, nameof(role));
 
@@ -49,6 +50,7 @@ public sealed class Contribution : EntityBase
     /// <summary>Creates a real contribution credited on a specific album.</summary>
     internal static Contribution ForAlbum(Album album, Author author, ContributionRole role)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(album);
         return new Contribution(album, null, author, role);
     }
@@ -59,6 +61,7 @@ public sealed class Contribution : EntityBase
     /// </summary>
     internal static Contribution ForSeriesTemplate(Series series, Author author, ContributionRole role)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(series);
         return new Contribution(null, series, author, role);
     }
@@ -73,6 +76,7 @@ public sealed class Contribution : EntityBase
         List<Contribution> contributions, IReadOnlyCollection<(Author Author, ContributionRole Role)> credits,
         Func<Author, ContributionRole, Contribution> create)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(credits);
         foreach (var (author, role) in credits)
         {
@@ -136,6 +140,7 @@ public sealed class Contribution : EntityBase
     /// <exception cref="ArgumentException">A contribution retained of neither record; nothing is changed.</exception>
     internal static void Merge(List<Contribution> kept, List<Contribution> merged, IReadOnlyCollection<Guid> retained, Action<Contribution> moveTo)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(retained);
         var held = HeldOf(kept, merged);
         var foreign = retained.Where(id => !kept.Exists(c => c.Id == id) && !merged.Exists(c => c.Id == id)).ToList();

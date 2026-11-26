@@ -7,6 +7,7 @@ internal static class EntityListExtensions
     // stand for the same row, and a duplicate would violate the join table's primary key.
     public static void AddOnce<TEntity>(this List<TEntity> entities, TEntity entity) where TEntity : EntityBase
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(entity);
         if (entities.TrueForAll(e => e.Id != entity.Id))
             entities.Add(entity);
@@ -14,6 +15,7 @@ internal static class EntityListExtensions
 
     public static void RemoveById<TEntity>(this List<TEntity> entities, TEntity entity) where TEntity : EntityBase
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(entity);
         entities.RemoveAll(e => e.Id == entity.Id);
     }

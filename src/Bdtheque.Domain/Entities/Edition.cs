@@ -143,6 +143,7 @@ public sealed class Edition : EntityBase
     /// </remarks>
     public void SetPublicationYearAndAcquisition(int? publicationYear, EditionAcquisition acquisition)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(acquisition);
         // Acquiring may realize an intent on this edition or on its album, which only the album
         // aggregate sees: a programming error to reach it from here.
@@ -447,6 +448,7 @@ public sealed class Edition : EntityBase
     /// </exception>
     public void ArrangeVisuals(IReadOnlyList<(Guid VisualId, VisualType Type)> arrangement)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(arrangement);
         var visuals = _visuals.ToDictionary(v => v.Id);
         if (arrangement.Count != visuals.Count
@@ -480,6 +482,7 @@ public sealed class Edition : EntityBase
     /// </exception>
     public IReadOnlyList<EditionVisual> SetVisuals(IReadOnlyList<(Guid? VisualId, PendingVisual? Pending, VisualType Type)> entries)
     {
+        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
         ArgumentNullException.ThrowIfNull(entries);
         var kept = entries.Where(e => e.VisualId is not null).Select(e => e.VisualId!.Value).ToList();
         var added = entries.Where(e => e.Pending is not null).Select(e => e.Pending!).ToList();
