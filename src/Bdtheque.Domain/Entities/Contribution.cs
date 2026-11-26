@@ -27,11 +27,10 @@ public sealed class Contribution : EntityBase
     private Contribution() { }
 
     // Private: only reachable through ForAlbum/ForSeriesTemplate below, which each pass exactly
-    // one non-null owner — so the album/series exclusivity has nothing left to validate here.
+    // one non-null owner — so the album/series exclusivity has nothing left to validate here — and
+    // a role that Replace, their only caller, has checked before changing anything.
     private Contribution(Album? album, Series? series, Author author, ContributionRole role)
     {
-        EnumGuard.EnsureDefined(role, nameof(role));
-
         Album = album;
         AlbumId = album?.Id;
         Series = series;
