@@ -31,6 +31,14 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
         context.ProblemDetails.Type = ProblemTypes.Technical;
 });
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
+
+// A contract's type says what can exist: a value it declares non-nullable is refused when a request
+// gives it null or leaves it out, the request being then unbindable, instead of reaching the code as null.
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.RespectNullableAnnotations = true;
+    options.SerializerOptions.RespectRequiredConstructorParameters = true;
+});
 builder.Services.AddScoped<ContentFields>();
 
 builder.Services.AddOptions<InternalApiKeyOptions>()
