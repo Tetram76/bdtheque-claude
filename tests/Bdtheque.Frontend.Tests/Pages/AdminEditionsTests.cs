@@ -254,7 +254,7 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void Merge_ADialogThatSearchesTheOtherEditionByItsIsbn_AndContinuesWithTheOneChosen()
+    public void Merge_ADialogThatSearchesTheOtherEditionByItsIsbnOrItsAlbum_AndContinuesWithTheOneChosen()
     {
         var dialog = Open($"merge={Glenat.Edition.Id}&mergeQ=978").Find("dialog");
 
@@ -265,7 +265,9 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         var next = dialog.QuerySelector("#edition-merge-continue")!;
         Assert.Equal(AppPaths.AdminMergeEditions, next.GetAttribute("action"));
         Assert.Equal(Glenat.Edition.Id.ToString(), next.QuerySelector("input[name='edition']")!.GetAttribute("value"));
-        Assert.Contains(_api.Requested, path => path == "/admin/editions?q=978&pageSize=11");
+        // By its ISBN or the title of its album or series: an edition without ISBN is found too.
+        Assert.Equal("ISBN ou titre de l'album…", dialog.QuerySelector("input[type=search]")!.GetAttribute("placeholder"));
+        Assert.Contains(_api.Requested, path => path == "/admin/editions?q=978&pageSize=11&byAlbum=true");
     }
 
     [Fact]

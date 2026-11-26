@@ -229,7 +229,9 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         var (firstIsbn, secondIsbn) = ($"9782{digits}1", $"9782{digits}2");
         var first = await CreateEditionAsync(api, album.Id, firstIsbn, AcquisitionMode.Purchase);
         var second = await CreateEditionAsync(api, album.Id, secondIsbn, AcquisitionMode.Gift);
-        var page = await OpenAsync(theme, $"{AppPaths.AdminEditions}?q={firstIsbn}&merge={first.Id}&mergeQ={secondIsbn}");
+        // The other edition searched by the title of its album, as an edition without ISBN is.
+        var page = await OpenAsync(theme,
+            $"{AppPaths.AdminEditions}?q={firstIsbn}&merge={first.Id}&mergeQ={Uri.EscapeDataString($"spirou a new york {_marker}")}");
 
         var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux éditions" });
         await dialog.GetByRole(AriaRole.Radio).CheckAsync();

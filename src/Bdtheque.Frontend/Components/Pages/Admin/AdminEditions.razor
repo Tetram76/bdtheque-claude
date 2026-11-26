@@ -246,10 +246,11 @@
         }
     }
 
-    // The other editions found by the search of the dialog, on their ISBN, the edition itself excepted.
+    // The other editions found by the search of the dialog, on their ISBN or on the title of their album or series, so that an
+    // edition without ISBN is found too (visuel/liste-albums/contenu.md, fusion), the edition itself excepted.
     private async Task<IReadOnlyList<MergeDialog.MergeCandidate>?> LoadCandidatesAsync(string text)
     {
-        var found = await Api.GetAsync<EditionAdminList>(_query.MergeCandidatesApiPath(text, CandidateCount));
+        var found = await Api.GetAsync<EditionAdminList>($"{_query.MergeCandidatesApiPath(text, CandidateCount)}&byAlbum=true");
         return
         [
             .. found.Editions.Items
