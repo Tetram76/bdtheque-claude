@@ -70,7 +70,7 @@ public sealed class Contribution : EntityBase
         List<Contribution> contributions, IReadOnlyCollection<(Author Author, ContributionRole Role)> credits,
         Func<Author, ContributionRole, Contribution> create)
     {
-        foreach (var (author, role) in credits)
+        foreach (var (_, role) in credits)
         {
             EnumGuard.EnsureDefined(role, nameof(credits));
         }
