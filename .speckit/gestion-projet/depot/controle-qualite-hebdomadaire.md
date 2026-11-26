@@ -4,12 +4,12 @@ title: 'Contrôle qualité hebdomadaire'
 description: 'Contrôle hebdomadaire du code global de main (SonarQube Cloud, règles de style, tests de mutation), rien de bloquant, ticket de suivi de la dette qualité par urgence (critique, prioritaire, au fil de l''eau), traitement borné à une Pull Request par semaine ; à lire quand le traitement est dû ou pour modifier le contrôle.'
 applies_to:
   - '.github/workflows/quality-audit.yml'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:02:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:07:21Z }
 ---
 
 # Contrôle qualité hebdomadaire
 
-La porte de qualité de SonarQube Cloud ne juge que le nouveau code d'une Pull Request ([Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)), et la couverture ne dit pas ce que vérifient les tests ([Outillage de développement](../../choix-implementation/outillage.md)) : un problème déjà présent sur `main`, ou un test qui manque, n'est relevé par aucun contrôle d'une Pull Request. Le contrôle qualité hebdomadaire (`.github/workflows/quality-audit.yml`) les surveille dans la durée, comme le contrôle de sécurité quotidien surveille les vulnérabilités des technologies employées ([Mises à jour des dépendances](mises-a-jour-des-dependances.md)). Son outillage est un choix de l'agent ([Outillage de développement](../../choix-implementation/outillage.md), contrôle qualité).
+La porte de qualité de SonarQube Cloud ne juge que le nouveau code d'une Pull Request ([Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)), et la couverture ne dit pas ce que vérifient les tests ([Outillage de développement](../../choix-implementation/outillage.md)) : un problème déjà présent sur `main`, ou un test qui manque, n'est relevé par aucun contrôle d'une Pull Request. Le contrôle qualité hebdomadaire (`.github/workflows/quality-audit.yml`) les surveille dans la durée, comme le contrôle de sécurité quotidien surveille les vulnérabilités des technologies employées ([Mises à jour des dépendances](mises-a-jour-des-dependances.md)). Il s'assure ainsi de la cohérence du code et du respect des règles, certaines parties ayant pu être écrites ou modifiées avant l'instauration d'une règle (exigence de l'utilisateur). Son outillage est un choix de l'agent ([Outillage de développement](../../choix-implementation/outillage.md), contrôle qualité).
 
 ## Ce qui est relevé
 
