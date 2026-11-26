@@ -197,10 +197,37 @@
 
 /* The stage of the home page, behind its first rows, over the whole width of the screen and up to the header: the deep
    colour, the halo of the dominant colour behind the album in the spotlight, the reflection of the accent in the opposite
-   corner. Its edge goes beyond the page as a shadow, which never makes it scroll sideways; the blocks that follow rise
-   over it. */
+   corner. Both lights are placed on the content, a fraction of its width (x, radius-x) and a percentage of the height of
+   the stage (y, radius-y), and both are painted beyond it, up to the edges of the screen, where they fade out, never cut
+   at the edge of the content (#662).
+   The stage never makes the page scroll sideways: it reaches beyond the content to the left, where an overflow is never
+   scrollable, by its own box, which paints the reflection; to the right, by an image drawn beyond its box
+   (border-image-outset), which paints the halo, and by a shadow of the deep colour, neither of which is scrollable either.
+   An element as wide as the screen would be (100vw counts the vertical scrollbar). The blocks that follow rise over it.
+   Each light is drawn in a frame twice as wide as the content, which holds all of it: the reflection in the background
+   tile from one width of the content to its left up to its right edge, the halo in the middle of the border image,
+   narrowed from the left edge of the content to one width of the content to its right. Its geometry is then a pure
+   percentage of that frame: Chromium drops a radial gradient whose size mixes a percentage and a length. */
 [data-theme="couverture"] .home-board {
+    --stage-beyond: 100vmax;
+    --stage-halo-x: 0.84;
+    --stage-halo-y: 42%;
+    --stage-halo-radius-x: 0.3;
+    --stage-halo-radius-y: 28%;
+    --stage-reflection-x: 0.08;
+    --stage-reflection-y: 92%;
+    --stage-reflection-radius-x: 0.5;
+    --stage-reflection-radius-y: 40%;
     position: relative;
+}
+
+[data-theme="couverture"] .home-board-empty {
+    --stage-halo-x: 0.82;
+    --stage-halo-y: 40%;
+    --stage-halo-radius-x: 0.34;
+    --stage-halo-radius-y: 60%;
+    --stage-reflection-y: 90%;
+    --stage-reflection-radius-y: 60%;
 }
 
 [data-theme="couverture"] .home-board::before {
@@ -208,22 +235,29 @@
     position: absolute;
     grid-column: 1 / -1;
     grid-row: 1 / span 4;
-    inset: calc(-1 * var(--space-l)) 0 -3.5rem;
+    inset: calc(-1 * var(--space-l)) 0 -3.5rem calc(-1 * var(--stage-beyond));
+    /* The box: the content and its reach to the left, so that 100% less that reach is the width of the content. */
     background:
-        radial-gradient(ellipse 30% 28% at 84% 42%, var(--day-halo) 0, transparent 75%),
-        radial-gradient(ellipse 50% 40% at 8% 92%, var(--day-reflection) 0, transparent 70%),
+        radial-gradient(
+            ellipse calc(var(--stage-reflection-radius-x) * 50%) var(--stage-reflection-radius-y)
+            at calc((var(--stage-reflection-x) + 1) * 50%) var(--stage-reflection-y),
+            var(--day-reflection) 0, transparent 70%)
+            100% 0 / calc(2 * (100% - var(--stage-beyond))) 100% no-repeat,
         var(--day-deep);
-    box-shadow: 0 0 0 100vmax var(--day-deep);
-    clip-path: inset(0 -100vmax);
+    /* The border image: the box and its reach to the right, 100% being the content and both reaches; the middle region
+       starts at the content, and its right edge is one width of the content past the content. */
+    border-image:
+        radial-gradient(
+            ellipse calc(var(--stage-halo-radius-x) * 50%) var(--stage-halo-radius-y)
+            at calc(var(--stage-halo-x) * 50%) var(--stage-halo-y),
+            var(--day-halo) 0, transparent 75%)
+        fill 0 / 0 calc(3 * var(--stage-beyond) - 100%) 0 var(--stage-beyond) / 0 var(--stage-beyond) 0 0;
+    box-shadow: var(--stage-beyond) 0 0 0 var(--day-deep);
     pointer-events: none;
 }
 
 [data-theme="couverture"] .home-board-empty::before {
     grid-row: 1 / span 1;
-    background:
-        radial-gradient(ellipse 34% 60% at 82% 40%, var(--day-halo) 0, transparent 75%),
-        radial-gradient(ellipse 50% 60% at 8% 90%, var(--day-reflection) 0, transparent 70%),
-        var(--day-deep);
 }
 
 /* On the stage, a block has no paper of its own: its texts are white, and light versions of the deep colour. */
