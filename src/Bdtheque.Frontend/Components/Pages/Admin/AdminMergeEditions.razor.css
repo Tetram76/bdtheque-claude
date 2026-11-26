@@ -1,0 +1,18 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md). The thumbnail of a visual, which opens the viewer:
+   nothing of a button of the theme, the thumbnail alone, marked as opening a larger view. */
+.merge-visual {
+    display: block;
+    min-inline-size: 0;
+    min-block-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-cover);
+    background: none;
+    cursor: zoom-in;
+}
+
+.merge-visual:focus-visible {
+    outline: 3px solid var(--color-text);
+    outline-offset: 2px;
+}

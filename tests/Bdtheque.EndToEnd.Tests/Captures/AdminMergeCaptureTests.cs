@@ -24,7 +24,7 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
     private static readonly string[] States =
     [
         "authors", "authors-confirmation", "publishers", "publishers-confirmation", "series", "universes", "universes-confirmation", "albums",
-        "albums-confirmation", "editions", "editions-confirmation",
+        "albums-confirmation", "editions", "editions-confirmation", "editions-visual",
     ];
 
     public static TheoryData<string, string, string> Captures
@@ -103,6 +103,13 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
 
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
             await Assertions.Expect(page.GetByRole(AriaRole.Alertdialog)).ToBeVisibleAsync();
+        }
+        else if (state == "editions-visual")
+        {
+            // The viewer, opened on the cover of the second edition.
+            await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Visuel", Exact = true }).Nth(1)
+                .GetByRole(AriaRole.Button, new() { Name = "Voir en grand : Couverture" }).ClickAsync();
+            await Assertions.Expect(page.Locator("dialog.visual-dialog .visual-dialog-image img")).ToHaveJSPropertyAsync("complete", true);
         }
         else if (state == "albums")
         {

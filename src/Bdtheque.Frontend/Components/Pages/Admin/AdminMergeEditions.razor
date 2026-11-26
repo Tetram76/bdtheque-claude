@@ -83,6 +83,14 @@ else
             </Actions>
         </Dialog>
     }
+
+    @if (_viewed is { } viewed)
+    {
+        var edition = Of(viewed.Side);
+        <VisualDialog Edition="Summary(edition, edition, edition)" PublisherWebsite="@edition.Publisher.Website" Visuals="edition.Visuals"
+                      EditionLabel="@LabelOf(edition)" Position="viewed.Position" Show="position => ShowVisualAsync(viewed.Side, position)"
+                      Close="() => _viewed = null" />
+    }
 }
 
 @code {
@@ -230,8 +238,25 @@ else
         }
     }
 
+    // The thumbnail of a visual opens the viewer of the consultation on it (visuel/fusion/fusion-de-deux-fiches.md), to judge it
+    // whole before keeping or discarding it.
     private RenderFragment? Picture(Row row, MergeSide side) =>
-        row.Visual is { } visual && row.Holder == side ? @<Cover VisualId="visual" /> : null;
+        row.Visual is { } visual && row.Holder == side
+            ? @<button type="button" class="merge-visual" aria-label="@L["ViewVisual", side == MergeSide.First ? row.First! : row.Second!]"
+                       @onclick="() => ShowVisualAsync(side, PositionOf(side, visual))"><Cover VisualId="visual" /></button>
+            : null;
+
+    /// <summary>The visual shown in the viewer: its edition and its position, from 1, among the visuals of the edition; none while closed.</summary>
+    private (MergeSide Side, int Position)? _viewed;
+
+    private int PositionOf(MergeSide side, Guid visual) => Of(side).Visuals.ToList().FindIndex(v => v.Id == visual) + 1;
+
+    // Recorded as the viewer of the record of an album records it (Navigation/AlbumRecordQuery.cs), each visual shown with itself.
+    private async Task ShowVisualAsync(MergeSide side, int position)
+    {
+        _viewed = (side, position);
+        await Recorder.RecordActionAsync(AudienceFunctions.AdminEditionMergeVisual, $"visual={Of(side).Visuals[position - 1].Id}");
+    }
 
     private string AlbumText(EditionMergeRecord edition) => Labels.Album(edition.Album, Format);
 

@@ -3,36 +3,44 @@
 @inject IStringLocalizer<VisualDialog> L
 @inject ValueLabels Values
 
-@* The viewer of the visuals of an edition on the record of an album (visuel/fiche-album/contenu.md): a modal dialog above the
-   record, opened by a thumbnail of the edition, which the address carries (Navigation/AlbumRecordQuery.cs) and the element
-   that wraps it opens (wwwroot/modal-dialog.js). The visual shown, whole, its type (numbered for the plates) and its
-   position among those of the edition, in their order (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md), the
-   previous and the next one, round the edition, and the link to the original image, in a new tab. Closing leads to the
-   record alone, which Escape follows too: the page under the dialog never moves. *@
+@* The viewer of the visuals of an edition (visuel/fiche-album/contenu.md): a modal dialog above the page, which the element that
+   wraps it opens (wwwroot/modal-dialog.js). The visual shown, whole, its type (numbered for the plates) and its position among
+   those of the edition, in their order (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md), the previous and the
+   next one, round the edition, and the link to the original image, in a new tab. On the record of an album, a static page,
+   the address carries the visual shown (Navigation/AlbumRecordQuery.cs): its steps and its closing are links (HrefOf,
+   CloseHref). On an interactive page (the merge of two editions, visuel/fusion/fusion-de-deux-fiches.md), they are buttons
+   that tell the page (Show, Close). Escape follows the closing, either way: the page under the dialog never moves. *@
 <app-modal-dialog>
     <dialog class="visual-dialog" aria-labelledby="visual-dialog-title">
         <header class="visual-dialog-header">
             <div>
-                <h2 id="visual-dialog-title" class="visual-dialog-title">@VisualLabels.TypeOf(Edition, Position - 1, Values, L)</h2>
-                <p class="visual-dialog-edition"><EditionLabelText Edition="Edition.Edition" PublisherWebsite="@Edition.PublisherWebsite" /></p>
+                <h2 id="visual-dialog-title" class="visual-dialog-title">@TypeName</h2>
+                <p class="visual-dialog-edition"><EditionLabelText Edition="Edition" PublisherWebsite="@PublisherWebsite" /></p>
             </div>
             @* The closing, the safe choice, has the focus as the dialog opens, though the publisher of the label of the edition, a
                link, comes before it: a modal dialog focuses the element it marks autofocus, else its first focusable one (HTML,
                dialog focusing steps). Its tabindex keeps it in the keyboard path once focused after a navigation (Routes.razor). *@
-            <a class="visual-dialog-close" href="@AppPaths.Album(AlbumId)" data-dialog-close aria-label="@L["Close"]" autofocus tabindex="0"><Icon Name="IconName.Close" /></a>
+            @if (HrefOf is not null)
+            {
+                <a class="visual-dialog-close" href="@CloseHref" data-dialog-close aria-label="@L["Close"]" autofocus tabindex="0"><Icon Name="IconName.Close" /></a>
+            }
+            else
+            {
+                <button type="button" class="visual-dialog-close" data-dialog-close aria-label="@L["Close"]" autofocus @onclick="Close"><Icon Name="IconName.Close" /></button>
+            }
         </header>
         <div class="visual-dialog-image">
-            <img src="@VisualMediaRoutes.Display(Current.Id)" alt="@L["Alt", VisualLabels.TypeOf(Edition, Position - 1, Values, L), EditionLabel]" />
+            <img src="@VisualMediaRoutes.Display(Current.Id)" alt="@L["Alt", TypeName, EditionLabel]" />
         </div>
         <div class="visual-dialog-bar">
             @if (Count > 1)
             {
-                <a class="visual-step" href="@HrefOf(Position == 1 ? Count : Position - 1)" aria-label="@L["Previous"]"><Icon Name="IconName.ChevronStart" /></a>
+                @Step(Position == 1 ? Count : Position - 1, L["Previous"], IconName.ChevronStart)
             }
             <span class="visual-position">@L["Position", Position, Count]</span>
             @if (Count > 1)
             {
-                <a class="visual-step" href="@HrefOf(Position == Count ? 1 : Position + 1)" aria-label="@L["Next"]"><Icon Name="IconName.ChevronEnd" /></a>
+                @Step(Position == Count ? 1 : Position + 1, L["Next"], IconName.ChevronEnd)
             }
         </div>
         <a class="visual-original" href="@VisualMediaRoutes.Original(Current.Id)" target="_blank" rel="noopener noreferrer">@L["Original"]</a>
@@ -40,12 +48,17 @@
 </app-modal-dialog>
 
 @code {
-    [Parameter, EditorRequired]
-    public Guid AlbumId { get; set; }
-
     /// <summary>The edition whose visual is shown, which has one at <see cref="Position"/>.</summary>
     [Parameter, EditorRequired]
-    public EditionDetail Edition { get; set; } = null!;
+    public EditionSummary Edition { get; set; } = null!;
+
+    /// <summary>The site of the publisher of the edition, which its label links to when it is known.</summary>
+    [Parameter]
+    public string? PublisherWebsite { get; set; }
+
+    /// <summary>The visuals of the edition, in their order.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<EditionVisualItem> Visuals { get; set; } = null!;
 
     /// <summary>The label of the edition, which the alternative text of its visual names, read as no link.</summary>
     [Parameter, EditorRequired]
@@ -55,9 +68,29 @@
     [Parameter]
     public int Position { get; set; } = 1;
 
-    private int Count => Edition.Visuals.Count;
+    /// <summary>On a static page, the address of the page with the visual at a position shown, from 1.</summary>
+    [Parameter]
+    public Func<int, string>? HrefOf { get; set; }
 
-    private EditionVisualItem Current => Edition.Visuals[Position - 1];
+    /// <summary>On a static page, the address of the page without the viewer.</summary>
+    [Parameter]
+    public string? CloseHref { get; set; }
 
-    private string HrefOf(int position) => AlbumRecordQuery.ForVisual(Edition.Edition.Id, position).Href(AlbumId);
+    /// <summary>On an interactive page, the visual at a position to show, from 1.</summary>
+    [Parameter]
+    public EventCallback<int> Show { get; set; }
+
+    /// <summary>On an interactive page, the closing of the viewer.</summary>
+    [Parameter]
+    public EventCallback Close { get; set; }
+
+    private int Count => Visuals.Count;
+
+    private EditionVisualItem Current => Visuals[Position - 1];
+
+    private string TypeName => VisualLabels.TypeOf([.. Visuals.Select(v => v.Type)], Position - 1, Values, L);
+
+    private RenderFragment Step(int position, string label, IconName icon) => HrefOf is not null
+        ? @<a class="visual-step" href="@HrefOf(position)" aria-label="@label"><Icon Name="icon" /></a>
+        : @<button type="button" class="visual-step" aria-label="@label" @onclick="() => Show.InvokeAsync(position)"><Icon Name="icon" /></button>;
 }

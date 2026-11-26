@@ -256,6 +256,26 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/albums/{album.Id}/editions/{second.Id}")).StatusCode);
     }
 
+    [Theory, InEachTheme]
+    public async Task EditionMerge_TheThumbnailOfAVisualOpensTheViewer_WithoutChoosingIt_AndEscapeClosesIt(string theme)
+    {
+        // The editions of the captures, read only: their covers, retained by the edition that holds each.
+        var page = await OpenAsync(theme, $"{AppPaths.AdminMergeEditions}?edition={Application.BelgiansFirst.Id}&other={Application.BelgiansSecond.Id}");
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var cover = page.GetByRole(AriaRole.Radiogroup, new() { Name = "Visuel", Exact = true }).Nth(1);
+
+        await cover.GetByRole(AriaRole.Button, new() { Name = "Voir en grand : Couverture" }).ClickAsync();
+
+        var viewer = page.Locator("dialog.visual-dialog");
+        await Assertions.Expect(viewer).ToBeVisibleAsync();
+        await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Couverture");
+        await Assertions.Expect(viewer.Locator(".visual-dialog-image img")).ToHaveJSPropertyAsync("complete", true);
+        await Assertions.Expect(cover.Locator("input[value=Second]")).ToBeCheckedAsync();
+
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(viewer).ToHaveCountAsync(0);
+    }
+
     // An edition of the album, owned, of a publisher of its own: the publishers of the captures count their editions.
     private async Task<EditionForm> CreateEditionAsync(HttpClient api, Guid albumId, string isbn, AcquisitionMode mode)
     {

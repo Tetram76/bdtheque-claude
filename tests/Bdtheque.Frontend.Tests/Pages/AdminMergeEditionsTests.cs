@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Audience;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
@@ -192,6 +193,30 @@ public sealed class AdminMergeEditionsTests : BunitContext, IDisposable
             request.Visuals);
         Assert.EndsWith(AppPaths.AdminEditions, Services.GetRequiredService<NavigationManager>().Uri);
         Assert.Contains("admin.edition-merge.merged", _audience.Functions);
+    }
+
+    [Fact]
+    public async Task Visual_ItsThumbnailOpensTheViewerOfItsEdition_WithoutChoosingIt_StepsRoundTheEdition_AndCloses()
+    {
+        var page = Open();
+
+        await page.ClickAsync($"input[name=merge-visual-{SecondPlate}][value=Second] ~ .merge-choice-picture button");
+
+        var viewer = page.Find("dialog.visual-dialog");
+        Assert.Equal("Planche 1", viewer.QuerySelector(".visual-dialog-title")!.TextContent);
+        Assert.Equal("2 sur 2", viewer.QuerySelector(".visual-position")!.TextContent);
+        Assert.Contains("Dupuis", viewer.QuerySelector(".visual-dialog-edition")!.TextContent);
+        // Retained by its edition, as before: the thumbnail opens the viewer, it does not choose.
+        Assert.Equal("Second", Checked(page, $"merge-visual-{SecondPlate}"));
+        var use = _audience.Sent.Select(sent => sent.Content.Deserialize<FunctionUse>(JsonSerializerOptions.Web)!).Last();
+        Assert.Equal(("admin.edition-merge.visual", $"visual={SecondPlate}"), (use.Function, use.Parameters));
+
+        await page.ClickAsync("dialog.visual-dialog button[aria-label='Visuel suivant']");
+        Assert.Equal("Couverture", page.Find(".visual-dialog-title").TextContent);
+        Assert.Equal("1 sur 2", page.Find(".visual-position").TextContent);
+
+        await page.ClickAsync("dialog.visual-dialog button.visual-dialog-close");
+        Assert.Empty(page.FindAll("dialog.visual-dialog"));
     }
 
     [Fact]

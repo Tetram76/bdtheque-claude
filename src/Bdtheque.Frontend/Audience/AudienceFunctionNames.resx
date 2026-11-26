@@ -645,4 +645,7 @@
   <data name="admin.edition-merge.merged" xml:space="preserve">
     <value>Fusion de deux éditions · fusion faite</value>
   </data>
+  <data name="admin.edition-merge.visual" xml:space="preserve">
+    <value>Fusion de deux éditions · visuel montré</value>
+  </data>
 </root>

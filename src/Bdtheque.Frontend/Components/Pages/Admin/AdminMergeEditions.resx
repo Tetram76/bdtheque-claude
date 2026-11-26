@@ -168,4 +168,7 @@
   <data name="Kicker.Visuals" xml:space="preserve">
     <value>Images</value>
   </data>
+  <data name="ViewVisual" xml:space="preserve">
+    <value>Voir en grand : {0}</value>
+  </data>
 </root>
