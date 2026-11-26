@@ -1,3 +1,12 @@
+/* The groups of data are blocks of the form, the view only wrapping them: they keep the gap between the blocks of the form
+   (EntryForm), which their wrapper would otherwise take for itself alone, leaving them stuck to one another. A group hidden is
+   no item of the column, and takes no gap. */
+.merge-view {
+    display: flex;
+    flex-direction: column;
+    gap: var(--admin-gap);
+}
+
 /* The reduced display (visuel/fusion/fusion-de-deux-fiches.md): a group of data with no row to choose left, the rows with nothing
    to choose being left out by MergeChoice, is hidden; with no row to choose at all, the line that says so takes the place of the
    groups. */
@@ -7,7 +16,7 @@
 
 .merge-view-empty {
     display: none;
-    margin: var(--space-l) 0 0;
+    margin: 0;
     color: var(--color-text-muted);
 }
 

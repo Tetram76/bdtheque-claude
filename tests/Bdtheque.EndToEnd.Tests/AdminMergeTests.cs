@@ -278,6 +278,36 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         await Assertions.Expect(viewer).ToHaveCountAsync(0);
     }
 
+    [Theory, InEachTheme]
+    public async Task Merge_TheBlocksOfItsData_AreSpacedAsTheBlocksOfAnEntryForm(string theme)
+    {
+        // The editions of the captures, read only: the blocks of the entry form of the first one, then those of their merge, all
+        // presented.
+        var edition = Application.BelgiansFirst;
+        var page = await OpenAsync(theme, AppPaths.AdminEditEdition(edition.AlbumId, edition.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var form = await SpacesAsync(page, ".entry-form-blocks > .block");
+
+        page = await OpenAsync(theme, $"{AppPaths.AdminMergeEditions}?edition={edition.Id}&other={Application.BelgiansSecond.Id}");
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
+        await Assertions.Expect(page.Locator(".merge-view[data-reduced]")).ToHaveCountAsync(0);
+        var merge = await SpacesAsync(page, ".merge-group");
+
+        // Each block below the previous one by the space between two blocks of a form, never stuck to it.
+        Assert.True(form[0] > 0);
+        Assert.Equal(3, merge.Length);
+        Assert.All(merge, space => Assert.Equal(form[0], space, 0.5));
+    }
+
+    // The space between each block and the next one, of those the selector designates that are presented.
+    private static Task<double[]> SpacesAsync(IPage page, string blocks) => page.EvaluateAsync<double[]>("""
+        selector => {
+            const rects = [...document.querySelectorAll(selector)].map(b => b.getBoundingClientRect()).filter(r => r.height > 0);
+            return rects.slice(1).map((r, i) => r.top - rects[i].bottom);
+        }
+        """, blocks);
+
     // An edition of the album, owned, of a publisher of its own: the publishers of the captures count their editions.
     private async Task<EditionForm> CreateEditionAsync(HttpClient api, Guid albumId, string isbn, AcquisitionMode mode)
     {
