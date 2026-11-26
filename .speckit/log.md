@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-26
+
+* **Exigences de l'utilisateur** : un jugement (coût, impact, ce que ferait un agent, mécanisme qui en compense un autre) est une affirmation, vérifiée comme les autres ; dans toute réponse à l'utilisateur, chaque affirmation porte sa source ou la mention « hypothèse non vérifiée » ([Règles de travail de l'agent](gestion-projet/gouvernance/regles-de-travail-de-l-agent.md)).
+
 ## 2026-11-25
 
 * **Choix** : journal entier lu par l'API avec recherche sur le libellé enregistré, chacune de ses chaînes décodée et comparée seule, nom complet d'un auteur dans ses deux ordres et ISBN sans séparateurs compris (SQL), période en jours du navigateur, type de fiche, opération et fiche, existence d'une fiche déduite de sa suppression ; attribut élément ou donnée distingué à la présentation ([Journal des modifications : mise en œuvre](choix-implementation/domaine/journal-des-modifications-mise-en-oeuvre.md)) (#657).
