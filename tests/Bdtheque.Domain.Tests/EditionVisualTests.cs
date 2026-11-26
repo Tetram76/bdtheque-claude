@@ -175,4 +175,18 @@ public sealed class EditionVisualTests
             () => edition.ArrangeVisuals([(second.Id, VisualType.Cover), (first.Id, (VisualType)42)]));
         Assert.Equal((VisualType.Cover, 1), (second.Type, second.DisplayOrder));
     }
+
+    [Fact]
+    public void AppendVisual_ComesAfterTheVisualsOfItsType()
+    {
+        var edition = CreateEdition();
+
+        var first = edition.AppendVisual(VisualType.Cover, "cover-1.jpg", TestPalette.Any);
+        var plate = edition.AppendVisual(VisualType.Plate, "plate-1.jpg", TestPalette.Any);
+        var second = edition.AppendVisual(VisualType.Cover, "cover-2.jpg", TestPalette.Any);
+        var third = edition.AppendVisual(VisualType.Cover, "cover-3.jpg", TestPalette.Any);
+
+        Assert.Equal((0, 1, 2), (first.DisplayOrder, second.DisplayOrder, third.DisplayOrder));
+        Assert.Equal(0, plate.DisplayOrder);
+    }
 }

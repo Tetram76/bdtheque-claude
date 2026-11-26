@@ -33,6 +33,7 @@ public sealed class TitleSortKeyCalculatorTests
     [InlineData("Lettre à un otage", "Lettre à un otage")]
     [InlineData("Larousse", "Larousse")]
     [InlineData("Description", "Description")]
+    [InlineData("D'Artagnan", "D'Artagnan")] // an apostrophe after a letter other than "L" elides no article
     public void Compute_NoLeadingArticle_ReturnsTitleUnchanged(string title, string expectedSortKey)
     {
         Assert.Equal(expectedSortKey, TitleSortKeyCalculator.Compute(title));

@@ -23,6 +23,9 @@ public sealed class IsbnChecksumValidatorTests
     [Theory]
     [InlineData("9780306406157")]
     [InlineData("978-0-306-40615-7")]
+    // Its digits of even rank do not sum to a multiple of 5, unlike the two above: only then does a weight wrong on
+    // them change the check.
+    [InlineData("9782203025127")]
     public void IsValid_ValidIsbn13_ReturnsTrue(string isbn)
     {
         Assert.True(IsbnChecksumValidator.IsValid(isbn));
@@ -42,6 +45,15 @@ public sealed class IsbnChecksumValidatorTests
         // checksum-only check would wrongly accept it, masking a genuine data-entry mistake
         // (e.g. a non-book barcode pasted into the ISBN field).
         Assert.False(IsbnChecksumValidator.IsValid("4006381333931"));
+    }
+
+    [Theory]
+    [InlineData("4080000000015")] // third digit of a Bookland prefix, without its "97"
+    [InlineData("0780000000001")] // "78" of a Bookland prefix, without its "9"
+    [InlineData("9980000000006")] // "9" and "8" of a Bookland prefix, without its "7"
+    public void IsValid_ChecksumValidEan13WithAPartOfTheBooklandPrefix_ReturnsFalse(string ean)
+    {
+        Assert.False(IsbnChecksumValidator.IsValid(ean));
     }
 
     [Fact]

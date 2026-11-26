@@ -168,6 +168,25 @@ public sealed class AlbumTests
     }
 
     [Fact]
+    public void SetTypeAndVolumeRange_OnlyEnd_DesignatesTheStart()
+    {
+        var album = new Album("Tintin", null);
+
+        DomainAssert.Violates<Album>(
+            DomainRules.AlbumVolumeRangeBothOrNeither, nameof(Album.StartVolumeNumber), () => album.SetTypeAndVolumeRange(AlbumType.Omnibus, null, 3));
+    }
+
+    [Fact]
+    public void SetTypeAndVolumeRange_RangeOfASingleVolume_Succeeds()
+    {
+        var album = new Album("Tintin", null);
+
+        album.SetTypeAndVolumeRange(AlbumType.Omnibus, 3, 3);
+
+        Assert.Equal((3, 3), (album.StartVolumeNumber, album.EndVolumeNumber));
+    }
+
+    [Fact]
     public void SetTypeAndVolumeRange_StartGreaterThanEnd_Throws()
     {
         var album = new Album("Tintin", null);
@@ -263,6 +282,18 @@ public sealed class AlbumTests
         var album = new Album("Tintin", null);
 
         DomainAssert.Violates<Album>(DomainRules.AlbumPublicationMonthRange, nameof(Album.FirstPublicationMonth), () => album.SetFirstPublicationDate(1978, month));
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(12)]
+    public void SetFirstPublicationDate_FirstAndLastMonths_Succeed(int month)
+    {
+        var album = new Album("Tintin", null);
+
+        album.SetFirstPublicationDate(1978, month);
+
+        Assert.Equal(month, album.FirstPublicationMonth);
     }
 
     [Theory]

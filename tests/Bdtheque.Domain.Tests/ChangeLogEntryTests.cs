@@ -49,6 +49,28 @@ public sealed class ChangeLogEntryTests
     }
 
     [Fact]
+    public void Change_OfAnElementAddedOrRemoved_HasAValueOnOneSideOnly()
+    {
+        var genre = new ReferenceValue(Guid.CreateVersion7(), Label);
+
+        var added = new ChangeLogChange(ChangeLogAttribute.Genre, null, genre);
+        var removed = new ChangeLogChange(ChangeLogAttribute.Genre, genre, null);
+
+        Assert.Equal((null, genre), (added.Before, added.After));
+        Assert.Equal((genre, null), (removed.Before, removed.After));
+    }
+
+    [Fact]
+    public void SearchVariablesValue_IsComparedByItsVariables()
+    {
+        var variables = new SearchVariablesValue([new SearchVariableValue("Année", "/conditions/0/value", "1980")]);
+
+        Assert.Equal(variables, new SearchVariablesValue([new SearchVariableValue("Année", "/conditions/0/value", "1980")]));
+        Assert.NotEqual(variables, new SearchVariablesValue([new SearchVariableValue("Année", "/conditions/0/value", "1990")]));
+        Assert.False(variables.Equals(null));
+    }
+
+    [Fact]
     public void Change_WithNeitherValueBeforeNorAfter_IsRefused()
     {
         DomainAssert.Throws<ArgumentException>(() => new ChangeLogChange(ChangeLogAttribute.Label, null, null));

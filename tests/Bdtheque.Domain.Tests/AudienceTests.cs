@@ -145,6 +145,19 @@ public sealed class AudienceTests
             LastUsage, []));
     }
 
+    [Theory]
+    [InlineData(1, 1, 0)] // a single usage, in a single visit
+    [InlineData(2, 2, 0)] // as many visits as usages, none repeated
+    [InlineData(3, 1, 2)] // every usage after the first of its visit repeated
+    public void Counter_AcceptsTheBoundsOfConsistentFigures(int usages, int visits, int repeated)
+    {
+        var counter = new AudienceCounter(
+            "dashboard", new DateOnly(2026, 3, 1), false, DeviceType.Computer, RenderingEngine.Blink, null, usages, visits, repeated,
+            LastUsage, []);
+
+        Assert.Equal((usages, visits, repeated), (counter.UsageCount, counter.VisitCount, counter.RepeatedUsageCount));
+    }
+
     [Fact]
     public void CounterObject_IsARecordOrParameters_UsedAtLeastOnce()
     {
