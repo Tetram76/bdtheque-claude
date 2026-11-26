@@ -32,7 +32,19 @@
                             <span class="intent-facts">@facts</span>
                         }
                     </span>
-                    <span class="intent-date">@L["Posed", Format.LocalDate(intent.PosedAt)]</span>
+                    @if (EditHref is not null && intent.Edition is { } targeted)
+                    {
+                        @* For the administrator, the link to the entry form of the edition the intent targets; an intent on the
+                           album itself has nothing to modify (visuel/fiche-album/contenu.md, decision of the user, #658). *@
+                        <span class="intent-end">
+                            <span class="intent-date">@L["Posed", Format.LocalDate(intent.PosedAt)]</span>
+                            <RecordEditLink Href="@EditHref(targeted.Edition.Id)" Label="@L["Edit"]" Part="edit-intent" />
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="intent-date">@L["Posed", Format.LocalDate(intent.PosedAt)]</span>
+                    }
                 </li>
             }
         </ul>
@@ -47,6 +59,12 @@
     /// <summary>The editions of the album, in their order; only those targeted by an intent are presented.</summary>
     [Parameter, EditorRequired]
     public IReadOnlyList<EditionDetail> Editions { get; set; } = [];
+
+    /// <summary>
+    /// The entry form of the edition an intent targets, for the authenticated administrator only; none for a visitor.
+    /// </summary>
+    [Parameter]
+    public Func<Guid, string>? EditHref { get; set; }
 
     // The edition targeted, none for an intent on the whole album.
     private List<(EditionDetail? Edition, string? Facts, DateTimeOffset PosedAt)> _intents = [];

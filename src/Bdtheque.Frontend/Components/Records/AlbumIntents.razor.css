@@ -53,3 +53,11 @@
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
 }
+
+/* The date, then the link to the entry form of the edition targeted, for the administrator. */
+.intent-end {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-m);
+}

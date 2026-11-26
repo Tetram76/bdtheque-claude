@@ -49,6 +49,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         _api = new FakeAdminApi(_audience);
         _api.AddServices(Services, _request);
+        // The pages of the administration are only ever served to the authenticated administrator (Pages/Admin/_Imports.razor).
+        AddAuthorization().SetAuthorized("admin");
         Services.AddScoped<RecordSearch>();
         Services.AddSingleton(TimeProvider.System);
         JSInterop.Mode = JSRuntimeMode.Loose;

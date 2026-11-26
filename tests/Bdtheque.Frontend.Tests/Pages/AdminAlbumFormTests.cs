@@ -811,6 +811,23 @@ public sealed class AdminAlbumFormTests : BunitContext, IDisposable
         Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
     }
 
+    // Opened from the record of the album in the consultation, the form leads back to it, saved or cancelled, its breadcrumb
+    // staying that of the administration (visuel/saisie-album/contenu.md, decisions of the user, #658).
+    [Fact]
+    public async Task OpenedFromTheRecord_LeadsBackToIt_SavedOrCancelled()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditAlbumFromRecord(AlbumId));
+        var page = Render<AdminAlbumForm>(parameters => parameters.Add(p => p.Id, AlbumId).AddCascadingValue(_request.Context));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Bijoux);
+
+        Assert.Equal(AppPaths.Album(AlbumId), page.Find(".save-bar a").GetAttribute("href"));
+        Assert.Equal([AppPaths.AdminHome, AppPaths.AdminAlbums], page.FindAll("nav.breadcrumb a").Select(a => a.GetAttribute("href")));
+        await page.ChangeAsync("#album-summary", "Autre");
+        await page.SubmitAsync("form");
+
+        Assert.Equal(AppPaths.Album(AlbumId), new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+    }
+
     private IRenderedComponent<AdminAlbumForm> OpenAlbum()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditAlbum(AlbumId));

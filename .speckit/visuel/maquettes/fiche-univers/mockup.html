@@ -17,6 +17,7 @@ summary{cursor:pointer}
 .cols>.c-state{justify-self:start}
 .top-row{--cols-end:12px}
 @media (max-width:640px){.cols{flex:1 1 100%;grid-template-columns:minmax(0,1fr) auto;margin:0 0 0 50px;--cols-end:0}.top-row{--cols-end:0;margin-left:88px}.cols>.c-state{justify-self:end}.cols>.c-roles{flex-wrap:nowrap}}
+@media (max-width: 599px){.edit-link{width:34px;padding:0 !important;justify-content:center}.edit-label{display:none}}
 </style>
 <script src="../shared/mockup.js"></script>
 <script src="../shared/couverture-theme.js"></script>
@@ -51,9 +52,14 @@ summary{cursor:pointer}
   </header>
 
   <div style="max-width: 1280px; margin: 0 auto; padding: 14px clamp(12px, 3vw, 24px) 32px; box-sizing: border-box">
-    <nav aria-label="Fil d'Ariane" style="margin-bottom: 12px; font-size: 13px; color: {{t.muted}}">
+    <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 16px">
+    <nav aria-label="Fil d'Ariane" style="flex: 1 1 0; min-width: 0; font-size: 13px; color: {{t.muted}}">
       <span>Univers</span> <span aria-hidden="true">›</span> <sc-for list="{{ancestors}}" as="p" hint-placeholder-count="1"><a href="#" style="color: {{t.link}}; font-weight: 700">{{p.name}}</a> <span aria-hidden="true">›</span> </sc-for><span>{{a.name}}</span>
     </nav>
+    <sc-if value="{{admin}}" hint-placeholder-val="{{false}}">
+      <a href="#" class="edit-link" aria-label="Modifier l'univers" style="flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; box-sizing: border-box; border: {{t.secB}}; border-radius: {{t.btnR}}; background: {{t.bg}}; color: {{t.secText}}; font-weight: 700; font-size: 13px; text-decoration: none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg><span class="edit-label">Modifier l'univers</span></a>
+    </sc-if>
+    </div>
 
     <main style="display: flex; flex-direction: column; gap: 22px">
 
@@ -481,6 +487,8 @@ class View extends Mockup {
     });
     const chip = { bg: 'transparent', fg: t.text, bd: t.tB === '0' ? '2px solid ' + t.line : t.tB };
     return {
+      // The link to the entry form, for the authenticated administrator only (visuel/fiche-album/contenu.md).
+      admin: this.props.administrateur,
       t,
       cols: 'cols top-row',
       colsIn: 'cols',
@@ -524,7 +532,7 @@ class View extends Mockup {
   }
 }
 
-Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}});
+Mockup.mount(View, {"theme": {"label": "Thème", "editor": "enum", "options": ["planche", "gazette", "sommaire", "festival", "riso", "librairie", "vignettes", "couverture"], "default": "planche"}, "administrateur": {"label": "Administrateur authentifié", "editor": "boolean", "default": false}});
 </script>
 </body>
 </html>

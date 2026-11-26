@@ -57,4 +57,7 @@
   <data name="Dates" xml:space="preserve">
     <value>Album créé le {0}, modifié le {1}.</value>
   </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier l'album</value>
+  </data>
 </root>

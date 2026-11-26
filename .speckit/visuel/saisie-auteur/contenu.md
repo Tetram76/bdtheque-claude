@@ -2,12 +2,12 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu du panneau d''un auteur : ouverture, erreurs, dates en tête, noms, nationalité, biographie, actions.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T14:00:00Z }
 ---
 
 # Contenu
 
-- **Ouverture** : depuis la liste des auteurs, par **Nouvel auteur**, par le nom d'un auteur ou son **Modifier**, ou, pour un auteur qu'une recherche ne trouve pas, par « Créer l'auteur « … » », qui propose le texte cherché comme son nom, son premier mot en prénom et le reste en nom (un seul mot : le nom), comme l'auteur créé sur place depuis la saisie d'un album. Le panneau s'ouvre par-dessus la liste, qui garde ses critères (recherche, initiale, page), et **Annuler** ou Échap y ramène sans rien enregistrer.
+- **Ouverture** : depuis la liste des auteurs, par **Nouvel auteur**, par le nom d'un auteur ou son **Modifier**, ou, pour un auteur qu'une recherche ne trouve pas, par « Créer l'auteur « … » », qui propose le texte cherché comme son nom, son premier mot en prénom et le reste en nom (un seul mot : le nom), comme l'auteur créé sur place depuis la saisie d'un album. Le panneau s'ouvre par-dessus la liste, qui garde ses critères (recherche, initiale, page), et **Annuler** ou Échap y ramène sans rien enregistrer. Ouvert depuis la fiche de l'auteur dans la consultation (« Modifier l'auteur », [Contenu](../fiche-auteur/contenu.md)), il s'ouvre par-dessus cette fiche, sans la quitter pour la liste des auteurs, et **Annuler**, Échap ou l'enregistrement y ramènent (décisions de l'utilisateur, #658).
 - **Titre** « Modifier l'auteur » ou « Nouvel auteur ». Le panneau ne propose ni lien vers la consultation, ni suppression, ni fusion : ces actions se font depuis la ligne de l'auteur.
 - **Erreur d'enregistrement**, en tête du panneau, comme celle d'une fiche en page ([Saisie selon l'entité](../listes/saisie-selon-l-entite.md)), en trois catégories ([Présentation des erreurs](../../fonctionnel/presentation-des-erreurs.md)) ; une erreur métier borde en outre le champ en cause, qui reçoit le focus :
   - un auteur sans nom ni pseudonyme ([Auteur / Artiste](../../modele-metier/auteur-artiste.md)) borde le nom et le pseudonyme de la couleur d'alerte, son message sous le nom ;

@@ -2,6 +2,7 @@ extern alias frontend;
 
 using System.Net.Http.Json;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Contracts.Deletion;
 using Bdtheque.EndToEnd.Tests.Controls;
 using frontend::Bdtheque.Frontend.Navigation;
 
@@ -215,6 +216,26 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await Assertions.Expect(Names(page)).ToHaveTextAsync([$"Parent {_marker}"]);
     }
 
+    // Deleted meanwhile, over its record in the consultation (visuel/listes/saisie-selon-l-entite.md, #658): the record, which no
+    // longer exists, says so, and its panel stays open over it with what was typed.
+    [Theory, InEachTheme]
+    public async Task Edit_FromItsRecord_OfAUniverseDeletedMeanwhile_KeepsThePanelOpen_AndSaysSo(string theme)
+    {
+        var universe = await CreateUniverseAsync($"Disparu {_marker}");
+        // The record being public, the administrator signs in first.
+        var page = await OpenAsync(theme, AppPaths.AdminHome);
+        await page.GotoAsync(AppPaths.UniverseRecordWithEntry(universe.Id));
+        var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+        await DeleteUniverseAsync(universe);
+
+        await panel.GetByRole(AriaRole.Textbox, new() { Name = "Description" }).FillAsync("Une description");
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
+
+        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+        await Assertions.Expect(panel.Locator("[data-error-category=functional]")).ToContainTextAsync("Fiche supprimée entre-temps");
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Description" })).ToHaveValueAsync("Une description");
+    }
+
     private async Task<IPage> OpenAsync(string theme, string path)
     {
         var page = await NewPageAsync(theme);
@@ -231,5 +252,13 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         using var response = await api.PostAsJsonAsync("/admin/universes", new CreateUniverseRequest(name, null, parentId));
         response.EnsureSuccessStatusCode();
         return (await response.Content.ReadFromJsonAsync<UniverseForm>())!;
+    }
+
+    private async Task DeleteUniverseAsync(UniverseForm universe)
+    {
+        using var api = Application.CreateApiClient();
+        var impact = await api.GetFromJsonAsync<DeletionImpact>($"/admin/universes/{universe.Id}/deletion-impact");
+        (await api.DeleteAsync($"/admin/universes/{universe.Id}?version={universe.Version}&fingerprint={Uri.EscapeDataString(impact!.Fingerprint)}"))
+            .EnsureSuccessStatusCode();
     }
 }

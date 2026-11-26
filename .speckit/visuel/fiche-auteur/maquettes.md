@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Maquettes'
 description: 'Maquettes de la fiche d''un auteur.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T19:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:00:00Z }
 ---
 
 # Maquettes
@@ -20,4 +20,4 @@ Toutes les déclinaisons sont présentées côte à côte par la visionneuse [`m
 | L'album de vignettes | `vignettes` |
 | La couverture du jour | `couverture` |
 
-L'exemple présenté est un auteur sans biographie ni nationalité, crédité sur huit séries et deux albums sans série, dont une série de seize albums, une série sur laquelle il n'est crédité que sur la série elle-même, plusieurs rôles sur un même album et des albums hors de la collection.
+L'exemple présenté est un auteur sans biographie ni nationalité, crédité sur huit séries et deux albums sans série, dont une série de seize albums, une série sur laquelle il n'est crédité que sur la série elle-même, plusieurs rôles sur un même album et des albums hors de la collection. Le réglage « Administrateur authentifié » montre le lien vers sa saisie.

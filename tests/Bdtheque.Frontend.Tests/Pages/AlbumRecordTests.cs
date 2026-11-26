@@ -731,6 +731,62 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("functional", page.Find("[role='alert']").GetAttribute("data-error-category"));
     }
 
+    // For the authenticated administrator only, the record leads to the entry form of the album, from the line of its
+    // breadcrumb, and to those of its editions and of its intents on an edition, each of which leads back to the record
+    // (visuel/fiche-album/contenu.md, decisions of the user, #658).
+    [Fact]
+    public void Administrator_IsLedToTheEntryForms_OfTheAlbum_OfItsEditions_AndOfItsIntentsOnAnEdition()
+    {
+        var album = Album();
+        _catalog.Album = album with { Editions = [.. album.Editions, Intended()] };
+        AddAuthorization().SetAuthorized("admin");
+
+        var page = Open();
+
+        var edit = page.Find(".record-breadcrumb [data-part=edit-record]");
+        Assert.Equal((AppPaths.AdminEditAlbumFromRecord(AlbumId), "Modifier l'album"), (edit.GetAttribute("href"), edit.TextContent.Trim()));
+        Assert.Equal(
+            album.Editions.Where(e => e.IsInCollection).Select(e => AppPaths.AdminEditEditionFromRecord(AlbumId, e.Edition.Id)),
+            page.FindAll(".edition [data-part=edit-edition]").Select(a => a.GetAttribute("href")));
+        Assert.All(page.FindAll("[data-part=edit-edition]"), a => Assert.Equal("Modifier l'édition", a.TextContent.Trim()));
+        var intent = page.Find(".album-intents [data-part=edit-intent]");
+        Assert.Equal((AppPaths.AdminEditEditionFromRecord(AlbumId, IntendedEditionId), "Modifier l'intention"), (intent.GetAttribute("href"), intent.TextContent.Trim()));
+    }
+
+    // An intent on the album itself has nothing to modify (visuel/editions-album/contenu.md): no link, even for the administrator.
+    [Fact]
+    public void Administrator_IsLedToNoEntryForm_OfAnIntentOnTheAlbumItself()
+    {
+        _catalog.Album = Album() with
+        {
+            Album = Summary() with { IsInCollection = false },
+            State = AlbumCollectionState.PurchaseIntent,
+            Editions = [],
+            PurchaseIntent = new PurchaseIntentItem(Guid.NewGuid(), Modified, Modified),
+        };
+        AddAuthorization().SetAuthorized("admin");
+
+        var page = Open();
+
+        Assert.NotEmpty(page.FindAll(".album-intents li"));
+        Assert.Empty(page.FindAll("[data-part=edit-intent]"));
+        Assert.Single(page.FindAll("[data-part=edit-record]"));
+    }
+
+    // A visitor sees none of these links, and the breadcrumb alone: nothing else of the record depends on the authentication.
+    [Fact]
+    public void Visitor_IsLedToNoEntryForm()
+    {
+        var album = Album();
+        _catalog.Album = album with { Editions = [.. album.Editions, Intended()] };
+        AddAuthorization();
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".record-breadcrumb, [data-part^=edit-]"));
+        Assert.NotNull(page.Find("nav.breadcrumb"));
+    }
+
     private IRenderedComponent<AlbumRecord> Open(string query = "")
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo($"{AppPaths.Album(AlbumId)}{query}");

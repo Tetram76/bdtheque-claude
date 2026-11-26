@@ -22,7 +22,7 @@
 }
 else if (_author is { } author)
 {
-    <Breadcrumb Items="BreadcrumbItems" />
+    <RecordBreadcrumb Items="BreadcrumbItems" EditHref="@AppPaths.AuthorRecordWithEntry(Id)" EditLabel="@L["Edit"]" />
 
     <div class="author-record">
         <div class="author-head">
@@ -84,9 +84,23 @@ else if (_author is { } author)
     <p class="author-dates" data-local>@L["Dates", Format.LocalDate(author.CreatedAt), Format.LocalDate(author.ModifiedAt)]</p>
 }
 
+@* For the administrator, the panel of the author over its record, which stays under it, and to which it leads back, closed
+   or saved (visuel/saisie-auteur/contenu.md, decisions of the user, #658); the panel opens for no one else. Rendered whatever the reading
+   of the record: a author deleted meanwhile, its record then saying so, keeps its panel open with what was typed and the
+   error of its saving, as in its list (#411). *@
+@if (Entry == AppPaths.RecordEntryOpen)
+{
+    <AuthorEntryPanel AuthorId="Id" CloseHref="@AppPaths.AuthorRecord(Id)" SavedHref="@AppPaths.AuthorRecord(Id)"
+                      ReloadHref="@AppPaths.AuthorRecordWithEntry(Id)" Opening="AudienceFunctions.AdminAuthorsEdit" />
+}
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Whether the address opens the panel of the author over its record (<see cref="AppPaths.RecordEntryParameter"/>).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.RecordEntryParameter)]
+    public string? Entry { get; set; }
 
     private AuthorDetail? _author;
     private ApiProblem? _problem;

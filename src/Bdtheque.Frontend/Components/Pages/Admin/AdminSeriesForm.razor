@@ -34,7 +34,7 @@ else
 {
     <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Series"], AppPaths.AdminSeries), new(Entry.Id is null ? L["New"] : Subject)])"
                Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Subject" State="State" Saving="_saving"
-               SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@AppPaths.AdminSeries" OnSave="SaveAsync"
+               SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@ReturnHref" OnSave="SaveAsync"
                Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Series"]" Kicker="@L["Kicker.Series"]">
             <div class="series-fields">
@@ -204,6 +204,14 @@ else
     [Parameter]
     public Guid? Id { get; set; }
 
+    /// <summary>The page the form was opened from, when not its list (<see cref="AppPaths.FromParameter"/>).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.FromParameter)]
+    public string? From { get; set; }
+
+    // Where a record saved, created or modified, or cancelled, leads (visuel/saisie-album/contenu.md, decisions of the user): the
+    // record of the series in the consultation when the form was opened from it (#658), the list otherwise.
+    private string ReturnHref => Id is { } id && AppPaths.IsFromRecord(From) ? AppPaths.SeriesRecord(id) : AppPaths.AdminSeries;
+
     /// <summary>For a new series, the text searched in its list, which found nothing: its title (AppPaths.NewWithSearched).</summary>
     [SupplyParameterFromQuery(Name = AppPaths.SearchedParameter)]
     public string? Searched { get; set; }
@@ -360,8 +368,7 @@ else
                 await Recorder.RecordActionAsync(AudienceFunctions.AdminSeriesCreated, $"series={created.Id}");
             }
 
-            // A record saved, created or modified, leads back to the list (visuel/saisie-album/contenu.md, decision of the user).
-            Navigation.NavigateTo(AppPaths.AdminSeries);
+            Navigation.NavigateTo(ReturnHref);
         }
         catch (ApiProblemException exception)
         {
@@ -391,7 +398,7 @@ else
     }
 
     // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
-    private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditSeries(Entry!.Id!.Value), forceLoad: true);
+    private void Reload() => Navigation.NavigateTo(AppPaths.IsFromRecord(From) ? Navigation.Uri : AppPaths.AdminEditSeries(Entry!.Id!.Value), forceLoad: true);
 
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);

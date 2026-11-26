@@ -27,4 +27,7 @@
   <data name="Posed" xml:space="preserve">
     <value>Posée le {0}</value>
   </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier l'intention</value>
+  </data>
 </root>

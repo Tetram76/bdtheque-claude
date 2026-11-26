@@ -22,7 +22,7 @@
 }
 else if (_universe is { } universe)
 {
-    <Breadcrumb Items="BreadcrumbItems" />
+    <RecordBreadcrumb Items="BreadcrumbItems" EditHref="@AppPaths.UniverseRecordWithEntry(Id)" EditLabel="@L["Edit"]" />
 
     <div class="universe-record">
         <div class="universe-head">
@@ -86,9 +86,23 @@ else if (_universe is { } universe)
     <p class="universe-dates" data-local>@L["Dates", Format.LocalDate(universe.CreatedAt), Format.LocalDate(universe.ModifiedAt)]</p>
 }
 
+@* For the administrator, the panel of the universe over its record, which stays under it, and to which it leads back, closed
+   or saved (visuel/listes/saisie-selon-l-entite.md, decisions of the user, #658); the panel opens for no one else. Rendered whatever the reading
+   of the record: a universe deleted meanwhile, its record then saying so, keeps its panel open with what was typed and the
+   error of its saving, as in its list (#411). *@
+@if (Entry == AppPaths.RecordEntryOpen)
+{
+    <UniverseEntryPanel UniverseId="Id" CloseHref="@AppPaths.UniverseRecord(Id)" SavedHref="@AppPaths.UniverseRecord(Id)"
+                        ReloadHref="@AppPaths.UniverseRecordWithEntry(Id)" Opening="AudienceFunctions.AdminUniversesEdit" />
+}
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Whether the address opens the panel of the universe over its record (<see cref="AppPaths.RecordEntryParameter"/>).</summary>
+    [SupplyParameterFromQuery(Name = AppPaths.RecordEntryParameter)]
+    public string? Entry { get; set; }
 
     private UniverseDetail? _universe;
     private ApiProblem? _problem;

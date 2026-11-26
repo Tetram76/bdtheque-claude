@@ -28,7 +28,7 @@
 }
 else if (_album is { } album)
 {
-    <Breadcrumb Items="BreadcrumbItems" />
+    <RecordBreadcrumb Items="BreadcrumbItems" EditHref="@AppPaths.AdminEditAlbumFromRecord(Id)" EditLabel="@L["Edit"]" />
 
     <div class="album-record">
         <div class="album-head">
@@ -112,12 +112,12 @@ else if (_album is { } album)
                                    (fonctionnel/presentation/libelle-d-une-edition.md). *@
                                 <h3 class="edition-label"><LabelText Text="@label" /></h3>
                                 <EditionVisuals AlbumId="Id" Edition="edition" EditionLabel="@label" Open="@(edition == _open ? _position : null)" />
-                                <EditionFacts Edition="edition" />
+                                <EditionFacts Edition="edition" EditHref="@(_administrator ? AppPaths.AdminEditEditionFromRecord(Id, edition.Edition.Id) : null)" />
                             </li>
                         }
                     </ol>
                 }
-                <AlbumIntents AlbumIntent="album.PurchaseIntent" Editions="album.Editions" />
+                <AlbumIntents AlbumIntent="album.PurchaseIntent" Editions="album.Editions" EditHref="@(_administrator ? edition => AppPaths.AdminEditEditionFromRecord(Id, edition) : null)" />
             </Block>
         }
 
@@ -149,9 +149,17 @@ else if (_album is { } album)
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
 
+    [CascadingParameter]
+    private Task<AuthenticationState>? Authentication { get; set; }
+
+    // The only authenticated user is the administrator, to whom alone the record leads to the entry forms of its editions and
+    // intents (visuel/fiche-album/contenu.md, #658); nothing else of the record depends on the authentication.
+    private bool _administrator;
+
     protected override async Task OnInitializedAsync()
     {
         var query = AlbumRecordQuery.Parse(new Uri(Navigation.Uri).Query);
+        _administrator = Authentication is not null && (await Authentication).User.Identity?.IsAuthenticated == true;
         try
         {
             _format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
