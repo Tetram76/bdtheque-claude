@@ -2,13 +2,14 @@
 type: Règle métier
 title: 'Gestion des devises'
 description: 'Montants dans leur devise, euros courants et euros du jour, date de référence, taux de change, ancien franc, montant non convertible.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-07T10:09:22Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T15:10:00Z }
 ---
 
 # Gestion des devises
 
 - L'application gère des **prix, montants et valeurs** (ex. valeur d'achat, valeur estimée d'un album, etc.).
 - **Saisie et affichage des données de base** : peuvent être faits dans n'importe quelle devise. Une fiche affiche chaque montant **deux fois** : la valeur saisie, dans sa devise, et sa valeur en **euros du jour**.
+- **Précision d'un montant** : la saisie n'accepte pas plus de décimales que n'en a la devise choisie, selon l'ISO 4217 (ex. deux pour l'euro et le franc, trois pour le dinar koweïtien, aucune pour le yen), et un montant est affiché avec les décimales de sa devise ; le stockage peut être plus large, commun à toutes les devises, pour ne pas multiplier les champs (exigence de l'utilisateur, #665).
 - **Euros courants** : un montant exprimé en euros courants est **converti en euro** au taux de change de sa date de référence (cf. *Taux de change* ci-dessous), **sans correction de l'inflation**.
 - **Euros du jour** : pour qu'une valorisation ait un sens quelle que soit l'époque du montant, un montant exprimé en euros du jour est d'abord exprimé en **euros courants**, puis **corrigé de l'inflation** entre sa date de référence et aujourd'hui. La correction utilise les coefficients annuels de **pouvoir d'achat de l'euro et du franc** publiés par l'**[INSEE](https://www.insee.fr/fr/information/2417794)** (source officielle et gratuite, disponible depuis 1901) : elle est **annuelle**, une date de référence plus précise étant corrigée selon son année.
 - **Analyses et statistiques** : chaque montant est affiché **en parallèle** dans les deux versions, pour mettre en relation l'**investissement réalisé** (euros courants) et son **équivalent en pouvoir d'achat** à la date du jour (euros du jour). Un montant non convertible (cf. *Taux de change* ci-dessous) n'entre dans aucune des deux : elles portent toujours sur les mêmes données.
