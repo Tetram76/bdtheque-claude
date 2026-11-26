@@ -200,6 +200,7 @@ public sealed class EditionValueTests
     [InlineData("eur")]
     [InlineData("EU")]
     [InlineData("EURO")]
+    [InlineData("E1R")]
     public void SetPublicationYearAndAcquisition_InvalidCurrencyShape_Throws(string currency)
     {
         var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
@@ -211,6 +212,18 @@ public sealed class EditionValueTests
             DomainRules.EditionCurrencyCodeInvalid, nameof(Edition.InitialValueCurrency),
             () => edition.SetPublicationYearAndAcquisition(
                 null, Acquisition(AcquisitionMode.Purchase, initialValue: 10m, initialValueCurrency: currency)));
+    }
+
+    [Theory]
+    [InlineData("AUD")] // first letter of the alphabet
+    [InlineData("ZAR")] // last letter of the alphabet
+    public void SetPublicationYearAndAcquisition_CurrencyAtTheBoundsOfTheAlphabet_Succeeds(string currency)
+    {
+        var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
+
+        edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: currency));
+
+        Assert.Equal(currency, edition.AcquisitionCurrency);
     }
 
     [Fact]

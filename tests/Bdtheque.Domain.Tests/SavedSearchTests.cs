@@ -236,4 +236,14 @@ public sealed class SavedSearchTests
         Assert.True(search.Variables.Equals((object)same.Variables));
         Assert.Equal(search.Variables.GetHashCode(), same.Variables.GetHashCode());
     }
+
+    [Fact]
+    public void SearchVariables_AreComparedByValue()
+    {
+        var variables = new SearchVariables([new SearchVariable("Année", "/conditions/0/value")]);
+
+        Assert.Equal(variables, new SearchVariables([new SearchVariable("Année", "/conditions/0/value")]));
+        Assert.NotEqual(variables, new SearchVariables([new SearchVariable("Auteur", "/conditions/0/value")]));
+        Assert.False(variables.Equals(null));
+    }
 }
