@@ -133,6 +133,17 @@ public sealed class AudienceTests
             LastUsage, []));
     }
 
+    [Fact]
+    public void Counter_RefusesAnUndefinedDeviceOrEngine()
+    {
+        var month = new DateOnly(2026, 3, 1);
+
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => new AudienceCounter(
+            "dashboard", month, false, (DeviceType)99, RenderingEngine.Blink, null, 1, 1, 0, LastUsage, []));
+        DomainAssert.Throws<ArgumentOutOfRangeException>(() => new AudienceCounter(
+            "dashboard", month, false, DeviceType.Computer, (RenderingEngine)99, null, 1, 1, 0, LastUsage, []));
+    }
+
     [Theory]
     [InlineData(0, 0, 0)] // a counter counts at least one usage
     [InlineData(2, 3, 0)] // more visits than usages

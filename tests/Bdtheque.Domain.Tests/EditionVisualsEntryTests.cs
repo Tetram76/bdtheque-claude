@@ -70,6 +70,19 @@ public sealed class EditionVisualsEntryTests
     }
 
     [Fact]
+    public void SetVisuals_UndefinedType_ChangesNothing()
+    {
+        var edition = CreateEdition();
+        edition.AppendVisual(VisualType.Cover, "cover.jpg", TestPalette.Any);
+
+        // The cover is not kept: refused only once it was removed, the entry would leave the edition without it.
+        DomainAssert.Throws<ArgumentOutOfRangeException>(
+            () => edition.SetVisuals([(null, new PendingVisual("new.png", TestPalette.Any), (VisualType)42)]));
+
+        Assert.Equal([("cover.jpg", VisualType.Cover)], edition.Visuals.Select(v => (v.MediaReference, v.Type)));
+    }
+
+    [Fact]
     public void PendingVisual_WithoutItsFile_IsRefused()
     {
         var exception = DomainAssert.Throws<DomainRuleViolationException>(() => new PendingVisual("  ", TestPalette.Any));
