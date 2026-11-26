@@ -407,14 +407,6 @@ public sealed class SeriesTests
     }
 
     [Fact]
-    public void SetTemplateContributions_NullAuthor_Throws()
-    {
-        var series = new Series("Tintin");
-
-        DomainAssert.Throws<ArgumentNullException>(() => series.SetTemplateContributions([(null!, ContributionRole.Scenarist)]));
-    }
-
-    [Fact]
     public void SetTemplateContributions_UndefinedRole_Throws()
     {
         var series = new Series("Tintin");

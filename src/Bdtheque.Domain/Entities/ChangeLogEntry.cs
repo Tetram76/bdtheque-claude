@@ -32,7 +32,6 @@ public sealed class ChangeLogEntry : EntityBase
     private ChangeLogEntry(
         RecordType recordType, Guid recordId, RecordLabel label, ChangeLogOperation operation, IEnumerable<ChangeLogChange> changes)
     {
-        ArgumentNullException.ThrowIfNull(label);
         RecordType = recordType;
         RecordId = recordId;
         Label = label;
@@ -50,8 +49,6 @@ public sealed class ChangeLogEntry : EntityBase
     public static ChangeLogEntry Modification(
         RecordType recordType, Guid recordId, RecordLabel label, IReadOnlyCollection<ChangeLogChange> changes)
     {
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(changes);
         if (changes.Count == 0)
             throw new ArgumentException("A modification records at least one change.", nameof(changes));
 

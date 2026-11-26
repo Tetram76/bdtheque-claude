@@ -8,8 +8,10 @@ namespace Bdtheque.Domain.Common;
 /// operation exceptions are also thrown by the framework and by programming mistakes.
 /// </summary>
 /// <remarks>
-/// Programming errors stay standard .NET exceptions (e.g. a required reference passed as
-/// <see langword="null"/>, an undefined enum value): no user input can cause them.
+/// Programming errors stay standard .NET exceptions (e.g. an undefined enum value): no user input can
+/// cause them. A required reference is not checked against <see langword="null"/>: the nullable
+/// annotations exclude it, and the API builds every reference it passes, a request's missing
+/// collection included.
 /// </remarks>
 public sealed class DomainRuleViolationException(string rule, string message) : Exception(message)
 {

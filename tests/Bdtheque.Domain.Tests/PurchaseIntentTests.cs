@@ -119,14 +119,6 @@ public sealed class PurchaseIntentTests
 
         DomainAssert.Throws<ArgumentException>(() => album.AddPurchaseIntent(otherEdition));
     }
-
-    [Fact]
-    public void AddPurchaseIntent_NullEdition_Throws()
-    {
-        var album = new Album("Le Lotus bleu", null);
-
-        DomainAssert.Throws<ArgumentNullException>(() => album.AddPurchaseIntent(null!));
-    }
 }
 
 public sealed class AcquisitionRecordingTests

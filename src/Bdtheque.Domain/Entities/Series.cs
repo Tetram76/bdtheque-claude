@@ -211,8 +211,6 @@ public sealed class Series : EntityBase, IAggregateRoot
     private static bool Personalized(
         IReadOnlyCollection<(Guid AuthorId, ContributionRole Role)> albumCredits, Series? previousSeries, bool albumIsNew)
     {
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(albumCredits);
         return albumCredits.Count > 0
                && (!albumIsNew
                    || previousSeries is null
@@ -297,8 +295,6 @@ public sealed class Series : EntityBase, IAggregateRoot
     /// <exception cref="InvalidOperationException">The template collection of the series is not loaded.</exception>
     public void TransferPublisher(PublisherMerge merge)
     {
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(merge);
         if (merge.Concerns(TemplatePublisherId, TemplatePublisherCollectionId))
             SetTemplate(merge.Kept, merge.CollectionReplacing(TemplatePublisherCollectionId, TemplatePublisherCollection));
     }

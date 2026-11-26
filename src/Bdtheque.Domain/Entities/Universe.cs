@@ -128,8 +128,6 @@ public sealed class Universe : EntityBase, IAggregateRoot
     public void Absorb(Universe merged, Universe? parent, IReadOnlyCollection<Guid> leftOut)
     {
         MergeGuard.EnsureDistinct(merged, this);
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(leftOut);
         // The merged universe is deleted: it cannot be the parent of the one that remains, which its own ancestor walk would
         // not see when this universe is one of its sub-universes.
         if (parent?.Id == merged.Id)

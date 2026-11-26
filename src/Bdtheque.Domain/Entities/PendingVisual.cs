@@ -24,8 +24,6 @@ public sealed class PendingVisual : EntityBase
 
     public PendingVisual(string mediaReference, VisualPalette palette)
     {
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(palette);
         MediaReference = DomainText.Required(mediaReference, DomainRules.EditionVisualMediaReferenceRequired, "The file of a visual is required.");
         Palette = palette;
     }

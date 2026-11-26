@@ -140,12 +140,6 @@ public sealed class EditionTests
     }
 
     [Fact]
-    public void Constructor_NullAlbum_Throws()
-    {
-        DomainAssert.Throws<ArgumentNullException>(() => new Edition(null!, CreatePublisher()));
-    }
-
-    [Fact]
     public void Constructor_WithoutPublisher_IsABusinessErrorAndRegistersNothing()
     {
         // The publisher is a required field of the form: leaving it empty is an input mistake.

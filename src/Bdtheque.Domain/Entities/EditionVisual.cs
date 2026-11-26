@@ -33,7 +33,6 @@ public sealed class EditionVisual : EntityBase
     internal EditionVisual(Edition edition, VisualType type, string mediaReference, int displayOrder, VisualPalette palette)
     {
         EnumGuard.EnsureDefined(type, nameof(type));
-        ArgumentNullException.ThrowIfNull(palette);
 
         Edition = edition;
         EditionId = edition.Id;

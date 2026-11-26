@@ -71,8 +71,6 @@ public sealed class Publisher : EntityBase, IAggregateRoot
     public PublisherMerge Absorb(Publisher merged, IReadOnlyCollection<(PublisherCollection Remaining, PublisherCollection Removed)> homonyms)
     {
         MergeGuard.EnsureDistinct(merged, this);
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(homonyms);
         var paired = homonyms.SelectMany(h => new[] { h.Remaining, h.Removed }).ToList();
         if (homonyms.Any(h => !(Owns(h.Remaining) && merged.Owns(h.Removed)) && !(merged.Owns(h.Remaining) && Owns(h.Removed)))
             || paired.Distinct().Count() != paired.Count)

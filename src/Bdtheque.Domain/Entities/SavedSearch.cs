@@ -71,8 +71,6 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     public void SetSearch(EntityKind entity, string criteria, IEnumerable<SearchVariable> variables, IEnumerable<DesignatedRecord> designated)
     {
         EnumGuard.EnsureDefined(entity, nameof(entity));
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(designated);
         var records = designated.Distinct().ToList();
         foreach (var record in records)
         {
@@ -87,8 +85,6 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
         var checkedVariables = new List<SearchVariable>();
         foreach (var variable in variables)
         {
-            // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-            ArgumentNullException.ThrowIfNull(variable);
             var name = DomainText.Required(variable.Name, DomainRules.SavedSearchVariableNameRequired, "A variable must have a name.");
             if (checkedVariables.Exists(v => SameName(v.Name, name)))
                 throw new DomainRuleViolationException(DomainRules.SavedSearchVariableNameAlreadyUsed, $"Two variables are named {name}.");
@@ -119,8 +115,6 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     /// </summary>
     public static string DefaultValueOf(string criteria, SearchVariable variable)
     {
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(variable);
         var (values, index) = ConstantAt(Parse(criteria), variable.Location);
         return values[index]!.GetValue<string>();
     }
@@ -133,8 +127,6 @@ public sealed class SavedSearch : EntityBase, IAggregateRoot
     /// <exception cref="ArgumentException">A value for a variable the search does not have, or two values for the same one.</exception>
     public string CriteriaWith(IReadOnlyDictionary<string, string> values)
     {
-        // Stryker disable once Statement : a guard against a programming error, null being excluded by the nullable annotations, with which no caller passes one
-        ArgumentNullException.ThrowIfNull(values);
         var tree = Parse(Criteria);
         var replaced = new List<SearchVariable>();
         foreach (var (name, value) in values)

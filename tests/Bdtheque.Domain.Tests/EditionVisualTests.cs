@@ -24,12 +24,6 @@ public sealed class EditionVisualTests
     }
 
     [Fact]
-    public void Constructor_WithoutPalette_Throws()
-    {
-        DomainAssert.Throws<ArgumentNullException>(() => CreateEdition().AddVisual(VisualType.Cover, "cover.jpg", 0, null!));
-    }
-
-    [Fact]
     public void Constructor_UndefinedType_Throws()
     {
         DomainAssert.Throws<ArgumentOutOfRangeException>(() => CreateEdition().AddVisual((VisualType)42, "cover.jpg", 0, TestPalette.Any));
