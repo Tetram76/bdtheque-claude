@@ -760,6 +760,26 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         Assert.Equal(AppPaths.AdminAlbumEditions(AlbumId), page.Find(".save-bar a").GetAttribute("href"));
     }
 
+    // Opened from the record of its album in the consultation, the form of an edition, or of the edition an intent targets,
+    // leads back to it, its breadcrumb staying that of every edition (visuel/saisie-edition/contenu.md, decisions of the user, #658).
+    [Fact]
+    public void Edition_OpenedFromTheRecordOfItsAlbum_LeadsBackToIt()
+    {
+        var owned = Open(AppPaths.AdminEditEditionFromRecord(AlbumId, EditionId), EditionId);
+
+        Assert.Equal(AppPaths.Album(AlbumId), owned.Find(".save-bar a").GetAttribute("href"));
+        Assert.Equal([AppPaths.AdminHome, AppPaths.AdminAlbums, AppPaths.AdminAlbumEditions(AlbumId)],
+            owned.FindAll("nav.breadcrumb a").Select(a => a.GetAttribute("href")));
+    }
+
+    [Fact]
+    public void IntentOnAnEdition_OpenedFromTheRecordOfItsAlbum_LeadsBackToIt()
+    {
+        var wished = Open(AppPaths.AdminEditEditionFromRecord(AlbumId, WishedId), WishedId);
+
+        Assert.Equal(AppPaths.Album(AlbumId), wished.Find(".save-bar a").GetAttribute("href"));
+    }
+
     [Fact]
     public void Conversion_OfAnIntentOnAnEdition_IsNoConversionToAnEdition()
     {

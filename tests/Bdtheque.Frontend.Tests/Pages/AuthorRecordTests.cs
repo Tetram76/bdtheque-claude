@@ -390,6 +390,32 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.Empty(page.FindAll(".bibliography"));
     }
 
+    // For the authenticated administrator only, the line of the breadcrumb leads to the entry form, which leads back to the
+    // record (visuel/fiche-auteur/contenu.md, #658); a visitor has the breadcrumb alone.
+    // An author under a pseudonym is found in the list of the administration by it: the panel opens over that list.
+    [Fact]
+    public void Administrator_IsLedToTheEntryForm_FromTheLineOfTheBreadcrumb()
+    {
+        _catalog.Author = Author() with { LastName = "Giraud", FirstName = "Jean", Pseudonym = "Moebius" };
+        AddAuthorization().SetAuthorized("admin");
+
+        var link = Open().Find(".record-breadcrumb [data-part=edit-record]");
+
+        Assert.Equal((AppPaths.AdminEditAuthorFromRecord(AuthorId, "Moebius"), "Modifier l'auteur"), (link.GetAttribute("href"), link.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void Visitor_IsLedToNoEntryForm()
+    {
+        _catalog.Author = Author() with { LastName = "Giraud", FirstName = "Jean", Pseudonym = "Moebius" };
+        AddAuthorization();
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".record-breadcrumb, [data-part=edit-record]"));
+        Assert.NotNull(page.Find("nav.breadcrumb"));
+    }
+
     private IRenderedComponent<AuthorRecord> Open()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AuthorRecord(AuthorId));

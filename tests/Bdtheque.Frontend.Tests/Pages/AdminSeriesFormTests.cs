@@ -597,6 +597,21 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
     }
 
+    // Opened from the record of the series in the consultation, the form leads back to it, saved or cancelled
+    // (visuel/saisie-album/contenu.md, decisions of the user, #658).
+    [Fact]
+    public async Task OpenedFromTheRecord_LeadsBackToIt_SavedOrCancelled()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditSeriesFromRecord(SeriesId));
+        var page = Render<AdminSeriesForm>(parameters => parameters.Add(p => p.Id, SeriesId).AddCascadingValue(_request.Context));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Blacksad);
+
+        Assert.Equal(AppPaths.SeriesRecord(SeriesId), page.Find(".save-bar a").GetAttribute("href"));
+        await page.SubmitAsync("form");
+
+        Assert.Equal(AppPaths.SeriesRecord(SeriesId), new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+    }
+
     private IRenderedComponent<AdminSeriesForm> OpenSeries()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditSeries(SeriesId));

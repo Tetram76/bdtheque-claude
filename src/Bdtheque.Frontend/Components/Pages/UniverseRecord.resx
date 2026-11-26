@@ -69,4 +69,7 @@
   <data name="Dates" xml:space="preserve">
     <value>Univers créé le {0}, modifié le {1}.</value>
   </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier l'univers</value>
+  </data>
 </root>

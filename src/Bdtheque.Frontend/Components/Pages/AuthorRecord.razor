@@ -22,7 +22,10 @@
 }
 else if (_author is { } author)
 {
-    <Breadcrumb Items="BreadcrumbItems" />
+    @* The panel of the author opens over its list, searched on what the search of that list finds it by: its pseudonym, or
+       else its last name, or else its first name (visuel/saisie-auteur/contenu.md). *@
+    <RecordBreadcrumb Items="BreadcrumbItems" EditLabel="@L["Edit"]"
+                      EditHref="@AppPaths.AdminEditAuthorFromRecord(Id, _author!.Pseudonym ?? _author.LastName ?? _author.FirstName ?? Name)" />
 
     <div class="author-record">
         <div class="author-head">

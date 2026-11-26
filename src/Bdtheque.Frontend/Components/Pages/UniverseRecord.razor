@@ -22,7 +22,7 @@
 }
 else if (_universe is { } universe)
 {
-    <Breadcrumb Items="BreadcrumbItems" />
+    <RecordBreadcrumb Items="BreadcrumbItems" EditHref="@AppPaths.AdminEditUniverseFromRecord(Id, universe.Name)" EditLabel="@L["Edit"]" />
 
     <div class="universe-record">
         <div class="universe-head">

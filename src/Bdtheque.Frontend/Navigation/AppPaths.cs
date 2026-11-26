@@ -211,6 +211,45 @@ public static class AppPaths
     /// <summary>The value of <see cref="FromParameter"/> for the list of the purchase intents.</summary>
     public const string FromPurchaseIntents = "acquisition-intents";
 
+    /// <summary>
+    /// The value of <see cref="FromParameter"/> for a record of the consultation, the one of what the form enters (the album of
+    /// an edition or of a purchase intent): its link to its entry form opens it, and the form leads back to it once saved or
+    /// cancelled (visuel/fiche-album/contenu.md, decisions of the user, #658). The record is never read from the address, so
+    /// that the form cannot lead out of the application.
+    /// </summary>
+    public const string FromRecord = "record";
+
+    /// <summary>The entry form of an album, opened from its record in the consultation, to which it leads back.</summary>
+    public static string AdminEditAlbumFromRecord(Guid id) => FromRecordOf(AdminEditAlbum(id));
+
+    /// <summary>The entry form of a series, opened from its record in the consultation, to which it leads back.</summary>
+    public static string AdminEditSeriesFromRecord(Guid id) => FromRecordOf(AdminEditSeries(id));
+
+    /// <summary>
+    /// The entry form of an edition, owned or targeted by a purchase intent, opened from the record of its album in the
+    /// consultation, to which it leads back.
+    /// </summary>
+    public static string AdminEditEditionFromRecord(Guid albumId, Guid id) => FromRecordOf(AdminEditEdition(albumId, id));
+
+    /// <summary>
+    /// The panel of an author, opened from its record in the consultation, to which it leads back: over the list of the authors
+    /// searched on its name, which shows it (visuel/saisie-auteur/contenu.md).
+    /// </summary>
+    public static string AdminEditAuthorFromRecord(Guid id, string name) =>
+        new AuthorListQuery(Text: name, Edit: id) { FromRecord = true }.Href();
+
+    /// <summary>
+    /// The panel of a universe, opened from its record in the consultation, to which it leads back: over the list of the
+    /// universes searched on its name, which shows it (visuel/listes/saisie-selon-l-entite.md).
+    /// </summary>
+    public static string AdminEditUniverseFromRecord(Guid id, string name) =>
+        new UniverseListQuery(Text: name, Edit: id) { FromRecord = true }.Href();
+
+    /// <summary>Whether the value of <see cref="FromParameter"/> says the form was opened from a record of the consultation.</summary>
+    public static bool IsFromRecord(string? from) => string.Equals(from, FromRecord, StringComparison.Ordinal);
+
+    private static string FromRecordOf(string path) => $"{path}?{FromParameter}={FromRecord}";
+
     /// <summary>Whether a path is that of the conversion of an intent into one on a new edition, which shares its page with the editions.</summary>
     public static bool IsPurchaseIntentConversion(string path) => IsOfAnIntent(path, "/edition");
 

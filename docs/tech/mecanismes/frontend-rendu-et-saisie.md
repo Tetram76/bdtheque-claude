@@ -7,6 +7,9 @@ code:
   - 'src/Bdtheque.Frontend/Components/Routes.razor'
   - 'src/Bdtheque.Frontend/Components/Controls/EntryForm.razor'
   - 'src/Bdtheque.Frontend/Entries/**'
+  - 'src/Bdtheque.Frontend/Components/Records/RecordBreadcrumb.razor'
+  - 'src/Bdtheque.Frontend/Components/Records/RecordEditLink.razor'
+  - 'src/Bdtheque.Frontend/Lists/InListEntryQuery.cs'
   - 'src/Bdtheque.Frontend/Navigation/AppPaths.cs'
   - 'src/Bdtheque.Frontend/wwwroot/*.js'
 ---
@@ -116,6 +119,10 @@ sequenceDiagram
         circuit-->>browser: erreur sur le champ en cause, focus
     end
 ```
+
+Le retour, après un enregistrement comme après une annulation, dépend de la page d'où la fiche a été ouverte, que son adresse dit par le paramètre `from` lorsqu'il y en a plusieurs ([`AppPaths`](../../../src/Bdtheque.Frontend/Navigation/AppPaths.cs)). Par défaut, une fiche ramène à sa liste, et une édition à la page des éditions et intentions d'acquisition de son album. Avec `from=record`, la fiche a été ouverte par l'administrateur depuis une fiche de la consultation, et c'est à cette fiche qu'elle ramène : celle de l'album pour un album, une édition ou l'édition que vise une intention, celle de la série pour une série. La page déduit cette fiche de ce qu'elle saisit et ne lit jamais d'adresse de retour, si bien qu'elle ne peut pas mener hors de l'application. Le panneau d'un auteur ou d'un univers suit la même règle : ouvert depuis la fiche, il se pose sur sa liste cherchée sur le nom de la fiche, qui la montre, et sa fermeture comme son enregistrement ramènent à la fiche ; l'adresse de la liste ne garde le paramètre qu'avec la fiche modifiée ([`InListEntryQuery`](../../../src/Bdtheque.Frontend/Lists/InListEntryQuery.cs)).
+
+Sur les fiches de la consultation, ce lien vers la saisie n'est rendu que pour l'administrateur authentifié. [`RecordBreadcrumb`](../../../src/Bdtheque.Frontend/Components/Records/RecordBreadcrumb.razor), commun aux fiches d'un album, d'une série, d'un auteur et d'un univers, lit l'état d'authentification que Blazor transmet en cascade, y compris en rendu statique. Pour l'administrateur, il place le fil d'Ariane dans sa propre colonne, suivi du bouton ; pour un visiteur, il rend le fil d'Ariane seul, exactement comme avant, et la page ne change en rien d'autre. La fiche d'un album lit de même l'authentification pour les liens de chaque édition et de chaque intention qui vise une édition, rendus par [`RecordEditLink`](../../../src/Bdtheque.Frontend/Components/Records/RecordEditLink.razor).
 
 Les éléments qui composent une fiche de saisie se répartissent ainsi :
 

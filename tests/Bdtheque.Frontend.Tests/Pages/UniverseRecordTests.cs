@@ -293,6 +293,31 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
         Assert.Empty(page.FindAll(".bibliography"));
     }
 
+    // For the authenticated administrator only, the line of the breadcrumb leads to the entry form, which leads back to the
+    // record (visuel/fiche-univers/contenu.md, #658); a visitor has the breadcrumb alone.
+    [Fact]
+    public void Administrator_IsLedToTheEntryForm_FromTheLineOfTheBreadcrumb()
+    {
+        _catalog.Universe = Universe();
+        AddAuthorization().SetAuthorized("admin");
+
+        var link = Open().Find(".record-breadcrumb [data-part=edit-record]");
+
+        Assert.Equal((AppPaths.AdminEditUniverseFromRecord(UniverseId, Universe().Name), "Modifier l'univers"), (link.GetAttribute("href"), link.TextContent.Trim()));
+    }
+
+    [Fact]
+    public void Visitor_IsLedToNoEntryForm()
+    {
+        _catalog.Universe = Universe();
+        AddAuthorization();
+
+        var page = Open();
+
+        Assert.Empty(page.FindAll(".record-breadcrumb, [data-part=edit-record]"));
+        Assert.NotNull(page.Find("nav.breadcrumb"));
+    }
+
     private IRenderedComponent<UniverseRecord> Open()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.UniverseRecord(UniverseId));

@@ -80,4 +80,18 @@ public sealed class AuthorListQueryTests
     {
         Assert.Null(new AuthorListQuery().Action);
     }
+
+    // Opened from the record of the author in the consultation, the panel leads back to it (visuel/saisie-auteur/contenu.md,
+    // #658): the address says so with the author changed, over the list searched on its name, and only then.
+    [Fact]
+    public void FromRecord_KeptWithTheAuthorChanged_Only()
+    {
+        var fromRecord = new AuthorListQuery(Text: "Pratt", Edit: Author) { FromRecord = true };
+
+        Assert.Equal($"{AppPaths.AdminAuthors}?q=Pratt&edit={Author}&from=record", fromRecord.Href());
+        Assert.Equal(fromRecord.Href(), AppPaths.AdminEditAuthorFromRecord(Author, "Pratt"));
+        Assert.Equal(fromRecord, AuthorListQuery.Parse($"?q=Pratt&edit={Author}&from=record"));
+        Assert.Equal($"{AppPaths.AdminAuthors}?q=Pratt", (fromRecord with { Edit = null }).Href());
+        Assert.False(AuthorListQuery.Parse($"?edit={Author}&from=elsewhere").FromRecord);
+    }
 }

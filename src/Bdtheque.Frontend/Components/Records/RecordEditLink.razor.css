@@ -1,0 +1,17 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md): a link of the record, with its icon, its
+   label on one line. */
+.record-edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-strong);
+    white-space: nowrap;
+}
+
+/* The pencil at the size of the text, like the icon of a button. */
+.record-edit-link ::deep .icon {
+    flex: none;
+    inline-size: 1.15em;
+    block-size: 1.15em;
+}

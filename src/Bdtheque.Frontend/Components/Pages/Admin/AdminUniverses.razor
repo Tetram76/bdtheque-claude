@@ -115,7 +115,7 @@
                 {
                     <input type="hidden" name="@VersionName" value="@EntryVersion" />
                 }
-                <SidePanel Id="universe-panel" Title="@(_query.Edit is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@ListOnly.Href()">
+                <SidePanel Id="universe-panel" Title="@(_query.Edit is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@EntryReturnHref">
                     <ChildContent>
                         @* The error of the saving, as on an entry form (visuel/listes/saisie-selon-l-entite.md): a universe deleted
                            meanwhile keeps the panel open, with what was typed. *@
@@ -239,6 +239,10 @@
 
     // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
     private UniverseListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
+
+    // Where the closing of the panel and its saving lead: the record of the universe in the consultation, when the panel was opened
+    // from it (visuel/listes/saisie-selon-l-entite.md, decisions of the user, #658); the list otherwise.
+    private string EntryReturnHref => _query is { FromRecord: true, Edit: { } edited } ? AppPaths.UniverseRecord(edited) : ListOnly.Href();
 
     private string NewHref => (ListOnly with { Adding = true }).Href();
 
@@ -368,7 +372,7 @@
             await Recorder.RecordActionAsync(AudienceFunctions.AdminUniverseParentCreated, $"universe={saved.ParentId}", aborted);
         await Recorder.RecordActionAsync(
             _query.Edit is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}", aborted);
-        Navigation.NavigateTo(ListOnly.Href());
+        Navigation.NavigateTo(EntryReturnHref);
     }
 
     // The fields of the content the panel enters, in their order in the panel.

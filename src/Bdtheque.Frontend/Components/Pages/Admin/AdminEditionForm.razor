@@ -357,7 +357,12 @@ else
     // Where a record saved, or cancelled, leads (visuel/saisie-album/contenu.md, decision of the user): back where the action
     // was opened (decision of the user, #612), the list of the intents, where the next one is, or the page of the editions of
     // the album, to which the breadcrumb then leads.
-    private string ReturnHref => OpenedFromIntents ? AppPaths.AdminPurchaseIntents : AppPaths.AdminAlbumEditions(AlbumId);
+    private string ReturnHref => OpenedFromIntents ? AppPaths.AdminPurchaseIntents : OpenedFromRecord ? AppPaths.Album(AlbumId) : AppPaths.AdminAlbumEditions(AlbumId);
+
+    // Whether the form of an edition, or of the edition an intent targets, was opened from the record of its album in the
+    // consultation, which it leads back to, its breadcrumb staying that of every edition (visuel/saisie-edition/contenu.md,
+    // decisions of the user, #658).
+    private bool OpenedFromRecord => Purpose == EditionPage.Edition && AppPaths.IsFromRecord(From);
 
     // An action asked from the list of the intents names the intent it realizes or converts (its album, and the edition it
     // targets) after that list; any other page, the album, by the page of its editions, then the edition by its full label,

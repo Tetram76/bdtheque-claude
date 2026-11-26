@@ -40,6 +40,9 @@ public sealed record AuthorListQuery(
     {
         var address = new Address(query);
         var (edit, adding) = ReadEntry(address);
-        return new AuthorListQuery(address.Search, address.Entry, address.Page, address.Delete, address.Merge, address.MergeText, edit, adding);
+        return new AuthorListQuery(address.Search, address.Entry, address.Page, address.Delete, address.Merge, address.MergeText, edit, adding)
+        {
+            FromRecord = ReadFromRecord(address),
+        };
     }
 }

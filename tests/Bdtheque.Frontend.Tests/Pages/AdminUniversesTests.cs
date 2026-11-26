@@ -263,6 +263,21 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
             error.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
     }
 
+    // Opened from the record of the universe in the consultation, the panel leads back to the record, cancelled or saved
+    // (visuel/listes/saisie-selon-l-entite.md, decisions of the user, #658).
+    [Fact]
+    public async Task Panel_OpenedFromTheRecord_LeadsBackToIt_CancelledOrSaved()
+    {
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"]);
+        var page = Open($"q=Corto&edit={Corto.Id}&from=record", recorded: true);
+
+        Assert.Equal(AppPaths.UniverseRecord(Corto.Id), page.Find("dialog.side-panel .side-panel-actions a.button").GetAttribute("href"));
+        await page.SubmitAsync("form.side-panel-form");
+
+        Assert.Single(_api.Written);
+        Assert.EndsWith(AppPaths.UniverseRecord(Corto.Id), Services.GetRequiredService<NavigationManager>().Uri);
+    }
+
     [Fact]
     public async Task Panel_CreatesTheUniverse_ThenLeadsBackToTheList()
     {

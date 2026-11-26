@@ -108,4 +108,7 @@
   <data name="Dates" xml:space="preserve">
     <value>Édition créée le {0}, modifiée le {1}.</value>
   </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifier l'édition</value>
+  </data>
 </root>

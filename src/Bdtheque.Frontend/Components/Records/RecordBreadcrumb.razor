@@ -1,0 +1,41 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
+@* The breadcrumb of a record of the consultation and, for the authenticated administrator only, the link to the entry form
+   of what it presents, at the end of its line (visuel/fiche-album/contenu.md, decisions of the user, #658): the breadcrumb has
+   a column of its own, where a long one wraps without ever reaching the link, centred on its height; on a smartphone, the link
+   is reduced to its icon. Written once for the records of an album, a series, an author and a universe, so that the link is
+   at the same place on each. For a visitor, the breadcrumb alone, as before: nothing else of the record depends on the
+   authentication. *@
+@if (_administrator)
+{
+    <div class="record-breadcrumb">
+        <Breadcrumb Items="Items" />
+        <Button Href="@EditHref" Icon="IconName.Edit" Label="@EditLabel" IconOnlyOnSmartphone="true" data-part="edit-record" />
+    </div>
+}
+else
+{
+    <Breadcrumb Items="Items" />
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<BreadcrumbItem> Items { get; set; } = [];
+
+    /// <summary>The entry form of what the record presents, which leads back to the record (<see cref="AppPaths.FromRecord"/>).</summary>
+    [Parameter, EditorRequired]
+    public string EditHref { get; set; } = null!;
+
+    /// <summary>The label of the link, after the kind of the record (« Modifier l'album »).</summary>
+    [Parameter, EditorRequired]
+    public string EditLabel { get; set; } = null!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? Authentication { get; set; }
+
+    private bool _administrator;
+
+    // The only authenticated user is the administrator (contraintes-techniques/architecture-deploiement/authentification.md).
+    protected override async Task OnParametersSetAsync() =>
+        _administrator = Authentication is not null && (await Authentication).User.Identity?.IsAuthenticated == true;
+}
