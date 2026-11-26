@@ -8,7 +8,7 @@ namespace Bdtheque.EndToEnd.Tests;
 /// <summary>
 /// The link of a record of the consultation to its entry form, for the authenticated administrator only (visuel/fiche-album/contenu.md,
 /// decisions of the user, #658): absent for a visitor; for the administrator, on the line of the breadcrumb, leading to the
-/// entry form, which leads back to the record once cancelled, a form on a page of its own as a panel over a list. Nothing is
+/// entry form, which leads back to the record once cancelled, a form on a page of its own as a panel over the record. Nothing is
 /// saved, the application of the records being shared with its captures (<see cref="RecordsApplication"/>).
 /// </summary>
 [Collection(RecordsApplication.Name)]
@@ -42,7 +42,7 @@ public sealed class RecordEntryLinkTests(RecordsApplication application) : Brows
     }
 
     [Theory, InEachTheme]
-    public async Task Administrator_ModifiesTheAuthor_FromItsRecord_InThePanelOverItsList_AndComesBackToIt(string theme)
+    public async Task Administrator_ModifiesTheAuthor_InThePanelOverItsRecord_AndComesBackToIt(string theme)
     {
         var page = await NewPageAsync(theme);
         await ApplicationHost.SignInAsync(page, AppPaths.AdminHome);
@@ -51,11 +51,12 @@ public sealed class RecordEntryLinkTests(RecordsApplication application) : Brows
         await page.GetByRole(AriaRole.Link, new() { Name = "Modifier l'auteur" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
         await Assertions.Expect(panel).ToBeVisibleAsync();
-        // The list behind the panel is the one searched on the name of the author, which shows it.
-        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditAuthorFromRecord(Application.AuthorId, "Pratt")));
-        await Assertions.Expect(page.Locator(".author-row:not(.author-row-head)").Filter(new() { HasText = "Hugo Pratt" })).ToHaveCountAsync(1);
+        // The panel is over the record of the author, which stays under it.
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AuthorRecordWithEntry(Application.AuthorId)));
+        await Assertions.Expect(page.Locator(".author-record")).ToHaveCountAsync(1);
         await panel.GetByRole(AriaRole.Link, new() { Name = "Annuler" }).ClickAsync();
 
         await Assertions.Expect(page).ToHaveURLAsync(new Regex($"/authors/{Application.AuthorId}$"));
+        await Assertions.Expect(page.GetByRole(AriaRole.Dialog)).ToHaveCountAsync(0);
     }
 }

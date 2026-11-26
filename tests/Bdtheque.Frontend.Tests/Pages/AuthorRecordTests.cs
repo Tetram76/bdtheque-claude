@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
@@ -392,7 +393,6 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
     // For the authenticated administrator only, the line of the breadcrumb leads to the entry form, which leads back to the
     // record (visuel/fiche-auteur/contenu.md, #658); a visitor has the breadcrumb alone.
-    // An author under a pseudonym is found in the list of the administration by it: the panel opens over that list.
     [Fact]
     public void Administrator_IsLedToTheEntryForm_FromTheLineOfTheBreadcrumb()
     {
@@ -401,7 +401,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
         var link = Open().Find(".record-breadcrumb [data-part=edit-record]");
 
-        Assert.Equal((AppPaths.AdminEditAuthorFromRecord(AuthorId, "Moebius"), "Modifier l'auteur"), (link.GetAttribute("href"), link.TextContent.Trim()));
+        Assert.Equal((AppPaths.AuthorRecordWithEntry(AuthorId), "Modifier l'auteur"), (link.GetAttribute("href"), link.TextContent.Trim()));
     }
 
     [Fact]
@@ -416,9 +416,54 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Assert.NotNull(page.Find("nav.breadcrumb"));
     }
 
-    private IRenderedComponent<AuthorRecord> Open()
+    // The panel of the author opens over its record, which stays under it, and leads back to it, closed or saved
+    // (visuel/saisie-auteur/contenu.md, decisions of the user, #658).
+    [Fact]
+    public void Administrator_EntersTheAuthorInAPanelOverItsRecord()
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AuthorRecord(AuthorId));
+        _catalog.Author = Author();
+        AddAuthorization().SetAuthorized("admin");
+
+        var page = Open(AppPaths.AuthorRecordWithEntry(AuthorId));
+
+        var panel = page.Find("dialog.side-panel");
+        Assert.Equal("Modifier l'auteur", panel.QuerySelector("h2")!.TextContent.Trim());
+        Assert.Equal("Floch", panel.QuerySelector("input[name='lastName']")!.GetAttribute("value"));
+        Assert.Equal(AppPaths.AuthorRecord(AuthorId), panel.QuerySelector(".side-panel-actions a.button")!.GetAttribute("href"));
+        Assert.NotNull(page.Find("h1"));
+        Assert.Contains("admin.authors.edit", _audience.Functions);
+    }
+
+    [Fact]
+    public async Task Administrator_SavesTheAuthor_FromItsRecord_AndComesBackToIt()
+    {
+        _catalog.Author = Author();
+        AddAuthorization().SetAuthorized("admin");
+        var page = Open(AppPaths.AuthorRecordWithEntry(AuthorId));
+
+        await page.ChangeAsync("input[name='nationality']", "Italienne");
+        await page.SubmitAsync("form.side-panel-form");
+
+        Assert.Equal(("PUT", $"/admin/authors/{AuthorId}", "Italienne"), Assert.Single(_catalog.Written));
+        Assert.Equal(AppPaths.AuthorRecord(AuthorId), new Uri(Services.GetRequiredService<NavigationManager>().Uri).PathAndQuery);
+    }
+
+    // A visitor who writes the address of the panel by hand has no panel, and nothing of the administration is read.
+    [Fact]
+    public void Visitor_HasNoPanel()
+    {
+        _catalog.Author = Author();
+        AddAuthorization();
+
+        var page = Open(AppPaths.AuthorRecordWithEntry(AuthorId));
+
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.DoesNotContain(_catalog.Requested, path => path.StartsWith("/admin/", StringComparison.Ordinal));
+    }
+
+    private IRenderedComponent<AuthorRecord> Open(string? address = null)
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo(address ?? AppPaths.AuthorRecord(AuthorId));
         return Render<AuthorRecord>(parameters => parameters.Add(p => p.Id, AuthorId).AddCascadingValue(_request.Context));
     }
 
@@ -477,25 +522,41 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
         public List<string> Requested { get; } = [];
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        /// <summary>The writings of the panel of the author: method, path and the nationality sent.</summary>
+        public List<(string Method, string Path, string? Nationality)> Written { get; } = [];
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var path = request.RequestUri!.PathAndQuery;
             if (path.StartsWith("/audience/", StringComparison.Ordinal))
-                return _audience.SendAsync(request, cancellationToken);
+                return await _audience.SendAsync(request, cancellationToken);
 
             Requested.Add(path);
+            // The author as its panel reads and saves it, in the administration.
+            if (path.StartsWith("/admin/authors/", StringComparison.Ordinal))
+            {
+                if (request.Method == HttpMethod.Put)
+                {
+                    var body = await request.Content!.ReadFromJsonAsync<JsonElement>(cancellationToken);
+                    Written.Add(("PUT", path, body.GetProperty("nationality").GetString()));
+                }
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = JsonContent.Create(new Contracts.Admin.AuthorForm(Author!.Id, Author.LastName, Author.FirstName, Author.Pseudonym, null, null, Created, Modified, 7)),
+                };
+            }
             if (path == "/catalog/settings")
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = JsonContent.Create(new ApplicationSettings(AlbumLabelFormat.TitleSeriesVolume, Contracts.Enums.DisplayCulture.FrenchFrance)),
-                });
+                };
             if (AuthorStatus != HttpStatusCode.OK)
-                return Task.FromResult(new HttpResponseMessage(AuthorStatus)
+                return new HttpResponseMessage(AuthorStatus)
                 {
                     Content = JsonContent.Create(new { type = ProblemTypes.Functional, status = (int)AuthorStatus },
                         mediaType: new System.Net.Http.Headers.MediaTypeHeaderValue("application/problem+json")),
-                });
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(Author) });
+                };
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(Author) };
         }
     }
 }

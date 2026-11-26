@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la fiche d''un univers : univers parents, description, arborescence de son univers de premier niveau, séries et albums rattachés.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T14:00:00Z }
 ---
 
 # Contenu
@@ -10,7 +10,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T10:00:00Z }
 Ce qui n'est pas renseigné n'est pas affiché ([Convivialité et efficacité](../charte-graphique/convivialite-et-efficacite.md)). Une fiche n'a pas de filtre : tout ce qui est rattaché à l'univers y figure ([Périmètre de la consultation](../../fonctionnel/regles-metier/perimetre-de-la-consultation.md)). De haut en bas (décision de l'utilisateur, #607, maquette à l'appui) :
 
 - **En-tête** de la partie Consultation, sans entrée active : un univers n'a pas d'entrée dans le menu ([Structure de l'application](../../fonctionnel/structure-de-l-application.md)). Puis le **fil d'Ariane** : « Univers », qui ne mène nulle part, les univers n'ayant pas de liste dans la consultation, mais dit dès le premier niveau ce que la fiche présente, comme « Albums », « Séries » ou « Auteurs » ouvrent celui des autres fiches (décision de l'utilisateur, #607) ; puis les univers parents, de la racine à son parent, chacun menant à sa fiche, puis l'univers.
-- **Lien vers la saisie**, pour l'administrateur authentifié seulement : « Modifier l'univers », sur la ligne du fil d'Ariane, comme celui de la fiche d'un album ([Contenu](../fiche-album/contenu.md)).
+- **Lien vers la saisie**, pour l'administrateur authentifié seulement : « Modifier l'univers », sur la ligne du fil d'Ariane, comme celui de la fiche d'un album ([Contenu](../fiche-album/contenu.md)), qui ouvre le panneau de l'univers par-dessus la fiche ([Saisie selon l'entité](../listes/saisie-selon-l-entite.md), décisions de l'utilisateur, #658).
 - **En-tête de la fiche** : la mention de sa nature, **« Univers »**, au-dessus de son visuel, comme celle de la fiche d'un album ([Contenu](../fiche-album/contenu.md)) ; son visuel, la **bulle de pensée** qui représente les univers ([Liens qui font sortir de l'application](../charte-graphique/liens-qui-font-sortir-de-l-application.md)), décoratif, à gauche du nom, comme le monogramme d'un auteur ([Contenu](../fiche-auteur/contenu.md)) ; son **nom** ; des étiquettes qui donnent le nombre de séries et le nombre d'albums rattachés, sous-univers compris ([Hiérarchie des univers](../../fonctionnel/regles-metier/hierarchie-des-univers.md)), puis le nombre de ses sous-univers, à tous les niveaux (« 5 sous-univers »), que présente l'arborescence ; sans sous-univers, pas d'étiquette, comme toute donnée absente de la consultation ([Convivialité et efficacité](../charte-graphique/convivialite-et-efficacite.md)).
 - **De quoi s'agit-il ?** : sa description ([Univers](../../modele-metier/univers.md)) ; sans description, pas de bloc.
 - **Où se situe-t-il ?** (mention « Arborescence ») : toute l'arborescence de son univers de premier niveau, lui-même compris, dans un bloc à elle, entre sa description et ses séries et albums : l'univers parmi ses frères, ses parents parmi les leurs, et les sous-univers de chacun, à tous les niveaux (décisions de l'utilisateur, #607, maquette à l'appui) ; un univers de premier niveau sans sous-univers n'a pas de bloc, qui ne présenterait que lui :

@@ -232,18 +232,19 @@ public static class AppPaths
     public static string AdminEditEditionFromRecord(Guid albumId, Guid id) => FromRecordOf(AdminEditEdition(albumId, id));
 
     /// <summary>
-    /// The panel of an author, opened from its record in the consultation, to which it leads back: over the list of the authors
-    /// searched on its name, which shows it (visuel/saisie-auteur/contenu.md).
+    /// The parameter of the address of the record of an author or of a universe that opens its side panel over it, for the
+    /// authenticated administrator only (visuel/saisie-auteur/contenu.md, visuel/listes/saisie-selon-l-entite.md, #658).
     /// </summary>
-    public static string AdminEditAuthorFromRecord(Guid id, string name) =>
-        new AuthorListQuery(Text: name, Edit: id) { FromRecord = true }.Href();
+    public const string RecordEntryParameter = "edit";
 
-    /// <summary>
-    /// The panel of a universe, opened from its record in the consultation, to which it leads back: over the list of the
-    /// universes searched on its name, which shows it (visuel/listes/saisie-selon-l-entite.md).
-    /// </summary>
-    public static string AdminEditUniverseFromRecord(Guid id, string name) =>
-        new UniverseListQuery(Text: name, Edit: id) { FromRecord = true }.Href();
+    /// <summary>The value of <see cref="RecordEntryParameter"/> that opens the panel.</summary>
+    public const string RecordEntryOpen = "open";
+
+    /// <summary>The record of an author with the panel of the author open over it, which leads back to the record.</summary>
+    public static string AuthorRecordWithEntry(Guid id) => $"{AuthorRecord(id)}?{RecordEntryParameter}={RecordEntryOpen}";
+
+    /// <summary>The record of a universe with the panel of the universe open over it, which leads back to the record.</summary>
+    public static string UniverseRecordWithEntry(Guid id) => $"{UniverseRecord(id)}?{RecordEntryParameter}={RecordEntryOpen}";
 
     /// <summary>Whether the value of <see cref="FromParameter"/> says the form was opened from a record of the consultation.</summary>
     public static bool IsFromRecord(string? from) => string.Equals(from, FromRecord, StringComparison.Ordinal);

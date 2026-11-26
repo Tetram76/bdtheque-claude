@@ -35,6 +35,6 @@ public sealed record UniverseListQuery(
     public static UniverseListQuery Parse(string query)
     {
         var (text, page, delete, merge, mergeText, edit, adding) = Read(query);
-        return new UniverseListQuery(text, page, delete, merge, mergeText, edit, adding) { FromRecord = ReadFromRecord(new Address(query)) };
+        return new UniverseListQuery(text, page, delete, merge, mergeText, edit, adding);
     }
 }

@@ -3,8 +3,6 @@
 @using Bdtheque.Contracts.Catalog
 @using Bdtheque.Contracts.Deletion
 @inject IStringLocalizer<AdminUniverses> L
-@inject IStringLocalizer<FieldMessages> FieldTexts
-@inject IStringLocalizer<RuleMessages> Rules
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -107,48 +105,12 @@
         }
     </ChildContent>
     <Dialogs>
-        @if (PanelOpen)
+        @if (_query.Edit is not null || _query.Adding)
         {
-            <form class="side-panel-form" method="post" @formname="@EntryFormName" @onsubmit="SaveAsync">
-                <AntiforgeryToken />
-                @if (_query.Edit is not null)
-                {
-                    <input type="hidden" name="@VersionName" value="@EntryVersion" />
-                }
-                <SidePanel Id="universe-panel" Title="@(_query.Edit is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@EntryReturnHref">
-                    <ChildContent>
-                        @* The error of the saving, as on an entry form (visuel/listes/saisie-selon-l-entite.md): a universe deleted
-                           meanwhile keeps the panel open, with what was typed. *@
-                        @if (_entryProblem is { } problem)
-                        {
-                            <SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                                       Technical="@L["Problem.Technical.Text"]" CanReload="@(_query.Edit is not null)" StaticForm="true"
-                                       ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />
-                        }
-                        @if (_universe is not null)
-                        {
-                            <p class="side-panel-dates">
-                                @L["Dates.Created"] <LocalDateTime Value="_universe.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_universe.ModifiedAt" />.
-                            </p>
-                        }
-                        <Field Id="universe-name" Label="@L["Name"]" Required Error="@Errors.For(NameField)" Context="control">
-                            <input id="@control.Id" type="text" name="@NameName" autofocus="@(Focused == NameField)" tabindex="0"
-                                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryName" />
-                        </Field>
-                        <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" NewKeyName="@NewParentKeyName"
-                                             NewName="@NewParentName" Parent="_parent" NewParent="@SentNewParent" Error="@ParentError"
-                                             Autofocus="@(Focused == ParentField)" />
-                        <Field Id="universe-description" Label="@L["Description"]" Error="@Errors.For(DescriptionField)" Context="control">
-                            <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
-                                      autofocus="@(Focused == DescriptionField)" tabindex="0" aria-describedby="@control.DescribedBy"
-                                      aria-invalid="@control.Invalid">@EntryDescription</textarea>
-                        </Field>
-                    </ChildContent>
-                    <Actions>
-                        <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(_query.Edit is null ? L["Create"] : L["Save"])" />
-                    </Actions>
-                </SidePanel>
-            </form>
+            @* The panel of the universe, changed or new, over the list (visuel/listes/saisie-selon-l-entite.md): its closing and its
+               saving lead back to the list, with its criteria. *@
+            <UniverseEntryPanel UniverseId="_query.Edit" Searched="@NewSearched" CloseHref="@ListOnly.Href()" SavedHref="@ListOnly.Href()"
+                                ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />
         }
         else if (_dialogUniverse is not null)
         {
@@ -175,13 +137,6 @@
 
 @code {
     private const string DeletionFormName = "universe-deletion";
-    private const string EntryFormName = "universe-entry";
-    private const string NameName = "name";
-    private const string DescriptionName = "description";
-    private const string ParentName = "parentId";
-    private const string NewParentKeyName = "newParentKey";
-    private const string NewParentName = "newParent";
-    private const string VersionName = "version";
 
     /// <summary>How many other universes the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
     internal const int CandidateCount = 10;
@@ -197,61 +152,22 @@
     [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
     private string? Fingerprint { get; set; }
 
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = NameName)]
-    private string? EntryName { get; set; }
-
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = DescriptionName)]
-    private string? EntryDescription { get; set; }
-
-    /// <summary>The parent chosen; none at the top of the hierarchy.</summary>
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = ParentName)]
-    private Guid? EntryParentId { get; set; }
-
-    /// <summary>The key of the parent created on the spot, sent by the field of the parent; none for an existing parent, or for none.</summary>
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = NewParentKeyName)]
-    private Guid? EntryNewParentKey { get; set; }
-
-    /// <summary>The name of the parent created on the spot, empty if the user emptied it: the saving refuses it.</summary>
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = NewParentName)]
-    private string? EntryNewParentName { get; set; }
-
-    // The parent created on the spot, told by its key: an empty name is still one, which the domain refuses, never no parent.
-    private NewUniverse? SentNewParent => EntryNewParentKey is { } key ? new NewUniverse(key, EntryNewParentName ?? "") : null;
-
-    /// <summary>The version of the universe changed, as its panel read it.</summary>
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = VersionName)]
-    private uint? EntryVersion { get; set; }
-
     private UniverseListQuery _query = new();
     private RecordCounts? _counts;
     private Page<UniverseAdminListItem>? _list;
     private ApiProblem? _problem;
     private UniverseAdminListItem? _dialogUniverse;
-    private UniverseForm? _universe;
-    private UniverseInHierarchy? _parent;
     private DeletionImpact? _impact;
     private ApiProblem? _deletionProblem;
-    private ApiProblem? _entryProblem;
-    // The parent created on the spot that the last saving sent, under the key standing for its identifier: what lets its error
-    // designate it (choix-implementation/socle/frontend.md, erreur d'une fiche créée sur place).
-    private NewRecords? _sentNewRecords;
     private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
 
     // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
     private UniverseListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
 
-    // Where the closing of the panel and its saving lead: the record of the universe in the consultation, when the panel was opened
-    // from it (visuel/listes/saisie-selon-l-entite.md, decisions of the user, #658); the list otherwise.
-    private string EntryReturnHref => _query is { FromRecord: true, Edit: { } edited } ? AppPaths.UniverseRecord(edited) : ListOnly.Href();
-
     private string NewHref => (ListOnly with { Adding = true }).Href();
 
-    // A form sent back, whose fields, even emptied, are those typed.
-    private bool IsPost => HttpContext is { } context && HttpMethods.IsPost(context.Request.Method);
-
-    // The panel of a new universe, or of the universe changed: read, or sent back with its version, which keeps it open over a
-    // universe deleted meanwhile, to present the error with what was typed. An address on a universe deleted opens none.
-    private bool PanelOpen => _query.Edit is null ? _query.Adding : _universe is not null || EntryVersion is not null;
+    // A new universe opened on a search that finds none is the universe searched (« Créer l'univers « … » »).
+    private string? NewSearched => _query is { Adding: true, Edit: null, Text: { } searched } && _list!.Items.Count == 0 ? searched : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -278,8 +194,6 @@
             return;
         }
 
-        await LoadEntryAsync();
-
         if (_dialogUniverse is not null && _query.Delete is { } deleted)
             await LoadImpactAsync(deleted);
         else if (_dialogUniverse is not null && _query.MergeText is { } text)
@@ -288,113 +202,6 @@
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
-
-    // The entry of the panel, if the address opens it: the universe changed, read once, or what a form sent back holds.
-    private async Task LoadEntryAsync()
-    {
-        // The panel opens over the list wherever the universe is in it.
-        if (_query.Edit is { } edited)
-            _universe = await FindAsync(edited);
-        // Read once, from the universe; a form sent back keeps what was typed, the version always among it.
-        if (_universe is not null && EntryVersion is null)
-        {
-            EntryName = _universe.Name;
-            EntryDescription = _universe.Description;
-            EntryParentId = _universe.ParentId;
-            EntryVersion = _universe.Version;
-        }
-        // A new universe opened on a search that finds none is the universe searched (« Créer l'univers « … » »), unless a name
-        // sent back, even emptied, is to be corrected.
-        if (_query is { Adding: true, Edit: null, Text: { } searched } && _list!.Items.Count == 0 && !IsPost)
-            EntryName ??= searched;
-        // The parent with its ancestors: that of the universe as read, or the one a form sent back chose.
-        if (EntryParentId is not { } parentId)
-            _parent = null;
-        else if (parentId == _universe?.ParentId)
-            _parent = _universe.Parent;
-        else
-            _parent = await HierarchyAsync(parentId);
-    }
-
-    // The universe, or none if it no longer exists: the list is then shown without its panel.
-    private async Task<UniverseForm?> FindAsync(Guid id)
-    {
-        try
-        {
-            return await Api.GetAsync<UniverseForm>($"/admin/universes/{id}");
-        }
-        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
-        {
-            return null;
-        }
-    }
-
-    // The parent sent with a form that was refused, with its ancestors; by its identifier alone if it no longer exists, the
-    // field then presenting none, and the saving the error.
-    private async Task<UniverseInHierarchy?> HierarchyAsync(Guid id)
-    {
-        try
-        {
-            return await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{id}/hierarchy");
-        }
-        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
-        {
-            return null;
-        }
-    }
-
-    private async Task SaveAsync()
-    {
-        // A parent created on the spot is sent by its name alone, under the key the field gave it, which the universe cites in
-        // place of its identifier: it is created with the universe, in the same transaction, or not at all.
-        var newParent = SentNewParent;
-        _sentNewRecords = newParent is null ? null : NewRecords.None with { Universes = [newParent] };
-        var parentId = newParent?.Key ?? EntryParentId;
-        UniverseForm saved;
-        try
-        {
-            // The universe changed, as its panel read it, even deleted meanwhile: the API then says so, never a new universe.
-            saved = _query.Edit is { } edited
-                ? await Api.PutAsync<UpdateUniverseRequest, UniverseForm>(
-                    $"/admin/universes/{edited}",
-                    new UpdateUniverseRequest(EntryName ?? "", EntryDescription, parentId, EntryVersion.GetValueOrDefault(), _sentNewRecords))
-                : await Api.PostAsync<CreateUniverseRequest, UniverseForm>(
-                    "/admin/universes", new CreateUniverseRequest(EntryName ?? "", EntryDescription, parentId, _sentNewRecords));
-        }
-        catch (ApiProblemException exception)
-        {
-            _entryProblem = exception.Problem;
-            return;
-        }
-
-        var aborted = HttpContext?.RequestAborted ?? default;
-        if (newParent is not null)
-            await Recorder.RecordActionAsync(AudienceFunctions.AdminUniverseParentCreated, $"universe={saved.ParentId}", aborted);
-        await Recorder.RecordActionAsync(
-            _query.Edit is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}", aborted);
-        Navigation.NavigateTo(EntryReturnHref);
-    }
-
-    // The fields of the content the panel enters, in their order in the panel.
-    private const string NameField = "/name";
-    private const string ParentField = "/parentId";
-    private const string DescriptionField = "/description";
-    private static readonly string[] PanelFields = [NameField, ParentField, DescriptionField];
-
-    // The fields a refused saving designates (choix-implementation/socle/frontend.md, champ d'une erreur métier): a name already
-    // taken under the parent has the text shared by every name unique regardless of case and accents (modele-metier/univers.md),
-    // naming the universe as typed.
-    private FieldErrors Errors => new(_entryProblem, FieldTexts, Rules, EntryName?.Trim() ?? "");
-
-    // The parent refused (a cycle), or the parent created on the spot that the saving refused (its name already taken at the top
-    // of the hierarchy), designated on the field of the parent, which cites it by its name.
-    private string? ParentError => Errors.For(ParentField)
-                                   ?? (_sentNewRecords is { Universes: [var sent] } ? Errors.ForAdded(_sentNewRecords, sent.Key) : null);
-
-    // The first field to correct gets the focus; the first field otherwise.
-    private string Focused => PanelFields.FirstOrDefault(entered => ErrorOf(entered) is not null && !Errors.IsRelated(entered)) ?? NameField;
-
-    private string? ErrorOf(string field) => field == ParentField ? ParentError : Errors.For(field);
 
     private async Task LoadImpactAsync(Guid universeId)
     {

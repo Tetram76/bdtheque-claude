@@ -57,17 +57,4 @@ public sealed class UniverseListQueryTests
         Assert.Equal((function, parameters), (action.Function.Key, action.Parameters));
         Assert.Contains(action.Function, AudienceFunctions.Followed);
     }
-
-    // Opened from the record of the universe in the consultation, the panel leads back to it
-    // (visuel/listes/saisie-selon-l-entite.md, #658): the address says so with the universe changed, and only then.
-    [Fact]
-    public void FromRecord_KeptWithTheUniverseChanged_Only()
-    {
-        var fromRecord = new UniverseListQuery(Text: "Corto", Edit: Universe) { FromRecord = true };
-
-        Assert.Equal($"{AppPaths.AdminUniverses}?q=Corto&edit={Universe}&from=record", fromRecord.Href());
-        Assert.Equal(fromRecord.Href(), AppPaths.AdminEditUniverseFromRecord(Universe, "Corto"));
-        Assert.Equal(fromRecord, UniverseListQuery.Parse($"?q=Corto&edit={Universe}&from=record"));
-        Assert.Equal($"{AppPaths.AdminUniverses}?q=Corto", (fromRecord with { Edit = null }).Href());
-    }
 }

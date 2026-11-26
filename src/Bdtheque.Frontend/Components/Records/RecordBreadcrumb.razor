@@ -22,7 +22,7 @@ else
     [Parameter, EditorRequired]
     public IReadOnlyList<BreadcrumbItem> Items { get; set; } = [];
 
-    /// <summary>The entry form of what the record presents, which leads back to the record (<see cref="AppPaths.FromRecord"/>).</summary>
+    /// <summary>The entry form of what the record presents, which leads back to the record: a page of its own (<see cref="AppPaths.FromRecord"/>), or a panel over the record (<see cref="AppPaths.RecordEntryParameter"/>).</summary>
     [Parameter, EditorRequired]
     public string EditHref { get; set; } = null!;
 

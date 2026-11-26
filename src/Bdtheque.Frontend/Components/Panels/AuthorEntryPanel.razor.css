@@ -1,0 +1,14 @@
+/* Built on the contracts of the theme only (choix-implementation/socle/themes.md), the panel being that of every side panel
+   (Components/Controls/SidePanel.razor). In the panel of an author, its first name and last name side by side, one under the
+   other on a narrow panel (visuel/saisie-auteur/contenu.md): after the width of the panel, not of the screen. */
+.author-panel-names {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m);
+}
+
+@container side-panel (min-width: 25rem) {
+    .author-panel-names {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}

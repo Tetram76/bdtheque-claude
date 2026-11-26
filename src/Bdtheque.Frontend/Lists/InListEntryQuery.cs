@@ -1,5 +1,4 @@
 using Bdtheque.Frontend.Audience;
-using Bdtheque.Frontend.Navigation;
 
 namespace Bdtheque.Frontend.Lists;
 
@@ -27,26 +26,14 @@ public abstract record InListEntryQuery(
     /// <summary>The functions the audience measurement follows for the entry of a record of the list.</summary>
     protected abstract EntryFunctions EntryFunctions { get; }
 
-    /// <summary>
-    /// Whether the record changed was opened from its record in the consultation, to which the closing of its entry and its
-    /// saving lead back (<see cref="AppPaths.FromRecord"/>); the address keeps it only with the record changed.
-    /// </summary>
-    public bool FromRecord { get; init; }
-
     protected override IEnumerable<(string Name, string Value)> EntryParameters
     {
         get
         {
             if (Edit is { } edited)
-            {
                 yield return (EditName, edited.ToString());
-                if (FromRecord)
-                    yield return (AppPaths.FromParameter, AppPaths.FromRecord);
-            }
             else if (Adding)
-            {
                 yield return (NewName, NewOpenValue);
-            }
         }
     }
 
@@ -60,9 +47,6 @@ public abstract record InListEntryQuery(
     /// <summary>The entry the address opens: the record changed, or a new one.</summary>
     protected static (Guid? Edit, bool Adding) ReadEntry(Address address) =>
         (address.Id(EditName), address.Text(NewName) == NewOpenValue);
-
-    /// <summary>Whether the address says the record changed was opened from its record in the consultation.</summary>
-    protected static bool ReadFromRecord(Address address) => AppPaths.IsFromRecord(address.Text(AppPaths.FromParameter));
 }
 
 /// <summary>

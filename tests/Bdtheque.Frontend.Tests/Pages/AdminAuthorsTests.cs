@@ -56,6 +56,8 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
         _api = new FakeAdminApi(_audience);
         _api.AddServices(Services, _request);
+        // The pages of the administration are only ever served to the authenticated administrator (Pages/Admin/_Imports.razor).
+        AddAuthorization().SetAuthorized("admin");
         Services.AddSingleton(TimeProvider.System);
         Answer([Gibelin, Gibrat, Gomez, Gotlib], totalCount: 38);
         _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
@@ -306,21 +308,6 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(
             [("Annuler", $"{AppPaths.AdminAuthors}?q=gib"), ("Enregistrer", null)],
             panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
-    }
-
-    // Opened from the record of the author in the consultation, over the list searched on its name, the panel leads back to
-    // the record, cancelled or saved (visuel/saisie-auteur/contenu.md, decisions of the user, #658).
-    [Fact]
-    public async Task Panel_OpenedFromTheRecord_LeadsBackToIt_CancelledOrSaved()
-    {
-        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"]);
-        var page = Open($"q=Gotlib&edit={Gotlib.Id}&from=record", recorded: true);
-
-        Assert.Equal(AppPaths.AuthorRecord(Gotlib.Id), page.Find("dialog.side-panel .side-panel-actions a.button").GetAttribute("href"));
-        await page.SubmitAsync("form.side-panel-form");
-
-        Assert.Single(_api.Written);
-        Assert.EndsWith(AppPaths.AuthorRecord(Gotlib.Id), Services.GetRequiredService<NavigationManager>().Uri);
     }
 
     [Fact]

@@ -4,8 +4,6 @@
 @using Bdtheque.Contracts.Deletion
 @using Bdtheque.Contracts.Enums
 @inject IStringLocalizer<AdminAuthors> L
-@inject IStringLocalizer<FieldMessages> FieldTexts
-@inject IStringLocalizer<RuleMessages> Rules
 @inject ApiClient Api
 @inject AdminRecordCounts RecordCounts
 @inject DisplayFormatter Format
@@ -132,62 +130,12 @@
         }
     </ChildContent>
     <Dialogs>
-        @if (PanelOpen)
+        @if (_query.Edit is not null || _query.Adding)
         {
-            <form class="side-panel-form" method="post" @formname="@EntryFormName" @onsubmit="SaveAsync">
-                <AntiforgeryToken />
-                @if (_query.Edit is not null)
-                {
-                    <input type="hidden" name="@VersionName" value="@EntryVersion" />
-                }
-                <SidePanel Id="author-panel" Title="@(_query.Edit is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@EntryReturnHref">
-                    <ChildContent>
-                        @* The error of the saving, as on an entry form (visuel/listes/saisie-selon-l-entite.md): an author deleted
-                           meanwhile keeps the panel open, with what was typed. *@
-                        @if (_entryProblem is { } problem)
-                        {
-                            <SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                                       Technical="@L["Problem.Technical.Text"]" CanReload="@(_query.Edit is not null)" StaticForm="true"
-                                       ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />
-                        }
-                        @if (_author is not null)
-                        {
-                            <p class="side-panel-dates">
-                                @L["Dates.Created"] <LocalDateTime Value="_author.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_author.ModifiedAt" />.
-                            </p>
-                        }
-                        <div class="author-panel-names">
-                            <Field Id="author-first-name" Label="@L["FirstName"]" Error="@Errors.For(FirstNameField)" Context="control">
-                                <input id="@control.Id" type="text" name="@FirstNameName" autofocus="@(Focused == FirstNameField)" tabindex="0"
-                                       aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryFirstName" />
-                            </Field>
-                            <Field Id="author-last-name" Label="@L["LastName"]" Error="@Errors.For(LastNameField)" Context="control">
-                                <input id="@control.Id" type="text" name="@LastNameName" autofocus="@(Focused == LastNameField)" tabindex="0"
-                                       aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryLastName" />
-                            </Field>
-                        </div>
-                        <Field Id="author-pseudonym" Label="@L["Pseudonym"]" Help="@L["Pseudonym.Help"]" Error="@Errors.For(PseudonymField)" Context="control">
-                            @* An author without last name nor pseudonym, said once under the last name, concerns the pseudonym as much:
-                               bordered, and described by it too (visuel/saisie-auteur/contenu.md). *@
-                            <input id="@control.Id" type="text" name="@PseudonymName" autofocus="@(Focused == PseudonymField)" tabindex="0"
-                                   aria-describedby="@PseudonymDescribedBy(control.DescribedBy)"
-                                   aria-invalid="@(control.Invalid ?? (WithoutName ? "true" : null))" @bind="EntryPseudonym" />
-                        </Field>
-                        <Field Id="author-nationality" Label="@L["Nationality"]" Characters="18" Error="@Errors.For(NationalityField)" Context="control">
-                            <input id="@control.Id" type="text" name="@NationalityName" autofocus="@(Focused == NationalityField)" tabindex="0"
-                                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryNationality" />
-                        </Field>
-                        <Field Id="author-biography" Label="@L["Biography"]" Error="@Errors.For(BiographyField)" Context="control">
-                            <textarea id="@control.Id" name="@BiographyName" rows="6" placeholder="@L["Biography.Placeholder"]"
-                                      autofocus="@(Focused == BiographyField)" tabindex="0" aria-describedby="@control.DescribedBy"
-                                      aria-invalid="@control.Invalid">@EntryBiography</textarea>
-                        </Field>
-                    </ChildContent>
-                    <Actions>
-                        <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(_query.Edit is null ? L["Create"] : L["Save"])" />
-                    </Actions>
-                </SidePanel>
-            </form>
+            @* The panel of the author, changed or new, over the list (visuel/listes/saisie-selon-l-entite.md): its closing and its
+               saving lead back to the list, with its criteria. *@
+            <AuthorEntryPanel AuthorId="_query.Edit" Searched="@NewSearched" CloseHref="@ListOnly.Href()" SavedHref="@ListOnly.Href()"
+                              ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />
         }
         else if (_dialogAuthor is not null)
         {
@@ -213,13 +161,6 @@
 
 @code {
     private const string DeletionFormName = "author-deletion";
-    private const string EntryFormName = "author-entry";
-    private const string LastNameName = "lastName";
-    private const string FirstNameName = "firstName";
-    private const string PseudonymName = "pseudonym";
-    private const string NationalityName = "nationality";
-    private const string BiographyName = "biography";
-    private const string VersionName = "version";
 
     /// <summary>How many other authors the merge dialog proposes: enough to choose, few enough to read at a glance.</summary>
     internal const int CandidateCount = 10;
@@ -235,25 +176,6 @@
     [SupplyParameterFromForm(FormName = DeletionFormName, Name = DeletionDialog.FingerprintName)]
     private string? Fingerprint { get; set; }
 
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = LastNameName)]
-    private string? EntryLastName { get; set; }
-
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = FirstNameName)]
-    private string? EntryFirstName { get; set; }
-
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = PseudonymName)]
-    private string? EntryPseudonym { get; set; }
-
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = NationalityName)]
-    private string? EntryNationality { get; set; }
-
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = BiographyName)]
-    private string? EntryBiography { get; set; }
-
-    /// <summary>The version of the author changed, as its panel read it.</summary>
-    [SupplyParameterFromForm(FormName = EntryFormName, Name = VersionName)]
-    private uint? EntryVersion { get; set; }
-
     private AuthorListQuery _query = new();
     private RecordCounts? _counts;
     private Page<AuthorAdminListItem>? _list;
@@ -262,24 +184,14 @@
     private DeletionImpact? _impact;
     private ApiProblem? _deletionProblem;
     private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
-    private AuthorForm? _author;
-    private ApiProblem? _entryProblem;
 
     // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
     private AuthorListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
 
-    // Where the closing of the panel and its saving lead: the record of the author in the consultation, when the panel was opened
-    // from it (visuel/saisie-auteur/contenu.md, decisions of the user, #658); the list otherwise.
-    private string EntryReturnHref => _query is { FromRecord: true, Edit: { } edited } ? AppPaths.AuthorRecord(edited) : ListOnly.Href();
-
     private string NewHref => (ListOnly with { Adding = true }).Href();
 
-    // A form sent back, whose fields, even emptied, are those typed.
-    private bool IsPost => HttpContext is { } context && HttpMethods.IsPost(context.Request.Method);
-
-    // The panel of a new author, or of the author changed: read, or sent back with its version, which keeps it open over an
-    // author deleted meanwhile, to present the error with what was typed. An address on an author deleted opens none.
-    private bool PanelOpen => _query.Edit is null ? _query.Adding : _author is not null || EntryVersion is not null;
+    // A new author opened on a search that finds none is the author searched (« Créer l'auteur « … » »).
+    private string? NewSearched => _query is { Adding: true, Edit: null, Text: { } searched } && _list!.Items.Count == 0 ? searched : null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -306,8 +218,6 @@
             return;
         }
 
-        await LoadEntryAsync();
-
         if (_dialogAuthor is not null && _query.Delete is { } deleted)
             await LoadImpactAsync(deleted);
         else if (_dialogAuthor is not null && _query.MergeText is { } text)
@@ -316,85 +226,6 @@
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
     }
-
-    // The entry of the panel, if the address opens it: the author changed, read once, or what a form sent back holds.
-    private async Task LoadEntryAsync()
-    {
-        // The panel opens over the list wherever the author is in it.
-        if (_query.Edit is { } edited)
-            _author = await FindAsync(edited);
-        // Read once, from the author; a form sent back keeps what was typed, the version always among it.
-        if (_author is not null && EntryVersion is null)
-        {
-            (EntryLastName, EntryFirstName, EntryPseudonym) = (_author.LastName, _author.FirstName, _author.Pseudonym);
-            (EntryNationality, EntryBiography, EntryVersion) = (_author.Nationality, _author.Biography, _author.Version);
-        }
-        // A new author opened on a search that finds none is the author searched (« Créer l'auteur « … » »), its name split as
-        // when created on the spot, unless names sent back, even emptied, are to be corrected.
-        if (_query is { Adding: true, Edit: null, Text: { } searched } && _list!.Items.Count == 0 && !IsPost)
-            (EntryFirstName, EntryLastName) = AuthorNames.Split(searched);
-    }
-
-    // The author, or none if it no longer exists: the list is then shown without its panel.
-    private async Task<AuthorForm?> FindAsync(Guid id)
-    {
-        try
-        {
-            return await Api.GetAsync<AuthorForm>($"/admin/authors/{id}");
-        }
-        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
-        {
-            return null;
-        }
-    }
-
-    private async Task SaveAsync()
-    {
-        AuthorForm saved;
-        try
-        {
-            // The author changed, as its panel read it, even deleted meanwhile: the API then says so, never a new author.
-            saved = _query.Edit is { } edited
-                ? await Api.PutAsync<UpdateAuthorRequest, AuthorForm>(
-                    $"/admin/authors/{edited}",
-                    new UpdateAuthorRequest(EntryLastName, EntryFirstName, EntryPseudonym, EntryBiography, EntryNationality, EntryVersion.GetValueOrDefault()))
-                : await Api.PostAsync<CreateAuthorRequest, AuthorForm>(
-                    "/admin/authors", new CreateAuthorRequest(EntryLastName, EntryFirstName, EntryPseudonym, EntryBiography, EntryNationality));
-        }
-        catch (ApiProblemException exception)
-        {
-            _entryProblem = exception.Problem;
-            return;
-        }
-
-        await Recorder.RecordActionAsync(
-            _query.Edit is null ? AudienceFunctions.AdminAuthorCreated : AudienceFunctions.AdminAuthorSaved, $"author={saved.Id}",
-            HttpContext?.RequestAborted ?? default);
-        Navigation.NavigateTo(EntryReturnHref);
-    }
-
-    // The fields of the content the panel enters, in their order in the panel.
-    private const string FirstNameField = "/firstName";
-    private const string LastNameField = "/lastName";
-    private const string PseudonymField = "/pseudonym";
-    private const string NationalityField = "/nationality";
-    private const string BiographyField = "/biography";
-    private static readonly string[] PanelFields = [FirstNameField, LastNameField, PseudonymField, NationalityField, BiographyField];
-
-    // The fields a refused saving designates (choix-implementation/socle/frontend.md, champ d'une erreur métier): a display name
-    // already taken at the field it comes from (visuel/saisie-auteur/contenu.md), its text naming the author as typed.
-    private FieldErrors Errors => new(
-        _entryProblem, FieldTexts, Rules, RecordSearch.AuthorName(EntryLastName?.Trim(), EntryFirstName?.Trim(), EntryPseudonym?.Trim()));
-
-    // The first field to correct gets the focus, a field whose value it only clashes with never; the first field otherwise.
-    private string Focused => PanelFields.FirstOrDefault(entered => Errors.For(entered) is not null && !Errors.IsRelated(entered)) ?? FirstNameField;
-
-    // An author without last name nor pseudonym, refused at the last name, which the domain designates.
-    private bool WithoutName =>
-        _entryProblem is { Category: ProblemCategory.Business, RuleCode: "Author.LastNameOrPseudonymRequired" };
-
-    private string? PseudonymDescribedBy(string? own) =>
-        WithoutName ? string.Join(' ', new[] { "author-last-name-error", own }.OfType<string>()) : own;
 
     private async Task LoadImpactAsync(Guid authorId)
     {
