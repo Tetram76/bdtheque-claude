@@ -49,7 +49,8 @@ public sealed class Edition : EntityBase
 
     // When the edition became owned, null until then (modele-metier/edition.md): always known for an
     // owned edition, unlike its optional acquisition date, and later than its creation for an edition
-    // first targeted by an intent. Set on save, never entered (BdthequeDbContext), like the creation date.
+    // first targeted by an intent. Set on save, never entered (BdthequeDbContext), like the creation date; only the merge of two
+    // editions gives it another one, the entry of the edition whose acquisition it takes (TakeAcquisitionOf).
     public DateTimeOffset? EnteredCollectionAt { get; private set; }
 
     public string? PersonalReference { get; private set; }
@@ -377,7 +378,7 @@ public sealed class Edition : EntityBase
         new(AcquisitionMode, AcquisitionDate, AcquisitionAmount, AcquisitionCurrency, IsFree, InitialValueAmount, InitialValueCurrency);
 
     // Only run by Album.MergeEditions, once it has checked the acquisition against the album the edition belongs to: the edition
-    // year, and the acquisition of the edition chosen, whole, with its entry in the collection, that the context keeps once set
+    // year, and the acquisition of the edition chosen, whole, with its entry in the collection, that the context keeps as given
     // (BdthequeDbContext), and which an edition no longer owned has no longer.
     internal void TakeAcquisitionOf(Edition other, int? publicationYear)
     {

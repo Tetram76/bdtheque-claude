@@ -156,7 +156,8 @@ public sealed class EditionMergeEndpointsTests : IClassFixture<ApiWebApplication
         var context = scope.ServiceProvider.GetRequiredService<BdthequeDbContext>();
         var kept = await context.Editions.AsNoTracking().SingleAsync(e => e.Id == targeted);
         Assert.Equal(AcquisitionMode.Purchase, kept.AcquisitionMode);
-        Assert.NotNull(kept.EnteredCollectionAt);
+        // The entry in the collection of the owned edition, with its acquisition, not the day of the merge.
+        Assert.Equal(OwnedEnteredCollectionAt, kept.EnteredCollectionAt);
         Assert.False(await context.PurchaseIntents.AnyAsync(p => p.AlbumId == kept.AlbumId));
     }
 
@@ -255,8 +256,20 @@ public sealed class EditionMergeEndpointsTests : IClassFixture<ApiWebApplication
         secondAlbum.RecordAcquisition(second, new EditionAcquisition(AcquisitionMode.Gift, null, null, null, true, null, null));
         var secondCover = second.AppendVisual(VisualType.Cover, $"{Guid.NewGuid():N}.jpg", TestPalette.Any);
         var secondPlate = second.AppendVisual(VisualType.Plate, $"{Guid.NewGuid():N}.jpg", TestPalette.Any);
-        context.AddRange(publisher, firstAlbum, secondAlbum);
-        await context.SaveChangesAsync();
+        // Each edition entered the collection on its own day, so that the merge shows which entry it keeps.
+        try
+        {
+            _factory.Clock.UtcNow = new DateTimeOffset(2026, 1, 5, 10, 0, 0, TimeSpan.Zero);
+            context.AddRange(publisher, firstAlbum);
+            await context.SaveChangesAsync();
+            _factory.Clock.UtcNow = new DateTimeOffset(2026, 2, 9, 10, 0, 0, TimeSpan.Zero);
+            context.Add(secondAlbum);
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            _factory.Clock.UtcNow = null;
+        }
 
         var firstForm = (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{firstAlbum.Id}"))!;
         var secondForm = (await _client.GetFromJsonAsync<AlbumForm>($"/admin/albums/{secondAlbum.Id}"))!;
@@ -277,9 +290,20 @@ public sealed class EditionMergeEndpointsTests : IClassFixture<ApiWebApplication
         var targeted = new Edition(album, publisher);
         album.AddPurchaseIntent(targeted);
         context.Add(album);
-        await context.SaveChangesAsync();
+        try
+        {
+            _factory.Clock.UtcNow = OwnedEnteredCollectionAt;
+            await context.SaveChangesAsync();
+        }
+        finally
+        {
+            _factory.Clock.UtcNow = null;
+        }
         return (owned.Id, targeted.Id);
     }
+
+    // When the owned edition of SeedOwnedAndTargetedAsync entered the collection, well before any merge.
+    private static readonly DateTimeOffset OwnedEnteredCollectionAt = new(2026, 3, 16, 10, 0, 0, TimeSpan.Zero);
 
     private async Task<Guid> CreateSearchAsync(ContractEnums.EntityKind entity, SearchCondition criteria)
     {

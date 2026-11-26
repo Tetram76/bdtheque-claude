@@ -6,7 +6,7 @@ namespace Bdtheque.Infrastructure.Tests;
 
 /// <summary>
 /// The date an edition entered the collection (modele-metier/edition.md) is set on save when the
-/// edition becomes owned, never entered, and never rewritten afterwards.
+/// edition becomes owned, never entered, and kept afterwards, unless the merge of two editions gives it another one.
 /// </summary>
 public sealed class CollectionEntryDateTests : IAsyncLifetime
 {
@@ -92,21 +92,23 @@ public sealed class CollectionEntryDateTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task Save_NeverRewritesTheEntryDate()
+    public async Task Save_KeepsTheEntryDateTheEditionCarries()
     {
+        // The merge of two editions gives the edition that remains the entry of the edition whose acquisition it takes
+        // (Album.MergeEditions): the save keeps it, rather than the date the edition had, or the time of the save.
         var album = new Album("Blake et Mortimer", null);
         var publisher = new Publisher("Éditions Blake et Mortimer");
         var edition = new Edition(album, publisher);
         album.RecordAcquisition(edition, AcquisitionMode.Purchase);
         _fixture.Context.AddRange(album, publisher, edition);
         await _fixture.Context.SaveChangesAsync();
-        var entered = edition.EnteredCollectionAt;
+        var taken = edition.EnteredCollectionAt!.Value.AddYears(-10);
 
-        _fixture.Context.Entry(edition).Property(e => e.EnteredCollectionAt).CurrentValue = entered!.Value.AddYears(-10);
+        _fixture.Context.Entry(edition).Property(e => e.EnteredCollectionAt).CurrentValue = taken;
         await _fixture.Context.SaveChangesAsync();
         _fixture.Context.ChangeTracker.Clear();
 
-        Assert.Equal(entered, (await _fixture.Context.Editions.SingleAsync()).EnteredCollectionAt);
+        Assert.Equal(taken, (await _fixture.Context.Editions.SingleAsync()).EnteredCollectionAt);
     }
 
     private async Task<(Album Album, Edition Edition, uint AlbumVersion)> CreateIntendedEditionAsync()
