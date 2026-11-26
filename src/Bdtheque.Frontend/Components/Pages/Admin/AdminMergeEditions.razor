@@ -338,7 +338,7 @@ else
     /// edition targeted by an intent says it is the intent.
     /// </summary>
     private MergeRecordHead Head(EditionMergeRecord record, bool detailed) =>
-        detailed ? new MergeRecordHead(LabelOf(record), record.IsTargeted ? L["Head.Targeted"].Value : null, record.ModifiedAt) : new MergeRecordHead(LabelOf(record), null, null);
+        new(LabelOf(record), detailed && record.IsTargeted ? L["Head.Targeted"].Value : null, detailed ? record.ModifiedAt : null);
 
     private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
 
