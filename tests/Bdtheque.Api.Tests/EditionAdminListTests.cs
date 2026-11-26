@@ -139,6 +139,28 @@ public sealed class EditionAdminListTests : IClassFixture<ApiWebApplicationFacto
     }
 
     [Fact]
+    public async Task SearchByAlbum_OfTheMergeDialog_FindsAnEditionByItsIsbnOrByTheTitleOfItsAlbumOrOfItsSeries()
+    {
+        var publisher = await CreatePublisherAsync($"Casterman {_marker}");
+        var series = await CreateSeriesAsync($"Tintin {_marker}");
+        var withoutIsbn = await CreateOwnedEditionAsync((await CreateAlbumAsync($"L'Île noire {_marker}")).Id, publisher.Id, Edition(publisher.Id));
+        var ofTheSeries = await CreateOwnedEditionAsync((await CreateAlbumAsync(null, series.Id, 1)).Id, publisher.Id, Edition(publisher.Id));
+        var digits = Random.Shared.NextInt64(1_000_000_000, 10_000_000_000).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var byIsbn = await CreateOwnedEditionAsync((await CreateAlbumAsync($"Autre {_marker}")).Id, publisher.Id, Edition(publisher.Id) with
+        {
+            Isbn = $"978-{digits[..1]}-{digits[1..5]}-{digits[5..]}",
+        });
+
+        // Without an ISBN, an edition is found by its album, title or series, without regard to case or accents
+        // (visuel/liste-albums/contenu.md, fusion): nothing keeps two editions without an ISBN from being merged.
+        Assert.Equal([withoutIsbn.Id], await IdsAsync($"q={Uri.EscapeDataString($"ile NOIRE {_marker}")}&byAlbum=true"));
+        Assert.Equal([ofTheSeries.Id], await IdsAsync($"q={Uri.EscapeDataString($"Tintin {_marker}")}&byAlbum=true"));
+        Assert.Equal([byIsbn.Id], await IdsAsync($"q={Uri.EscapeDataString($"978 {digits}")}&byAlbum=true"));
+        // The list itself searches the ISBN only (visuel/listes/liste-par-liste.md).
+        Assert.Empty(await IdsAsync($"q={Uri.EscapeDataString($"ile NOIRE {_marker}")}"));
+    }
+
+    [Fact]
     public async Task Filter_OnASeries_KeepsTheEditionsOfItsAlbums()
     {
         var publisher = await CreatePublisherAsync($"Dargaud {_marker}");

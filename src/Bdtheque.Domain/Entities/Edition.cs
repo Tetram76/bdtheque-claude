@@ -49,7 +49,8 @@ public sealed class Edition : EntityBase
 
     // When the edition became owned, null until then (modele-metier/edition.md): always known for an
     // owned edition, unlike its optional acquisition date, and later than its creation for an edition
-    // first targeted by an intent. Set on save, never entered (BdthequeDbContext), like the creation date.
+    // first targeted by an intent. Set on save, never entered (BdthequeDbContext), like the creation date; only the merge of two
+    // editions gives it another one, the entry of the edition whose acquisition it takes (TakeAcquisitionOf).
     public DateTimeOffset? EnteredCollectionAt { get; private set; }
 
     public string? PersonalReference { get; private set; }
@@ -80,7 +81,8 @@ public sealed class Edition : EntityBase
 
     /// <summary>
     /// Passes the edition to <paramref name="album"/>, with its identity, its visuals and its history, as the merge of two albums
-    /// does (<see cref="Album.TakeEditionsOf"/>), the only way for an edition to change albums.
+    /// (<see cref="Album.TakeEditionsOf"/>) or of two editions (<see cref="Album.MergeEditions"/>) does, the only ways for an edition
+    /// to change albums.
     /// </summary>
     internal void MoveTo(Album album)
     {
@@ -151,7 +153,6 @@ public sealed class Edition : EntityBase
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionModeRequired, "An owned edition keeps an acquisition mode until it is deleted.", this,
                 nameof(AcquisitionMode));
-        EnsurePublicationYearPositive(publicationYear);
         EnsureValid(acquisition, publicationYear);
 
         PublicationYear = publicationYear;
@@ -297,10 +298,32 @@ public sealed class Edition : EntityBase
     /// d'intégrité). Also run by <see cref="Album.RecordAcquisition(Edition, EditionAcquisition)"/>
     /// before it touches anything.
     /// </summary>
-    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear)
+    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear) => EnsureValid(acquisition, publicationYear, IsAlbumDated);
+
+    /// <summary>
+    /// Checks the acquisition and value as <see cref="EnsureValid(EditionAcquisition, int?)"/> does, the edition belonging to
+    /// <paramref name="album"/> after the write under way (the merge of two editions, <see cref="Album.MergeEditions"/>), whose
+    /// first publication is the last reference date of an amount.
+    /// </summary>
+    internal void EnsureValid(EditionAcquisition acquisition, int? publicationYear, Album album) =>
+        EnsureValid(acquisition, publicationYear, () => album.FirstPublicationYear is not null);
+
+    private void EnsureValid(EditionAcquisition acquisition, int? publicationYear, Func<bool> albumDated)
     {
         if (acquisition.Mode is not null)
             EnumGuard.EnsureDefined(acquisition.Mode.Value, nameof(acquisition));
+        EnsureAmountsPaired(acquisition);
+        EnsureModeOfAValue(acquisition);
+        if (acquisition.IsFree)
+            EnsureFreeHasNoValue(acquisition);
+        EnsureAmountsValid(acquisition);
+        EnsurePublicationYearPositive(publicationYear);
+        EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, albumDated);
+    }
+
+    // An amount and its currency go together (modele-metier/edition.md, contraintes d'intégrité).
+    private void EnsureAmountsPaired(EditionAcquisition acquisition)
+    {
         if ((acquisition.PriceAmount is null) != (acquisition.PriceCurrency is null))
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionAmountCurrencyTogether, "An acquisition amount and its currency must be provided together, or not at all.",
@@ -309,29 +332,35 @@ public sealed class Edition : EntityBase
             throw new DomainRuleViolationException(
                 DomainRules.EditionInitialValueAmountCurrencyTogether, "An initial value amount and its currency must be provided together, or not at all.",
                 this, acquisition.InitialValueCurrency is null ? nameof(InitialValueCurrency) : nameof(InitialValueAmount));
+    }
 
-        // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
-        // until the edition is acquired (fonctionnel/regles-metier/intention-d-acquisition.md).
+    // An edition not owned has no value; freeness, a trait of the copy, is left free of rules
+    // until the edition is acquired (fonctionnel/regles-metier/intention-d-acquisition.md).
+    private void EnsureModeOfAValue(EditionAcquisition acquisition)
+    {
         if (acquisition.Mode is null
             && (acquisition.Date is not null || acquisition.PriceAmount is not null || acquisition.InitialValueAmount is not null))
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionModeRequired, "An acquisition date, price or initial value requires an acquisition mode.", this,
                 nameof(AcquisitionMode));
+    }
 
-        // A free edition has no value at all: neither price paid, nor market value, nor initial value.
-        if (acquisition.IsFree)
-        {
-            if (acquisition.PriceAmount is not null)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.", this, nameof(AcquisitionAmount));
-            if (acquisition.InitialValueAmount is not null)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.", this, nameof(InitialValueAmount));
-            if (acquisition.Mode == Enums.AcquisitionMode.Purchase)
-                throw new DomainRuleViolationException(
-                    DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.", this, nameof(AcquisitionMode));
-        }
+    // A free edition has no value at all: neither price paid, nor market value, nor initial value.
+    private void EnsureFreeHasNoValue(EditionAcquisition acquisition)
+    {
+        if (acquisition.PriceAmount is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionFreeExcludesPrice, "A free edition has no acquisition price.", this, nameof(AcquisitionAmount));
+        if (acquisition.InitialValueAmount is not null)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionFreeExcludesInitialValue, "A free edition has no initial value.", this, nameof(InitialValueAmount));
+        if (acquisition.Mode == Enums.AcquisitionMode.Purchase)
+            throw new DomainRuleViolationException(
+                DomainRules.EditionPurchaseCannotBeFree, "A purchased edition cannot be free.", this, nameof(AcquisitionMode));
+    }
 
+    private void EnsureAmountsValid(EditionAcquisition acquisition)
+    {
         if (acquisition.PriceAmount is <= 0)
             throw new DomainRuleViolationException(
                 DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.", this, nameof(AcquisitionAmount));
@@ -342,8 +371,54 @@ public sealed class Edition : EntityBase
                 DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.", this, nameof(InitialValueAmount));
         if (acquisition.InitialValueCurrency is not null)
             EnsureValidCurrencyCode(acquisition.InitialValueCurrency, nameof(InitialValueCurrency));
+    }
 
-        EnsureAmountsDated(acquisition.PriceAmount, acquisition.InitialValueAmount, acquisition.Date, publicationYear, IsAlbumDated);
+    /// <summary>The acquisition and value of the edition, as a whole (none but its freeness for an edition not owned).</summary>
+    public EditionAcquisition Acquisition =>
+        new(AcquisitionMode, AcquisitionDate, AcquisitionAmount, AcquisitionCurrency, IsFree, InitialValueAmount, InitialValueCurrency);
+
+    // Only run by Album.MergeEditions, once it has checked the acquisition against the album the edition belongs to: the edition
+    // year, and the acquisition of the edition chosen, whole, with its entry in the collection, that the context keeps as given
+    // (BdthequeDbContext), and which an edition no longer owned has no longer.
+    internal void TakeAcquisitionOf(Edition other, int? publicationYear)
+    {
+        PublicationYear = publicationYear;
+        if (other == this)
+            return;
+        Apply(other.Acquisition);
+        EnteredCollectionAt = other.EnteredCollectionAt;
+    }
+
+    // Only run by Album.MergeEditions: the days the other edition was in the spotlight become days of this one, the edition the
+    // spotlight of these days designates from now on.
+    internal void PassSpotlightsTo(Edition kept)
+    {
+        foreach (var spotlight in _spotlights.ToList())
+        {
+            _spotlights.Remove(spotlight);
+            spotlight.MoveTo(kept);
+            kept._spotlights.Add(spotlight);
+        }
+    }
+
+    // Only run by Album.MergeEditions, once it has checked the visuals retained: those of this edition discarded are removed, those
+    // of the other one retained pass to it, after its own of their type; the others stay with the other edition, deleted with it.
+    internal IReadOnlyList<EditionVisual> TakeVisualsOf(Edition merged, IReadOnlyCollection<Guid> retained)
+    {
+        var removed = _visuals.Where(v => !retained.Contains(v.Id)).ToList();
+        foreach (var visual in removed)
+            _visuals.Remove(visual);
+        var moved = merged.GetOrderedVisuals().Where(v => retained.Contains(v.Id)).ToList();
+        var arrangement = GetOrderedVisuals().Concat(moved).Select(v => (v.Id, v.Type)).ToList();
+        foreach (var visual in moved)
+        {
+            merged._visuals.Remove(visual);
+            visual.MoveTo(this);
+            _visuals.Add(visual);
+        }
+
+        ArrangeVisuals(arrangement);
+        return [.. removed, .. merged._visuals];
     }
 
     // Internal: a rank chosen by the caller could duplicate another; the application adds a visual

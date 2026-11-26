@@ -22,8 +22,8 @@
 else
 {
     <div class="merge-choice-options" role="radiogroup" aria-labelledby="@LabelId">
-        @Option(MergeSide.First, FirstRecord, First)
-        @Option(MergeSide.Second, SecondRecord, Second)
+        @Option(MergeSide.First, FirstRecord, First, FirstPicture)
+        @Option(MergeSide.Second, SecondRecord, Second, SecondPicture)
     </div>
 }
 
@@ -86,18 +86,35 @@ else
     [Parameter]
     public string? ImpossibleReason { get; set; }
 
-    private RenderFragment Option(MergeSide side, string record, string? value) =>
-        @<label class="merge-choice-option" data-selected="@(Selected == side)" data-impossible="@(Impossible == side)">
-            <input class="merge-choice-radio" type="radio" name="@Id" value="@side" checked="@(Selected == side)" disabled="@(Impossible == side)"
-                   @onchange="() => SelectedChanged.InvokeAsync(side)" />
+    /// <summary>
+    /// What the value of the first record shows, next to its text, when the text alone cannot tell it (the thumbnail of a visual of
+    /// an edition, whose text is only its type).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? FirstPicture { get; set; }
+
+    [Parameter]
+    public RenderFragment? SecondPicture { get; set; }
+
+    // The label of the radio covers the whole option, which a click anywhere chooses; the picture, above it, may hold its own
+    // action (the viewer of a visual), which a label cannot hold: a button is labelable, and a label holds no labelable
+    // element but its control (HTML, the label element).
+    private RenderFragment Option(MergeSide side, string record, string? value, RenderFragment? picture) =>
+        @<div class="merge-choice-option" data-selected="@(Selected == side)" data-impossible="@(Impossible == side)">
+            <input class="merge-choice-radio" id="@($"{Id}-{side}")" type="radio" name="@Id" value="@side" checked="@(Selected == side)"
+                   disabled="@(Impossible == side)" @onchange="() => SelectedChanged.InvokeAsync(side)" />
             <span class="merge-choice-mark" aria-hidden="true"><Icon Name="IconName.Check" /></span>
-            <span class="merge-choice-text">
+            @if (picture is not null)
+            {
+                <span class="merge-choice-picture">@picture</span>
+            }
+            <label class="merge-choice-text" for="@($"{Id}-{side}")">
                 <span class="merge-choice-record">@record</span>
                 <span class="merge-choice-value" data-long="@Long">@if (value is null) { <NotSet Brief /> } else { @value }</span>
                 @if (Impossible == side)
                 {
                     <span class="merge-choice-reason">@ImpossibleReason</span>
                 }
-            </span>
-        </label>;
+            </label>
+        </div>;
 }

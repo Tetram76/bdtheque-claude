@@ -57,6 +57,14 @@
     color: var(--color-text);
 }
 
+/* As buttons, on an interactive page: nothing of a button of the theme but what the links have. */
+button.visual-dialog-close,
+button.visual-step {
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+}
+
 .visual-dialog-close ::deep .icon,
 .visual-step ::deep .icon {
     inline-size: 1.125rem;

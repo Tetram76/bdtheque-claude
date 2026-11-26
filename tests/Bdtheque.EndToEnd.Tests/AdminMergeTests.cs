@@ -1,16 +1,19 @@
 extern alias frontend;
 
+using System.Globalization;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Enums;
 using frontend::Bdtheque.Frontend.Navigation;
+using SkiaSharp;
 
 namespace Bdtheque.EndToEnd.Tests;
 
 /// <summary>
-/// The merge of two genres, of two authors, of two publishers, of two series and of two albums (visuel/fusion/fusion-de-deux-fiches.md), on an
+/// The merge of two genres, of two authors, of two publishers, of two series, of two albums and of two editions (visuel/fusion/fusion-de-deux-fiches.md), on an
 /// application of its own: a merge deletes one of its records, which no other test may count on. Each journey of the
 /// administrator, through the browser: from the dialog of the list to the merge, the data chosen one by one, the confirmation and
 /// the list again; and two records modified meanwhile. Its captures are in <see cref="Captures.AdminMergeCaptureTests"/>.
@@ -19,6 +22,7 @@ namespace Bdtheque.EndToEnd.Tests;
 public sealed partial class AdminMergeTests(MergeApplication application) : BrowserTest<MergeApplication>(application)
 {
     private readonly string _marker = Guid.NewGuid().ToString("N")[..8];
+    private PublisherForm? _publisher;
 
     [Theory, InEachTheme]
     public async Task GenreMerge_FromTheDialogOfTheList_KeepsTheLabelChosen_AndLeadsBackToTheList(string theme)
@@ -214,6 +218,107 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         var kept = (await api.GetFromJsonAsync<AlbumDetail>($"/catalog/albums/{first.Id}"))!;
         Assert.Equal(($"Le lotus bleu {_marker}", 1, null), (kept.Album.Title, kept.Editions.Count, kept.PurchaseIntent));
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/albums/{second.Id}")).StatusCode);
+    }
+
+    [Theory, InEachTheme]
+    public async Task EditionMerge_FromTheDialogOfTheList_KeepsEachDataChosen_AndLeadsBackToTheList(string theme)
+    {
+        using var api = Application.CreateApiClient();
+        var album = await CreateAlbumAsync(api, $"Spirou à New York {_marker}");
+        var digits = string.Concat(_marker.Select(c => (char)('0' + c % 10)));
+        var (firstIsbn, secondIsbn) = ($"9782{digits}1", $"9782{digits}2");
+        var first = await CreateEditionAsync(api, album.Id, firstIsbn, AcquisitionMode.Purchase);
+        var second = await CreateEditionAsync(api, album.Id, secondIsbn, AcquisitionMode.Gift);
+        // The other edition searched by the title of its album, as an edition without ISBN is.
+        var page = await OpenAsync(theme,
+            $"{AppPaths.AdminEditions}?q={firstIsbn}&merge={first.Id}&mergeQ={Uri.EscapeDataString($"spirou a new york {_marker}")}");
+
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux éditions" });
+        await dialog.GetByRole(AriaRole.Radio).CheckAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Continuer" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminMergeEditions, $"?other={second.Id}&edition={first.Id}"));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Fusionner deux éditions");
+        // The ISBN and the acquisition differ, neither favoured; every other data the same in both editions.
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("2 données restent à choisir");
+        await page.GetByRole(AriaRole.Radiogroup, new() { Name = "ISBN" }).GetByRole(AriaRole.Radio).Last.CheckAsync();
+        await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Acquisition" }).GetByRole(AriaRole.Radio).First.CheckAsync();
+        await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
+        await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
+
+        var confirmation = page.GetByRole(AriaRole.Alertdialog, new() { Name = "Fusionner les deux éditions ?" });
+        await Assertions.Expect(confirmation).ToContainTextAsync("La fusion est définitive.");
+        await confirmation.GetByRole(AriaRole.Button, new() { Name = "Fusionner définitivement" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminEditions));
+        // As many data of each edition kept, the first one remains, with the ISBN of the other and its own acquisition.
+        var kept = (await api.GetFromJsonAsync<EditionForm>($"/admin/albums/{album.Id}/editions/{first.Id}"))!;
+        Assert.Equal((secondIsbn, AcquisitionMode.Purchase), (kept.Content.Isbn, kept.Content.AcquisitionMode));
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/albums/{album.Id}/editions/{second.Id}")).StatusCode);
+    }
+
+    [Theory, InEachTheme]
+    public async Task EditionMerge_TheThumbnailOfAVisualOpensTheViewer_WithoutChoosingIt_AndEscapeClosesIt(string theme)
+    {
+        // The editions of the captures, read only: their covers, retained by the edition that holds each.
+        var page = await OpenAsync(theme, $"{AppPaths.AdminMergeEditions}?edition={Application.BelgiansFirst.Id}&other={Application.BelgiansSecond.Id}");
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var cover = page.GetByRole(AriaRole.Radiogroup, new() { Name = "Visuel", Exact = true }).Nth(1);
+
+        await cover.GetByRole(AriaRole.Button, new() { Name = "Voir en grand : Couverture" }).ClickAsync();
+
+        var viewer = page.Locator("dialog.visual-dialog");
+        await Assertions.Expect(viewer).ToBeVisibleAsync();
+        await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Couverture");
+        await Assertions.Expect(viewer.Locator(".visual-dialog-image img")).ToHaveJSPropertyAsync("complete", true);
+        await Assertions.Expect(cover.Locator("input[value=Second]")).ToBeCheckedAsync();
+
+        await page.Keyboard.PressAsync("Escape");
+        await Assertions.Expect(viewer).ToHaveCountAsync(0);
+    }
+
+    [Theory, InEachTheme]
+    public async Task Merge_TheBlocksOfItsData_AreSpacedAsTheBlocksOfAnEntryForm(string theme)
+    {
+        // The editions of the captures, read only: the blocks of the entry form of the first one, then those of their merge, all
+        // presented.
+        var edition = Application.BelgiansFirst;
+        var page = await OpenAsync(theme, AppPaths.AdminEditEdition(edition.AlbumId, edition.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var form = await SpacesAsync(page, ".entry-form-blocks > .block");
+
+        page = await OpenAsync(theme, $"{AppPaths.AdminMergeEditions}?edition={edition.Id}&other={Application.BelgiansSecond.Id}");
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await page.GetByRole(AriaRole.Checkbox, new() { Name = "Tout afficher" }).CheckAsync();
+        await Assertions.Expect(page.Locator(".merge-view[data-reduced]")).ToHaveCountAsync(0);
+        var merge = await SpacesAsync(page, ".merge-group");
+
+        // Each block below the previous one by the space between two blocks of a form, never stuck to it.
+        Assert.True(form[0] > 0);
+        Assert.Equal(3, merge.Length);
+        Assert.All(merge, space => Assert.Equal(form[0], space, 0.5));
+    }
+
+    // The space between each block and the next one, of those the selector designates that are presented.
+    private static Task<double[]> SpacesAsync(IPage page, string blocks) => page.EvaluateAsync<double[]>("""
+        selector => {
+            const rects = [...document.querySelectorAll(selector)].map(b => b.getBoundingClientRect()).filter(r => r.height > 0);
+            return rects.slice(1).map((r, i) => r.top - rects[i].bottom);
+        }
+        """, blocks);
+
+    // An edition of the album, owned, of a publisher of its own: the publishers of the captures count their editions.
+    private async Task<EditionForm> CreateEditionAsync(HttpClient api, Guid albumId, string isbn, AcquisitionMode mode)
+    {
+        _publisher ??= (await (await api.PostAsJsonAsync("/admin/publishers", new PublisherContent($"Dupuis {_marker}", null, []))).Content
+            .ReadFromJsonAsync<PublisherForm>())!;
+        var album = (await api.GetFromJsonAsync<AlbumForm>($"/admin/albums/{albumId}"))!;
+        var response = await api.PostAsJsonAsync($"/admin/albums/{albumId}/editions", new CreateEditionRequest(
+            new EditionContent(_publisher.Id, null, 1987, isbn, null, null, null, null, null, null, false, true, null, mode, false,
+                null, null, null, false, null, null, null, null), album.Version));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<EditionForm>())!;
     }
 
     [Theory, InEachTheme]
@@ -436,6 +541,49 @@ public sealed class MergeApplication : ApplicationHost
         });
         await PostAsync<CreatePurchaseIntentRequest, PurchaseIntentsForm>(api, $"/admin/albums/{tourAgain.Id}/purchase-intents", new(null, tourAgain.Version));
         TourAgain = await GetAsync<AlbumForm>(api, $"/admin/albums/{tourAgain.Id}");
+
+        // The two editions of the captures, of « Astérix chez les Belges », apart from the other albums: the first one in the
+        // collection « Pilote », bought, its cover; the second one saved again without collection, offered, free, in good
+        // condition, its own cover and a plate.
+        var belgians = await PostAsync<AlbumContent, AlbumForm>(api, "/admin/albums", Album(null, null) with { Title = "Astérix chez les Belges" });
+        BelgiansFirst = await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{belgians.Id}/editions", new(Owned(dargaud.Id, dargaud.Collections[0].Id) with
+        {
+            PublicationYear = 1979, Isbn = "9782012101333", AcquisitionDate = new DateOnly(2004, 3, 12), AcquisitionAmount = 7.5m, AcquisitionCurrency = "EUR",
+        }, belgians.Version));
+        var version = await UploadAsync(api, belgians.Id, BelgiansFirst.Id, VisualType.Cover, new SKColor(0x2F, 0x5B, 0xA8), BelgiansFirst.AlbumVersion);
+        BelgiansSecond = await PostAsync<CreateEditionRequest, EditionForm>(api, $"/admin/albums/{belgians.Id}/editions", new(Owned(dargaud.Id, dargaud.Collections[0].Id) with
+        {
+            PublisherCollectionId = null, PublicationYear = 1979, Isbn = "9782012101333", AcquisitionMode = AcquisitionMode.Gift, IsFree = true, Condition = EditionCondition.Good,
+            PersonalReference = "B-12",
+        }, version));
+        version = await UploadAsync(api, belgians.Id, BelgiansSecond.Id, VisualType.Cover, new SKColor(0xD8, 0x34, 0x2B), BelgiansSecond.AlbumVersion);
+        await UploadAsync(api, belgians.Id, BelgiansSecond.Id, VisualType.Plate, new SKColor(0x3C, 0x9A, 0x5F), version);
+    }
+
+    /// <summary>The two editions of the captures, of the same album, the second saved again later.</summary>
+    public EditionForm BelgiansFirst { get; private set; } = null!;
+
+    public EditionForm BelgiansSecond { get; private set; } = null!;
+
+    // A visual of an edition, a plain image of a colour, uploaded as the entry of a visual is.
+    private async Task<uint> UploadAsync(HttpClient api, Guid album, Guid edition, VisualType type, SKColor color, uint albumVersion)
+    {
+        Clock.UtcNow += TimeSpan.FromMinutes(15);
+        using var bitmap = new SKBitmap(300, 400);
+        bitmap.Erase(color);
+        using var image = SKImage.FromBitmap(bitmap);
+        using var png = image.Encode(SKEncodedImageFormat.Png, 100);
+        var file = new ByteArrayContent(png.ToArray());
+        file.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        using var form = new MultipartFormDataContent
+        {
+            { file, UploadVisualFields.File, "visual.png" },
+            { new StringContent(type.ToString()), UploadVisualFields.Type },
+            { new StringContent(albumVersion.ToString(CultureInfo.InvariantCulture)), UploadVisualFields.AlbumVersion },
+        };
+        using var response = await api.PostAsync($"/admin/albums/{album}/editions/{edition}/visuals", form);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<EditionVisualsForm>())!.AlbumVersion;
     }
 
     /// <summary>The two albums of the captures: one in its series, with an edition, the other saved again later, wished for as a whole.</summary>

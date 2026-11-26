@@ -190,3 +190,45 @@ public sealed record UniverseMergePairChoice(MergedRecord First, MergedRecord Se
 public sealed record UniverseMergeRequest(
     MergedRecord First, MergedRecord Second, MergeSide Name, MergeSide Description, MergeSide Parent,
     IReadOnlyList<UniverseMergePairChoice> Pairs);
+
+/// <summary>An edition as its merge presents it: what its form edits, its album and the records it references, named.</summary>
+/// <param name="Album">The album it belongs to, which the merge chooses too.</param>
+/// <param name="PublisherCollection">With its publisher, the one it belongs to.</param>
+/// <param name="AcquisitionMode">None for an edition targeted by a purchase intent, not owned, which has neither date nor amount.</param>
+/// <param name="IsTargeted">Whether a purchase intent targets it, the edition being then presented as the intent.</param>
+/// <param name="Visuals">In their presentation order (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md).</param>
+/// <param name="Version">The version of its album, whose aggregate it belongs to.</param>
+public sealed record EditionMergeRecord(
+    Guid Id, AlbumSummary Album, PublisherListItem Publisher, PublisherCollectionListItem? PublisherCollection, int? PublicationYear,
+    string? Isbn, EditionCategory? Category, EditionFormat? Format, BindingType? Binding, BookOrientation? Orientation,
+    ReadingDirection? ReadingDirection, int? PageCount, bool IsColor, AcquisitionMode? AcquisitionMode, DateOnly? AcquisitionDate,
+    decimal? AcquisitionAmount, string? AcquisitionCurrency, bool IsFree, decimal? InitialValueAmount, string? InitialValueCurrency,
+    EditionCondition? Condition, bool IsSecondHand, bool IsDedicated, string? PersonalReference, string? PersonalNotes, bool IsTargeted,
+    IReadOnlyList<EditionVisualItem> Visuals, DateTimeOffset ModifiedAt, uint Version);
+
+/// <summary>
+/// What the merge of two editions does, the acquisition of <paramref name="Acquisition"/> being kept: the edition that remains owned
+/// or not, which decides of its purchase intent (fonctionnel/regles-metier/fusion-des-fiches.md).
+/// </summary>
+/// <param name="Links">What passes to the edition that remains: its purchase intent, one both editions hold being common to both.</param>
+/// <param name="WithdrawnPurchaseIntents">The editions whose intent the merge withdraws, the edition that remains being owned.</param>
+public sealed record EditionMergeOutcome(MergeSide Acquisition, IReadOnlyList<MergeLinkCount> Links, IReadOnlyList<MergeSide> WithdrawnPurchaseIntents);
+
+/// <summary>Two editions to merge, and what their merge does, for the acquisition of either.</summary>
+public sealed record EditionMergePreview(EditionMergeRecord First, EditionMergeRecord Second, IReadOnlyList<EditionMergeOutcome> Outcomes);
+
+/// <summary>
+/// The merge of two editions: each data kept, of the one or the other, the publisher and its collection together, of the same
+/// edition (modele-metier/relations-et-cardinalites.md), and the acquisition whole, its mode, date, amounts and freeness bound by
+/// the constraints of integrity of an edition (modele-metier/edition.md); and each visual retained or discarded.
+/// </summary>
+/// <param name="Album">The album the edition that remains belongs to.</param>
+/// <param name="Publisher">The publisher and its collection, together.</param>
+/// <param name="Isbn">The ISBN, with the acceptance of its error, if any.</param>
+/// <param name="Acquisition">The acquisition and the value, whole.</param>
+/// <param name="Visuals">Each visual, held by one edition only, retained by its side or discarded by the other one.</param>
+public sealed record EditionMergeRequest(
+    MergedRecord First, MergedRecord Second, MergeSide Album, MergeSide Publisher, MergeSide PublicationYear, MergeSide Isbn,
+    MergeSide Category, MergeSide Format, MergeSide Binding, MergeSide Orientation, MergeSide ReadingDirection, MergeSide PageCount,
+    MergeSide IsColor, MergeSide Acquisition, MergeSide Condition, MergeSide IsSecondHand, MergeSide IsDedicated,
+    MergeSide PersonalReference, MergeSide PersonalNotes, IReadOnlyList<MergeElement> Visuals);

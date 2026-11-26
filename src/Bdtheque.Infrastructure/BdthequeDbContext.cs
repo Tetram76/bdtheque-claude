@@ -173,13 +173,14 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
         // being targeted by an intent (Album.RecordAcquisition) — and keeps that date for good: the
         // edition stays owned until deleted. Stamped from its state rather than from the operation, so
         // that every way of saving an owned edition, the import of the existing data included, dates it.
+        // The date the edition holds is kept: the domain only ever gives it the entry of the edition
+        // whose acquisition it takes, whole, in the merge of two editions (Album.MergeEditions).
         foreach (var entry in ChangeTracker.Entries<Edition>()
                      .Where(e => e.State is EntityState.Added or EntityState.Modified))
         {
             var entered = entry.Property(e => e.EnteredCollectionAt);
-            var stored = entry.State == EntityState.Modified ? entered.OriginalValue : null;
-            entered.CurrentValue = entry.Entity.AcquisitionMode is null ? null : stored ?? now;
-            if (entry.State == EntityState.Modified && entered.CurrentValue == stored)
+            entered.CurrentValue = entry.Entity.AcquisitionMode is null ? null : entered.CurrentValue ?? now;
+            if (entry.State == EntityState.Modified && entered.CurrentValue == entered.OriginalValue)
                 entered.IsModified = false;
         }
     }

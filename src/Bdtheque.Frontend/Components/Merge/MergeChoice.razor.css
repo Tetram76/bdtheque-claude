@@ -48,6 +48,8 @@
 /* Out of sight, never out of reach: the keyboard chooses a value by its radio, whose focus the option shows. */
 .merge-choice-radio {
     position: absolute;
+    /* Above the label stretched over the option, as the control it labels. */
+    z-index: 1;
     inline-size: 1px;
     block-size: 1px;
     opacity: 0;
@@ -82,7 +84,19 @@
     block-size: 0.75rem;
 }
 
+/* The label, stretched over the whole option, so that a click anywhere on it chooses the value. */
+.merge-choice-text::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.merge-choice-option[data-impossible] .merge-choice-text {
+    cursor: not-allowed;
+}
+
 .merge-choice-text {
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: 0.125rem;
@@ -134,4 +148,13 @@
     .merge-choice-record {
         display: none;
     }
+}
+
+/* A picture of the value (the thumbnail of a visual), the size of the thumbnails of the lists, above the label stretched over the
+   option, so that its own action, if any, is reached. */
+.merge-choice-picture {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    --cover-width: 2.25rem;
 }

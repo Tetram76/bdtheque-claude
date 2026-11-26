@@ -354,6 +354,78 @@ public sealed class Album : EntityBase, IAggregateRoot
         _purchaseIntents.RemoveAll(withdrawn.Contains);
     }
 
+    /// <summary>
+    /// The intents the merge of <paramref name="first"/> and <paramref name="second"/> withdraws, the acquisition of
+    /// <paramref name="acquisitionOf"/> being kept (fonctionnel/regles-metier/fusion-des-fiches.md): an edition that remains owned
+    /// cannot be targeted, so that the intents of both go; one that remains not owned keeps one, the same wish on both sides, and
+    /// none is withdrawn.
+    /// </summary>
+    public static IReadOnlyList<PurchaseIntent> PurchaseIntentsWithdrawnByEditionMerge(Edition first, Edition second, Edition acquisitionOf)
+    {
+        ArgumentNullException.ThrowIfNull(first);
+        ArgumentNullException.ThrowIfNull(second);
+        ArgumentNullException.ThrowIfNull(acquisitionOf);
+        return acquisitionOf.AcquisitionMode is null ? [] : [.. new[] { first, second }.Select(IntentOf).OfType<PurchaseIntent>()];
+    }
+
+    private static PurchaseIntent? IntentOf(Edition edition) => edition.Album._purchaseIntents.Find(p => p.EditionId == edition.Id);
+
+    /// <summary>
+    /// Merges <paramref name="merged"/> into <paramref name="kept"/>, the edition that remains
+    /// (fonctionnel/regles-metier/fusion-des-fiches.md): it belongs to <paramref name="album"/>, the album of either edition, with
+    /// its identity; it takes the edition year and the acquisition of <paramref name="acquisitionOf"/>, whole, its entry in the
+    /// collection included (modele-metier/edition.md, contraintes d'intégrité); it keeps the visuals retained of both, those of the
+    /// other edition passing to it with their identity, after its own of the same type. The other edition leaves its album, to be
+    /// deleted, with the history of its spotlight passed to the edition that remains. Its intent follows the rules of the edition
+    /// that remains (<see cref="PurchaseIntentsWithdrawnByEditionMerge"/>): withdrawn once it is owned, otherwise one, its own, or
+    /// else that of the other edition. Every check runs before anything changes.
+    /// </summary>
+    /// <param name="retainedVisuals">The visuals retained, of either edition.</param>
+    /// <returns>The visuals of both editions the merge deletes, whose files go once the merge is saved.</returns>
+    /// <exception cref="ArgumentException">
+    /// The same edition twice, an album or an acquisition of neither edition, or a visual retained of neither.
+    /// </exception>
+    public static IReadOnlyList<EditionVisual> MergeEditions(
+        Edition kept, Edition merged, Album album, int? publicationYear, Edition acquisitionOf, IReadOnlyCollection<Guid> retainedVisuals)
+    {
+        MergeGuard.EnsureDistinct(merged, kept);
+        ArgumentNullException.ThrowIfNull(album);
+        ArgumentNullException.ThrowIfNull(acquisitionOf);
+        ArgumentNullException.ThrowIfNull(retainedVisuals);
+        if (album != kept.Album && album != merged.Album)
+            throw new ArgumentException("The edition that remains belongs to the album of either edition.", nameof(album));
+        if (acquisitionOf != kept && acquisitionOf != merged)
+            throw new ArgumentException("The acquisition kept is that of either edition.", nameof(acquisitionOf));
+        var visuals = kept.Visuals.Concat(merged.Visuals).ToList();
+        if (!retainedVisuals.All(id => visuals.Exists(v => v.Id == id)))
+            throw new ArgumentException("Each visual retained is one of either edition.", nameof(retainedVisuals));
+        var acquisition = acquisitionOf.Acquisition;
+        kept.EnsureValid(acquisition, publicationYear, album);
+
+        var (keptIntent, mergedIntent) = (IntentOf(kept), IntentOf(merged));
+        merged.Album._editions.Remove(merged);
+        if (mergedIntent is not null)
+            merged.Album._purchaseIntents.Remove(mergedIntent);
+        if (keptIntent is not null)
+            kept.Album._purchaseIntents.Remove(keptIntent);
+        // The intent of the edition that remains: its own, or else that of the other edition, which then targets it.
+        var intent = acquisition.Mode is null ? keptIntent ?? mergedIntent : null;
+        intent?.Retarget(kept);
+
+        kept.Album._editions.Remove(kept);
+        kept.MoveTo(album);
+        album._editions.Add(kept);
+        if (intent is not null)
+        {
+            intent.MoveTo(album);
+            album._purchaseIntents.Add(intent);
+        }
+
+        kept.TakeAcquisitionOf(acquisitionOf, publicationYear);
+        merged.PassSpotlightsTo(kept);
+        return kept.TakeVisualsOf(merged, retainedVisuals);
+    }
+
     public void SetRating(AlbumRating? rating)
     {
         if (rating is not null)

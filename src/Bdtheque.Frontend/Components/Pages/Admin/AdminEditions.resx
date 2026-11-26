@@ -148,10 +148,10 @@
     <value>Rechercher l&apos;autre édition</value>
   </data>
   <data name="Merge.Placeholder" xml:space="preserve">
-    <value>ISBN de l&apos;autre édition…</value>
+    <value>ISBN ou titre de l&apos;album…</value>
   </data>
   <data name="Merge.Prompt" xml:space="preserve">
-    <value>Recherchez l&apos;autre édition par son ISBN.</value>
+    <value>Recherchez l&apos;autre édition par son ISBN ou par le titre de son album.</value>
   </data>
   <data name="Merge.None" xml:space="preserve">
     <value>Aucune autre édition ne correspond à « {0} ».</value>

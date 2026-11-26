@@ -150,7 +150,7 @@ internal static class RecordMerge
     /// The saved searches designating a record the merge removes designate the one that replaces it instead, at the same places
     /// of their criteria: their variables keep their constants, and their designations follow.
     /// </summary>
-    private static async Task TransferSavedSearchesAsync(
+    public static async Task TransferSavedSearchesAsync(
         BdthequeDbContext context, IReadOnlyList<MergeReplacement> replaced, CancellationToken cancellationToken)
     {
         var removed = replaced.Select(r => r.Merged).ToList();

@@ -4830,6 +4830,14 @@
             }
           },
           {
+            "name": "ByAlbum",
+            "in": "query",
+            "description": "The search finds an edition by the title of its album or of its series too, when `true`: that of the dialog of the merge of\nan edition, which an edition without ISBN must not escape (visuel/liste-albums/contenu.md, fusion). The list searches the ISBN\nonly (visuel/listes/liste-par-liste.md).",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "schema": {
@@ -4903,6 +4911,152 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EditionAdminList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/editions/merge": {
+      "get": {
+        "tags": [
+          "EditionEndpoints"
+        ],
+        "parameters": [
+          {
+            "name": "first",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "second",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EditionMergePreview"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "EditionEndpoints"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditionMergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MergeResult"
                 }
               }
             }
@@ -5035,6 +5189,14 @@
             "name": "InCollection",
             "in": "query",
             "description": "Only the editions of the collection, when `true`: an edition a purchase intent targets is presented as the intent, never\nas an edition (fonctionnel/regles-metier/intention-d-acquisition.md), as by the search of the consultation.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ByAlbum",
+            "in": "query",
+            "description": "The search finds an edition by the title of its album or of its series too, when `true`: that of the dialog of the merge of\nan edition, which an edition without ISBN must not escape (visuel/liste-albums/contenu.md, fusion). The list searches the ISBN\nonly (visuel/listes/liste-par-liste.md).",
             "schema": {
               "type": "boolean"
             }
@@ -8829,6 +8991,14 @@
             "name": "InCollection",
             "in": "query",
             "description": "Only the editions of the collection, when `true`: an edition a purchase intent targets is presented as the intent, never\nas an edition (fonctionnel/regles-metier/intention-d-acquisition.md), as by the search of the consultation.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "ByAlbum",
+            "in": "query",
+            "description": "The search finds an edition by the title of its album or of its series too, when `true`: that of the dialog of the merge of\nan edition, which an edition without ISBN must not escape (visuel/liste-albums/contenu.md, fusion). The list searches the ISBN\nonly (visuel/listes/liste-par-liste.md).",
             "schema": {
               "type": "boolean"
             }
@@ -15064,6 +15234,392 @@
             "description": "Whether the edition is owned (fonctionnel/regles-metier/appartenance-a-la-collection.md)."
           }
         }
+      },
+      "EditionMergeOutcome": {
+        "required": [
+          "acquisition",
+          "links",
+          "withdrawnPurchaseIntents"
+        ],
+        "type": "object",
+        "properties": {
+          "acquisition": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeLinkCount"
+            },
+            "description": "What passes to the edition that remains: its purchase intent, one both editions hold being common to both."
+          },
+          "withdrawnPurchaseIntents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeSide"
+            },
+            "description": "The editions whose intent the merge withdraws, the edition that remains being owned."
+          }
+        },
+        "description": "What the merge of two editions does, the acquisition of Acquisition being kept: the edition that remains owned\nor not, which decides of its purchase intent (fonctionnel/regles-metier/fusion-des-fiches.md)."
+      },
+      "EditionMergePreview": {
+        "required": [
+          "first",
+          "second",
+          "outcomes"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/EditionMergeRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/EditionMergeRecord"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EditionMergeOutcome"
+            }
+          }
+        },
+        "description": "Two editions to merge, and what their merge does, for the acquisition of either."
+      },
+      "EditionMergeRecord": {
+        "required": [
+          "id",
+          "album",
+          "publisher",
+          "publisherCollection",
+          "publicationYear",
+          "isbn",
+          "category",
+          "format",
+          "binding",
+          "orientation",
+          "readingDirection",
+          "pageCount",
+          "isColor",
+          "acquisitionMode",
+          "acquisitionDate",
+          "acquisitionAmount",
+          "acquisitionCurrency",
+          "isFree",
+          "initialValueAmount",
+          "initialValueCurrency",
+          "condition",
+          "isSecondHand",
+          "isDedicated",
+          "personalReference",
+          "personalNotes",
+          "isTargeted",
+          "visuals",
+          "modifiedAt",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "album": {
+            "description": "The album it belongs to, which the merge chooses too.",
+            "$ref": "#/components/schemas/AlbumSummary"
+          },
+          "publisher": {
+            "$ref": "#/components/schemas/PublisherListItem"
+          },
+          "publisherCollection": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "With its publisher, the one it belongs to.",
+                "$ref": "#/components/schemas/PublisherCollectionListItem"
+              }
+            ]
+          },
+          "publicationYear": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isbn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "category": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EditionCategory"
+              }
+            ]
+          },
+          "format": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EditionFormat"
+              }
+            ]
+          },
+          "binding": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BindingType"
+              }
+            ]
+          },
+          "orientation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookOrientation"
+              }
+            ]
+          },
+          "readingDirection": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReadingDirection"
+              }
+            ]
+          },
+          "pageCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isColor": {
+            "type": "boolean"
+          },
+          "acquisitionMode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "None for an edition targeted by a purchase intent, not owned, which has neither date nor amount.",
+                "$ref": "#/components/schemas/AcquisitionMode"
+              }
+            ]
+          },
+          "acquisitionDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "acquisitionAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "acquisitionCurrency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isFree": {
+            "type": "boolean"
+          },
+          "initialValueAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "initialValueCurrency": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "condition": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EditionCondition"
+              }
+            ]
+          },
+          "isSecondHand": {
+            "type": "boolean"
+          },
+          "isDedicated": {
+            "type": "boolean"
+          },
+          "personalReference": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "personalNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isTargeted": {
+            "type": "boolean",
+            "description": "Whether a purchase intent targets it, the edition being then presented as the intent."
+          },
+          "visuals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EditionVisualItem"
+            },
+            "description": "In their presentation order (fonctionnel/regles-metier/ordre-des-visuels-d-une-edition.md)."
+          },
+          "modifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The version of its album, whose aggregate it belongs to.",
+            "format": "uint32"
+          }
+        },
+        "description": "An edition as its merge presents it: what its form edits, its album and the records it references, named."
+      },
+      "EditionMergeRequest": {
+        "required": [
+          "first",
+          "second",
+          "album",
+          "publisher",
+          "publicationYear",
+          "isbn",
+          "category",
+          "format",
+          "binding",
+          "orientation",
+          "readingDirection",
+          "pageCount",
+          "isColor",
+          "acquisition",
+          "condition",
+          "isSecondHand",
+          "isDedicated",
+          "personalReference",
+          "personalNotes",
+          "visuals"
+        ],
+        "type": "object",
+        "properties": {
+          "first": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "second": {
+            "$ref": "#/components/schemas/MergedRecord"
+          },
+          "album": {
+            "description": "The album the edition that remains belongs to.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "publisher": {
+            "description": "The publisher and its collection, together.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "publicationYear": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isbn": {
+            "description": "The ISBN, with the acceptance of its error, if any.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "category": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "format": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "binding": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "orientation": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "readingDirection": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "pageCount": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isColor": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "acquisition": {
+            "description": "The acquisition and the value, whole.",
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isSecondHand": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "isDedicated": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "personalReference": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "personalNotes": {
+            "$ref": "#/components/schemas/MergeSide"
+          },
+          "visuals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MergeElement"
+            },
+            "description": "Each visual, held by one edition only, retained by its side or discarded by the other one."
+          }
+        },
+        "description": "The merge of two editions: each data kept, of the one or the other, the publisher and its collection together, of the same\nedition (modele-metier/relations-et-cardinalites.md), and the acquisition whole, its mode, date, amounts and freeness bound by\nthe constraints of integrity of an edition (modele-metier/edition.md); and each visual retained or discarded."
       },
       "EditionSummary": {
         "required": [

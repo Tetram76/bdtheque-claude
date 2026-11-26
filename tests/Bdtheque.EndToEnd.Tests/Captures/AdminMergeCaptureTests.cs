@@ -6,12 +6,14 @@ using frontend::Bdtheque.Frontend.Navigation;
 namespace Bdtheque.EndToEnd.Tests.Captures;
 
 /// <summary>
-/// The merge of two authors, that of two publishers, that of two series and that of two albums, captured in each offered theme on the application of
+/// The merge of two authors, that of two publishers, that of two series, that of two albums and that of two editions, captured in each offered theme on the application of
 /// the merges (<see cref="MergeApplication"/>), whose dates are fixed, without merging anything
 /// (visuel/fusion/fusion-de-deux-fiches.md): those of two authors and of two publishers as they open, two data left to choose, then
 /// every data chosen, with the confirmation open, the publishers with their homonymous collections, in a block of their own; that of
 /// two series as it opens, with the credits, the genres and the publisher of either series; that of two albums as it opens, the intent
-/// on the whole album withdrawn said apart, then every data chosen, with the confirmation open, what the merge will delete set apart.
+/// on the whole album withdrawn said apart, then every data chosen, with the confirmation open, what the merge will delete set apart;
+/// that of two editions as it opens, each visual on its thumbnail, then every data chosen, a visual discarded, with the
+/// confirmation open.
 /// In a window as high as the page, the bar
 /// of the merge at its bottom
 /// (<see cref="ScreenCaptureTests.CaptureAsync"/>).
@@ -22,7 +24,7 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
     private static readonly string[] States =
     [
         "authors", "authors-confirmation", "publishers", "publishers-confirmation", "series", "universes", "universes-confirmation", "albums",
-        "albums-confirmation",
+        "albums-confirmation", "editions", "editions-confirmation", "editions-visual",
     ];
 
     public static TheoryData<string, string, string> Captures
@@ -49,6 +51,7 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
             "publishers" => $"{AppPaths.AdminMergePublishers}?publisher={Application.Dupuis.Id}&other={Application.EditionsDupuis.Id}",
             "series" => $"{AppPaths.AdminMergeSeries}?series={Application.Asterix.Id}&other={Application.AsterixAgain.Id}",
             "albums" => $"{AppPaths.AdminMergeAlbums}?album={Application.Tour.Id}&other={Application.TourAgain.Id}",
+            "editions" => $"{AppPaths.AdminMergeEditions}?edition={Application.BelgiansFirst.Id}&other={Application.BelgiansSecond.Id}",
             _ => $"{AppPaths.AdminMergeUniverses}?universe={Application.StarWars.Id}&other={Application.StarWarsTwin.Id}",
         };
         await ApplicationHost.SignInAsync(page, path);
@@ -67,6 +70,14 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
                 await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Genre", Exact = true }).Last
                     .GetByRole(AriaRole.Radio).First.CheckAsync();
                 await Assertions.Expect(page.Locator(".merge-data-result")).ToContainTextAsync("Affiché : Le Tour de Gaule d'Astérix");
+            }
+            else if (state == "editions-confirmation")
+            {
+                // The publisher with its collection and the acquisition of the first edition; the cover of the second discarded.
+                foreach (var data in new[] { "Éditeur et collection", "Acquisition" })
+                    await page.GetByRole(AriaRole.Radiogroup, new() { Name = data }).Locator("input[value=First]").CheckAsync();
+                await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Visuel", Exact = true }).Nth(1).Locator("input[value=First]").CheckAsync();
+                await Assertions.Expect(page.Locator(".save-bar-state-long")).ToHaveTextAsync("Tout est choisi");
             }
             else if (state == "authors-confirmation")
             {
@@ -92,6 +103,13 @@ public sealed partial class AdminMergeCaptureTests(MergeApplication application)
 
             await page.GetByRole(AriaRole.Button, new() { Name = "Fusionner…" }).ClickAsync();
             await Assertions.Expect(page.GetByRole(AriaRole.Alertdialog)).ToBeVisibleAsync();
+        }
+        else if (state == "editions-visual")
+        {
+            // The viewer, opened on the cover of the second edition.
+            await page.GetByRole(AriaRole.Radiogroup, new() { Name = "Visuel", Exact = true }).Nth(1)
+                .GetByRole(AriaRole.Button, new() { Name = "Voir en grand : Couverture" }).ClickAsync();
+            await Assertions.Expect(page.Locator("dialog.visual-dialog .visual-dialog-image img")).ToHaveJSPropertyAsync("complete", true);
         }
         else if (state == "albums")
         {

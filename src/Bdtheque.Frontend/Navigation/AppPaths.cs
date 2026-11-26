@@ -168,10 +168,10 @@ public static class AppPaths
     public static string AdminEditEdition(Guid albumId, Guid id) => $"{AdminAlbums}/{albumId}/editions/{id}";
 
     /// <summary>
-    /// The next step of the merge of two editions, whose presentation awaits the terms of the merge
-    /// (fonctionnel/structure-de-l-application.md): it receives the edition and the other one, <c>edition</c> and <c>other</c>.
+    /// The merge of two editions (visuel/fusion/fusion-de-deux-fiches.md): it receives the edition and the other one, <c>edition</c>
+    /// and <c>other</c>.
     /// </summary>
-    public const string AdminMergeEditions = NotYetImplemented;
+    public const string AdminMergeEditions = AdminEditions + MergeSegment;
 
     /// <summary>The list of the purchase intents of the administration (visuel/listes/).</summary>
     public const string AdminPurchaseIntents = "/admin/acquisition-intents";

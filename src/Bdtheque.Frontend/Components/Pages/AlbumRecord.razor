@@ -131,7 +131,8 @@ else if (_album is { } album)
 
     @if (_open is { } open)
     {
-        <VisualDialog AlbumId="Id" Edition="open" EditionLabel="@Labels.Edition(open.Edition)" Position="_position" />
+        <VisualDialog Edition="open.Edition" PublisherWebsite="@open.PublisherWebsite" Visuals="open.Visuals" EditionLabel="@Labels.Edition(open.Edition)"
+                      Position="_position" CloseHref="@AppPaths.Album(Id)" HrefOf="@(position => AlbumRecordQuery.ForVisual(open.Edition.Id, position).Href(Id))" />
     }
 }
 

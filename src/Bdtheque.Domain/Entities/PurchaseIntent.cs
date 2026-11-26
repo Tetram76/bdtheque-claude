@@ -42,4 +42,14 @@ public sealed class PurchaseIntent : EntityBase
         Album = album;
         AlbumId = album.Id;
     }
+
+    /// <summary>
+    /// Makes the intent target <paramref name="edition"/>, with its identity, as the merge of two editions does when the edition that
+    /// remains, owned before, is no longer (<see cref="Album.MergeEditions"/>): the wish is that of the other edition, merged into it.
+    /// </summary>
+    internal void Retarget(Edition edition)
+    {
+        Edition = edition;
+        EditionId = edition.Id;
+    }
 }

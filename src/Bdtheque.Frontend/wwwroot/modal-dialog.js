@@ -1,7 +1,7 @@
 // Opens as a modal the dialog it wraps, whenever it enters the page: on the first load, by an enhanced navigation of Blazor
 // or by an interactive rendering (choix-implementation/socle/frontend.md). Only a script can open a dialog as a modal,
-// which the browser keeps above an inert page, focus included. Escape follows the closing link of the dialog, rather than
-// closing it in place, so that the page without it is the one shown.
+// which the browser keeps above an inert page, focus included. Escape follows the closing of the dialog, a link on a static
+// page, a button on an interactive one, rather than closing it in place, so that the page without it is the one shown.
 function open(element) {
     const dialog = element.querySelector("dialog");
     if (!element.isConnected || !dialog || dialog.open)
