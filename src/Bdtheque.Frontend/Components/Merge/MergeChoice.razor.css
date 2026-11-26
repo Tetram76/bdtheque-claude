@@ -135,3 +135,9 @@
         display: none;
     }
 }
+
+/* A picture of the value (the thumbnail of a visual), the size of the thumbnails of the lists. */
+.merge-choice-picture {
+    flex: none;
+    --cover-width: 2.25rem;
+}

@@ -1,0 +1,394 @@
+@attribute [Route(AppPaths.AdminMergeEditions)]
+@rendermode InteractiveServer
+@using System.Globalization
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Components.Merge
+@using Bdtheque.Frontend.Components.Records
+@inject IStringLocalizer<AdminMergeEditions> L
+@inject IStringLocalizer<MergeTexts> MergeLocalizer
+@inject Citation Citation
+@inject ValueLabels Values
+@inject RecordLabels Labels
+@inject DisplayFormatter Display
+@inject IsbnFormatter Isbns
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The merge of two editions (visuel/fusion/fusion-de-deux-fiches.md), reached from the dialog of the list of the editions, which
+   gives the edition and the other one: the album the edition belongs to, and each data it keeps, of the one or the other, in the
+   blocks of its entry form (visuel/saisie-edition/contenu.md), the publisher and its collection together, the acquisition whole,
+   its amounts included, which the constraints of integrity of an edition bind (modele-metier/edition.md); each visual, retained or
+   discarded on its thumbnail; the label the data chosen give; the purchase intent that passes to it, or that the merge withdraws
+   once the edition is owned; then the confirmation, which sets apart what the merge will delete. Merged or cancelled, it leads back
+   to the list. It applies no rule of the merge nor of an edition, which the API alone holds: it sends, data by data, the record
+   whose value is kept, and presents what the API says the merge does for the acquisition chosen. *@
+<PageTitle>@L["Title"]</PageTitle>
+<AudienceScreen Function="AudienceFunctions.AdminEditionMerge" />
+
+@if (Preview is null)
+{
+    <Breadcrumb Items="Breadcrumb" />
+    @if (_loadProblem is not null)
+    {
+        <ErrorMessage Problem="_loadProblem" />
+    }
+}
+else
+{
+    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@L["Title"]" Subject="@L["Subject", Citation.Of(FirstName), Citation.Of(SecondName)]"
+               State="SaveBarState.Unchanged" StateText="@Merge.PendingText(Pending)" StateShortText="@Merge.PendingShortText(Pending)"
+               SaveDisabled="Pending > 0" Saving="_merging" SaveLabel="@L["Merge"]" CancelHref="@AppPaths.AdminEditions" OnSave="OpenConfirmation"
+               Problem="@MergeProblem">
+        <BarOptions><MergeShowAll @bind-All="_all" /></BarOptions>
+        <ChildContent>
+            <MergeView Reduced="!_all">
+                @foreach (var (block, index) in Blocks.Select((block, index) => (block, index)))
+                {
+                    <MergeData @key="block.Key" Title="@L[$"Block.{block.Key}"]" Kicker="@L[$"Kicker.{block.Key}"]" First="Head(Preview.First, index == FirstShown)"
+                               Second="Head(Preview.Second, index == FirstShown)" Result="@(block.Key == EditionBlock ? Result : null)">
+                        @foreach (var row in block.Rows)
+                        {
+                            <MergeChoice @key="row.Key" Id="@($"merge-{row.Key}")" Label="@row.Label" FirstRecord="@FirstName"
+                                         SecondRecord="@SecondName" First="@row.First" Second="@row.Second" Selected="Choices![row.Key]"
+                                         SelectedChanged="side => Choices![row.Key] = side" Long="row.Long" Same="row.Same"
+                                         FirstPicture="@Picture(row, MergeSide.First)" SecondPicture="@Picture(row, MergeSide.Second)" />
+                        }
+                    </MergeData>
+                }
+            </MergeView>
+            <MergeLinks Links="Outcome.Links" FirstName="@FirstName" SecondName="@SecondName" Count="Count"
+                        Withdrawn="@([.. Withdrawn.Select(side => L["Links.Withdrawn", Citation.Of(NameOf(side))].Value)])" />
+        </ChildContent>
+    </EntryForm>
+
+    @if (_confirming)
+    {
+        <Dialog Id="merge-confirmation" Title="@L["Confirm.Title"]" Tone="DialogTone.Merge" OnClose="() => _confirming = false">
+            <ChildContent>
+                <p>@Merge.Definitive</p>
+                <ul class="merge-impact">
+                    <li>@Merge.OneRecord(KeptLabel)</li>
+                    @if (Merge.Linked(Outcome.Links) is { } linked)
+                    {
+                        <li>@L["Confirm.Linked", Citation.Of(KeptLabel), linked]</li>
+                    }
+                </ul>
+                <MergeRemovals Lines="Removals" />
+            </ChildContent>
+            <Actions>
+                <Button Variant="ButtonVariant.Delete" Label="@Merge.ConfirmLabel" OnClick="MergeAsync" Disabled="_merging" />
+            </Actions>
+        </Dialog>
+    }
+}
+
+@code {
+    // Every data presented, rather than only those with a choice to make, the default (visuel/fusion/fusion-de-deux-fiches.md).
+    private bool _all;
+    // The keys of the data of an edition, each the key of its row and of the choice made for it.
+    private const string AlbumKey = "album";
+    private const string PublisherKey = "publisher";
+    private const string YearKey = "year";
+    private const string IsbnKey = "isbn";
+    private const string CategoryKey = "category";
+    private const string FormatKey = "format";
+    private const string BindingKey = "binding";
+    private const string OrientationKey = "orientation";
+    private const string ReadingDirectionKey = "reading-direction";
+    private const string PagesKey = "pages";
+    private const string ColorKey = "color";
+    private const string AcquisitionKey = "acquisition";
+    private const string ConditionKey = "condition";
+    private const string SecondHandKey = "second-hand";
+    private const string DedicatedKey = "dedicated";
+    private const string ReferenceKey = "reference";
+    private const string NotesKey = "notes";
+    private const string VisualKind = "visual";
+
+    private ApiProblem? _loadProblem;
+    private ApiProblem? _mergeProblem;
+    private EntryForm? _form;
+    private bool _confirming;
+    private bool _merging;
+    private bool _revealProblem;
+
+    /// <summary>The edition the merge was asked from, in the list.</summary>
+    [SupplyParameterFromQuery(Name = "edition")]
+    public Guid? EditionId { get; set; }
+
+    /// <summary>The other edition, chosen in the dialog of the merge.</summary>
+    [SupplyParameterFromQuery(Name = "other")]
+    public Guid? OtherId { get; set; }
+
+    /// <summary>The two editions as they were read, once, by the prerendering.</summary>
+    [PersistentState]
+    public EditionMergePreview? Preview { get; set; }
+
+    /// <summary>The format of the labels of the albums, a setting of the application.</summary>
+    [PersistentState]
+    public AlbumLabelFormat Format { get; set; }
+
+    /// <summary>The record each data, and each visual, is kept from, by its row; none while the user has not chosen.</summary>
+    [PersistentState]
+    public Dictionary<string, MergeSide?>? Choices { get; set; }
+
+    private MergeTexts Merge => new(MergeLocalizer, Citation);
+
+    private IReadOnlyList<BreadcrumbItem> Breadcrumb => [new(L["Administration"], AppPaths.AdminHome), new(L["Editions"], AppPaths.AdminEditions), new(L["Breadcrumb"])];
+
+    private int Pending => Choices!.Values.Count(c => c is null);
+
+    // Each edition is named by its label (fonctionnel/presentation/libelle-d-une-edition.md), as the list names it.
+    private string FirstName => LabelOf(Preview!.First);
+
+    private string SecondName => LabelOf(Preview!.Second);
+
+    private string NameOf(MergeSide side) => side == MergeSide.First ? FirstName : SecondName;
+
+    private string LabelOf(EditionMergeRecord edition) => Labels.Edition(Summary(edition, edition, edition));
+
+    private static EditionSummary Summary(EditionMergeRecord published, EditionMergeRecord dated, EditionMergeRecord numbered) => new(
+        published.Id, published.Publisher.Id, published.Publisher.Name, published.PublisherCollection?.Id, published.PublisherCollection?.Name,
+        dated.PublicationYear, numbered.Isbn);
+
+    // The label the edition keeps, of the data chosen, that the confirmation names it by; that of the first edition while one of its
+    // parts is left to choose.
+    private string KeptLabel => KeptLabelChosen ? Labels.Edition(Summary(Of(Choices![PublisherKey]!.Value), Of(Choices[YearKey]!.Value), Of(Choices[IsbnKey]!.Value))) : FirstName;
+
+    private bool KeptLabelChosen => new[] { PublisherKey, YearKey, IsbnKey }.All(key => Choices![key] is not null);
+
+    // The blocks of the entry form of an edition (visuel/saisie-edition/contenu.md), whose titles and mentions the merge takes up,
+    // each with the keys of its data, in its order; the amounts, part of the acquisition, leave the block of the value without data.
+    private const string EditionBlock = "Edition";
+
+    private static readonly (string Key, Func<string, bool> Holds)[] BlockKeys =
+    [
+        (EditionBlock, key => key is AlbumKey or PublisherKey or YearKey or IsbnKey or CategoryKey),
+        ("Making", key => key is FormatKey or BindingKey or OrientationKey or ReadingDirectionKey or PagesKey or ColorKey),
+        ("Copy", key => key is AcquisitionKey or ConditionKey or SecondHandKey or DedicatedKey or ReferenceKey or NotesKey),
+        ("Visuals", key => key.StartsWith(VisualKind + "-", StringComparison.Ordinal)),
+    ];
+
+    // The block whose heads carry the detail of the two records: the first one presented (visuel/fusion/fusion-de-deux-fiches.md).
+    private int FirstShown => _all ? 0 : Math.Max(0, Blocks.ToList().FindIndex(b => b.Rows.Any(r => MergeView.HasChoice(r.First, r.Second, same: r.Same))));
+
+    private IEnumerable<(string Key, List<Row> Rows)> Blocks
+    {
+        get
+        {
+            var rows = Rows.ToList();
+            return BlockKeys.Select(block => (block.Key, Rows: rows.Where(row => block.Holds(row.Key)).ToList())).Where(block => block.Rows.Count > 0);
+        }
+    }
+
+    /// <summary>A row of the merge: a data, or a visual held by one edition (<paramref name="Visual"/>, of <paramref name="Holder"/>).</summary>
+    private sealed record Row(string Key, string Label, string? First, string? Second, bool Long = false, bool? Same = null, Guid? Visual = null, MergeSide? Holder = null);
+
+    // In the order of the entry form of an edition (visuel/saisie-edition/contenu.md).
+    private IEnumerable<Row> Rows
+    {
+        get
+        {
+            var (first, second) = (Preview!.First, Preview.Second);
+            // Two albums of the same label are two albums: told apart by their identity, as a publisher and its collection.
+            yield return new(AlbumKey, L["Data.Album"], AlbumText(first), AlbumText(second), Same: first.Album.Id == second.Album.Id);
+            yield return new(PublisherKey, L["Data.Publisher"], PublisherText(first), PublisherText(second),
+                Same: (first.Publisher.Id, first.PublisherCollection?.Id) == (second.Publisher.Id, second.PublisherCollection?.Id));
+            yield return new(YearKey, L["Data.Year"], first.PublicationYear?.ToString(CultureInfo.CurrentCulture), second.PublicationYear?.ToString(CultureInfo.CurrentCulture));
+            yield return new(IsbnKey, L["Data.Isbn"], IsbnText(first), IsbnText(second), Same: first.Isbn == second.Isbn);
+            yield return new(CategoryKey, L["Data.Category"], Named(first.Category), Named(second.Category));
+            yield return new(FormatKey, L["Data.Format"], Named(first.Format), Named(second.Format));
+            yield return new(BindingKey, L["Data.Binding"], Named(first.Binding), Named(second.Binding));
+            yield return new(OrientationKey, L["Data.Orientation"], Named(first.Orientation), Named(second.Orientation));
+            yield return new(ReadingDirectionKey, L["Data.ReadingDirection"], Named(first.ReadingDirection), Named(second.ReadingDirection));
+            yield return new(PagesKey, L["Data.Pages"], first.PageCount?.ToString(CultureInfo.CurrentCulture), second.PageCount?.ToString(CultureInfo.CurrentCulture));
+            yield return new(ColorKey, L["Data.Color"], YesNo(first.IsColor), YesNo(second.IsColor));
+            yield return new(AcquisitionKey, L["Data.Acquisition"], AcquisitionText(first), AcquisitionText(second));
+            yield return new(ConditionKey, L["Data.Condition"], Named(first.Condition), Named(second.Condition));
+            yield return new(SecondHandKey, L["Data.SecondHand"], YesNo(first.IsSecondHand), YesNo(second.IsSecondHand));
+            yield return new(DedicatedKey, L["Data.Dedicated"], YesNo(first.IsDedicated), YesNo(second.IsDedicated));
+            yield return new(ReferenceKey, L["Data.Reference"], first.PersonalReference, second.PersonalReference);
+            yield return new(NotesKey, L["Data.Notes"], first.PersonalNotes, second.PersonalNotes, Long: true);
+            foreach (var row in VisualRows(first, MergeSide.First).Concat(VisualRows(second, MergeSide.Second)))
+                yield return row;
+        }
+    }
+
+    // Each visual of an edition, in its order, named by its type (« Couverture », « Planche 2 »): held by this edition only, the
+    // files of two editions never being the same.
+    private IEnumerable<Row> VisualRows(EditionMergeRecord edition, MergeSide side)
+    {
+        var types = edition.Visuals.Select(v => v.Type).ToList();
+        foreach (var (visual, index) in edition.Visuals.Select((visual, index) => (visual, index)))
+        {
+            var name = VisualLabels.TypeOf(types, index, Values, L);
+            yield return new($"{VisualKind}-{visual.Id}", L["Data.Visual"], side == MergeSide.First ? name : null, side == MergeSide.Second ? name : null,
+                Visual: visual.Id, Holder: side);
+        }
+    }
+
+    private RenderFragment? Picture(Row row, MergeSide side) =>
+        row.Visual is { } visual && row.Holder == side ? @<Cover VisualId="visual" /> : null;
+
+    private string AlbumText(EditionMergeRecord edition) => Labels.Album(edition.Album, Format);
+
+    // The publisher and its collection, together, of the same edition (modele-metier/relations-et-cardinalites.md).
+    private static string PublisherText(EditionMergeRecord edition) =>
+        edition.PublisherCollection is { } collection ? $"{edition.Publisher.Name} ({collection.Name})" : edition.Publisher.Name;
+
+    private string? IsbnText(EditionMergeRecord edition) => edition.Isbn is { } isbn ? Isbns.Format(isbn) : null;
+
+    // The acquisition whole, its value included: its mode and date, its amounts, its freeness; an edition targeted by an intent,
+    // not owned, presented as the intent (fonctionnel/regles-metier/intention-d-acquisition.md).
+    private string AcquisitionText(EditionMergeRecord edition)
+    {
+        if (edition.AcquisitionMode is not { } mode)
+            return L["Data.Acquisition.Intent"];
+        var purchase = mode == AcquisitionMode.Purchase;
+        List<string> parts = [edition.AcquisitionDate is { } date ? L["Data.Acquisition.On", Values.Of(mode), Display.Date(date)] : Values.Of(mode)];
+        if (edition.AcquisitionAmount is { } amount)
+            parts.Add(L[purchase ? "Data.Price.Purchase" : "Data.Price.Other", Display.Amount(amount, edition.AcquisitionCurrency!)]);
+        if (edition.InitialValueAmount is { } initial)
+            parts.Add(L["Data.InitialValue", Display.Amount(initial, edition.InitialValueCurrency!)]);
+        if (edition.IsFree)
+            parts.Add(L["Data.Free"]);
+        return string.Join(" · ", parts);
+    }
+
+    private string? Named<TEnum>(TEnum? value) where TEnum : struct, Enum => value is { } named ? Values.Of(named) : null;
+
+    private string YesNo(bool value) => value ? L["Data.Yes"].Value : L["Data.No"].Value;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Preview is not null)
+            return;
+        if (EditionId is not { } first || OtherId is not { } second)
+        {
+            Navigation.NavigateTo(AppPaths.AdminEditions);
+            return;
+        }
+
+        try
+        {
+            Format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+            Preview = await Api.GetAsync<EditionMergePreview>($"/admin/editions/merge?first={first}&second={second}");
+        }
+        catch (ApiProblemException exception)
+        {
+            _loadProblem = exception.Problem;
+            return;
+        }
+
+        // A value set on one side only, or the same on both, is retained at once; two different values wait for the user's choice:
+        // no record is favoured (fonctionnel/regles-metier/fusion-des-fiches.md). A visual, held by one edition, is retained.
+        Choices = Rows.ToDictionary(row => row.Key, row => Initial(row.First, row.Second, row.Same));
+    }
+
+    private static MergeSide? Initial(string? first, string? second, bool? same = null) =>
+        (first, second) switch
+        {
+            _ when MergeView.IsSame(first, second, same) => MergeSide.First,
+            (_, null) => MergeSide.First,
+            (null, _) => MergeSide.Second,
+            _ => null,
+        };
+
+    private EditionMergeRecord Of(MergeSide side) => side == MergeSide.First ? Preview!.First : Preview!.Second;
+
+    // What the merge does for the acquisition chosen, which the API tells (the edition owned or not, which decides of its intent);
+    // that of the first edition while the acquisition is left to choose, the merge withdrawing nothing until then.
+    private EditionMergeOutcome Outcome => Preview!.Outcomes.Single(o => o.Acquisition == (Choices![AcquisitionKey] ?? MergeSide.First));
+
+    private IReadOnlyList<MergeSide> Withdrawn => Choices![AcquisitionKey] is null ? [] : Outcome.WithdrawnPurchaseIntents;
+
+    // What the data chosen make of the edition, as its entry form says it: its label; nothing of a part left to choose.
+    private RenderFragment? Result => !KeptLabelChosen ? null : @<span>@L["Result.Label"] : <strong><LabelText Text="@KeptLabel" /></strong></span>;
+
+    /// <summary>
+    /// The head of a record above a block: its detail above the first block only, the blocks after it naming the record only; an
+    /// edition targeted by an intent says it is the intent.
+    /// </summary>
+    private MergeRecordHead Head(EditionMergeRecord record, bool detailed) =>
+        detailed ? new MergeRecordHead(LabelOf(record), record.IsTargeted ? L["Head.Targeted"].Value : null, record.ModifiedAt) : new MergeRecordHead(LabelOf(record), null, null);
+
+    private string Count(MergeLinkCount link) => L[$"Links.{link.Kind}.{(link.Total == 1 ? "One" : "Other")}", link.Total].Value;
+
+    // What the merge will delete, set apart in the confirmation (fonctionnel/regles-metier/fusion-des-fiches.md): the intents it
+    // withdraws, the edition being owned, then each visual discarded, by the edition that held it.
+    private IReadOnlyList<string> Removals
+    {
+        get
+        {
+            var discarded = Rows
+                .Where(r => r.Visual is not null && Choices![r.Key] != r.Holder)
+                .Select(r => (EntityKind.EditionVisual, r.Holder!.Value, (r.Holder == MergeSide.First ? r.First : r.Second)!));
+            List<string> lines =
+            [
+                .. Withdrawn.Select(side => L["Confirm.Withdrawn", Citation.Of(NameOf(side))].Value),
+                .. Merge.Discarded(discarded, NameOf),
+            ];
+            return lines;
+        }
+    }
+
+    private void OpenConfirmation()
+    {
+        if (Pending == 0)
+            _confirming = true;
+    }
+
+    private async Task MergeAsync()
+    {
+        if (_merging)
+            return;
+        _merging = true;
+        _mergeProblem = null;
+        try
+        {
+            await Api.PostAsync<EditionMergeRequest, MergeResult>("/admin/editions/merge", Request());
+            await Recorder.RecordActionAsync(AudienceFunctions.AdminEditionMerged);
+            Navigation.NavigateTo(AppPaths.AdminEditions);
+        }
+        catch (ApiProblemException exception)
+        {
+            _mergeProblem = exception.Problem;
+            _confirming = false;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _merging = false;
+        }
+    }
+
+    private EditionMergeRequest Request()
+    {
+        MergeSide Side(string key) => Choices![key]!.Value;
+        return new EditionMergeRequest(
+            new MergedRecord(Preview!.First.Id, Preview.First.Version), new MergedRecord(Preview.Second.Id, Preview.Second.Version),
+            Side(AlbumKey), Side(PublisherKey), Side(YearKey), Side(IsbnKey), Side(CategoryKey), Side(FormatKey), Side(BindingKey),
+            Side(OrientationKey), Side(ReadingDirectionKey), Side(PagesKey), Side(ColorKey), Side(AcquisitionKey), Side(ConditionKey),
+            Side(SecondHandKey), Side(DedicatedKey), Side(ReferenceKey), Side(NotesKey),
+            [.. Rows.Where(r => r.Visual is not null).Select(r => new MergeElement(r.Visual!.Value, Side(r.Key)))]);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _form is not null)
+        {
+            _revealProblem = false;
+            await _form.RevealProblemAsync();
+        }
+    }
+
+    // The editions as they are now, the choices left behind: a navigation that loads the page anew.
+    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+
+    private RenderFragment? MergeProblem => _mergeProblem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Conflict"]" NotFound="@L["Problem.NotFound"]" Technical="@L["Problem.Technical"]"
+                      CanReload="true" OnReload="Reload" OnRetry="MergeAsync" />;
+}

@@ -369,6 +369,16 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         });
         await data.EditionAsync(lighthouseTwin, Owned(blackPlate.Id, null, 2021, AcquisitionMode.Gift, new DateOnly(2021, 12, 24)) with { IsFree = true });
         await data.IntentOnEditionAsync(lighthouseTwin, new PurchaseIntentEditionContent(horizon.Id, null, 2025, null, null, null, null, null, null, null, true));
+        // The first edition of « Le Phare aux mille lanternes » saved again with the album in figures, to merge with it
+        // (fonctionnel/regles-metier/fusion-des-fiches.md): the same publisher, year and ISBN, another acquisition, a condition, a
+        // reference and a page count of its own, its cover and a plate, the album of either edition to choose.
+        var lighthouseFirstTwin = await data.EditionAsync(lighthouseTwin, Owned(blackPlate.Id, null, 1989, AcquisitionMode.Gift, new DateOnly(1989, 12, 25)) with
+        {
+            Isbn = Isbn("978290512302"), Category = EditionCategory.FirstEdition, PageCount = 64, Condition = EditionCondition.Good,
+            PersonalReference = TwinEditionReference,
+        });
+        await data.VisualAsync(lighthouseTwin, lighthouseFirstTwin, VisualType.Cover, Images.Portrait(0.56));
+        await data.VisualAsync(lighthouseTwin, lighthouseFirstTwin, VisualType.Plate, Images.Landscape(0.42));
         // An album wished for as a whole, saved again outside its series: to merge with « Le Récif d'argent », which has an
         // edition, the intent on the whole album being withdrawn (fonctionnel/regles-metier/fusion-des-fiches.md).
         var reefTwin = await data.AlbumAsync(OneShot(TwinWishedAlbumTitle, 2022, 6, [adventure], [], [Credit(arnaud, ContributionRole.Scenarist)]));
@@ -450,6 +460,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
 
     /// <summary>The album « Le Phare aux mille lanternes » saved again under its title in figures, to merge with it.</summary>
     public const string TwinAlbumTitle = "Le Phare aux 1000 lanternes";
+
+    /// <summary>The personal reference of the edition saved again of « Le Phare aux mille lanternes », to merge with its first edition.</summary>
+    public const string TwinEditionReference = "Étagère B-12";
 
     /// <summary>The album « Le Récif d'argent », wished for as a whole, saved again outside its series, to merge with it.</summary>
     public const string TwinWishedAlbumTitle = "Le Récif d'Argent";

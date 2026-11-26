@@ -433,6 +433,20 @@ public sealed class ValidationDataLoaderTests(ValidationDataLoaderTests.LoadedAp
         Assert.Single(found.Albums.Items, a => a.Album.SeriesId is not null);
     }
 
+    // visuel/fusion/fusion-de-deux-fiches.md: the first edition of an album saved again with its twin, the same publisher, year
+    // and ISBN, with visuals of its own, the two editions of two albums.
+    [Fact]
+    public async Task EditionTwins_OfTwoAlbums_TheSameLabel_WithVisualsOfTheirOwn()
+    {
+        var twin = await AlbumAsync(ValidationDataLoader.TwinAlbumTitle);
+        var original = await AlbumAsync(ValidationDataLoader.MultiEditionOneShotTitle);
+        var again = Assert.Single(twin.Editions, e => e.PersonalReference == ValidationDataLoader.TwinEditionReference);
+        var first = Assert.Single(original.Editions, e => e.Edition.Isbn == again.Edition.Isbn);
+        Assert.Equal((first.Edition.PublisherId, first.Edition.PublicationYear), (again.Edition.PublisherId, again.Edition.PublicationYear));
+        Assert.NotEqual(first.AcquisitionMode, again.AcquisitionMode);
+        Assert.Equal(2, again.Visuals.Count);
+    }
+
     private async Task<AlbumDetail> AlbumAsync(string title)
     {
         var found = await _client.GetFromJsonAsync<AlbumCatalogList>($"/catalog/albums?q={Uri.EscapeDataString(title)}");

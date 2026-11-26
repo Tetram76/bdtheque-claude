@@ -96,4 +96,10 @@
   <data name="Discarded.Other.Universe" xml:space="preserve">
     <value>{0} univers : {1}, de {2}</value>
   </data>
+  <data name="Discarded.One.EditionVisual" xml:space="preserve">
+    <value>1 visuel : {0}, de {1}</value>
+  </data>
+  <data name="Discarded.Other.EditionVisual" xml:space="preserve">
+    <value>{0} visuels : {1}, de {2}</value>
+  </data>
 </root>
