@@ -78,15 +78,33 @@ public sealed class PurchaseIntentListTests(ApplicationHost application) : Brows
     public async Task Rows_AtEveryWidth_LeaveTheAlbumItsRoom_WithoutTheListOverflowing(string theme, int width)
     {
         await CreateAlbumIntentAsync($"L'Horloger d'Ombrelune et les veilleurs du port {_marker}");
+        // An edition targeted whose label ends with an ISBN, a single block, and whose summary is whole (#632).
+        var publisher = await PostAsync<PublisherForm>("/admin/publishers", new PublisherContent($"Éditions de l'Horizon {_marker}", null, []));
+        var album = await PostAsync<AlbumForm>("/admin/albums", new AlbumContent(
+            $"Brouillard sur Ombrelune {_marker}", null, null, AlbumType.Regular, false, null, null, null, null, null, null, null, null, [], [], []));
+        await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+            new PurchaseIntentEditionContent(publisher.Id, null, 2023, "978-2-7234-4567-1", BindingType.Hardcover, BookOrientation.Landscape,
+                ReadingDirection.RightToLeft, EditionFormat.Large, 48, EditionCategory.SpecialEdition, false),
+            album.Version));
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
         await PageReadiness.GotoAsync(page, $"{AppPaths.PurchaseIntents}?q={_marker}");
 
-        var label = await page.Locator(".row-entry").EvaluateAsync<double>("label => label.getBoundingClientRect().width");
+        var labels = await page.Locator(".intent-row:not(.intent-row-head) .row-entry")
+            .EvaluateAllAsync<double[]>("labels => labels.map(label => label.getBoundingClientRect().width)");
         var overflow = await page.EvaluateAsync<bool>("() => document.documentElement.scrollWidth > document.documentElement.clientWidth");
 
-        Assert.True(label >= 120, $"{theme} at {width}px: the album is {label}px wide.");
+        Assert.All(labels, label => Assert.True(label >= 120, $"{theme} at {width}px: the album is {label}px wide."));
         Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        Assert.False(await SpillsAsync(page), $"{theme} at {width}px: what an intent targets spills out of its column.");
     }
+
+    // Whether something of what an intent targets (its unbreakable ISBN first) goes beyond its column, over the next one.
+    internal static Task<bool> SpillsAsync(IPage page) => page.Locator(".intent-row:not(.intent-row-head) .intent-target").EvaluateAllAsync<bool>("""
+        cells => cells.some(cell => {
+            const right = cell.getBoundingClientRect().right;
+            return [...cell.querySelectorAll('*')].some(element => element.getBoundingClientRect().right > right + 0.5);
+        })
+        """);
 
     private static ILocator Labels(IPage page) =>
         page.GetByRole(AriaRole.Table, new() { Name = "Intentions d'acquisition" }).Locator(".row-entry a");

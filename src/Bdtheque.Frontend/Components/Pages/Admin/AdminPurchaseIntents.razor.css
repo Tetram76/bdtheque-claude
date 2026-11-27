@@ -3,8 +3,9 @@
 /* The layout of the rows follows the width of the list itself, not that of the screen: the room the rows have depends on
    the margins of the page and of the block, which a theme sets. Mobile-first, each row holds on two lines, the thumbnail
    on the left: the album and the actions, then what the intent targets and its date, the date carrying the name of its
-   column. A list wide enough for those columns, the fixed ones and at least 12rem for the album, is a table, what the
-   intent targets taking the room left and wrapping in it; wider still, the table adds the membership of the collection
+   column. A list wide enough for those columns, the fixed ones, at least 12rem for the album and 13rem for what the intent
+   targets, whose label ends with an ISBN that never breaks (fonctionnel/presentation/libelle-d-une-edition.md), is a table,
+   what the intent targets taking the room left and wrapping in it, its summary under it (#632); wider still, the table adds the membership of the collection
    (visuel/listes/principes-communs.md: on a narrower screen, the secondary columns go first). */
 .intent-rows {
     container: intent-rows / inline-size;
@@ -113,9 +114,9 @@
     gap: var(--space-xs);
 }
 
-@container intent-rows (min-width: 42rem) {
+@container intent-rows (min-width: 52rem) {
     .intent-row {
-        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(0, 1.4fr) 6.75rem var(--intent-actions-width);
+        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(13rem, 1.4fr) 6.75rem var(--intent-actions-width);
         grid-template-areas: "cover main target created actions";
         align-items: center;
     }
@@ -139,9 +140,9 @@
     }
 }
 
-@container intent-rows (min-width: 60rem) {
+@container intent-rows (min-width: 64rem) {
     .intent-row {
-        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(0, 1.4fr) 10.5rem 6.75rem var(--intent-actions-width);
+        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(13rem, 1.4fr) 10.5rem 6.75rem var(--intent-actions-width);
         grid-template-areas: "cover main target collection created actions";
     }
 
