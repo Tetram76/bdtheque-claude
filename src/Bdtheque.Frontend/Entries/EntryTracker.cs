@@ -41,7 +41,9 @@ public sealed record EntryDatumState(bool Modified, string? Redo, EventCallback 
 public sealed class EntryTracker<TEntry>(Func<TEntry?> read, Func<TEntry?> entry, IReadOnlyList<EntryDatum<TEntry>> data)
     where TEntry : class
 {
-    private readonly HashSet<string> _rejected = [];
+    // The data whose entry left behind was taken or rejected: settled, whatever the datum becomes afterwards (a take may merge
+    // what was entered with what changed since, e.g. the collections of a publisher, without equalling it).
+    private readonly HashSet<string> _settled = [];
     private (TEntry Read, TEntry Entry)? _abandoned;
 
     public bool IsModified(string key) =>
@@ -66,7 +68,7 @@ public sealed class EntryTracker<TEntry>(Func<TEntry?> read, Func<TEntry?> entry
         if (_abandoned is not null && data.All(d => d.Value(r) == d.Value(e)))
             return;
         _abandoned = (r, e);
-        _rejected.Clear();
+        _settled.Clear();
     }
 
     /// <summary>The entry left behind at the reload, if any.</summary>
@@ -80,11 +82,13 @@ public sealed class EntryTracker<TEntry>(Func<TEntry?> read, Func<TEntry?> entry
 
     public void Take(string key)
     {
-        if (_abandoned is { } abandoned && entry() is { } e)
-            Datum(key).Take(abandoned.Entry, e);
+        if (_abandoned is not { } abandoned || entry() is not { } e)
+            return;
+        Datum(key).Take(abandoned.Entry, e);
+        _settled.Add(key);
     }
 
-    public void Reject(string key) => _rejected.Add(key);
+    public void Reject(string key) => _settled.Add(key);
 
     /// <summary>What the control of the datum presents, its buttons rendering the page anew.</summary>
     public EntryDatumState State(string key, IHandleEvent receiver) => new(
@@ -94,9 +98,10 @@ public sealed class EntryTracker<TEntry>(Func<TEntry?> read, Func<TEntry?> entry
     private EntryDatum<TEntry> Datum(string key) =>
         data.FirstOrDefault(d => d.Key == key) ?? throw new ArgumentException($"The form has no datum « {key} ».", nameof(key));
 
-    // Changed by the user before the reload, different from the record reloaded, and not entered again since.
+    // Changed by the user before the reload, different from the record reloaded, neither taken nor rejected, and not entered
+    // again by hand since.
     private bool IsPending(EntryDatum<TEntry> datum) =>
-        _abandoned is { } abandoned && read() is { } r && entry() is { } e && !_rejected.Contains(datum.Key)
+        _abandoned is { } abandoned && read() is { } r && entry() is { } e && !_settled.Contains(datum.Key)
         && (datum.Shown is null || (datum.Shown(abandoned.Entry) && datum.Shown(e)))
         && datum.Value(abandoned.Entry) is var entered && entered != datum.Value(abandoned.Read)
         && entered != datum.Value(r) && entered != datum.Value(e);

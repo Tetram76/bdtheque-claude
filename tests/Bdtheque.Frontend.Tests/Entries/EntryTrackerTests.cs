@@ -98,6 +98,26 @@ public sealed class EntryTrackerTests
     }
 
     [Fact]
+    public void Taking_ADatum_SettlesIt_EvenWhenTheTakeMergesWhatWasEntered_WithWhatChangedSince()
+    {
+        // e.g. the additions and removals of the collections of a publisher, taken into a list changed since the reload.
+        var tracker = new EntryTracker<Entry>(() => _read, () => _entry,
+        [
+            new EntryDatum<Entry>("title", "Titre", e => e.Title, e => e.Title, (from, to) => to.Title = $"{to.Title} + {from.Title}"),
+        ]);
+        _entry.Title = "Le Lotus";
+        tracker.Abandon();
+        _read = new Entry { Title = "Les Bijoux", Year = 1963 };
+        _entry = _read.Copy();
+
+        tracker.Take("title");
+        _entry.Title = "Autre chose";
+
+        Assert.Null(tracker.Redo("title"));
+        Assert.False(tracker.HasRedo);
+    }
+
+    [Fact]
     public void Typing_WhatWasEntered_ByHand_HasTheLineDisappear()
     {
         var tracker = Tracker();
