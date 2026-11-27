@@ -389,12 +389,11 @@ public sealed class Edition : EntityBase
 
     // Only run by Album.MergeEditions, once it has checked the acquisition against the album the edition belongs to: the edition
     // year, and the acquisition of the edition chosen, whole, with its entry in the collection, that the context keeps as given
-    // (BdthequeDbContext), and which an edition no longer owned has no longer.
+    // (BdthequeDbContext), and which an edition no longer owned has no longer. The edition chosen may be this one, which then
+    // keeps its own as they are.
     internal void TakeAcquisitionOf(Edition other, int? publicationYear)
     {
         PublicationYear = publicationYear;
-        if (other == this)
-            return;
         Apply(other.Acquisition);
         EnteredCollectionAt = other.EnteredCollectionAt;
     }
