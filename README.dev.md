@@ -165,7 +165,7 @@ Le premier lancement construit les images, en quelques minutes ; les suivants ne
 
 Ces ports ne sont ouverts qu'au poste lui-même.
 
-L'administration s'ouvre avec le compte fictif de `validation.env` : identifiant `admin`, mot de passe `validation`, que le script affiche aussi.
+L'administration s'ouvre avec le compte fictif de `validation.env` : identifiant `admin`, mot de passe `validation`, et le code du second facteur, comme sur un déploiement exposé. Sa clé fictive, `GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ`, se saisit une fois dans une application d'authentification. Le script affiche aussi ces trois valeurs.
 
 Le thème, tiré au hasard à chaque visite en production, se choisit ici par l'adresse : `?theme=planche`, `?theme=gazette` ou `?theme=couverture` (ex. `http://localhost:8180/?theme=planche`). Il reste celui de la visite pour les pages suivantes, jusqu'au prochain choix.
 

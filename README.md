@@ -105,7 +105,7 @@ Les dépôts Docker Hub sont privés : leur téléchargement exige une authentif
 Une pré-version, version candidate ou de développement (cf. [`README.dev.md`](README.dev.md#plusieurs-versions-sur-le-nas)), se déploie à partir des fichiers du dépôt et des images de Docker Hub. Le tag déployé est choisi par `BDTHEQUE_TAG` dans `.env` (`nightly` par défaut, ou `sha-<commit>`), et `docker-compose.yml` et `.env.example` sont pris dans le dépôt à ce même commit, car ils peuvent différer d'une version à l'autre.
 
 1. Créer sur le NAS un dossier pour le projet (ex. `/volume1/docker/bdtheque`) et y copier [`docker-compose.yml`](docker-compose.yml) et [`.env.example`](.env.example), renommé en `.env`.
-2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), le compte administrateur `ADMIN_LOGIN` et `ADMIN_PASSWORD` (un mot de passe long, ex. une phrase de plusieurs mots), `BDTHEQUE_TAG`, `FRONTEND_PORT`, `VISUELS_HOST_PATH` et, derrière le reverse proxy, `PUBLIC_URL` (ci-dessous).
+2. Renseigner `.env` : `POSTGRES_PASSWORD`, `INTERNAL_API_KEY` (ex. `openssl rand -base64 32`), le compte administrateur `ADMIN_LOGIN` et `ADMIN_PASSWORD` (un mot de passe long, ex. une phrase de plusieurs mots), `BDTHEQUE_TAG`, `FRONTEND_PORT`, `VISUELS_HOST_PATH` et, derrière le reverse proxy, `PUBLIC_URL` et `ADMIN_TOTP_SECRET` (ci-dessous).
 3. Préparer le dossier des visuels (ci-dessous).
 4. Les dépôts Docker Hub étant **privés**, authentifier le NAS auprès de Docker Hub avec le compte `tetram76` et un jeton d'accès en **lecture seule** (*Personal Access Token*, droits *Read-only*), sans quoi le téléchargement des images est refusé. En SSH : `sudo docker login -u tetram76` (le jeton tient lieu de mot de passe).
 5. Dans Container Manager, créer un **projet** sur ce dossier, à partir de son `docker-compose.yml` : Container Manager télécharge les images et démarre les conteneurs. En ligne de commande (SSH), depuis ce dossier : `docker compose pull && docker compose up -d`.
@@ -129,6 +129,16 @@ Le `frontend` ne sert que du HTTP : le chiffrement (HTTPS, certificats) est assu
 - **en interne**, sans reverse proxy (versions à valider ou à tester, cf. [`README.dev.md`](README.dev.md#plusieurs-versions-sur-le-nas)) : `PUBLIC_URL` reste vide, et l'application est accessible directement sur `http://<NAS>:<FRONTEND_PORT>`, sans rien d'autre à configurer.
 
 Le `frontend` ne redirige jamais vers HTTPS et n'envoie pas d'en-tête HSTS : une éventuelle politique HSTS se règle sur le reverse proxy.
+
+### Second facteur du compte administrateur
+
+Exposée sur Internet, derrière le reverse proxy, l'application demande à la connexion, en plus de l'identifiant et du mot de passe, le code à six chiffres d'une application d'authentification (Google Authenticator, Aegis, 1Password…). Quand `PUBLIC_URL` est une adresse `https`, `ADMIN_TOTP_SECRET` est donc obligatoire : sans lui, le `frontend` refuse de démarrer et le signale dans son journal. En interne, il reste facultatif.
+
+1. Sur un poste qui a le [SDK .NET 10](https://dotnet.microsoft.com/download), depuis une copie du dépôt, créer le secret avec `dotnet run scripts/New-AdminTotpSecret.cs`. Le script affiche un QR code et la ligne `ADMIN_TOTP_SECRET=…`.
+2. Scanner le QR code avec l'application d'authentification, ou y saisir la clé à la main (code basé sur l'heure, 6 chiffres, 30 secondes).
+3. Copier la ligne dans le `.env`, puis recréer les conteneurs (`docker compose up -d`) et effacer la console.
+
+Un téléphone perdu ou changé se remplace par un nouveau secret, créé de la même façon. Changer le secret, l'identifiant ou le mot de passe ferme toutes les sessions ouvertes. Une session se ferme aussi d'elle-même après deux heures sans activité, et au plus tard douze heures après la connexion.
 
 ### Dossier des visuels
 
