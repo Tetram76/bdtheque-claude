@@ -176,7 +176,7 @@ internal static class AuthorEndpoints
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null,
         AlbumCollectionState? state = null, int page = 1, int pageSize = Paging.DefaultSize)
     {
-        var rows = await RowsAsync(context, q, entry, state, page, pageSize, cancellationToken);
+        var rows = await RowsAsync(context, Search(context, q, entry, state), page, pageSize, cancellationToken);
         return new Page<AuthorCatalogListItem>(
             [.. rows.Items.Select(r => new AuthorCatalogListItem(
                 r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.CreditedAlbumsInCollectionCount, r.Roles))],
@@ -196,7 +196,7 @@ internal static class AuthorEndpoints
         int pageSize = Paging.DefaultSize, Guid? resembling = null)
     {
         var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
-        var rows = await RowsAsync(context, q, entry, state: null, page, pageSize, cancellationToken, ranked);
+        var rows = await RowsAsync(context, Search(context, q, entry, state: null, ranked), page, pageSize, cancellationToken);
         return new Page<AuthorAdminListItem>(
             MergeSuggestions.InRankOrder(rows.Items.Select(r => new AuthorAdminListItem(
                 r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.Roles, r.ModifiedAt, r.Version)), ranked, a => a.Id),
@@ -216,12 +216,11 @@ internal static class AuthorEndpoints
             [b.Pseudonym, b.LastName, $"{b.FirstName} {b.LastName}", $"{b.LastName} {b.FirstName}"], inclusion: true), count);
     }
 
-    // A page of the authors as both lists read them, each list keeping what it presents.
+    // A page of the authors found by a search of either list (Search), as both lists read them, each list keeping what it presents.
     private static async Task<Page<AuthorRow>> RowsAsync(
-        BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state, int page, int pageSize,
-        CancellationToken cancellationToken, IReadOnlyList<Guid>? only = null)
+        BdthequeDbContext context, IOrderedQueryable<Author> authors, int page, int pageSize, CancellationToken cancellationToken)
     {
-        var rows = await Search(context, text, entry, state, only).ToPageAsync(page, pageSize, CatalogExpressions.Expand((Author a) => new
+        var rows = await authors.ToPageAsync(page, pageSize, CatalogExpressions.Expand((Author a) => new
         {
             a.Id,
             a.LastName,
