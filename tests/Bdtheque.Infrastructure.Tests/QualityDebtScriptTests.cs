@@ -141,7 +141,9 @@ public sealed class QualityDebtScriptTests : IAsyncLifetime
     // script of the path by its name, gh.ps1 on Windows, an executable gh elsewhere, before the gh installed further on.
     private void WriteFakeGh()
     {
+        // A failure stops the fake and, run as its own process outside Windows, exits non-zero, as gh does.
         const string script = """
+            $ErrorActionPreference = 'Stop'
             $state = $env:FAKE_GH_STATE
             switch ($args[1]) {
                 'list' { @(@{ number = 381; body = [IO.File]::ReadAllText("$state/body.md") }) | ConvertTo-Json -AsArray }
