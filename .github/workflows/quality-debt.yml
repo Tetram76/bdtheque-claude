@@ -1,0 +1,68 @@
+name: Quality debt
+
+# The debt along the way of the weekly quality audit (style deviations, surviving mutants) is fixed by the chantiers
+# that change its files anyway, in their pull request (gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md). The
+# harness must work whatever environment the session of a chantier runs in, cloud or workstation: it lives here, not
+# in a tool of the session. On a pull request, a required check fails while an entry along the way on a changed file
+# is not handled in its description, and runs again when the description is edited. On main, the entries the merged
+# pull request fixed or rejected are removed from the tracking issue at once (gestion-projet/revue-tickets/issues.md).
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Quality debt along the way
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    # A description edited several times in a row: only the last state counts.
+    concurrency:
+      group: quality-debt-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Check the debt of the changed files is handled
+        shell: pwsh
+        run: ./.github/scripts/Test-QualityDebtHandled.ps1 -PullRequest ${{ github.event.pull_request.number }}
+
+  remove:
+    name: Remove the handled quality debt
+    if: github.event_name == 'push'
+    runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    # GitHub rewrites a description whole, with no conditional write: two removals at once would each put back what
+    # the other removed. They run one after the other, every pending one kept in the queue, none cancelled.
+    concurrency:
+      group: quality-debt-removal
+      cancel-in-progress: false
+      queue: max
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - name: Remove the entries the merged pull request handled
+        shell: pwsh
+        run: ./.github/scripts/Remove-QualityDebt.ps1 -Commit ${{ github.sha }}
