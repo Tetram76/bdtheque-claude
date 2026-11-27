@@ -90,7 +90,7 @@ public class ApplicationHost : IAsyncLifetime
     {
         await _api.InitializeAsync();
 
-        _frontend = new FrontendFactory(_api, PaintedByItsSpotlight);
+        _frontend = new FrontendFactory(_api, PaintedByItsSpotlight, TotpSecret);
         _frontend.UseKestrel(0);
         _frontend.StartServer();
         BaseAddress = new Uri(_frontend.Services.GetRequiredService<IServer>()
@@ -126,6 +126,12 @@ public class ApplicationHost : IAsyncLifetime
     protected virtual bool PaintedByItsSpotlight => false;
 
     /// <summary>
+    /// The secret of the second factor of the administrator account, which an application of its own sets to exercise the
+    /// login of a deployment exposed in HTTPS; none otherwise, as on the internal deployment.
+    /// </summary>
+    protected virtual string? TotpSecret => null;
+
+    /// <summary>
     /// A browser context of its own, on <c>frontend</c>: no cookie nor history shared with another one. The caller owns
     /// it, and closes it once done: an open context keeps its pages, their connections to the application, and on the
     /// server the circuits of their interactive components. Its theme is the one its options fix, if any: the tests
@@ -155,7 +161,7 @@ public class ApplicationHost : IAsyncLifetime
         await _api.DisposeAsync();
     }
 
-    private sealed class FrontendFactory(ApiHostFactory api, bool paintedByItsSpotlight) : WebApplicationFactory<FrontendProgram>
+    private sealed class FrontendFactory(ApiHostFactory api, bool paintedByItsSpotlight, string? totpSecret) : WebApplicationFactory<FrontendProgram>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -171,6 +177,7 @@ public class ApplicationHost : IAsyncLifetime
                     ["InternalApiKey:Key"] = ApiHostFactory.InternalApiKey,
                     ["AdminAccount:Login"] = AdminLogin,
                     ["AdminAccount:Password"] = AdminPassword,
+                    ["AdminAccount:TotpSecret"] = totpSecret,
                 }));
 
             builder.ConfigureTestServices(services =>

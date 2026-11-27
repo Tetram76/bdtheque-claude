@@ -25,6 +25,8 @@
 
     <!-- Image processing of the visuals (MIT); native Linux assets without system dependency -->
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
+    <!-- The QR code of the second factor of the administrator account, shown by scripts/New-AdminTotpSecret.cs. -->
+    <PackageVersion Include="QRCoder" Version="1.9.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
 
     <!-- Tests -->
