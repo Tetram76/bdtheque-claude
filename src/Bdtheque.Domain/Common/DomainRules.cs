@@ -47,6 +47,15 @@ public static class DomainRules
     public const string EditionInitialValueAmountPositive = "Edition.InitialValueAmountPositive";
 
     /// <summary>
+    /// An acquisition amount with more decimals than its currency has (fonctionnel/valorisation/gestion-des-devises.md, précision
+    /// d'un montant).
+    /// </summary>
+    public const string EditionAcquisitionAmountTooPrecise = "Edition.AcquisitionAmountTooPrecise";
+
+    /// <summary>An initial value with more decimals than its currency has.</summary>
+    public const string EditionInitialValueAmountTooPrecise = "Edition.InitialValueAmountTooPrecise";
+
+    /// <summary>
     /// An ISBN to correct, or whose error to accept, that has no error (fonctionnel/regles-metier/validation-de-l-isbn.md): no
     /// ISBN, or one whose check digit agrees with it, corrected since the list was read.
     /// </summary>

@@ -1,3 +1,4 @@
+using Bdtheque.Currencies;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities.Common;
 using Bdtheque.Domain.Enums;
@@ -364,11 +365,22 @@ public sealed class Edition : EntityBase
                 DomainRules.EditionAcquisitionAmountPositive, "Acquisition amount must be positive when specified.", this, nameof(AcquisitionAmount));
         if (acquisition.PriceCurrency is not null)
             EnsureValidCurrencyCode(acquisition.PriceCurrency, nameof(AcquisitionCurrency));
+        if (acquisition is { PriceAmount: { } price, PriceCurrency: { } priceCurrency } && !CurrencyDecimals.Fit(price, priceCurrency))
+            throw new DomainRuleViolationException(
+                DomainRules.EditionAcquisitionAmountTooPrecise,
+                $"Acquisition amount has more decimals than its currency {priceCurrency}, which has {CurrencyDecimals.Of(priceCurrency)}.", this,
+                nameof(AcquisitionAmount));
         if (acquisition.InitialValueAmount is <= 0)
             throw new DomainRuleViolationException(
                 DomainRules.EditionInitialValueAmountPositive, "Initial value amount must be positive when specified.", this, nameof(InitialValueAmount));
         if (acquisition.InitialValueCurrency is not null)
             EnsureValidCurrencyCode(acquisition.InitialValueCurrency, nameof(InitialValueCurrency));
+        if (acquisition is { InitialValueAmount: { } initialValue, InitialValueCurrency: { } initialValueCurrency }
+            && !CurrencyDecimals.Fit(initialValue, initialValueCurrency))
+            throw new DomainRuleViolationException(
+                DomainRules.EditionInitialValueAmountTooPrecise,
+                $"Initial value amount has more decimals than its currency {initialValueCurrency}, which has {CurrencyDecimals.Of(initialValueCurrency)}.",
+                this, nameof(InitialValueAmount));
     }
 
     /// <summary>The acquisition and value of the edition, as a whole (none but its freeness for an edition not owned).</summary>
