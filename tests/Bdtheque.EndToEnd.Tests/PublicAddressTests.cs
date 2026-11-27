@@ -112,6 +112,27 @@ public sealed class PublicAddressTests
         Assert.Contains(UnwrapAll(exception), inner => inner is OptionsValidationException);
     }
 
+    // A deployment exposed in HTTPS never runs on the password alone: a forgotten secret prevents the start, an internal
+    // deployment does without it.
+    [Theory]
+    [InlineData("https://bd.example.com", null, false)]
+    [InlineData("https://bd.example.com", "GEZDGNBVGY3TQOJQ", false)]
+    [InlineData("http://bd.example.com", null, true)]
+    [InlineData(null, null, true)]
+    public async Task SecondFactor_IsRequired_ByAnHttpsPublicAddress(string? publicAddress, string? totpSecret, bool starts)
+    {
+        await using var frontend = new FrontendFactory(publicAddress, totpSecret: totpSecret);
+
+        if (starts)
+        {
+            frontend.CreateClient().Dispose();
+            return;
+        }
+
+        var exception = Assert.ThrowsAny<Exception>(() => frontend.CreateClient());
+        Assert.Contains(UnwrapAll(exception), inner => inner is OptionsValidationException);
+    }
+
     private static readonly WebApplicationFactoryClientOptions NoRedirect = new() { AllowAutoRedirect = false };
 
     /// <summary>
@@ -140,7 +161,9 @@ public sealed class PublicAddressTests
         }
     }
 
-    private sealed class FrontendFactory(string? publicAddress, int? httpsPort = null) : WebApplicationFactory<FrontendProgram>
+    // The second factor, which an https public address requires (contraintes-techniques/architecture-deploiement/authentification.md).
+    private sealed class FrontendFactory(string? publicAddress, int? httpsPort = null, string? totpSecret = SecondFactorApplication.Secret)
+        : WebApplicationFactory<FrontendProgram>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -152,6 +175,7 @@ public sealed class PublicAddressTests
                     ["InternalApiKey:Key"] = ApiHostFactory.InternalApiKey,
                     ["AdminAccount:Login"] = ApplicationHost.AdminLogin,
                     ["AdminAccount:Password"] = ApplicationHost.AdminPassword,
+                    ["AdminAccount:TotpSecret"] = totpSecret,
                     ["PublicAddress:Url"] = publicAddress,
                     ["https_port"] = httpsPort?.ToString(CultureInfo.InvariantCulture),
                 }));

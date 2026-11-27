@@ -10,6 +10,7 @@ code:
   - 'src/Bdtheque.Frontend/Components/Pages/Admin/_Imports.razor'
   - 'src/Bdtheque.Frontend/Navigation/ReturnPath.cs'
   - 'src/Bdtheque.Api/Security/**'
+  - 'scripts/New-AdminTotpSecret.cs'
 ---
 
 # Authentification et appels internes
@@ -32,13 +33,13 @@ sequenceDiagram
     frontend-->>navigateur: redirection vers /admin/login?ReturnUrl=/admin/albums
     navigateur->>frontend: GET /admin/login
     frontend-->>navigateur: formulaire de connexion
-    navigateur->>frontend: POST /admin/login avec l'identifiant et le mot de passe
+    navigateur->>frontend: POST /admin/login avec l'identifiant, le mot de passe et, s'il est demandé, le code
     frontend-->>navigateur: cookie Bdtheque.Auth et redirection vers /admin/albums
     navigateur->>frontend: GET /admin/albums, avec le cookie
     frontend-->>navigateur: page de l'administration
 ```
 
-Quand le formulaire est envoyé, la page [`AdminLogin`](../../../src/Bdtheque.Frontend/Components/Pages/AdminLogin.razor) décide de la réponse en trois temps, que montre le second schéma, lui aussi tracé à la main. Il répond à une autre question : comment la page décide-t-elle d'accepter ou de refuser une tentative de connexion ?
+Quand le formulaire est envoyé, la page [`AdminLogin`](../../../src/Bdtheque.Frontend/Components/Pages/AdminLogin.razor) décide de la réponse en trois temps, le second facteur s'ajoutant à la vérification des identifiants quand il est demandé, que montre le second schéma, lui aussi tracé à la main. Il répond à une autre question : comment la page décide-t-elle d'accepter ou de refuser une tentative de connexion ?
 
 ```mermaid
 flowchart TD
@@ -46,13 +47,21 @@ flowchart TD
     bloquee -- "oui" --> refus_trop["Refus sans vérifier les identifiants<br/>(erreur fonctionnelle)"]
     bloquee -- "non" --> valides{"Identifiant et mot de passe<br/>conformes à la configuration ?"}
     valides -- "non" --> echec["Échec enregistré,<br/>refus (erreur métier)"]
-    valides -- "oui" --> accepte["Compteur d'échecs remis à zéro,<br/>cookie écrit, retour à la page demandée"]
+    valides -- "oui" --> facteur{"Second facteur demandé ?"}
+    facteur -- "non" --> accepte["Compteur d'échecs remis à zéro,<br/>cookie écrit, retour à la page demandée"]
+    facteur -- "oui" --> code{"Code du moment,<br/>pas encore utilisé ?"}
+    code -- "non" --> echec
+    code -- "oui" --> accepte
 ```
+
+La décision est prise par [`AdminSignIn`](../../../src/Bdtheque.Frontend/Security/AdminSignIn.cs), que la page appelle. Le refus présenté au visiteur ne dit jamais lequel de l'identifiant, du mot de passe ou du code était faux, mais le journal de `frontend` le dit : chaque refus y est un avertissement qui nomme ce qui a été refusé, et une connexion réussie y laisse une information. L'exploitant comprend ainsi un refus sans rien en dire à un tiers.
 
 Ces trois temps reposent sur les éléments suivants :
 
 - Le limiteur [`LoginThrottle`](../../../src/Bdtheque.Frontend/Security/LoginThrottle.cs) mémorise l'heure des échecs récents. Il existe en un seul exemplaire pour toute l'application, car derrière le reverse proxy aucune requête ne dit de façon fiable qui l'envoie : les échecs de tous les visiteurs comptent donc ensemble. Dès que cinq échecs se sont produits dans les cinq dernières minutes, toute tentative est refusée sans même vérifier les identifiants, jusqu'à ce que le plus ancien échec sorte de cette fenêtre. Une connexion réussie efface les échecs mémorisés.
 - La vérification des identifiants est faite par [`AdminCredentials`](../../../src/Bdtheque.Frontend/Security/AdminCredentials.cs), qui compare l'identifiant et le mot de passe saisis à ceux des variables d'environnement `AdminAccount__Login` et `AdminAccount__Password`. La comparaison porte sur leurs empreintes SHA-256 et se fait en temps constant, si bien que la durée d'un refus ne révèle rien de la partie juste d'une valeur ni de sa longueur. Sans ces deux variables, `frontend` refuse de démarrer.
+- Le second facteur est vérifié par [`AdminSecondFactor`](../../../src/Bdtheque.Frontend/Security/AdminSecondFactor.cs). C'est un code à usage unique fondé sur le temps (TOTP, RFC 6238), que l'application d'authentification de l'administrateur calcule à partir du même secret que `frontend`, lu dans la variable `AdminAccount__TotpSecret`. Le code change toutes les trente secondes ; celui du pas précédent et celui du pas suivant sont aussi acceptés, pour tenir compte de l'horloge du téléphone. Un code accepté ne l'est plus jamais, pas plus qu'un code d'un pas antérieur : un code aperçu ou intercepté ne sert donc plus une fois utilisé. Le code n'est vérifié qu'après un identifiant et un mot de passe justes, si bien qu'une faute de frappe dans le mot de passe ne consomme pas le code ; le refus est le même dans tous les cas, et un code faux compte comme un échec pour le limiteur. Le champ du code n'apparaît que lorsque le secret est déclaré. Le secret devient obligatoire quand l'adresse publique est une adresse `https`, c'est-à-dire sur un déploiement exposé sur Internet : sans lui, `frontend` refuse de démarrer. Le script [`New-AdminTotpSecret.cs`](../../../scripts/New-AdminTotpSecret.cs), une application .NET en un seul fichier lancée par `dotnet run`, crée ce secret et l'affiche en QR code pour l'application d'authentification ; avec la clé actuelle en argument, il affiche le QR code de ce même secret, pour enregistrer de nouveau une application d'authentification sans rien changer au déploiement.
+- La session de l'administrateur est confiée au cookie, mais c'est [`AdminSessions`](../../../src/Bdtheque.Frontend/Security/AdminSessions.cs) qui en fixe la durée de vie et la révocation. Le cookie expire après deux heures sans requête, et chaque requête vérifie que la session a moins de douze heures et qu'elle porte encore l'empreinte des réglages actuels du compte (identifiant, mot de passe et secret). Changer l'un de ces réglages puis redémarrer `frontend` ferme donc toutes les sessions ouvertes : c'est la réponse prévue à un téléphone perdu ou à un mot de passe compromis. Une page interactive pose un problème à part : son circuit garde le principal de son ouverture tant qu'il vit, sans repasser par le cookie. [`AdminCircuitAuthenticationStateProvider`](../../../src/Bdtheque.Frontend/Security/AdminCircuitSession.cs) revérifie donc la session de chaque circuit toutes les minutes, avec les mêmes règles, l'activité du circuit relevée par un gestionnaire de circuit tenant lieu des requêtes. Quand la session est finie, le circuit devient anonyme, et le cadre commun des pages interactives, [`EntryForm`](../../../src/Bdtheque.Frontend/Components/Controls/EntryForm.razor), recharge la page vers la connexion.
 - L'adresse de retour est contrôlée par [`ReturnPath.AfterSignIn`](../../../src/Bdtheque.Frontend/Navigation/ReturnPath.cs). Elle n'accepte qu'un chemin de l'application : elle le résout par rapport à l'adresse de l'application et vérifie que le résultat y reste. Toute autre valeur, par exemple l'adresse d'un autre site, mène à l'accueil de l'administration ; la page de connexion ne peut ainsi pas servir à faire sortir le visiteur vers un site tiers.
 
 La déconnexion suit le même principe d'une page rendue statiquement : [`AdminLogout.razor`](../../../src/Bdtheque.Frontend/Components/Pages/AdminLogout.razor) efface le cookie en réponse à un formulaire envoyé en `POST` et protégé contre la falsification de requête. Elle n'est jamais déclenchée par un simple lien, sans quoi une page d'un autre site pourrait déconnecter l'administrateur à son insu.
@@ -101,3 +110,4 @@ La requête relayée passe par le même gestionnaire de messages que `ApiClient`
 - `api` ne vérifie l'identité d'aucun utilisateur. Une route `/admin` n'est donc sûre que tant que `frontend` ne l'appelle ou ne la relaie que pour l'administrateur authentifié ; c'est une propriété de `frontend` à préserver à chaque nouvelle page ou nouvelle route relayée.
 - Le secret interne n'est jamais transmis au navigateur, et aucune valeur de l'en-tête `X-Internal-Api-Key` reçue du navigateur n'est transmise à `api`.
 - La page de connexion et la déconnexion restent rendues statiquement, puisque c'est la réponse HTTP qui écrit ou efface le cookie d'authentification.
+- Un déploiement dont l'adresse publique est en `https` ne démarre jamais sans le secret du second facteur.

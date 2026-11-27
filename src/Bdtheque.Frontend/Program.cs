@@ -9,7 +9,10 @@ using Bdtheque.Frontend.Navigation;
 using Bdtheque.Frontend.Security;
 using Bdtheque.Frontend.Theming;
 using Bdtheque.Frontend.Visits;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Options;
 
@@ -83,14 +86,38 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.Name = "Bdtheque.Auth";
         options.LoginPath = AppPaths.AdminLogin;
         options.AccessDeniedPath = AppPaths.AdminLogin;
+        // Sliding over the idle timeout, bounded by the maximum lifetime that AdminSessions checks.
+        options.ExpireTimeSpan = AdminSessions.IdleTimeout;
+        options.SlidingExpiration = true;
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            if (context.Principal is { } principal
+                && context.HttpContext.RequestServices.GetRequiredService<AdminSessions>().IsCurrent(principal))
+                return;
+            context.RejectPrincipal();
+            await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        };
     });
 builder.Services.AddAuthorization();
-// The single administrator account, from the environment: missing, the application does not start.
+// The single administrator account, from the environment: missing, or without the second factor a deployment exposed in
+// HTTPS requires, the application does not start.
 builder.Services.AddOptions<AdminAccountOptions>()
     .Bind(builder.Configuration.GetSection(AdminAccountOptions.SectionName))
     .ValidateDataAnnotations()
+    .Validate<IOptions<PublicAddressOptions>>(
+        (account, publicAddress) => AdminSecondFactor.AreSettingsValid(account, publicAddress.Value),
+        "AdminAccount:TotpSecret must be a Base32 secret of at least 160 bits, and is required with an https PublicAddress:Url.")
     .ValidateOnStart();
 builder.Services.AddSingleton<AdminCredentials>();
+// One for the application: a code accepted once is refused to every later request.
+builder.Services.AddSingleton<AdminSecondFactor>();
+builder.Services.AddSingleton<AdminSessions>();
+builder.Services.AddSingleton<AdminSignIn>();
+// An interactive circuit keeps its principal for as long as it lives: the same session limits, checked again in it.
+builder.Services.AddOptions<AdminCircuitOptions>();
+builder.Services.AddScoped<AdminCircuitSession>();
+builder.Services.AddScoped<CircuitHandler, AdminCircuitActivityHandler>();
+builder.Services.AddScoped<AuthenticationStateProvider, AdminCircuitAuthenticationStateProvider>();
 // One for the application: the failures of every request count against the same window.
 builder.Services.AddSingleton<LoginThrottle>();
 builder.Services.AddScoped<AdminRecordCounts>();

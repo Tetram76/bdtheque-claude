@@ -77,7 +77,7 @@ Lorsqu'un élément a vraiment besoin de réagir sans recharger la page, il devi
 
 Les fiches de saisie d'un album, d'une série, d'un éditeur et d'une édition, dans `Components/Pages/Admin/`, sont au contraire des pages **entièrement interactives**, déclarées par la directive `@rendermode InteractiveServer`.
 
-Un circuit n'a pas de requête HTTP, et donc pas de cookie. Les informations qu'une page statique lit dans les cookies doivent par conséquent lui être transmises autrement. Le fuseau horaire du navigateur et la visite de la mesure d'audience passent ainsi au circuit par l'*état persistant*, un mécanisme de Blazor qui sérialise des valeurs dans la page prérendue pour que le circuit les reprenne ; ces deux services sont enregistrés par `RegisterPersistentService`, dans `Program.cs`.
+Un circuit n'a pas de requête HTTP, et donc pas de cookie. Les informations qu'une page statique lit dans les cookies doivent par conséquent lui être transmises autrement. Le fuseau horaire du navigateur et la visite de la mesure d'audience passent ainsi au circuit par l'*état persistant*, un mécanisme de Blazor qui sérialise des valeurs dans la page prérendue pour que le circuit les reprenne ; ces deux services sont enregistrés par `RegisterPersistentService`, dans `Program.cs`. L'authentification, elle aussi, reste celle de l'ouverture du circuit : la session de l'administrateur y est revérifiée à intervalle régulier, et le cadre `EntryForm` ramène à la connexion une page dont la session est finie ([Authentification et appels internes](authentification-et-appels-internes.md)).
 
 ## Le fonctionnement d'une fiche de saisie
 

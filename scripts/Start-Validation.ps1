@@ -132,4 +132,8 @@ if ($settings.DOCS_PORT) {
 if ($settings.ADMIN_LOGIN) {
     Write-Host "Administration:    login '$($settings.ADMIN_LOGIN)', password '$($settings.ADMIN_PASSWORD)'"
 }
+# The key of the second factor, for the versions that ask for it, to type in an authenticator application.
+if ($settings.ADMIN_TOTP_SECRET) {
+    Write-Host "Second factor:     key '$($settings.ADMIN_TOTP_SECRET)' (time-based, 6 digits, 30 seconds)"
+}
 Write-Host 'Stop: ./scripts/Stop-Validation.ps1'

@@ -1,14 +1,12 @@
 @attribute [Route(AppPaths.AdminLogin)]
-@using System.Security.Claims
 @using Bdtheque.Frontend.Api
 @using Bdtheque.Frontend.Security
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
-@using Microsoft.Extensions.Options
 @inject IStringLocalizer<AdminLogin> L
-@inject AdminCredentials Credentials
-@inject IOptions<AdminAccountOptions> Account
-@inject LoginThrottle Throttle
+@inject AdminSignIn SignIn
+@inject AdminSecondFactor SecondFactor
+@inject AdminSessions Sessions
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
@@ -21,7 +19,7 @@
 
 <div class="admin-login">
     <Block Title="@L["Title"]" HeadingLevel="1" Raised="true">
-        <p>@L["Intro"]</p>
+        <p>@(SecondFactor.IsRequired ? L["IntroWithCode"] : L["Intro"])</p>
         @if (_problem is not null)
         {
             <ErrorMessage Problem="_problem" Label="@_label" Message="@_message" />
@@ -35,6 +33,15 @@
             <Field Id="admin-login-password" Label="@L["Password"]" Context="field">
                 <input id="@field.Id" name="@nameof(Password)" type="password" autocomplete="current-password" required />
             </Field>
+            @* Under the password, in the same form: a refusal never tells which of the three was wrong
+               (fonctionnel/structure-de-l-application.md). *@
+            @if (SecondFactor.IsRequired)
+            {
+                <Field Id="admin-login-code" Label="@L["Code"]" Context="field">
+                    <input id="@field.Id" name="@nameof(Code)" type="text" inputmode="numeric" autocomplete="one-time-code"
+                           pattern="[0-9 ]*" maxlength="7" required />
+                </Field>
+            }
             <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["SignIn"]" />
         </form>
     </Block>
@@ -59,6 +66,9 @@
     [SupplyParameterFromForm(FormName = FormName)]
     private string? Password { get; set; }
 
+    [SupplyParameterFromForm(FormName = FormName)]
+    private string? Code { get; set; }
+
     // Already signed in: nothing to ask, straight to the page asked for.
     protected override void OnInitialized()
     {
@@ -68,23 +78,17 @@
 
     private async Task SignInAsync()
     {
-        // Too many failures of late: refused without even checking, which would otherwise go on telling a right guess.
-        if (Throttle.IsBlocked())
+        switch (SignIn.Attempt(Login, Password, Code))
         {
-            Refuse(ProblemCategory.Functional, "TooManyAttempts", L["TooManyAttempts.Label"]);
-            return;
+            case AdminSignInOutcome.Suspended:
+                Refuse(ProblemCategory.Functional, "TooManyAttempts", L["TooManyAttempts.Label"]);
+                return;
+            case AdminSignInOutcome.Refused:
+                Refuse(ProblemCategory.Business, SecondFactor.IsRequired ? "InvalidCredentialsOrCode" : "InvalidCredentials", L["InvalidCredentials.Label"]);
+                return;
         }
 
-        if (!Credentials.AreValid(Login, Password))
-        {
-            Throttle.RecordFailure();
-            Refuse(ProblemCategory.Business, "InvalidCredentials", L["InvalidCredentials.Label"]);
-            return;
-        }
-
-        Throttle.Reset();
-        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, Account.Value.Login)], CookieAuthenticationDefaults.AuthenticationScheme);
-        var administrator = new ClaimsPrincipal(identity);
+        var administrator = Sessions.SignIn();
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, administrator);
         // The cookie only authenticates the requests that follow: this one, from now on that of the administrator, records
         // the login in a visit of the administrator.

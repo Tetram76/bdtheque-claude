@@ -12,7 +12,7 @@ applies_to:
   - 'tests/Bdtheque.ValidationData.Tests/**'
   - 'src/Bdtheque.Frontend/Theming/ChosenThemeSelector.cs'
   - 'src/Bdtheque.Frontend/Hosting/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:00:00Z }
 ---
 
 # Environnement de validation fonctionnelle
@@ -33,4 +33,4 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T12:00:00Z }
 - **Édition à la une laissée au tirage de l'application** : le chargement n'en met aucune à la une ; le premier affichage de la journée la tire parmi toutes les éditions possédées des données, comme en production ([Page d'accueil](../../fonctionnel/page-accueil.md)). Les données comptent une couverture pâle, à l'accent de ton moyen, cas le plus exigeant du thème « La couverture du jour » ([La couverture du jour](../../visuel/dashboard/la-couverture-du-jour.md)), qu'un tirage au hasard ne présenterait qu'une fois sur trente : une option du lancement la met à la une des jours qui entourent le chargement, en temps universel, qui couvrent la date du navigateur quel que soit son fuseau, pour juger un écran dans ce thème sur ce cas. La lisibilité d'une couverture pâle reste vérifiée par les tests du thème, indépendamment des données ([Thèmes](../socle/themes.md)).
   - **Alternative écartée (couverture pâle à la une à chaque lancement)** : chaque lancement repartant d'une base vide le jour de la validation, celle-ci ne montrait jamais le tirage réel, ni le thème dans d'autres couleurs : chaque écran se jugeait sur un seul jeu de couleurs, qui n'est pas celui que la production présente le plus souvent.
 - **Chaque lancement repart d'une base vide**, sauf demande contraire : rien ne passe d'une validation à l'autre.
-- **Compte administrateur fixe et fictif**, affiché au lancement : la validation de l'administration ne demande aucun secret ([Authentification : mise en œuvre](../socle/transverse/authentification-mise-en-oeuvre.md)).
+- **Compte administrateur fixe et fictif**, affiché au lancement : la validation de l'administration ne demande aucun secret ([Authentification : mise en œuvre](../socle/transverse/authentification-mise-en-oeuvre.md)). Il a un second facteur, de clé fixe et fictive, elle aussi affichée, pour que la connexion se valide telle que la présente un déploiement exposé.

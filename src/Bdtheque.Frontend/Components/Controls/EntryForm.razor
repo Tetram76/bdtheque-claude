@@ -36,9 +36,27 @@
     </form>
 </div>
 
+@* The frame of every interactive page of the administration: its circuit keeps the principal it was opened with, which
+   the router, rendered statically, never checks again. Once the circuit finds the session over
+   (AdminCircuitAuthenticationStateProvider), the page leads back to the login, as a request without its cookie would. *@
+@if (_sessionEnded)
+{
+    <RedirectToLogin />
+}
+
 @code {
     private ElementReference _root;
     private IJSObjectReference? _module;
+    private bool _sessionEnded;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (RendererInfo.IsInteractive && AuthenticationState is not null)
+            _sessionEnded = (await AuthenticationState).User.Identity?.IsAuthenticated != true;
+    }
 
     [Parameter, EditorRequired]
     public IReadOnlyList<BreadcrumbItem> Breadcrumb { get; set; } = [];

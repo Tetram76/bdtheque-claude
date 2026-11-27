@@ -16,4 +16,10 @@ public sealed class AdminAccountOptions
 
     [Required(AllowEmptyStrings = false)]
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The secret of the second factor, in Base32 as authenticator applications take it (<c>AdminAccount__TotpSecret</c>),
+    /// required on a deployment exposed in HTTPS (<see cref="AdminSecondFactor.AreSettingsValid"/>).
+    /// </summary>
+    public string? TotpSecret { get; set; }
 }
