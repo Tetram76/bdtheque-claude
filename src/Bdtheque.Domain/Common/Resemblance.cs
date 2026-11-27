@@ -74,7 +74,12 @@ public static partial class Resemblance
     }
 
     // fonctionnel/regles-metier/fusion-des-fiches.md: at most 1 character up to 6, 2 up to 12, 3 beyond.
-    private static int MaxDistance(int length) => length <= 6 ? 1 : length <= 12 ? 2 : 3;
+    private static int MaxDistance(int length) => length switch
+    {
+        <= 6 => 1,
+        <= 12 => 2,
+        _ => 3,
+    };
 
     /// <summary>The Levenshtein distance between the two texts, or <c>null</c> beyond <paramref name="max"/>.</summary>
     private static int? Distance(string first, string second, int max)
