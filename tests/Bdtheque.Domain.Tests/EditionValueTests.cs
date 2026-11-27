@@ -277,6 +277,20 @@ public sealed class EditionValueTests
     }
 
     [Fact]
+    public void SetPublicationYear_OfAnEditionReadWithoutItsAlbum_IsAProgrammingError_ThatSaysWhy()
+    {
+        // A price dated by the album alone: an edition read without its album (EF Core leaves the navigation empty) cannot tell
+        // whether it stays dated; the error, technical, says why in the log (gestion-projet/gouvernance/qualite-du-code.md).
+        var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
+        edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR"));
+        typeof(Edition).GetProperty(nameof(Edition.Album))!.SetValue(edition, null);
+
+        var error = DomainAssert.Throws<InvalidOperationException>(() => edition.SetPublicationYear(null));
+
+        Assert.Equal("The album of the edition must be loaded to check the reference date of its amounts.", error.Message);
+    }
+
+    [Fact]
     public void SetPublicationYearAndAcquisition_OldFrenchFranc_Succeeds()
     {
         // The old franc has no ISO 4217 code: it is stored under the reserved code QZF
