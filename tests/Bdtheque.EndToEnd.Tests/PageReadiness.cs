@@ -109,6 +109,14 @@ public static class PageReadiness
         // The handle of the value the wait returns, of no use.
         await (await page.WaitForFunctionAsync("() => document.querySelector('.entry-form[data-interactive]') !== null")).DisposeAsync();
 
+    /// <summary>
+    /// Waits for the side panel of an author or a universe to be rendered by its circuit (<c>EntryPanel</c>,
+    /// <c>data-interactive</c>): until then, the prerendered panel answers neither typing nor clicks.
+    /// </summary>
+    public static async Task WaitUntilEntryPanelInteractiveAsync(IPage page) =>
+        // The handle of the value the wait returns, of no use.
+        await (await page.WaitForFunctionAsync("() => document.querySelector('.side-panel-form[data-interactive]') !== null")).DisposeAsync();
+
     /// <summary>Goes to the page and waits for it to be ready (<see cref="WaitAsync"/>).</summary>
     public static async Task<IResponse?> GotoAsync(IPage page, string path)
     {

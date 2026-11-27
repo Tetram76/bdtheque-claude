@@ -107,13 +107,54 @@ public sealed class CitedRecords
             Universes[index] = universe;
     }
 
-    /// <summary>The roles whose authors differ from those of the record as read.</summary>
-    public IEnumerable<ContributionRole> RolesChangedSince(CitedRecords read) =>
-        Enum.GetValues<ContributionRole>().Where(role => !Same(read.AuthorsOf(role), AuthorsOf(role)));
+    /// <summary>The key of the authors of a role among the data of an entry form (<see cref="EntryDatum{TEntry}"/>).</summary>
+    public static string RoleKey(ContributionRole role) => $"role-{role}";
 
-    public bool GenresChangedSince(CitedRecords read) => !Same(read.Genres, Genres);
+    public const string GenresKey = "genres";
 
-    public bool UniversesChangedSince(CitedRecords read) => !Same(read.Universes, Universes);
+    public const string UniversesKey = "universes";
+
+    /// <summary>
+    /// The data of the authors of an entry form, a line per role in the order of the form, each compared on the authors it
+    /// credits, whatever their order.
+    /// </summary>
+    public static IEnumerable<EntryDatum<TEntry>> AuthorData<TEntry>(Func<TEntry, CitedRecords> cited, Func<ContributionRole, string> roleLabel) =>
+        Enum.GetValues<ContributionRole>().Select(role => new EntryDatum<TEntry>(
+            RoleKey(role), roleLabel(role), e => Identities(cited(e).AuthorsOf(role)), e => EntryChange.Names(cited(e).AuthorsOf(role)),
+            (from, to) => cited(to).TakeAuthorsOf(role, cited(from))));
+
+    /// <summary>The data of the genres and the universes of an entry form, each compared on the records it cites.</summary>
+    public static IEnumerable<EntryDatum<TEntry>> ClassificationData<TEntry>(Func<TEntry, CitedRecords> cited, string genres, string universes) =>
+    [
+        new EntryDatum<TEntry>(GenresKey, genres, e => Identities(cited(e).Genres), e => EntryChange.Names(cited(e).Genres),
+            (from, to) => cited(to).TakeGenres(cited(from))),
+        new EntryDatum<TEntry>(UniversesKey, universes, e => Identities(cited(e).Universes), e => EntryChange.Names(cited(e).Universes),
+            (from, to) => cited(to).TakeUniverses(cited(from))),
+    ];
+    /// <summary>Credits the role with the authors another entry credits it with, those it added on the spot included.</summary>
+    public void TakeAuthorsOf(ContributionRole role, CitedRecords from)
+    {
+        Credits.RemoveAll(c => c.Role == role);
+        Credits.AddRange(from.Credits.Where(c => c.Role == role));
+        NewAuthors.AddRange(from.NewAuthors.Where(a => NewAuthors.All(o => o.Key != a.Key)));
+    }
+
+    /// <summary>Cites the genres another entry cites, those it added on the spot included.</summary>
+    public void TakeGenres(CitedRecords from)
+    {
+        Genres = [.. from.Genres];
+        NewGenres.AddRange(from.NewGenres.Where(g => NewGenres.All(o => o.Key != g.Key)));
+    }
+
+    /// <summary>Cites the universes another entry cites, those it added on the spot included.</summary>
+    public void TakeUniverses(CitedRecords from)
+    {
+        Universes = [.. from.Universes];
+        NewUniverses.AddRange(from.NewUniverses.Where(u => NewUniverses.All(o => o.Key != u.Key)));
+    }
+
+    // The records a list cites, whatever their order or their names.
+    private static string Identities(IEnumerable<RecordOption> records) => string.Join(',', records.Select(r => r.Id).Order());
 
     public static RecordOption Author(AuthorListItem author) =>
         new(author.Id, RecordSearch.AuthorName(author.LastName, author.FirstName, author.Pseudonym), null);
@@ -122,6 +163,4 @@ public sealed class CitedRecords
     public static RecordOption Universe(UniverseInHierarchy universe) =>
         new(universe.Universe.Id, string.Join(" › ", universe.Ancestors.Append(universe.Universe).Select(u => u.Name)), null);
 
-    private static bool Same(IEnumerable<RecordOption> a, IEnumerable<RecordOption> b) =>
-        a.Select(r => r.Id).Order().SequenceEqual(b.Select(r => r.Id).Order());
 }

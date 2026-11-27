@@ -91,6 +91,12 @@
     --color-text-on-info: #FFFFFF;
     --color-delete: #B42318;
     --color-text-on-delete: #FFFFFF;
+    /* A datum the user changed in an entry form: its green pill « Modifié », and the ring of a tag added (decisions of the
+       user, #355), apart from the alert color of a field in error and from the outline of the focus. */
+    --color-modified: #1E7A3C;
+    --color-text-on-modified: #FFFFFF;
+    /* The ring of the pill, which sets it apart from what holds it: its own green by default. */
+    --color-modified-border: var(--color-modified);
     /* A filled tag (e.g. « Possédé », an active filter): its own fill, which a theme sets apart from the accent. */
     --color-tag: #E3E1DA;
     --color-text-on-tag: #1D1D21;

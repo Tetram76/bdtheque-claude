@@ -12,14 +12,24 @@
 <div class="role-credits">
     @foreach (var role in Enum.GetValues<ContributionRole>())
     {
+        var state = StateOf?.Invoke(CitedRecords.RoleKey(role));
         <div class="role-credits-line">
-            <span class="role-credits-name" id="@($"{Id}-role-{role}")">@Values.Of(role)</span>
-            <RecordTags Id="@($"{Id}-add-{role}")" Kind="RecordKind.Author" Items="@Records.AuthorsOf(role)"
-                        AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAsync(role, author)"
-                        OnRemove="author => UncreditAsync(role, author)"
-                        RemoveLabel="@(author => L["Remove", author.Label, Values.Of(role)].Value)"
-                        OnCreate="text => _creation = (role, text)" CreateLabel="@(text => L["Create", text].Value)"
-                        Pending="Pending" ErrorOf="author => ErrorOf(author.Id)" />
+            <span class="role-credits-name" id="@($"{Id}-role-{role}")">@Values.Of(role)@if (state?.Modified == true)
+                {
+                    <ModifiedMark />
+                }</span>
+            <div class="role-credits-tags">
+                <RecordTags Id="@($"{Id}-add-{role}")" Kind="RecordKind.Author" Items="@Records.AuthorsOf(role)" Read="@Read?.AuthorsOf(role)"
+                            AddText="@L["Add"]" AddLabel="@L[$"Role.{role}.Add"]" OnAdd="author => CreditAsync(role, author)"
+                            OnRemove="author => UncreditAsync(role, author)"
+                            RemoveLabel="@(author => L["Remove", author.Label, Values.Of(role)].Value)"
+                            OnCreate="text => _creation = (role, text)" CreateLabel="@(text => L["Create", text].Value)"
+                            Pending="Pending" ErrorOf="author => ErrorOf(author.Id)" />
+                @if (state is not null)
+                {
+                    <RedoLine Id="@($"{Id}-redo-{role}")" State="state" />
+                }
+            </div>
         </div>
     }
 </div>
@@ -40,6 +50,14 @@
 
     [Parameter, EditorRequired]
     public CitedRecords Records { get; set; } = null!;
+
+    /// <summary>The cited records as the form read them, for a record already saved (<see cref="RecordTags.Read"/>).</summary>
+    [Parameter]
+    public CitedRecords? Read { get; set; }
+
+    /// <summary>What the form tells of the authors of a role, by its key (<see cref="CitedRecords.RoleKey"/>); none tracked by default.</summary>
+    [Parameter]
+    public Func<string, EntryDatumState?>? StateOf { get; set; }
 
     /// <summary>What the authors of the record are, under the lines of the roles.</summary>
     [Parameter, EditorRequired]

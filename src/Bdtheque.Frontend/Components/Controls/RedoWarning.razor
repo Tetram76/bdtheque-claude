@@ -1,0 +1,23 @@
+@inject IStringLocalizer<RedoWarning> L
+
+@* Saved with data of the entry left behind at the reload neither taken nor rejected: the user is warned first
+   (visuel/saisie-album/contenu.md, decision of the user, #329), going back to the record being the safe choice. Written once,
+   for the entry forms in a page and the side panels. *@
+<Dialog Id="@Id" Title="@L["Redo.Title"]" Tone="DialogTone.Information" CloseLabel="@L["Redo.Back"]" OnClose="OnBack">
+    <ChildContent><p>@L["Redo.Text"]</p></ChildContent>
+    <Actions><Button Label="@L["Redo.Save"]" Variant="ButtonVariant.Primary" OnClick="OnSave" /></Actions>
+</Dialog>
+
+@code {
+    /// <summary>The identifier of the dialog, unique in the page.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    /// <summary>Back to the record, nothing saved.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback OnBack { get; set; }
+
+    /// <summary>The record saved as it is, what was left behind abandoned.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback OnSave { get; set; }
+}

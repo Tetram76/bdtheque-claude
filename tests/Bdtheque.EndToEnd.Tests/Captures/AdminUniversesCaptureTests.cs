@@ -43,6 +43,9 @@ public sealed class AdminUniversesCaptureTests(AdministrationApplication applica
         var page = await NewCapturePageAsync(theme, ScreenCaptureTests.Viewports[viewport]);
         await ApplicationHost.SignInAsync(page, path);
         await PageReadiness.WaitAsync(page);
+        // The panel captured as its circuit renders it, the prerendered one giving way to it.
+        if (state == "panel")
+            await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
 
         CaptureStore.Verify(theme, $"admin-universes-{state}.{viewport}", await ScreenCaptureTests.CaptureAsync(page));
     }

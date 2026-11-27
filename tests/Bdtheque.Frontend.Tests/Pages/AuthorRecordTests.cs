@@ -53,6 +53,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         Services.AddScoped<DisplayFormatter>();
         Services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         Services.AddSingleton<ValueLabels>();
+        JSInterop.Mode = JSRuntimeMode.Loose;
     }
 
     void IDisposable.Dispose()
@@ -428,7 +429,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal("Modifier l'auteur", panel.QuerySelector("h2")!.TextContent.Trim());
-        Assert.Equal("Floch", panel.QuerySelector("input[name='lastName']")!.GetAttribute("value"));
+        Assert.Equal("Floch", panel.QuerySelector("#author-last-name")!.GetAttribute("value"));
         Assert.Equal(AppPaths.AuthorRecord(AuthorId), panel.QuerySelector(".side-panel-actions a.button")!.GetAttribute("href"));
         Assert.NotNull(page.Find("h1"));
         Assert.Contains("admin.authors.edit", _audience.Functions);
@@ -441,7 +442,7 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
         AddAuthorization().SetAuthorized("admin");
         var page = Open(AppPaths.AuthorRecordWithEntry(AuthorId));
 
-        await page.ChangeAsync("input[name='nationality']", "Italienne");
+        await page.InputAsync("#author-nationality", "Italienne");
         await page.SubmitAsync("form.side-panel-form");
 
         Assert.Equal(("PUT", $"/admin/authors/{AuthorId}", "Italienne"), Assert.Single(_catalog.Written));
@@ -463,6 +464,8 @@ public sealed class AuthorRecordTests : BunitContext, IDisposable
 
     private IRenderedComponent<AuthorRecord> Open(string? address = null)
     {
+        // The panel is rendered by its circuit (InteractiveServer), which its frame marks; set once the authorization is.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         Services.GetRequiredService<NavigationManager>().NavigateTo(address ?? AppPaths.AuthorRecord(AuthorId));
         return Render<AuthorRecord>(parameters => parameters.Add(p => p.Id, AuthorId).AddCascadingValue(_request.Context));
     }

@@ -31,17 +31,17 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Publishers"], AppPaths.AdminPublishers), new(Entry.Id is null ? L["New"] : Subject)])"
+    <EntryForm @key="_reading" @ref="_form" HasRedo="Tracker.HasRedo" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Publishers"], AppPaths.AdminPublishers), new(Entry.Id is null ? L["New"] : Subject)])"
                Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Subject" State="State" Saving="_saving"
                SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@AppPaths.AdminPublishers" OnSave="SaveAsync"
                Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Publisher"]" Kicker="@L["Kicker.Publisher"]">
             <div class="publisher-fields">
-                <Field Id="publisher-name" Label="@L["Name"]" Required Error="@Errors.For("/name")" Context="control">
+                <Field Id="publisher-name" Label="@L["Name"]" Required State="@DatumState(NameKey)" Error="@Errors.For("/name")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@L["Name.Placeholder"]" aria-describedby="@control.DescribedBy"
                            aria-invalid="@control.Invalid" @bind="Entry.Name" @bind:event="oninput" />
                 </Field>
-                <Field Id="publisher-website" Label="@L["Website"]" Help="@L["Website.Help"]" Error="@Errors.For("/website")" Context="control">
+                <Field Id="publisher-website" Label="@L["Website"]" Help="@L["Website.Help"]" State="@DatumState(WebsiteKey)" Error="@Errors.For("/website")" Context="control">
                     <span class="publisher-website">
                         <input id="@control.Id" type="url" placeholder="https://…" aria-describedby="@control.DescribedBy"
                                aria-invalid="@control.Invalid" @bind="Entry.Website" @bind:event="oninput" />
@@ -77,13 +77,22 @@ else
                                 }
                                 else
                                 {
+                                    var state = CollectionState(collection);
                                     <span class="publisher-collection-name">
-                                        <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden Required
+                                        @* Its label hidden, the mark of a collection renamed is read with it, inside it (Field); the
+                                           pill seen right after the name is hidden from screen readers, so as not to be read twice. *@
+                                        <Field Id="@CollectionId(collection)" Label="@L["Collection.Name"]" LabelHidden Required State="state"
                                                Error="@Errors.ForNamed(Label(collection), CollectionField(collection))" ErrorRelated="@Errors.IsRelated(CollectionField(collection))"
                                                Context="control">
-                                            <input id="@control.Id" type="text" placeholder="@L["Collection.Name"]"
-                                                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
-                                                   @bind="collection.Name" @bind:event="oninput" />
+                                            <span class="publisher-collection-input">
+                                                <input id="@control.Id" type="text" placeholder="@L["Collection.Name"]"
+                                                       aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
+                                                       @bind="collection.Name" @bind:event="oninput" />
+                                                @if (state?.Modified == true)
+                                                {
+                                                    <span class="publisher-collection-mark" aria-hidden="true"><ModifiedMark /></span>
+                                                }
+                                            </span>
                                         </Field>
                                     </span>
                                 }
@@ -117,6 +126,11 @@ else
                         }
                     </ul>
                 }
+                @* What the user had added and removed before the reload, under the list (visuel/saisie-album/contenu.md, #329). *@
+                @if (DatumState(CollectionsKey) is { } collectionsState)
+                {
+                    <RedoLine Id="publisher-collections-redo" State="collectionsState" />
+                }
                 <span>
                     <button type="button" class="publisher-collections-add" @onclick="AddCollection"><Icon Name="IconName.Add" /><span>@L["Collections.Add"]</span></button>
                 </span>
@@ -126,7 +140,7 @@ else
 
     @if (_changesShown)
     {
-        <ChangesDialog Id="publisher-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
+        <ChangesDialog Id="publisher-changes" Subject="@Subject" Changes="Tracker.Changes()" OnClose="() => _changesShown = false" />
     }
 }
 
@@ -141,6 +155,15 @@ else
     private bool _saving;
     private string? _savedFingerprint;
     private bool _changesShown;
+    private EntryTracker<PublisherEntry>? _tracker;
+    // The data the tracker compares, those of the collections following the reading (CollectionData).
+    private readonly List<EntryDatum<PublisherEntry>> _data = [];
+    // The number of the reading of the publisher: the form is rendered anew for each, its controls reading the record reloaded.
+    private int _reading;
+
+    private const string NameKey = "name";
+    private const string WebsiteKey = "website";
+    private const string CollectionsKey = "collections";
 
     /// <summary>The publisher to modify; none for a new publisher.</summary>
     [Parameter]
@@ -185,6 +208,7 @@ else
         }
 
         _savedFingerprint = ReadEntry!.Fingerprint();
+        Track(ReadEntry);
     }
 
     private static string CollectionId(CollectionEntry collection) => $"publisher-collection-{collection.Key}";
@@ -273,8 +297,28 @@ else
         await Recorder.RecordActionAsync(AudienceFunctions.AdminPublisherChanges, $"publisher={Entry!.Id}");
     }
 
-    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
-    private void Reload() => Navigation.NavigateTo(AppPaths.AdminEditPublisher(Entry!.Id!.Value), forceLoad: true);
+    // The record as it is now, read anew within the circuit: the entry left behind offers again, under each datum, what the
+    // user had entered (visuel/saisie-album/contenu.md, #329). The form is rendered anew, its controls reading the record reloaded.
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var reloaded = PublisherEntry.Of(await Api.GetAsync<PublisherForm>($"/admin/publishers/{Entry!.Id!.Value}"));
+            Tracker.Abandon();
+            Entry = reloaded;
+            ReadEntry = reloaded.Copy();
+            Track(ReadEntry);
+            _savedFingerprint = ReadEntry.Fingerprint();
+            _saveProblem = null;
+            _sentCollections = [];
+            _reading++;
+        }
+        catch (ApiProblemException exception)
+        {
+            // Deleted meanwhile, or unreadable: said as the error of the saving was, the entry staying as it is.
+            _saveProblem = exception.Problem;
+        }
+    }
 
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
@@ -286,7 +330,7 @@ else
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-editeur/contenu.md).
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="ReloadAsync" OnShowChanges="ShowChangesAsync"
                       OnRetry="SaveAsync" Business="@RefusedRemoval(problem)" RefusalHint="RefusalHint" />;
 
     // The removal of a collection refused, as any deletion is, naming the collection the error designates, which the content
@@ -304,18 +348,65 @@ else
         ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>
         : null;
 
-    // Each field the user changed since the publisher was read, with what they entered, to enter it again once it is reloaded.
-    private List<EntryChange> Changes() => [.. ChangedFields()];
+    // The data of the publisher, in the order of the form, compared on what is entered against what was read
+    // (visuel/saisie-album/contenu.md, données modifiées): for their mark, « Voir mes changements » and the entry left behind
+    // at a reload. The tracker reads them from the list Track fills at each reading.
+    private EntryTracker<PublisherEntry> Tracker => _tracker ??= new(() => ReadEntry, () => Entry, _data);
 
-    private IEnumerable<EntryChange> ChangedFields()
+    // The data of the publisher as read: its name, its website, the name of each collection read, which renaming it modifies,
+    // and the collections it keeps, those it adds or removes, whose lines « Nouvelle » and « Retirée à l'enregistrement »
+    // already tell apart, unmarked. Those of the collections are those of the reading, rebuilt at each: a collection deleted
+    // meanwhile offers nothing to take again.
+    private void Track(PublisherEntry read)
     {
-        var (read, entry) = (ReadEntry!, Entry!);
-        if (read.Name != entry.Name)
-            yield return new(L["Name"], entry.Name);
-        if (read.Website != entry.Website)
-            yield return new(L["Website"], entry.Website);
-        var kept = entry.Kept.Select(c => c.Name ?? "").ToList();
-        if (!read.Kept.Select(c => c.Name ?? "").SequenceEqual(kept))
-            yield return new(L["Changes.Collections"], string.Join(", ", kept));
+        _data.Clear();
+        _data.Add(new(NameKey, L["Name"], e => e.Name, e => e.Name, (from, to) => to.Name = from.Name));
+        _data.Add(new(WebsiteKey, L["Website"], e => e.Website, e => e.Website, (from, to) => to.Website = from.Website));
+        _data.AddRange(read.Collections.Where(c => c.Id is not null).Select(c => CollectionName(c.Id!.Value, L["Changes.Collection", Label(c)])));
+        var present = read.Collections.Select(c => c.Id).OfType<Guid>().ToHashSet();
+        _data.Add(new(CollectionsKey, L["Changes.Collections"], e => CollectionsChanged(e, present), e => string.Join(", ", e.Kept.Select(c => c.Name ?? "")),
+            TakeCollections));
     }
+
+    private static string CollectionKey(Guid id) => $"collection-{id}";
+
+    private static CollectionEntry? Collection(PublisherEntry entry, Guid id) => entry.Collections.FirstOrDefault(c => c.Id == id);
+
+    // The name of a collection read, taken back into the same collection, if the record reloaded still has it.
+    private static EntryDatum<PublisherEntry> CollectionName(Guid id, string label) => new(
+        CollectionKey(id), label, e => Collection(e, id)?.Name, e => Collection(e, id)?.Name, (from, to) =>
+        {
+            if (Collection(to, id) is { } collection)
+                collection.Name = Collection(from, id)?.Name;
+        });
+
+    // What the entry changes to the collections read: those it removes and those it adds, nothing for the record as read. Told
+    // against the collections read rather than listing those kept, so that what is taken back into a record reloaded equals
+    // what was entered, whatever collections the other modification added; in no particular order, the collections being read
+    // by name, which the other modification may change; and only for the collections the record read now has, a removal of one
+    // deleted meanwhile being done already.
+    private static string CollectionsChanged(PublisherEntry entry, IReadOnlySet<Guid> present) =>
+        string.Join(' ', entry.Collections
+            .Select(c => c.Id is { } id ? (c.Removed && present.Contains(id) ? $"-{id}" : null) : $"+{c.Key}")
+            .OfType<string>().Order(StringComparer.Ordinal));
+
+    // The removals and additions entered, made again in the record reloaded: a collection added is copied, under its key, so that
+    // the entry left behind stays as it was.
+    private static void TakeCollections(PublisherEntry from, PublisherEntry to)
+    {
+        foreach (var removed in from.Collections.Where(c => c.Removed))
+        {
+            if (Collection(to, removed.Id!.Value) is { } collection)
+                collection.Removed = true;
+        }
+        to.Collections.AddRange(from.Collections
+            .Where(c => c.Id is null && to.Collections.TrueForAll(o => o.Key != c.Key))
+            .Select(c => new CollectionEntry { Key = c.Key, Name = c.Name }));
+    }
+
+    // Nothing is modified on a new publisher, all of which is new, as its save bar says (« Nouvelle fiche »).
+    private EntryDatumState? DatumState(string key) => Entry!.Id is null ? null : Tracker.State(key, this);
+
+    // A collection read is a datum, its name; one added is not, its tag « Nouvelle » saying so.
+    private EntryDatumState? CollectionState(CollectionEntry collection) => collection.Id is { } id ? DatumState(CollectionKey(id)) : null;
 }

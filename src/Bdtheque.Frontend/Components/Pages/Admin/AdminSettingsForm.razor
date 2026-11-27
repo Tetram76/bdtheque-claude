@@ -31,12 +31,12 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Breadcrumb"])])"
+    <EntryForm @key="_reading" @ref="_form" HasRedo="Tracker.HasRedo" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Breadcrumb"])])"
                Title="@L["Title"]" State="State" Saving="_saving" SaveLabel="@L["Save"]" CancelHref="@AppPaths.AdminHome"
                OnSave="SaveAsync" Problem="@SaveProblem" Dates="@Dates">
         <Block Title="@L["Block.Display"]" Kicker="@L["Kicker.Display"]">
             <div class="settings-fields">
-                <Field Id="settings-album-label-format" Label="@L["AlbumLabelFormat"]" Required Help="@L["AlbumLabelFormat.Help"]"
+                <Field Id="settings-album-label-format" Label="@L["AlbumLabelFormat"]" Required Help="@L["AlbumLabelFormat.Help"]" State="@Tracker.State(AlbumLabelFormatKey, this)"
                        Error="@Errors.For("/albumLabelFormat")" Context="control">
                     <select id="@control.Id" class="settings-list" aria-describedby="@DescribedBy(control, ExampleId)"
                             aria-invalid="@control.Invalid" @bind="Entry.AlbumLabelFormat">
@@ -51,7 +51,7 @@ else
                        (the label of an album has no ISBN to keep on a line, LabelText's only purpose). *@
                     <p class="settings-example" id="@ExampleId">@L["AlbumLabelFormat.Example", Labels.Record(Example, Entry.AlbumLabelFormat)]</p>
                 </Field>
-                <Field Id="settings-display-culture" Label="@L["DisplayCulture"]" Required Help="@L["DisplayCulture.Help"]"
+                <Field Id="settings-display-culture" Label="@L["DisplayCulture"]" Required Help="@L["DisplayCulture.Help"]" State="@Tracker.State(DisplayCultureKey, this)"
                        Error="@Errors.For("/displayCulture")" Context="control">
                     <select id="@control.Id" class="settings-list" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
                             @bind="Entry.DisplayCulture">
@@ -67,7 +67,7 @@ else
 
     @if (_changesShown)
     {
-        <ChangesDialog Id="settings-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
+        <ChangesDialog Id="settings-changes" Subject="@Subject" Changes="Tracker.Changes()" OnClose="() => _changesShown = false" />
     }
 }
 
@@ -85,6 +85,12 @@ else
     private bool _saving;
     private string? _savedFingerprint;
     private bool _changesShown;
+    private EntryTracker<SettingsEntry>? _tracker;
+    // The number of the reading of the setting: the form is rendered anew for each, its controls reading the setting reloaded.
+    private int _reading;
+
+    private const string AlbumLabelFormatKey = "albumLabelFormat";
+    private const string DisplayCultureKey = "displayCulture";
 
     /// <summary>The setting as the form holds it, read once, by the prerendering.</summary>
     [PersistentState]
@@ -163,8 +169,26 @@ else
         await Recorder.RecordActionAsync(AudienceFunctions.AdminSettingsChanges);
     }
 
-    // The setting as it is now, the changes of the form left behind: a navigation that loads the page anew.
-    private void Reload() => Navigation.NavigateTo(AppPaths.AdminSettings, forceLoad: true);
+    // The setting as it is now, read anew within the circuit: the entry left behind offers again, under each datum, what the
+    // user had entered (visuel/saisie-album/contenu.md, #329). The form is rendered anew, its controls reading the setting reloaded.
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var reloaded = SettingsEntry.Of(await Api.GetAsync<ApplicationSettingsForm>("/admin/settings"));
+            Tracker.Abandon();
+            Entry = reloaded;
+            ReadEntry = reloaded.Copy();
+            _savedFingerprint = ReadEntry.Fingerprint();
+            _saveProblem = null;
+            _reading++;
+        }
+        catch (ApiProblemException exception)
+        {
+            // Unreadable: said as the error of the saving was, the entry staying as it is.
+            _saveProblem = exception.Problem;
+        }
+    }
 
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Subject);
@@ -172,7 +196,7 @@ else
     // The three categories told apart at first glance, each with what the user can do about it. The setting is never deleted.
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.Conflict"]"
-                      Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="ReloadAsync" OnShowChanges="ShowChangesAsync"
                       OnRetry="SaveAsync" />;
 
     // Its modification only: the setting is provisioned with the deployment, never created by anyone, so that a date of creation
@@ -182,15 +206,14 @@ else
         ? @<text>@L["Dates.Modified"] <LocalDateTime Value="Entry.ModifiedAt" />.</text>
         : null;
 
-    // Each field the user changed since the setting was read, with what they entered, to enter it again once it is reloaded.
-    private List<EntryChange> Changes() => [.. ChangedFields()];
-
-    private IEnumerable<EntryChange> ChangedFields()
-    {
-        var (read, entry) = (ReadEntry!, Entry!);
-        if (read.AlbumLabelFormat != entry.AlbumLabelFormat)
-            yield return new(L["AlbumLabelFormat"], Values.Of(entry.AlbumLabelFormat));
-        if (read.DisplayCulture != entry.DisplayCulture)
-            yield return new(L["DisplayCulture"], Values.Of(entry.DisplayCulture));
-    }
+    // The data of the setting, in the order of the form, compared on what is entered against what was read
+    // (visuel/saisie-album/contenu.md, données modifiées): for their mark, « Voir mes changements » and the entry left behind
+    // at a reload. A single record, always present: the form always tracks them.
+    private EntryTracker<SettingsEntry> Tracker => _tracker ??= new(() => ReadEntry, () => Entry,
+    [
+        new(AlbumLabelFormatKey, L["AlbumLabelFormat"], e => e.AlbumLabelFormat.ToString(), e => Values.Of(e.AlbumLabelFormat),
+            (from, to) => to.AlbumLabelFormat = from.AlbumLabelFormat),
+        new(DisplayCultureKey, L["DisplayCulture"], e => e.DisplayCulture.ToString(), e => Values.Of(e.DisplayCulture),
+            (from, to) => to.DisplayCulture = from.DisplayCulture),
+    ]);
 }

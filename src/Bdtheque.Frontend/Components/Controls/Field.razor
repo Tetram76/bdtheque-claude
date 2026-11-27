@@ -1,3 +1,4 @@
+@using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<Field> L
 
 @* A labelled field: its label, the control it gives its identifier to, then the error and the help that describe it. The
@@ -31,6 +32,10 @@
     @if (Help is not null)
     {
         <p class="field-help" id="@HelpId">@Help</p>
+    }
+    @if (State is { } state)
+    {
+        <RedoLine Id="@($"{Id}-redo")" State="state" />
     }
 </div>
 
@@ -94,6 +99,14 @@
     [Parameter]
     public RenderFragment? Beside { get; set; }
 
+    /// <summary>
+    /// What the form tells of the datum of the field (EntryTracker): its mark once modified, after the label, inside it, and what
+    /// the user had entered before the record was reloaded, under the field (visuel/saisie-album/contenu.md); none on a form that
+    /// tracks nothing.
+    /// </summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
+
     [Parameter]
     public RenderFragment<FieldContext>? ChildContent { get; set; }
 
@@ -102,6 +115,10 @@
         @if (Required)
         {
             <span class="field-note">@L["Required"]</span>
+        }
+        @if (State?.Modified == true)
+        {
+            <ModifiedMark />
         }
     </label>;
 

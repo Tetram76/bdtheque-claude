@@ -21,7 +21,7 @@
 
     @Problem
 
-    <form class="entry-form-body" novalidate @onsubmit="OnSave">
+    <form class="entry-form-body" novalidate @onsubmit="SubmitAsync">
         @* Disabled while the record is saved: a field changed meanwhile would be overwritten by the record as saved. *@
         <fieldset class="entry-form-blocks" disabled="@Saving">
             @* Just above the first block (visuel/saisie-album/contenu.md). *@
@@ -31,10 +31,17 @@
             }
             @ChildContent
         </fieldset>
+        @* Saved from the circuit only: the prerendered form, sent by the browser before the circuit answers, would be sent as a plain
+           GET to its own address, losing what was typed. *@
         <SaveBar State="State" SaveLabel="@SaveLabel" CancelHref="@CancelHref" Saving="Saving" StateText="@StateText"
-                 StateShortText="@StateShortText" SaveDisabled="SaveDisabled" Options="BarOptions" />
+                 StateShortText="@StateShortText" SaveDisabled="@(SaveDisabled || !RendererInfo.IsInteractive)" Options="BarOptions" />
     </form>
 </div>
+
+@if (_redoWarned)
+{
+    <RedoWarning Id="entry-form-redo" OnBack="() => _redoWarned = false" OnSave="SaveAnywayAsync" />
+}
 
 @* The frame of every interactive page of the administration: its circuit keeps the principal it was opened with, which
    the router, rendered statically, never checks again. Once the circuit finds the session over
@@ -46,6 +53,7 @@
 
 @code {
     private ElementReference _root;
+    private bool _redoWarned;
     private IJSObjectReference? _module;
     private bool _sessionEnded;
 
@@ -115,6 +123,13 @@
     [Parameter]
     public RenderFragment? BarOptions { get; set; }
 
+    /// <summary>
+    /// Whether data of the entry left behind when the record was reloaded are still to take or reject (EntryTracker.HasRedo):
+    /// the saving warns first.
+    /// </summary>
+    [Parameter]
+    public bool HasRedo { get; set; }
+
     /// <summary>Whether the record cannot be saved yet.</summary>
     [Parameter]
     public bool SaveDisabled { get; set; }
@@ -127,6 +142,20 @@
     {
         _module ??= await JS.InvokeAsync<IJSObjectReference>("import", $"./{Assets["entry-form.js"]}");
         await _module.InvokeVoidAsync("revealProblem", _root);
+    }
+
+    private Task SubmitAsync()
+    {
+        if (!HasRedo)
+            return OnSave.InvokeAsync();
+        _redoWarned = true;
+        return Task.CompletedTask;
+    }
+
+    private Task SaveAnywayAsync()
+    {
+        _redoWarned = false;
+        return OnSave.InvokeAsync();
     }
 
     public async ValueTask DisposeAsync()

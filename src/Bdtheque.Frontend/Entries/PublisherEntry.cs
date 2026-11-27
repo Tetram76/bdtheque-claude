@@ -22,9 +22,9 @@ public sealed class PublisherEntry
 
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    public string? Name { get; set; }
+    public string? Name { get; set => field = EntryText.Typed(value); }
 
-    public string? Website { get; set; }
+    public string? Website { get; set => field = EntryText.Typed(value); }
 
     /// <summary>Its collections as read, by name, then those the form added, in the order they were added.</summary>
     public List<CollectionEntry> Collections { get; set; } = [];
@@ -92,7 +92,7 @@ public sealed class CollectionEntry
     /// <summary>The collection; <c>null</c> for one the form added, not saved yet.</summary>
     public Guid? Id { get; set; }
 
-    public string? Name { get; set; }
+    public string? Name { get; set => field = EntryText.Typed(value); }
 
     /// <summary>The editions of the collection, no purchase intent targets, when it was read.</summary>
     public int EditionCount { get; set; }

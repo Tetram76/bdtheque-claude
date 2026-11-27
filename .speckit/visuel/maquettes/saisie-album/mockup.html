@@ -197,14 +197,14 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <span style="{{kickStyle}}">{{k.date}}</span>
             <h2 id="s-date" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Parution</h2>
               <fieldset aria-describedby="f-date-help" style="margin: 0; padding: 0; border: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px">
-                <legend style="{{lbl}} padding: 0 0 4px">Première publication</legend>
+                <legend style="{{lbl}} padding: 0 0 4px">Première publication<sc-if value="{{mk.year}}"><span style="{{modified}}">Modifié</span></sc-if></legend>
                 <div style="display: flex; align-items: center; gap: 8px">
                   <label for="f-month" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Mois</label>
                   <span style="position: relative; display: block"><select id="f-month" style="{{num}} width: 138px; text-align: left; padding: 0 30px 0 12px; appearance: none"><sc-for list="{{months}}" as="m"><option selected="{{m.selected}}">{{m.label}}</option></sc-for></select><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position: absolute; right: 11px; top: 13px; pointer-events: none"><path d="M6 9l6 6 6-6"></path></svg></span>
                   <label for="f-year" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Année</label>
                   <input id="f-year" type="text" inputmode="numeric" maxlength="4" value="{{x.year}}" placeholder="aaaa" style="{{num}} width: 76px">
                 </div>
-                <span id="f-date-help" style="{{help}}">Mois facultatif ; jamais le jour.</span>
+                <span id="f-date-help" style="{{help}}">Mois facultatif ; jamais le jour.</span><sc-if value="{{redo.year}}"><span style="{{redoLine}} "><span>Votre saisie : <strong>{{redo.year}}</strong></span><span style="display: inline-flex; gap: 12px"><button type="button" style="{{redoBtn}}">Reprendre</button><button type="button" style="{{redoBtn}}">Rejeter</button></span></span></sc-if>
               </fieldset>
           </section>
           </div>
@@ -221,12 +221,13 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <div style="display: flex; flex-direction: column">
               <sc-for list="{{roles}}" as="r">
                 <div class="sa-role" style="padding: 10px 0; border-bottom: {{t.rowB}}">
-                  <span style="{{lbl}} padding-top: 6px">{{r.label}}</span>
+                  <span style="{{lbl}} padding-top: 6px">{{r.label}}<sc-if value="{{r.mod}}"><span style="{{modified}}">Modifié</span></sc-if></span>
                   <div style="min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
                     <sc-for list="{{r.people}}" as="p">
-                      <span style="{{chip}}">{{p}}<button type="button" aria-label="Retirer {{p}} ({{r.label}})" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
+                      <span style="{{chip}} {{p.style}}">{{p.name}}<sc-if value="{{p.kept}}"><button type="button" aria-label="Retirer {{p.name}} ({{r.label}})" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></sc-if><sc-if value="{{p.removed}}"><button type="button" style="{{restore}}">Rétablir</button></sc-if></span>
                     </sc-for>
                     <button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter</button>
+<sc-if value="{{r.redo}}"><span style="{{redoLine}} flex-basis: 100%;"><span>Votre saisie : <strong>{{r.redo}}</strong></span><span style="display: inline-flex; gap: 12px"><button type="button" style="{{redoBtn}}">Reprendre</button><button type="button" style="{{redoBtn}}">Rejeter</button></span></span></sc-if>
                   </div>
                 </div>
               </sc-for>
@@ -239,13 +240,14 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <h2 id="s-tags" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Genres et univers</h2>
             <sc-for list="{{tagGroups}}" as="g">
               <div style="display: flex; flex-direction: column; gap: 6px">
-                <span style="{{lbl}}">{{g.label}}</span>
+                <span style="{{lbl}}">{{g.label}}<sc-if value="{{g.mod}}"><span style="{{modified}}">Modifié</span></sc-if></span>
                 <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px">
                   <sc-for list="{{g.own}}" as="p">
-                    <span style="{{chip}}">{{p}}<button type="button" aria-label="Retirer {{p}}" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
+                    <span style="{{chip}} {{p.style}}">{{p.name}}<sc-if value="{{p.kept}}"><button type="button" aria-label="Retirer {{p.name}}" style="{{chipX}}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></sc-if><sc-if value="{{p.removed}}"><button type="button" style="{{restore}}">Rétablir</button></sc-if></span>
                   </sc-for>
                   <button type="button" style="{{addBtn}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Ajouter</button>
                 </div>
+<sc-if value="{{g.redo}}"><span style="{{redoLine}} "><span>Votre saisie : <strong>{{g.redo}}</strong></span><span style="display: inline-flex; gap: 12px"><button type="button" style="{{redoBtn}}">Reprendre</button><button type="button" style="{{redoBtn}}">Rejeter</button></span></span></sc-if>
                 <sc-if value="{{g.inherited.length}}">
                   <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; color: {{t.muted}}">
                     <span>Par la série :</span>
@@ -261,15 +263,15 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
             <span style="{{kickStyle}}">{{k.texts}}</span>
             <h2 id="s-texts" style="{{h2}}"><span aria-hidden="true" style="{{mark}}"></span><span aria-hidden="true" data-tail="" style="{{tail}}"></span>Résumé, notes et appréciation</h2>
             <div style="display: flex; flex-direction: column; gap: 4px">
-              <label for="f-summary" style="{{lbl}}">Résumé</label>
-              <textarea id="f-summary" rows="4" placeholder="Ce que raconte l'album…" style="{{area}}">{{x.summary}}</textarea>
+              <label for="f-summary" style="{{lbl}}">Résumé<sc-if value="{{mk.summary}}"><span style="{{modified}}">Modifié</span></sc-if></label>
+              <textarea id="f-summary" rows="4" placeholder="Ce que raconte l'album…" style="{{area}}">{{x.summary}}</textarea><sc-if value="{{redo.summary}}"><span style="{{redoLine}} "><span>Votre saisie : <strong>{{redo.summary}}</strong></span><span style="display: inline-flex; gap: 12px"><button type="button" style="{{redoBtn}}">Reprendre</button><button type="button" style="{{redoBtn}}">Rejeter</button></span></span></sc-if>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px">
               <label for="f-notes" style="{{lbl}}">Notes personnelles</label>
               <textarea id="f-notes" rows="3" placeholder="Vos annotations, visibles dans la consultation…" style="{{area}}">{{x.notes}}</textarea>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px">
-              <span id="f-rating" style="{{lbl}}">Appréciation</span>
+              <span id="f-rating" style="{{lbl}}">Appréciation<sc-if value="{{mk.rating}}"><span style="{{modified}}">Modifié</span></sc-if></span>
               <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px">
                 <div role="radiogroup" aria-labelledby="f-rating" style="display: flex; gap: 2px">
                   <sc-for list="{{stars}}" as="s">
@@ -278,7 +280,7 @@ input::placeholder,textarea::placeholder{color:var(--placeholder);opacity:1}
                 </div>
                 <span style="font-size: 14px; font-weight: 700">{{ratingLabel}}</span>
                 <sc-if value="{{rated}}"><button type="button" onClick="{{clearRating}}" style="padding: 0; border: 0; background: transparent; color: {{t.link}}; font-family: {{t.fb}}; font-weight: 700; font-size: 13px; cursor: pointer">Retirer</button></sc-if>
-              </div>
+              </div><sc-if value="{{redo.rating}}"><span style="{{redoLine}} "><span>Votre saisie : <strong>{{redo.rating}}</strong></span><span style="display: inline-flex; gap: 12px"><button type="button" style="{{redoBtn}}">Reprendre</button><button type="button" style="{{redoBtn}}">Rejeter</button></span></span></sc-if>
             </div>
           </section>
         </form>
@@ -476,7 +478,37 @@ const EXAMPLES = {
     notes: 'Le préféré de la série. L\'édition de 1963 est un peu jaunie.',
     rating: 4,
     meta: 'Album créé le 4 mars 2026, modifié hier à 21:08.',
+    dirty: false, status: 'Aucune modification', statusShort: 'À jour', save: 'Enregistrer'
+  },
+  modifiee: {
+    existing: true, heading: "Modifier l'album", crumb: 'Les Bijoux de la Castafiore', labelNote: '',
+    series: 'Tintin', seriesHelp: 'Rattaché à une série, l\'album peut se passer de titre : la série et le tome l\'identifient.',
+    title: 'Les Bijoux de la Castafiore', titleNote: '', titlePh: 'Sans titre, l\'album prend celui de la série',
+    key: 'Bijoux de la Castafiore [Les]', manualKey: 'Bijoux Castafiore [Les]',
+    type: 'regular', hs: false, tome: '21', from: '', to: '', month: 0, year: '1964',
+    credits: { 'Scénario': ['Hergé'], 'Dessin': ['Hergé', '+Bob de Moor'], 'Couleurs': [] }, copied: false,
+    genres: ['-Humour', '+Policier'], genresSeries: ['Aventure'], universes: ['Univers Hergé › Moulinsart'], universesSeries: ['Univers Hergé'],
+    summary: 'La Castafiore s\'invite à Moulinsart, et ses bijoux disparaissent. Une marche cassée, une pie, un perroquet et beaucoup de bruit pour rien.',
+    notes: 'Le préféré de la série. L\'édition de 1963 est un peu jaunie.',
+    rating: 5,
+    meta: 'Album créé le 4 mars 2026, modifié hier à 21:08.',
+    modified: ['year', 'summary', 'rating'],
     dirty: true, status: 'Modifications non enregistrées', statusShort: 'Non enregistré', save: 'Enregistrer'
+  },
+  rechargee: {
+    existing: true, heading: "Modifier l'album", crumb: 'Les Bijoux de la Castafiore', labelNote: '',
+    series: 'Tintin', seriesHelp: 'Rattaché à une série, l\'album peut se passer de titre : la série et le tome l\'identifient.',
+    title: 'Les Bijoux de la Castafiore', titleNote: '', titlePh: 'Sans titre, l\'album prend celui de la série',
+    key: 'Bijoux de la Castafiore [Les]', manualKey: 'Bijoux Castafiore [Les]',
+    type: 'regular', hs: false, tome: '21', from: '', to: '', month: 0, year: '1963',
+    credits: { 'Scénario': ['Hergé'], 'Dessin': ['Hergé'], 'Couleurs': [] }, copied: false,
+    genres: ['Humour'], genresSeries: ['Aventure'], universes: ['Univers Hergé › Moulinsart'], universesSeries: ['Univers Hergé'],
+    summary: 'La Castafiore s\'invite à Moulinsart, et ses bijoux disparaissent. Une marche cassée, une pie et beaucoup de bruit pour rien.',
+    notes: 'Le préféré de la série. L\'édition de 1963 est un peu jaunie.',
+    rating: 3,
+    meta: 'Album créé le 4 mars 2026, modifié aujourd\'hui à 10:42.',
+    redo: { year: '1964', summary: 'La Castafiore s\'invite à Moulinsart, et ses bijoux disparaissent. Une marche cassée, une pie, un perroquet et beaucoup de bruit pour rien.', rating: 'Très bien', Dessin: 'Hergé, Bob de Moor', Genres: 'Policier' },
+    dirty: false, status: 'Aucune modification', statusShort: 'À jour', save: 'Enregistrer'
   },
   creation: {
     existing: false, creating: true, heading: 'Nouvel album', crumb: 'Nouvel album', labelNote: '',
@@ -496,7 +528,7 @@ const EXAMPLES = {
     // Without a title of its own, the key retained is that of its series (#465).
     key: 'Blacksad', manualKey: '',
     type: 'omnibus', hs: false, tome: '', from: '1', to: '5', month: 10, year: '2023',
-    credits: { 'Scénario': ['Juan Díaz Canales'], 'Dessin': ['Juanjo Guarnido'], 'Couleurs': ['Juanjo Guarnido'] }, copied: true,
+    credits: { 'Scénario': ['+Juan Díaz Canales'], 'Dessin': ['+Juanjo Guarnido'], 'Couleurs': ['+Juanjo Guarnido'] }, copied: true,
     genres: [], genresSeries: ['Polar', 'Animalier'], universes: [], universesSeries: [],
     summary: '', notes: '', rating: 0,
     meta: 'Album créé le 8 octobre 2026, modifié le 8 octobre 2026.',
@@ -527,7 +559,20 @@ class View extends Mockup {
   renderVals() {
     const t = THEMES[this.props.theme] ?? THEMES.planche;
     const x = EXAMPLES[this.props.exemple] ?? EXAMPLES.modification;
-    const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
+    // The data changed since the reading, marked by a green pill after their label, the tags added ringed in green and those
+    // removed struck through until the saving (decisions of the user, #355); what was entered before a reload, under each datum (#329).
+    const ex = EXAMPLES[this.props.exemple] ?? EXAMPLES.modification;
+    const MODIFIED = '#1E7A3C';
+    const isModified = (key) => (ex.modified ?? []).includes(key);
+    const tagsOf = (list) => list.map((n) => {
+      const added = n.startsWith('+'), removed = n.startsWith('-');
+      const name = added || removed ? n.slice(1) : n;
+      const style = added ? 'box-shadow: inset 0 0 0 2px ' + MODIFIED + ';'
+        : removed ? 'background: transparent; border: 2px dashed ' + t.line + '; color: ' + t.muted + '; text-decoration: line-through; padding-right: 8px;' : '';
+      return { name, style, kept: !removed, removed };
+    });
+    const touched = (list) => list.some((n) => n.startsWith('+') || n.startsWith('-'));
+    const redoOf = (key) => ex.redo?.[key] ?? null;    const menuOpen = this.state?.menuOpen ?? (this.props.menuOpen ?? false);
     const type = this.state?.type ?? x.type;
     const hs = this.state?.hs ?? x.hs;
     const rating = this.state?.rating ?? x.rating;
@@ -560,8 +605,13 @@ class View extends Mockup {
     const field = 'width: 100%; box-sizing: border-box; border: ' + t.inB + '; border-radius: ' + t.inR + '; background: ' + t.inBg + '; color: ' + t.text + '; font: inherit; font-size: 15px;';
     const barBg = t.cBg === 'transparent' ? t.bg : (t.cBg === '#FFFFFF' || t.cBg === '#FFFBEF' || t.cBg === '#FBF7EE' ? t.cBg : t.cBg);
     return {
-      t, x, label,
-      icons: ICONS,
+      mk: { year: isModified('year'), summary: isModified('summary'), rating: isModified('rating') },
+      modified: 'display: inline-block; margin-left: 8px; padding: 0 7px; border: 1.5px solid ' + (t === THEMES.planche ? '#111111' : MODIFIED) + '; border-radius: 999px; background: ' + MODIFIED + '; color: #FFFFFF; font-weight: 700; font-size: 11px; letter-spacing: .04em; line-height: 1.6; text-transform: uppercase; vertical-align: .1em;',
+      redo: { year: redoOf('year'), summary: redoOf('summary'), rating: redoOf('rating') },
+      redoLine: 'display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 4px 8px; border-left: 3px solid ' + t.infoBg + '; background: ' + t.cBg + '; color: ' + t.text + '; font-size: 13px;',
+      redoBtn: 'padding: 0; border: 0; background: transparent; color: ' + t.link + '; font-family: ' + t.fb + '; font-weight: 700; font-size: 13px; text-decoration: underline; cursor: pointer;',
+      restore: 'padding: 0 0 0 6px; border: 0; background: transparent; color: ' + t.link + '; font-family: ' + t.fb + '; font-weight: 700; font-size: 12px; text-decoration: underline; cursor: pointer;',
+      t, x, label,      icons: ICONS,
       hdrBg, hdrMuted: t.hMuted ?? t.muted,
       menuOpen, menuExpanded: menuOpen ? 'true' : 'false',
       panelBg, panelB, panelSh,
@@ -610,10 +660,10 @@ class View extends Mockup {
       omnibus,
       tomeLabel: omnibus ? 'Numéro' : 'Tome',
       months: MONTHS.map((m, i) => ({ label: m, selected: i === x.month })),
-      roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people })),
+      roles: Object.entries(x.credits).map(([role, people]) => ({ label: role, people: tagsOf(people), mod: touched(people), redo: redoOf(role) })),
       tagGroups: [
-        { label: 'Genres', own: x.genres, inherited: x.genresSeries },
-        { label: 'Univers', own: x.universes, inherited: x.universesSeries }
+        { label: 'Genres', own: tagsOf(x.genres), inherited: x.genresSeries, mod: touched(x.genres), redo: redoOf('Genres') },
+        { label: 'Univers', own: tagsOf(x.universes), inherited: x.universesSeries, mod: touched(x.universes), redo: null }
       ],
       stars: [1, 2, 3, 4, 5].map((n) => ({
         glyph: n <= rating ? '★' : '☆', fg: n <= rating ? t.acc : t.muted, label: n + ' sur 5 : ' + RATING_LABELS[n],
@@ -637,7 +687,7 @@ class View extends Mockup {
 
 Mockup.mount(View, {
   theme: { label: 'Thème', editor: 'enum', options: ['planche', 'gazette', 'sommaire', 'festival', 'riso', 'librairie', 'vignettes', 'couverture'], default: 'planche' },
-  exemple: { label: 'Exemple', editor: 'enum', options: ['modification', 'creation', 'integrale'], default: 'modification' },
+  exemple: { label: 'Exemple', editor: 'enum', options: ['modification', 'modifiee', 'rechargee', 'creation', 'integrale'], default: 'modification' },
   cleManuelle: { label: 'Clé de tri manuelle', editor: 'boolean', default: false },
   erreur: { label: 'Erreur', editor: 'enum', options: ['aucune', 'metier', 'fonctionnelle', 'technique'], default: 'aucune' },
   menuOpen: { label: 'Menu ouvert', editor: 'boolean', default: false }

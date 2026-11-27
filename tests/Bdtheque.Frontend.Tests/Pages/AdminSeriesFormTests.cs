@@ -132,7 +132,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("Dargaud", page.Find("#series-publisher").GetAttribute("value"));
         Assert.Equal("Ligne noire", page.Find("#series-collection").TextContent.Trim());
         Assert.Equal("Juan Díaz Canales", page.Find(".role-credits-line .tag").TextContent.Trim());
-        Assert.Equal(["Polar"], page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag").Select(tag => tag.TextContent.Trim()));
+        Assert.Equal(["Polar"], page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag .tag-text").Select(tag => tag.TextContent.Trim()));
         Assert.Equal("John Blacksad, détective privé.", page.Find("#series-summary").GetAttribute("value") ?? page.Find("#series-summary").TextContent);
         Assert.Equal("Série créée le 12/01/2026 11:00, modifiée le 08/10/2026 22:08.", page.Find(".entry-form-dates").TextContent.Trim());
     }
@@ -548,7 +548,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
 
         await page.SubmitAsync("form");
 
-        var tag = page.FindAll(".classification-tags")[1].QuerySelectorAll(".tag").Single(t => t.TextContent.Trim() == "Le port");
+        var tag = page.FindAll(".classification-tags")[1].QuerySelectorAll(".tag").Single(t => t.QuerySelector(".tag-text")!.TextContent.Trim() == "Le port");
         Assert.Equal("true", tag.GetAttribute("data-invalid"));
         var removal = tag.QuerySelector(".tag-remove")!;
         Assert.Equal("true", removal.GetAttribute("data-error-focus"));

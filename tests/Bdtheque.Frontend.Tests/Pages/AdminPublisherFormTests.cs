@@ -485,6 +485,208 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
         Assert.Equal("Nouvelle fiche", page.Find(".save-bar-state-long").TextContent);
     }
 
+    [Fact]
+    public async Task Datum_ChangedSinceTheReading_IsMarkedAfterItsLabel_UntilSetBackToWhatWasRead()
+    {
+        // visuel/saisie-album/contenu.md, données modifiées (#355): the mark compares what is entered to what was read.
+        var page = OpenPublisher();
+        Assert.Empty(page.FindAll(".modified-mark"));
+
+        await page.InputAsync("#publisher-website", "https://www.casterman.fr");
+
+        Assert.Equal("Modifié", page.Find("label[for=publisher-website] .modified-mark").TextContent);
+        Assert.Single(page.FindAll(".modified-mark"));
+
+        await page.InputAsync("#publisher-website", "https://www.casterman.com");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task RenamedCollection_IsMarkedRightAfterItsName_TheMarkReadWithItsHiddenLabel()
+    {
+        var page = OpenPublisher();
+
+        await page.InputAsync($"#publisher-collection-{FacSimile}", "Fac-similé (rééditions)");
+
+        var row = page.FindAll(".publisher-collection")[1];
+        // Seen beside the name, which has no label shown; read once, with the label of the field, by screen readers.
+        var seen = row.QuerySelector(".publisher-collection-mark")!;
+        Assert.Equal("true", seen.GetAttribute("aria-hidden"));
+        Assert.Equal("Modifié", seen.QuerySelector(".modified-mark")!.TextContent);
+        Assert.NotNull(row.QuerySelector($"label.visually-hidden[for=publisher-collection-{FacSimile}] .modified-mark"));
+        Assert.Equal(2, page.FindAll(".modified-mark").Count);
+
+        await page.InputAsync($"#publisher-collection-{FacSimile}", "Fac-similé");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task CollectionAddedOrRemoved_KeepsItsOwnMention_WithoutTheMark()
+    {
+        var page = OpenPublisher();
+
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+        await page.ClickAsync(".publisher-collections-add");
+
+        Assert.Equal("Nouvelle", page.FindAll(".publisher-collection")[4].QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Equal("Retirée à l'enregistrement", page.FindAll(".publisher-collection")[2].QuerySelector(".publisher-collection-count")!.TextContent.Trim());
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task NewPublisher_HasNoMark_AllOfItBeingNew()
+    {
+        var page = OpenNew();
+
+        await page.InputAsync("#publisher-name", "Casterman");
+        await page.ClickAsync(".publisher-collections-add");
+        await page.InputAsync(() => page.Find(".publisher-collection input"), "Écritures");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Reload_AfterAModificationMeanwhile_OffersUnderEachDatum_OnlyWhatDiffersFromTheRecordReloaded()
+    {
+        // visuel/saisie-album/contenu.md (#329): the record reloaded within the page, what the user had entered offered again.
+        var page = OpenPublisher();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.InputAsync("#publisher-name", "Casterman BD");
+        await page.InputAsync("#publisher-website", "https://www.casterman.fr");
+        await page.SubmitAsync("form");
+        // The other modification entered the same website, and renamed a collection the user did not touch.
+        _api.Answers[$"/admin/publishers/{PublisherId}"] = Casterman with
+        {
+            Website = "https://www.casterman.fr",
+            Collections = [.. Casterman.Collections.Select(c => c.Id == Univers ? c with { Name = "Univers" } : c)],
+            Version = 13,
+        };
+
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+
+        Assert.Empty(page.FindAll("[role=alert]"));
+        Assert.Equal("Casterman", page.Find("#publisher-name").GetAttribute("value"));
+        Assert.Equal("Univers", page.Find($"#publisher-collection-{Univers}").GetAttribute("value"));
+        var line = page.Find("#publisher-name-redo");
+        Assert.Equal("Votre saisie : Casterman BD", line.QuerySelector("span")!.TextContent.Trim());
+        Assert.Equal(["Reprendre", "Rejeter"], line.QuerySelectorAll("button").Select(b => b.TextContent));
+        Assert.Single(page.FindAll(".redo-line"));
+        Assert.Empty(page.FindAll(".modified-mark"));
+        Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
+    }
+
+    [Fact]
+    public async Task Taking_WhatWasEntered_PutsItBack_TheDatumThenMarked()
+    {
+        var page = await ReloadedAfterAsync(form => form.InputAsync("#publisher-name", "Casterman BD"));
+
+        await page.ClickAsync(() => page.Find("#publisher-name-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Casterman BD", page.Find("#publisher-name").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.NotNull(page.Find("label[for=publisher-name] .modified-mark"));
+    }
+
+    [Fact]
+    public async Task Rejecting_WhatWasEntered_LeavesTheRecordReloaded()
+    {
+        var page = await ReloadedAfterAsync(form => form.InputAsync("#publisher-name", "Casterman BD"));
+
+        await page.ClickAsync(() => page.Find("#publisher-name-redo").QuerySelectorAll("button")[1]);
+
+        Assert.Equal("Casterman", page.Find("#publisher-name").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Taking_TheNameEnteredOfACollection_RenamesItAgain_UnderItsName()
+    {
+        var page = await ReloadedAfterAsync(form => form.InputAsync($"#publisher-collection-{FacSimile}", "Fac-similé (rééditions)"));
+
+        var line = page.Find($"#publisher-collection-{FacSimile}-redo");
+        Assert.Equal("Votre saisie : Fac-similé (rééditions)", line.QuerySelector("span")!.TextContent.Trim());
+        Assert.Single(page.FindAll(".redo-line"));
+
+        await page.ClickAsync(() => page.Find($"#publisher-collection-{FacSimile}-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Fac-similé (rééditions)", page.Find($"#publisher-collection-{FacSimile}").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.NotNull(page.FindAll(".publisher-collection")[1].QuerySelector(".publisher-collection-mark .modified-mark"));
+    }
+
+    [Fact]
+    public async Task Taking_TheCollectionsEntered_AddsAndRemovesThemAgain_UnderTheirList()
+    {
+        var page = await ReloadedAfterAsync(async form =>
+        {
+            await form.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+            await form.ClickAsync(".publisher-collections-add");
+            await form.InputAsync(() => form.FindAll(".publisher-collection")[4].QuerySelector("input")!, "Sakka");
+        });
+        Assert.Equal(4, page.FindAll(".publisher-collection").Count);
+
+        var line = page.Find("#publisher-collections-redo");
+        Assert.Equal("Votre saisie : Écritures, Fac-similé, Univers d'auteurs, Sakka", line.QuerySelector("span")!.TextContent.Trim());
+        Assert.Single(page.FindAll(".redo-line"));
+
+        await page.ClickAsync(() => page.Find("#publisher-collections-redo").QuerySelectorAll("button")[0]);
+
+        var rows = page.FindAll(".publisher-collection");
+        Assert.Equal(5, rows.Count);
+        Assert.Equal("true", rows[2].GetAttribute("data-removed"));
+        Assert.Equal("Nouvelle", rows[4].QuerySelector(".tag")!.TextContent.Trim());
+        Assert.Equal("Sakka", rows[4].QuerySelector("input")!.GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Saving_WhileWhatWasEnteredIsNeitherTakenNorRejected_WarnsFirst()
+    {
+        var page = await ReloadedAfterAsync(form => form.InputAsync("#publisher-name", "Casterman BD"));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Casterman);
+        var written = _api.Written.Count;
+
+        await page.SubmitAsync("form");
+
+        var dialog = page.Find("dialog");
+        Assert.Equal("Saisie précédente à reprendre ou rejeter", dialog.QuerySelector(".dialog-title")!.TextContent);
+        Assert.Equal(written, _api.Written.Count);
+
+        await page.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
+
+        Assert.Equal(written + 1, _api.Written.Count);
+    }
+
+    [Fact]
+    public async Task Reload_ThatCannotReadThePublisher_SaysSo_TheEntryStayingAsItIs()
+    {
+        var page = OpenPublisher();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.InputAsync("#publisher-name", "Casterman BD");
+        await page.SubmitAsync("form");
+        _api.Failures[$"/admin/publishers/{PublisherId}"] = HttpStatusCode.InternalServerError;
+
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("technical", page.Find("[role=alert]").GetAttribute("data-error-category"));
+        Assert.Equal("Casterman BD", page.Find("#publisher-name").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    // The form once reloaded after a saving refused, the publisher modified meanwhile, what the user entered left behind.
+    private async Task<IRenderedComponent<AdminPublisherForm>> ReloadedAfterAsync(Func<IRenderedComponent<AdminPublisherForm>, Task> entering)
+    {
+        var page = OpenPublisher();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await entering(page);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/publishers/{PublisherId}"] = Casterman with { Version = 13 };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        return page;
+    }
+
     private IRenderedComponent<AdminPublisherForm> OpenPublisher()
     {
         Services.GetRequiredService<NavigationManager>().NavigateTo(AppPaths.AdminEditPublisher(PublisherId));

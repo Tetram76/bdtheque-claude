@@ -1,70 +1,17 @@
-@using Bdtheque.Contracts.Admin
-@using Bdtheque.Contracts.Catalog
 @using Microsoft.AspNetCore.Components.Authorization
-@inject IStringLocalizer<UniverseEntryPanel> L
-@inject IStringLocalizer<FieldMessages> FieldTexts
-@inject IStringLocalizer<RuleMessages> Rules
-@inject ApiClient Api
-@inject AudienceRecorder Recorder
-@inject NavigationManager Navigation
 
-@* The side panel of a universe, changed or new (visuel/listes/saisie-selon-l-entite.md), over the page that its address opens:
-   the list of the universes, or the record of the universe in the consultation, which stays under the panel (decisions of the
-   user, #658). Its form is sent to that page, rendered statically, whose error is presented in place; only the choice of its
-   parent is interactive. For the authenticated administrator only: the record being public, a visitor sees no panel, and a
-   form sent without authentication saves nothing. *@
-@if (Open)
+@* The side panel of a universe, changed or new (visuel/listes/saisie-selon-l-entite.md), over the page that its address opens: the
+   list of the universes, or the record of the universe in the consultation, which stays under the panel (decisions of the user,
+   #658). For the authenticated administrator only: rendered with the page, statically, it reads the authentication of the
+   request, and renders the interactive panel (UniversePanelForm) for the administrator alone, so that a visitor of the record,
+   public, sees no panel and opens no circuit. *@
+@if (_administrator)
 {
-    <form class="side-panel-form" method="post" @formname="@FormName" @onsubmit="SaveAsync">
-        <AntiforgeryToken />
-        @if (UniverseId is not null)
-        {
-            <input type="hidden" name="@VersionName" value="@EntryVersion" />
-        }
-        <SidePanel Id="universe-panel" Title="@(UniverseId is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@CloseHref">
-            <ChildContent>
-                @* The error of the saving, as on an entry form (visuel/listes/saisie-selon-l-entite.md): a universe deleted
-                   meanwhile keeps the panel open, with what was typed. *@
-                @if (_problem is { } problem)
-                {
-                    <SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                               Technical="@L["Problem.Technical.Text"]" CanReload="@(UniverseId is not null)" StaticForm="true"
-                               ReloadHref="@ReloadHref" />
-                }
-                @if (_universe is not null)
-                {
-                    <p class="side-panel-dates">
-                        @L["Dates.Created"] <LocalDateTime Value="_universe.CreatedAt" />@L["Dates.Modified"] <LocalDateTime Value="_universe.ModifiedAt" />.
-                    </p>
-                }
-                <Field Id="universe-name" Label="@L["Name"]" Required Error="@Errors.For(NameField)" Context="control">
-                    <input id="@control.Id" type="text" name="@NameName" autofocus="@(Focused == NameField)" tabindex="0"
-                           aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="EntryName" />
-                </Field>
-                <ParentUniverseField @rendermode="InteractiveServer" Id="universe-parent" Name="@ParentName" NewKeyName="@NewParentKeyName"
-                                     NewName="@NewParentName" Parent="_parent" NewParent="@SentNewParent" Error="@ParentError"
-                                     Autofocus="@(Focused == ParentField)" />
-                <Field Id="universe-description" Label="@L["Description"]" Error="@Errors.For(DescriptionField)" Context="control">
-                    <textarea id="@control.Id" name="@DescriptionName" rows="5" placeholder="@L["Description.Placeholder"]"
-                              autofocus="@(Focused == DescriptionField)" tabindex="0" aria-describedby="@control.DescribedBy"
-                              aria-invalid="@control.Invalid">@EntryDescription</textarea>
-                </Field>
-            </ChildContent>
-            <Actions>
-                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@(UniverseId is null ? L["Create"] : L["Save"])" />
-            </Actions>
-        </SidePanel>
-    </form>
+    <UniversePanelForm UniverseId="UniverseId" Searched="@Searched" CloseHref="@CloseHref" SavedHref="@SavedHref" Opening="Opening" />
 }
 
 @code {
-    private const string FormName = "universe-entry";
-    private const string NameName = "name";
-    private const string DescriptionName = "description";
-    private const string ParentName = "parentId";
-    private const string NewParentKeyName = "newParentKey";
-    private const string NewParentName = "newParent";
-    private const string VersionName = "version";
+    private bool _administrator;
 
     /// <summary>The universe changed; none for a new universe.</summary>
     [Parameter]
@@ -82,10 +29,6 @@
     [Parameter, EditorRequired]
     public string SavedHref { get; set; } = null!;
 
-    /// <summary>The page with the panel of the universe read anew, which « Recharger la fiche » leads to.</summary>
-    [Parameter]
-    public string? ReloadHref { get; set; }
-
     /// <summary>
     /// The action the opening of the panel is, recorded by the panel when the page under it does not record it from its own
     /// address (the record of the universe; the list records it); none otherwise.
@@ -94,165 +37,9 @@
     public AudienceFunction? Opening { get; set; }
 
     [CascadingParameter]
-    private HttpContext? HttpContext { get; set; }
-
-    [CascadingParameter]
     private Task<AuthenticationState>? Authentication { get; set; }
 
-    [SupplyParameterFromForm(FormName = FormName, Name = NameName)]
-    private string? EntryName { get; set; }
-
-    [SupplyParameterFromForm(FormName = FormName, Name = DescriptionName)]
-    private string? EntryDescription { get; set; }
-
-    /// <summary>The parent chosen; none at the top of the hierarchy.</summary>
-    [SupplyParameterFromForm(FormName = FormName, Name = ParentName)]
-    private Guid? EntryParentId { get; set; }
-
-    /// <summary>The key of the parent created on the spot, sent by the field of the parent; none for an existing parent, or for none.</summary>
-    [SupplyParameterFromForm(FormName = FormName, Name = NewParentKeyName)]
-    private Guid? EntryNewParentKey { get; set; }
-
-    /// <summary>The name of the parent created on the spot, empty if the user emptied it: the saving refuses it.</summary>
-    [SupplyParameterFromForm(FormName = FormName, Name = NewParentName)]
-    private string? EntryNewParentName { get; set; }
-
-    /// <summary>The version of the universe changed, as its panel read it.</summary>
-    [SupplyParameterFromForm(FormName = FormName, Name = VersionName)]
-    private uint? EntryVersion { get; set; }
-
-    private bool _administrator;
-    private UniverseForm? _universe;
-    private UniverseInHierarchy? _parent;
-    private ApiProblem? _problem;
-    // The parent created on the spot that the last saving sent, under the key standing for its identifier: what lets its error
-    // designate it (choix-implementation/socle/frontend.md, erreur d'une fiche créée sur place).
-    private NewRecords? _sentNewRecords;
-
-    // The parent created on the spot, told by its key: an empty name is still one, which the domain refuses, never no parent.
-    private NewUniverse? SentNewParent => EntryNewParentKey is { } key ? new NewUniverse(key, EntryNewParentName ?? "") : null;
-
-    // A form sent back, whose fields, even emptied, are those typed.
-    private bool IsPost => HttpContext is { } context && HttpMethods.IsPost(context.Request.Method);
-
-    // The panel of a new universe, or of the universe changed: read, or sent back with its version, which keeps it open over a
-    // universe deleted meanwhile, to present the error with what was typed. An address on a universe deleted opens none.
-    private bool Open => _administrator && (UniverseId is null || _universe is not null || EntryVersion is not null);
-
-    protected override async Task OnInitializedAsync()
-    {
-        // The only authenticated user is the administrator (contraintes-techniques/architecture-deploiement/authentification.md).
+    // The only authenticated user is the administrator (contraintes-techniques/architecture-deploiement/authentification.md).
+    protected override async Task OnInitializedAsync() =>
         _administrator = Authentication is not null && (await Authentication).User.Identity?.IsAuthenticated == true;
-        if (!_administrator)
-            return;
-
-        if (UniverseId is { } edited)
-            _universe = await FindAsync(edited);
-        if (Opening is { } opening && _universe is not null && HttpContext is { } context && HttpMethods.IsGet(context.Request.Method))
-            await Recorder.RecordActionAsync(opening, $"universe={_universe.Id}", context.RequestAborted);
-        // Read once, from the universe; a form sent back keeps what was typed, the version always among it.
-        if (_universe is not null && EntryVersion is null)
-        {
-            EntryName = _universe.Name;
-            EntryDescription = _universe.Description;
-            EntryParentId = _universe.ParentId;
-            EntryVersion = _universe.Version;
-        }
-        // A new universe opened on a search that finds none is the universe searched, unless a name sent back, even emptied, is
-        // to be corrected.
-        if (UniverseId is null && Searched is { } searched && !IsPost)
-            EntryName ??= searched;
-        // The parent with its ancestors: that of the universe as read, or the one a form sent back chose.
-        if (EntryParentId is not { } parentId)
-            _parent = null;
-        else if (parentId == _universe?.ParentId)
-            _parent = _universe.Parent;
-        else
-            _parent = await HierarchyAsync(parentId);
-    }
-
-    // The universe, or none if it no longer exists: the page is then shown without its panel.
-    private async Task<UniverseForm?> FindAsync(Guid id)
-    {
-        try
-        {
-            return await Api.GetAsync<UniverseForm>($"/admin/universes/{id}");
-        }
-        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
-        {
-            return null;
-        }
-    }
-
-    // The parent sent with a form that was refused, with its ancestors; by its identifier alone if it no longer exists, the
-    // field then presenting none, and the saving the error.
-    private async Task<UniverseInHierarchy?> HierarchyAsync(Guid id)
-    {
-        try
-        {
-            return await Api.GetAsync<UniverseInHierarchy>($"/admin/universes/{id}/hierarchy");
-        }
-        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
-        {
-            return null;
-        }
-    }
-
-    private async Task SaveAsync()
-    {
-        // The API knows no user (docs/tech/mecanismes/authentification-et-appels-internes.md): over a public page, a form sent
-        // without the authentication of the administrator writes nothing.
-        if (!_administrator)
-            return;
-
-        // A parent created on the spot is sent by its name alone, under the key the field gave it, which the universe cites in
-        // place of its identifier: it is created with the universe, in the same transaction, or not at all.
-        var newParent = SentNewParent;
-        _sentNewRecords = newParent is null ? null : NewRecords.None with { Universes = [newParent] };
-        var parentId = newParent?.Key ?? EntryParentId;
-        UniverseForm saved;
-        try
-        {
-            // The universe changed, as its panel read it, even deleted meanwhile: the API then says so, never a new universe.
-            saved = UniverseId is { } edited
-                ? await Api.PutAsync<UpdateUniverseRequest, UniverseForm>(
-                    $"/admin/universes/{edited}",
-                    new UpdateUniverseRequest(EntryName ?? "", EntryDescription, parentId, EntryVersion.GetValueOrDefault(), _sentNewRecords))
-                : await Api.PostAsync<CreateUniverseRequest, UniverseForm>(
-                    "/admin/universes", new CreateUniverseRequest(EntryName ?? "", EntryDescription, parentId, _sentNewRecords));
-        }
-        catch (ApiProblemException exception)
-        {
-            _problem = exception.Problem;
-            return;
-        }
-
-        var aborted = HttpContext?.RequestAborted ?? default;
-        if (newParent is not null)
-            await Recorder.RecordActionAsync(AudienceFunctions.AdminUniverseParentCreated, $"universe={saved.ParentId}", aborted);
-        await Recorder.RecordActionAsync(
-            UniverseId is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}", aborted);
-        Navigation.NavigateTo(SavedHref);
-    }
-
-    // The fields of the content the panel enters, in their order in the panel.
-    private const string NameField = "/name";
-    private const string ParentField = "/parentId";
-    private const string DescriptionField = "/description";
-    private static readonly string[] PanelFields = [NameField, ParentField, DescriptionField];
-
-    // The fields a refused saving designates (choix-implementation/socle/frontend.md, champ d'une erreur métier): a name already
-    // taken under the parent has the text shared by every name unique regardless of case and accents (modele-metier/univers.md),
-    // naming the universe as typed.
-    private FieldErrors Errors => new(_problem, FieldTexts, Rules, EntryName?.Trim() ?? "");
-
-    // The parent refused (a cycle), or the parent created on the spot that the saving refused (its name already taken at the top
-    // of the hierarchy), designated on the field of the parent, which cites it by its name.
-    private string? ParentError => Errors.For(ParentField)
-                                   ?? (_sentNewRecords is { Universes: [var sent] } ? Errors.ForAdded(_sentNewRecords, sent.Key) : null);
-
-    // The first field to correct gets the focus; the first field otherwise.
-    private string Focused => PanelFields.FirstOrDefault(entered => ErrorOf(entered) is not null && !Errors.IsRelated(entered)) ?? NameField;
-
-    private string? ErrorOf(string field) => field == ParentField ? ParentError : Errors.For(field);
 }

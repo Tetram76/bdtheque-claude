@@ -90,8 +90,7 @@ else if (_author is { } author)
    error of its saving, as in its list (#411). *@
 @if (Entry == AppPaths.RecordEntryOpen)
 {
-    <AuthorEntryPanel AuthorId="Id" CloseHref="@AppPaths.AuthorRecord(Id)" SavedHref="@AppPaths.AuthorRecord(Id)"
-                      ReloadHref="@AppPaths.AuthorRecordWithEntry(Id)" Opening="AudienceFunctions.AdminAuthorsEdit" />
+    <AuthorEntryPanel AuthorId="Id" CloseHref="@AppPaths.AuthorRecord(Id)" SavedHref="@AppPaths.AuthorRecord(Id)" Opening="AudienceFunctions.AdminAuthorsEdit" />
 }
 
 @code {

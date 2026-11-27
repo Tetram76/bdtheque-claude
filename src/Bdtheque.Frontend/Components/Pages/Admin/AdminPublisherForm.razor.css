@@ -76,8 +76,21 @@
     overflow-wrap: anywhere;
 }
 
+/* The name and, once renamed, its mark right after it, on its line (visuel/saisie-album/contenu.md, données modifiées). */
+.publisher-collection-input {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+}
+
 .publisher-collection-name input {
+    flex: 1 1 auto;
+    min-inline-size: 0;
     inline-size: 100%;
+}
+
+.publisher-collection-mark {
+    flex: none;
 }
 
 .publisher-collection-use {

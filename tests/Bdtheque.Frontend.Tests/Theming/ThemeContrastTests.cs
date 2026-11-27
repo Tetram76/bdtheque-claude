@@ -69,6 +69,15 @@ public sealed partial class ThemeContrastTests
         // tells it from the block.
         ("text-on-notice", "notice", Text),
         ("notice-border", "notice", NonText),
+        // What the user had entered before the record was reloaded, offered under a datum: a notice whose actions are links.
+        ("accent-text", "notice", Text),
+        // A datum the user changed (#355): its pill, which must stand out from what holds it, and the ring of a tag added.
+        ("text-on-modified", "modified", Text),
+        ("modified-border", "surface", NonText),
+        ("modified-border", "background", NonText),
+        ("modified-border", "tag", NonText),
+        ("modified", "tag", NonText),
+        .. Enumerable.Range(1, 14).Select(index => ("modified-border", $"block-tint-{index}", NonText)),
         // The tile of a type of record of the home page of the administration: its name, detail and links.
         ("text", "tile", Text),
         ("text-muted", "tile", Text),

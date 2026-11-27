@@ -1,4 +1,5 @@
 @using Bdtheque.Contracts.Enums
+@using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<RatingInput> L
 @inject ValueLabels Values
 
@@ -6,7 +7,7 @@
    (visuel/saisie-album/contenu.md; modele-metier/album.md): native radio buttons, which the arrows of the keyboard move
    through, each drawn as a star, filled up to the one chosen. Interactive. *@
 <fieldset class="rating">
-    <legend class="rating-legend">@Legend</legend>
+    <legend class="rating-legend">@Legend@if (State?.Modified == true) { <ModifiedMark /> }</legend>
     <div class="rating-line">
         <div class="rating-stars">
             @foreach (var rating in Enum.GetValues<AlbumRating>())
@@ -24,6 +25,10 @@
             <button type="button" class="rating-clear" @onclick="() => ValueChanged.InvokeAsync(null)">@L["Clear"]</button>
         }
     </div>
+    @if (State is { } state)
+    {
+        <RedoLine Id="@($"{Id}-redo")" State="state" />
+    }
 </fieldset>
 
 @code {
@@ -39,4 +44,8 @@
 
     [Parameter]
     public EventCallback<AlbumRating?> ValueChanged { get; set; }
+
+    /// <summary>What the form tells of its datum (EntryTracker): its mark once modified, and what the user had entered before the record was reloaded (visuel/saisie-album/contenu.md).</summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
 }

@@ -59,6 +59,10 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         // The pages of the administration are only ever served to the authenticated administrator (Pages/Admin/_Imports.razor).
         AddAuthorization().SetAuthorized("admin");
         Services.AddSingleton(TimeProvider.System);
+        // The panel of an author is rendered by its circuit (InteractiveServer), which its frame marks; the error of its saving
+        // imports the script that reveals it, which only the test of the focus sets up.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
+        JSInterop.Mode = JSRuntimeMode.Loose;
         Answer([Gibelin, Gibrat, Gomez, Gotlib], totalCount: 38);
         _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
             Gotlib.Id, "Gotlieb", "Marcel", "Gotlib", "Créateur de Gai-Luron.", "Française", January, March, 44);
@@ -211,7 +215,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         var panel = Open($"q={Uri.EscapeDataString(searched)}&new=open").Find("dialog.side-panel");
 
         Assert.Equal((firstName, lastName),
-            (panel.QuerySelector("input[name='firstName']")!.GetAttribute("value") ?? "", panel.QuerySelector("input[name='lastName']")!.GetAttribute("value")));
+            (panel.QuerySelector("#author-first-name")!.GetAttribute("value") ?? "", panel.QuerySelector("#author-last-name")!.GetAttribute("value")));
     }
 
     [Fact]
@@ -297,17 +301,23 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     [Fact]
     public void Panel_OfAnAuthor_ItsDatesAtTheTopThenItsFields()
     {
-        var panel = Open($"q=gib&edit={Gotlib.Id}").Find("dialog.side-panel");
+        var page = Open($"q=gib&edit={Gotlib.Id}");
+        var panel = page.Find("dialog.side-panel");
 
         Assert.Equal("Modifier l'auteur", Text(panel.QuerySelector("h2")!));
         Assert.Equal(
-            [("firstName", "Marcel"), ("lastName", "Gotlieb"), ("pseudonym", "Gotlib"), ("nationality", "Française")],
-            panel.QuerySelectorAll("input[type='text']").Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
-        Assert.Equal("Créateur de Gai-Luron.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='biography']")!).Value);
+            [("author-first-name", "Marcel"), ("author-last-name", "Gotlieb"), ("author-pseudonym", "Gotlib"), ("author-nationality", "Française")],
+            panel.QuerySelectorAll("input[type='text']").Select(input => (input.Id, input.GetAttribute("value"))));
+        Assert.Equal("Créateur de Gai-Luron.", panel.QuerySelector("#author-biography")!.GetAttribute("value"));
         Assert.Equal("Auteur créé le 12/01/2026 10:30, modifié le 30/03/2026 10:00.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));
         Assert.Equal(
             [("Annuler", $"{AppPaths.AdminAuthors}?q=gib"), ("Enregistrer", null)],
             panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+        // The first field gets the focus at the opening, declared in the keyboard path: without it, Blazor, which focuses the
+        // field after an enhanced navigation, would take it out of that path (#443).
+        Assert.Equal([("author-first-name", "0")], panel.QuerySelectorAll("[autofocus]").Select(input => (input.Id, input.GetAttribute("tabindex"))));
+        // Interactive once its circuit has rendered it, which it marks.
+        Assert.Equal("true", page.Find("form.side-panel-form").GetAttribute("data-interactive"));
     }
 
     [Fact]
@@ -329,7 +339,7 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"]);
         var page = Open($"q=gib&edit={Gotlib.Id}", recorded: true);
 
-        await page.ChangeAsync("input[name='nationality']", "Belge");
+        await page.InputAsync("#author-nationality", "Belge");
         await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
@@ -356,26 +366,25 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     }
 
     // As on an entry form (visuel/listes/saisie-selon-l-entite.md, #411): the error at the top of the panel, the field it
-    // designates bordered with its text under it, and focused.
+    // designates bordered with its text under it, and brought into view, focused, by the script of the entry forms.
     [Fact]
     public async Task Panel_AnAuthorWithoutLastNameNorPseudonym_IsRefusedAtBothFields()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(
             ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.LastNameOrPseudonymRequired", "/lastName");
+        var reveal = JSInterop.SetupModule(module => module.Identifier == "import" && ((string)module.Arguments[0]!).EndsWith("entry-form.js"))
+            .SetupVoid("revealProblem", _ => true);
         var page = Open("new=open");
 
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal(("true", "true"), (panel.QuerySelector("input[name='lastName']")!.GetAttribute("aria-invalid"),
-            panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-invalid")));
+        Assert.Equal(("true", "true"), (panel.QuerySelector("#author-last-name")!.GetAttribute("aria-invalid"),
+            panel.QuerySelector("#author-pseudonym")!.GetAttribute("aria-invalid")));
         Assert.Equal("Au moins le nom ou le pseudonyme.", Text(panel.QuerySelector(".field-error")!));
-        Assert.StartsWith("author-last-name-error", panel.QuerySelector("input[name='pseudonym']")!.GetAttribute("aria-describedby"));
+        Assert.StartsWith("author-last-name-error", panel.QuerySelector("#author-pseudonym")!.GetAttribute("aria-describedby"));
         Assert.Equal(("business", "Saisie à corriger"), ErrorOf(panel));
-        Assert.Equal(["lastName"], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
-        // Declared: without it, Blazor, which focuses the field after an enhanced navigation, would take it out of the
-        // keyboard path (#443).
-        Assert.Equal("0", panel.QuerySelector("[autofocus]")!.GetAttribute("tabindex"));
+        Assert.Single(reveal.Invocations);
     }
 
     [Theory]
@@ -386,18 +395,16 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         _api.Write = (_, _, _) => FakeAdminApi.Problem(
             ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Author.DisplayNameAlreadyUsed", $"/{field}");
         var page = Open("new=open");
-        await page.ChangeAsync("input[name='firstName']", firstName);
-        await page.ChangeAsync("input[name='lastName']", "Gotlieb");
-        await page.ChangeAsync("input[name='pseudonym']", pseudonym);
+        await page.InputAsync("#author-first-name", firstName);
+        await page.InputAsync("#author-last-name", "Gotlieb");
+        await page.InputAsync("#author-pseudonym", pseudonym);
 
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal(["true"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("aria-invalid")));
-        Assert.Equal(field, panel.QuerySelector("[aria-invalid]")!.GetAttribute("name"));
+        Assert.Equal([field == "pseudonym" ? "author-pseudonym" : "author-last-name"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.Id));
         Assert.StartsWith(message, Text(panel.QuerySelector(".field-error")!));
         Assert.Equal(("business", "Saisie à corriger"), ErrorOf(panel));
-        Assert.Equal([field], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
     }
 
     // A text too long is refused at its own field, whichever it is.
@@ -410,13 +417,12 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal(["nationality"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.GetAttribute("name")));
-        Assert.Equal(["nationality"], panel.QuerySelectorAll("[autofocus]").Select(input => input.GetAttribute("name")));
+        Assert.Equal(["author-nationality"], panel.QuerySelectorAll("[aria-invalid]").Select(input => input.Id));
         Assert.Equal("Trop long : raccourcissez ce texte.", Text(panel.QuerySelector(".field-error")!));
     }
 
-    // Changed or deleted meanwhile: nothing overwritten nor saved, the author reloaded at its address, what was typed staying in
-    // the panel until then.
+    // Changed or deleted meanwhile: nothing overwritten nor saved, what was typed staying in the panel until the author is
+    // reloaded, within the panel.
     [Theory]
     [InlineData(HttpStatusCode.Conflict, "Fiche modifiée entre-temps", "L'auteur a été modifié entre-temps, depuis un autre onglet ou un autre appareil : rien n'a été écrasé. Rechargez la fiche pour partir de son état actuel ; votre saisie reste dans le panneau jusque-là.")]
     [InlineData(HttpStatusCode.NotFound, "Fiche supprimée entre-temps", "L'auteur a été supprimé entre-temps : rien n'a été enregistré.")]
@@ -424,33 +430,152 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, status);
         var page = Open($"q=gib&edit={Gotlib.Id}");
-        await page.ChangeAsync("input[name='nationality']", "Belge");
+        await page.InputAsync("#author-nationality", "Belge");
 
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal(("functional", title), ErrorOf(panel));
         Assert.Equal(text, Text(panel.QuerySelector("[data-error-text]")!));
-        Assert.Equal([("Recharger la fiche", $"{AppPaths.AdminAuthors}?q=gib&edit={Gotlib.Id}")],
-            panel.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
-        Assert.Equal("Belge", panel.QuerySelector("input[name='nationality']")!.GetAttribute("value"));
+        // « Voir mes changements » is not there: what was typed stays in front of the user (visuel/listes/saisie-selon-l-entite.md).
+        Assert.Equal(["Recharger la fiche"], panel.QuerySelectorAll(".error-actions .button").Select(Text));
+        Assert.Equal("Belge", panel.QuerySelector("#author-nationality")!.GetAttribute("value"));
         Assert.Empty(panel.QuerySelectorAll("[aria-invalid]"));
     }
 
-    // A technical error: the same mention as any other, and the form sent again with what was typed.
+    // A technical error: the same mention as any other, and the author saved again with what was typed.
     [Fact]
-    public async Task Panel_ATechnicalError_OffersToSendTheFormAgain()
+    public async Task Panel_ATechnicalError_OffersToSaveAgain()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
         var page = Open("new=open");
+        await page.InputAsync("#author-last-name", "Hugo");
 
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
         Assert.Equal(("technical", "Problème technique"), ErrorOf(panel));
-        var retry = panel.QuerySelector(".error-actions button")!;
-        Assert.Equal(("Réessayer", "submit"), (Text(retry), retry.GetAttribute("type")));
-        Assert.NotNull(retry.Closest("form.side-panel-form"));
+        Assert.Equal(["Réessayer"], panel.QuerySelectorAll(".error-actions .button").Select(Text));
+
+        await page.ClickAsync(".side-panel .error-actions .button");
+
+        Assert.Equal(2, _api.Written.Count);
+        Assert.Equal("Hugo", _api.Written[1].Body.GetProperty("lastName").GetString());
+    }
+
+    // visuel/saisie-album/contenu.md, données modifiées (#355): the mark compares what is typed to what was read, as it is typed.
+    [Fact]
+    public async Task Datum_ChangedSinceTheReading_IsMarkedAfterItsLabel_UntilSetBackToWhatWasRead()
+    {
+        var page = Open($"edit={Gotlib.Id}");
+        Assert.Empty(page.FindAll(".modified-mark"));
+
+        await page.InputAsync("#author-nationality", "Belge");
+
+        Assert.Equal("Modifié", Text(page.Find("label[for=author-nationality] .modified-mark")));
+        Assert.Single(page.FindAll(".modified-mark"));
+
+        await page.InputAsync("#author-nationality", "Française");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task NewAuthor_HasNoMark_AllOfItBeingNew()
+    {
+        var page = Open("new=open");
+
+        await page.InputAsync("#author-last-name", "Hugo");
+        await page.InputAsync("#author-biography", "Poète.");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    // visuel/saisie-album/contenu.md (#329): the author reloaded within the panel, what the user had typed offered again under
+    // each datum where it differs from the author reloaded, and there only.
+    [Fact]
+    public async Task Reload_AfterAModificationMeanwhile_OffersUnderEachDatum_OnlyWhatDiffersFromTheAuthorReloaded()
+    {
+        var page = Open($"edit={Gotlib.Id}");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.InputAsync("#author-nationality", "Belge");
+        await page.InputAsync("#author-biography", "Créateur de Gaston.");
+        await page.SubmitAsync("form.side-panel-form");
+        // The other modification typed the same biography, and a pseudonym the user did not touch.
+        _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
+            Gotlib.Id, "Gotlieb", "Marcel", "Gotlib le grand", "Créateur de Gaston.", "Française", January, March, 45);
+
+        await page.ClickAsync(".side-panel .error-actions .button");
+
+        Assert.Empty(page.FindAll(".side-panel [data-error-category]"));
+        Assert.Equal(("Française", "Gotlib le grand"),
+            (page.Find("#author-nationality").GetAttribute("value"), page.Find("#author-pseudonym").GetAttribute("value")));
+        var line = page.Find("#author-nationality-redo");
+        Assert.Equal("Votre saisie : Belge", Text(line.QuerySelector("span")!));
+        Assert.Equal(["Reprendre", "Rejeter"], line.QuerySelectorAll("button").Select(Text));
+        Assert.Single(page.FindAll(".redo-line"));
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Taking_WhatWasTyped_PutsItBack_TheDatumThenMarked_AndSavedUnderTheVersionReloaded()
+    {
+        var page = await ReloadedWithANationalityTypedAsync();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"]);
+
+        await page.ClickAsync(() => page.Find("#author-nationality-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Belge", page.Find("#author-nationality").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.NotNull(page.Find("label[for=author-nationality] .modified-mark"));
+
+        await page.SubmitAsync("form.side-panel-form");
+
+        Assert.Equal(("Belge", 45u), (_api.Written[^1].Body.GetProperty("nationality").GetString(), _api.Written[^1].Body.GetProperty("version").GetUInt32()));
+    }
+
+    [Fact]
+    public async Task Rejecting_WhatWasTyped_LeavesTheAuthorReloaded()
+    {
+        var page = await ReloadedWithANationalityTypedAsync();
+
+        await page.ClickAsync(() => page.Find("#author-nationality-redo").QuerySelectorAll("button")[1]);
+
+        Assert.Equal("Française", page.Find("#author-nationality").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Saving_WhileWhatWasTypedIsNeitherTakenNorRejected_WarnsFirst()
+    {
+        var page = await ReloadedWithANationalityTypedAsync();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/authors/{Gotlib.Id}"]);
+        var written = _api.Written.Count;
+
+        await page.SubmitAsync("form.side-panel-form");
+
+        var dialog = page.Find("dialog.dialog");
+        Assert.Equal("Saisie précédente à reprendre ou rejeter", Text(dialog.QuerySelector(".dialog-title")!));
+        Assert.Equal(["Revenir à la fiche", "Enregistrer quand même"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
+        Assert.Equal(written, _api.Written.Count);
+
+        await page.ClickAsync("dialog.dialog .dialog-actions .button[data-variant=primary]");
+
+        Assert.Equal(written + 1, _api.Written.Count);
+        Assert.EndsWith(AppPaths.AdminAuthors, Services.GetRequiredService<NavigationManager>().Uri);
+    }
+
+    private async Task<IRenderedComponent<AdminAuthors>> ReloadedWithANationalityTypedAsync()
+    {
+        var page = Open($"edit={Gotlib.Id}");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.InputAsync("#author-nationality", "Belge");
+        await page.SubmitAsync("form.side-panel-form");
+        _api.Answers[$"/admin/authors/{Gotlib.Id}"] = new AuthorForm(
+            Gotlib.Id, "Gotlieb", "Marcel", "Gotlib", "Créateur de Gai-Luron.", "Française", January, March, 45);
+        await page.ClickAsync(".side-panel .error-actions .button");
+        return page;
     }
 
     private static (string?, string) ErrorOf(IElement panel)

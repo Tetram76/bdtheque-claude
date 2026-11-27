@@ -53,6 +53,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         AddAuthorization().SetAuthorized("admin");
         Services.AddScoped<RecordSearch>();
         Services.AddSingleton(TimeProvider.System);
+        // The panel of a universe is rendered by its circuit (InteractiveServer), which its frame marks.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         JSInterop.Mode = JSRuntimeMode.Loose;
         Answer([Pratt, Corto, Antilles, Cities], totalCount: 4);
         _api.Answers[$"/admin/universes/{Corto.Id}"] = new UniverseForm(
@@ -147,24 +149,26 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     [Fact]
     public void Panel_OfAUniverse_ItsFieldsItsParentWithItsAncestorsAndItsDates()
     {
-        var panel = Open($"q=c&edit={Corto.Id}").Find("dialog.side-panel");
+        var page = Open($"q=c&edit={Corto.Id}");
+        var panel = page.Find("dialog.side-panel");
 
         Assert.Equal("Modifier l'univers", Text(panel.QuerySelector("h2")!));
-        Assert.Equal("Corto Maltese", panel.QuerySelector("input[name='name']")!.GetAttribute("value"));
+        Assert.Equal("Corto Maltese", panel.QuerySelector("#universe-name")!.GetAttribute("value"));
         // The name alone is required, the parent and the description being optional (visuel/saisie-album/contenu.md, mentions).
         Assert.Equal(["universe-name"], panel.QuerySelectorAll("label:has(.field-note)").Select(label => label.GetAttribute("for")));
         Assert.Equal("(obligatoire)", Text(panel.QuerySelector("label[for='universe-name'] .field-note")!));
-        Assert.Equal("Les voyages du marin.", ((AngleSharp.Html.Dom.IHtmlTextAreaElement)panel.QuerySelector("textarea[name='description']")!).Value);
+        Assert.Equal("Les voyages du marin.", panel.QuerySelector("#universe-description")!.GetAttribute("value"));
         Assert.Equal("Univers Hugo Pratt", panel.QuerySelector(".record-picker input[role='combobox']")!.GetAttribute("value"));
-        // An existing parent is sent by its identifier, a parent created on the spot by its name (ParentUniverseFieldTests).
-        Assert.Equal(PrattItem.Id.ToString(), panel.QuerySelector("input[type='hidden'][name='parentId']")!.GetAttribute("value"));
-        Assert.Equal("", panel.QuerySelector("input[type='hidden'][name='newParent']")!.GetAttribute("value"));
         Assert.Equal("Ses séries et albums sont aussi ceux de Univers Hugo Pratt.", Text(panel.QuerySelector(".field-help")!));
         // The dates at the top of the panel, above its first field.
         Assert.Equal("Univers créé le 12/01/2026 10:30, modifié le 12/01/2026 10:30.", Text(panel.QuerySelector(".side-panel-body > :first-child")!));
         Assert.Equal(
             [("Annuler", $"{AppPaths.AdminUniverses}?q=c"), ("Enregistrer", null)],
             panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+        // The name gets the focus at the opening, its tabindex declared: without it, Blazor, which focuses the field after an
+        // enhanced navigation, would take it out of the keyboard path (#443).
+        Assert.Equal([("universe-name", "0")], panel.QuerySelectorAll("[autofocus]").Select(input => (input.Id, input.GetAttribute("tabindex"))));
+        Assert.Equal("true", page.Find("form.side-panel-form").GetAttribute("data-interactive"));
     }
 
     [Fact]
@@ -184,7 +188,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"]);
         var page = Open($"q=c&edit={Corto.Id}", recorded: true);
 
-        await page.ChangeAsync("input[name='name']", "Corto");
+        await page.InputAsync("#universe-name", "Corto");
         await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
@@ -195,13 +199,36 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Contains("admin.universe.saved", _audience.Functions);
     }
 
+    // The parent created on the spot, by the field of the panel (ParentUniverseFieldTests): sent by its name, under the key the
+    // universe cites it by, and created with it.
+    [Fact]
+    public async Task Panel_AParentCreatedOnTheSpot_IsCreatedWithTheUniverse()
+    {
+        var created = new NewUniverse(Guid.NewGuid(), "Mers du Sud");
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"]);
+        var page = Open($"edit={Corto.Id}", recorded: true);
+        var field = page.FindComponent<ParentUniverseField>();
+
+        await field.InvokeAsync(() => field.Instance.NewParentChanged.InvokeAsync(created));
+        await field.InvokeAsync(() => field.Instance.ValueChanged.InvokeAsync(new RecordOption(created.Key, created.Name, null)));
+        await page.SubmitAsync("form.side-panel-form");
+
+        var body = Assert.Single(_api.Written).Body;
+        Assert.Equal(created.Key.ToString(), body.GetProperty("parentId").GetString());
+        var sent = Assert.Single(body.GetProperty("newRecords").GetProperty("universes").EnumerateArray());
+        Assert.Equal((created.Key.ToString(), "Mers du Sud"), (sent.GetProperty("key").GetString(), sent.GetProperty("name").GetString()));
+        Assert.Contains("admin.universe.parent-created", _audience.Functions);
+    }
+
     // As on an entry form (visuel/listes/saisie-selon-l-entite.md, #411): the error at the top of the panel, the field it
-    // designates bordered with its text under it, and focused.
+    // designates bordered with its text under it, and brought into view, focused, by the script of the entry forms.
     [Fact]
     public async Task Panel_AParentThatWouldMakeACycle_IsRefusedInPlace_WithItsReason()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(
             ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.HierarchyCycle", "/parentId");
+        var reveal = JSInterop.SetupModule(module => module.Identifier == "import" && ((string)module.Arguments[0]!).EndsWith("entry-form.js"))
+            .SetupVoid("revealProblem", _ => true);
         var page = Open($"edit={Corto.Id}");
 
         await page.SubmitAsync("form.side-panel-form");
@@ -209,12 +236,10 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         var panel = page.Find("dialog.side-panel");
         var parent = panel.QuerySelector(".record-picker input[role='combobox']")!;
         Assert.Equal("Ni lui-même, ni l'un de ses sous-univers.", Text(panel.QuerySelector(".record-picker")!.ParentElement!.QuerySelector(".field-error")!));
-        Assert.Equal("true", parent.GetAttribute("aria-invalid"));
-        // The parent, interactive, takes the focus once its circuit has rendered it; no other field of the panel takes it.
-        Assert.True(page.FindComponent<RecordPicker>().Instance.AutoFocus);
-        Assert.Empty(panel.QuerySelectorAll("[autofocus]"));
+        Assert.Equal(["universe-parent"], panel.QuerySelectorAll("[aria-invalid='true']").Select(input => input.Id));
         Assert.Equal("Un univers ne peut pas être rangé sous lui-même, ni sous l'un de ses sous-univers.",
             Text(panel.QuerySelector("[data-error-category='business'] [data-error-text]")!));
+        Assert.Single(reveal.Invocations);
     }
 
     [Fact]
@@ -225,10 +250,8 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
 
         await page.SubmitAsync("form.side-panel-form");
 
-        var name = page.Find("input[name='name']");
-        // Its tabindex declared: without it, Blazor, which focuses the field after an enhanced navigation, would take it out
-        // of the keyboard path (#443).
-        Assert.Equal(("true", true, "0"), (name.GetAttribute("aria-invalid"), name.HasAttribute("autofocus"), name.GetAttribute("tabindex")));
+        var name = page.Find("#universe-name");
+        Assert.Equal("true", name.GetAttribute("aria-invalid"));
         Assert.Equal("Obligatoire.", Text(name.ParentElement!.QuerySelector(".field-error")!));
     }
 
@@ -237,32 +260,33 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Business, HttpStatusCode.UnprocessableEntity, "Universe.NameAlreadyUsed", "/name");
         var page = Open("new=open");
-        await page.ChangeAsync("input[name='name']", " star wars ");
+        await page.InputAsync("#universe-name", " star wars ");
 
         await page.SubmitAsync("form.side-panel-form");
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal("true", panel.QuerySelector("input[name='name']")!.GetAttribute("aria-invalid"));
+        Assert.Equal("true", panel.QuerySelector("#universe-name")!.GetAttribute("aria-invalid"));
         Assert.Equal(
             "« star wars » est déjà pris sous ce parent : deux noms qui ne diffèrent que par la casse ou les accents désignent le même univers.",
-            Text(panel.QuerySelector("input[name='name']")!.ParentElement!.QuerySelector(".field-error")!));
+            Text(panel.QuerySelector("#universe-name")!.ParentElement!.QuerySelector(".field-error")!));
         Assert.Equal("Saisie à corriger", Text(panel.QuerySelector("[data-error-category='business'] [data-error-label]")!));
     }
 
-    // Deleted meanwhile, or its parent: nothing saved, the universe reloaded at its address.
+    // Deleted meanwhile, or its parent: nothing saved, what was typed staying in the panel, which offers to reload it.
     [Fact]
     public async Task Panel_AUniverseDeletedMeanwhile_OffersToReloadIt()
     {
         _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.NotFound);
         var page = Open($"edit={Corto.Id}");
+        await page.InputAsync("#universe-name", "Corto");
 
         await page.SubmitAsync("form.side-panel-form");
 
         var error = page.Find("dialog.side-panel [data-error-category='functional']");
         Assert.Equal("L'univers, ou son univers parent, a été supprimé entre-temps : rien n'a été enregistré.",
             Text(error.QuerySelector("[data-error-text]")!));
-        Assert.Equal([("Recharger la fiche", $"{AppPaths.AdminUniverses}?edit={Corto.Id}")],
-            error.QuerySelectorAll(".error-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
+        Assert.Equal(["Recharger la fiche"], error.QuerySelectorAll(".error-actions .button").Select(Text));
+        Assert.Equal("Corto", page.Find("#universe-name").GetAttribute("value"));
     }
 
     [Fact]
@@ -271,7 +295,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"], HttpStatusCode.Created);
         var page = Open("new=open", recorded: true);
 
-        await page.ChangeAsync("input[name='name']", "Les Scorpions du désert");
+        await page.InputAsync("#universe-name", "Les Scorpions du désert");
         await page.SubmitAsync("form.side-panel-form");
 
         var written = Assert.Single(_api.Written);
@@ -289,6 +313,76 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         Assert.Equal(4, page.FindAll(".universe-row:not(.universe-row-head)").Count);
     }
 
+    // visuel/saisie-album/contenu.md, données modifiées (#355): each datum of the panel, its parent included, marked once changed.
+    [Fact]
+    public async Task Datum_ChangedSinceTheReading_IsMarkedAfterItsLabel_UntilSetBackToWhatWasRead()
+    {
+        var page = Open($"edit={Corto.Id}");
+        var field = page.FindComponent<ParentUniverseField>();
+
+        await page.InputAsync("#universe-name", "Corto");
+        await field.InvokeAsync(() => field.Instance.ValueChanged.InvokeAsync(null));
+
+        Assert.Equal(["universe-name", "universe-parent"], page.FindAll("label:has(.modified-mark)").Select(label => label.GetAttribute("for")));
+
+        await page.InputAsync("#universe-name", "Corto Maltese");
+
+        Assert.Equal(["universe-parent"], page.FindAll("label:has(.modified-mark)").Select(label => label.GetAttribute("for")));
+    }
+
+    [Fact]
+    public async Task NewUniverse_HasNoMark_AllOfItBeingNew()
+    {
+        var page = Open("new=open");
+
+        await page.InputAsync("#universe-name", "Mu");
+        await page.InputAsync("#universe-description", "Le continent perdu.");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    // visuel/saisie-album/contenu.md (#329): the universe reloaded within the panel, its name, its parent and its description
+    // typed offered again under each, where they differ from the universe reloaded, and taken back.
+    [Fact]
+    public async Task Reload_AfterAModificationMeanwhile_OffersAgainWhatWasTyped_EachTakenBack()
+    {
+        var cities = new RecordOption(Cities.Id, "Les Cités obscures", null);
+        var page = Open($"edit={Corto.Id}");
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.InputAsync("#universe-name", "Corto");
+        await page.InputAsync("#universe-description", "Le marin.");
+        var field = page.FindComponent<ParentUniverseField>();
+        await field.InvokeAsync(() => field.Instance.ValueChanged.InvokeAsync(cities));
+        await page.SubmitAsync("form.side-panel-form");
+        // The other modification renamed the universe and moved it to the top of the hierarchy.
+        _api.Answers[$"/admin/universes/{Corto.Id}"] = new UniverseForm(
+            Corto.Id, "Corto Maltese, le marin", "Les voyages du marin.", null, null, January, January, 43);
+
+        await page.ClickAsync(".side-panel .error-actions .button");
+
+        Assert.Empty(page.FindAll(".side-panel [data-error-category]"));
+        Assert.Equal(("Corto Maltese, le marin", ""),
+            (page.Find("#universe-name").GetAttribute("value"), page.Find(".record-picker input[role='combobox']").GetAttribute("value") ?? ""));
+        Assert.Equal(
+            [("universe-name-redo", "Votre saisie : Corto"), ("universe-parent-redo", "Votre saisie : Les Cités obscures"), ("universe-description-redo", "Votre saisie : Le marin.")],
+            page.FindAll(".redo-line").Select(line => (line.Id, Text(line.QuerySelector("span")!))));
+
+        foreach (var redo in new[] { "#universe-name-redo", "#universe-parent-redo", "#universe-description-redo" })
+            await page.ClickAsync(() => page.Find(redo).QuerySelectorAll("button")[0]);
+
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.Equal(("Corto", "Les Cités obscures", "Le marin."),
+            (page.Find("#universe-name").GetAttribute("value"), page.Find(".record-picker input[role='combobox']").GetAttribute("value"),
+                page.Find("#universe-description").GetAttribute("value")));
+        Assert.Equal(["universe-name", "universe-parent", "universe-description"], page.FindAll("label:has(.modified-mark)").Select(label => label.GetAttribute("for")));
+
+        _api.Write = (_, _, _) => FakeAdminApi.Json(_api.Answers[$"/admin/universes/{Corto.Id}"]);
+        await page.SubmitAsync("form.side-panel-form");
+
+        var body = _api.Written[^1].Body;
+        Assert.Equal((Cities.Id.ToString(), 43u), (body.GetProperty("parentId").GetString(), body.GetProperty("version").GetUInt32()));
+    }
+
     [Fact]
     public void Empty_ASearchWithoutResult_OffersToCreateTheUniverseSearched_InThePanel()
     {
@@ -299,7 +393,7 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
         var link = empty.QuerySelector("a.button[data-variant='primary']")!;
         Assert.Equal(("Créer l'univers « Mu »", $"{AppPaths.AdminUniverses}?q=Mu&new=open"), (Text(link), link.GetAttribute("href")));
 
-        Assert.Equal("Mu", Open("q=Mu&new=open").Find("input[name='name']").GetAttribute("value"));
+        Assert.Equal("Mu", Open("q=Mu&new=open").Find("#universe-name").GetAttribute("value"));
     }
 
     [Fact]

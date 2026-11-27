@@ -1,3 +1,5 @@
+@inject IStringLocalizer<RecordTags> L
+
 @* The records an entry form associates with the one it enters (e.g. the authors of a role, the genres of an album,
    visuel/saisie-album/contenu.md): each a removable tag, then « Ajouter », which opens the choice of a record by typing
    its name, and may offer to create it (RecordPicker); nothing stands for no record. A record the saving refused (created on
@@ -7,8 +9,14 @@
         @foreach (var item in Items)
         {
             var error = ErrorOf?.Invoke(item);
+            var added = Read is not null && Read.All(r => r.Id != item.Id);
             <Tag Text="@item.Label" OnRemove="() => OnRemove.InvokeAsync(item)" RemoveLabel="@RemoveLabel?.Invoke(item)"
+                 Variant="@(added ? TagVariant.Added : TagVariant.Filled)" Note="@(added ? L["Added"].Value : null)"
                  Invalid="@(error is not null)" DescribedBy="@(error is null ? null : ErrorId(error))" />
+        }
+        @foreach (var item in Removed)
+        {
+            <Tag Text="@item.Label" Variant="TagVariant.Removed" Note="@L["Removed"]" OnRestore="() => OnAdd.InvokeAsync(item)" />
         }
         @if (_adding)
         {
@@ -30,6 +38,16 @@
 
 @code {
     private bool _adding;
+
+    /// <summary>
+    /// The records as the form read them, for a record already saved: a record added since is ringed, one removed is presented
+    /// until the saving, struck through, with « Rétablir » (visuel/saisie-album/contenu.md, données modifiées, #355); none for a
+    /// new record, all of whose records are new.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<RecordOption>? Read { get; set; }
+
+    private IEnumerable<RecordOption> Removed => Read?.Where(r => Items.All(i => i.Id != r.Id)) ?? [];
 
     /// <summary>What to correct in the record of a tag; none for a record the error does not designate.</summary>
     [Parameter]

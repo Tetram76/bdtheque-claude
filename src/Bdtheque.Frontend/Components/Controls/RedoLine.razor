@@ -1,0 +1,28 @@
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<RedoLine> L
+
+@* What the user had entered in a datum, under it, once the record is reloaded after it was modified meanwhile
+   (visuel/saisie-album/contenu.md, decisions of the user, #329): « Reprendre » puts it back into the datum, « Rejeter » sets it
+   aside; nothing is taken by itself. Written once, for every point of entry. Nothing while there is nothing to offer. *@
+@if (State.Redo is { } entered)
+{
+    <p class="redo-line" id="@Id">
+        <span id="@EnteredId">@L["Entered"] <strong>@(string.IsNullOrWhiteSpace(entered) ? L["Empty"] : entered)</strong></span>
+        <span class="redo-line-actions">
+            <button type="button" class="redo-line-action" aria-describedby="@EnteredId" @onclick="State.Take">@L["Take"]</button>
+            <button type="button" class="redo-line-action" aria-describedby="@EnteredId" @onclick="State.Reject">@L["Reject"]</button>
+        </span>
+    </p>
+}
+
+@code {
+    /// <summary>The identifier of the line, unique in the page, which describes its buttons.</summary>
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public EntryDatumState State { get; set; } = null!;
+
+    // What describes each button: the text entered alone, without the labels of the buttons.
+    private string EnteredId => $"{Id}-entered";
+}

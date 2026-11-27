@@ -70,7 +70,7 @@ public sealed class EditionEntry
 
     public int? PublicationYear { get; set; }
 
-    public string? Isbn { get; set; }
+    public string? Isbn { get; set => field = EntryText.Typed(value); }
 
     /// <summary>Whether the check digit of the ISBN, as read, is consistent; <c>null</c> without ISBN.</summary>
     public bool? IsbnChecksumValid { get; set; }
@@ -99,9 +99,9 @@ public sealed class EditionEntry
 
     public bool IsDedicated { get; set; }
 
-    public string? PersonalReference { get; set; }
+    public string? PersonalReference { get; set => field = EntryText.Typed(value); }
 
-    public string? PersonalNotes { get; set; }
+    public string? PersonalNotes { get; set => field = EntryText.Typed(value); }
 
     /// <summary>
     /// The visuals of the edition, in their presentation order, saved with it (visuel/saisie-edition/contenu.md): those it has and

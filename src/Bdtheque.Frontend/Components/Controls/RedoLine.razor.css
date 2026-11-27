@@ -1,0 +1,35 @@
+/* A notice at the scale of a datum (contracts of the notices of a block), marked on its side by the color of information of
+   the error that led to it (Fiche modifiée entre-temps): what was entered, then its two actions, links of the theme. */
+.redo-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-xs) var(--space-m);
+    margin: 0;
+    padding: var(--space-xs) var(--space-s);
+    border-inline-start: 3px solid var(--color-notice-border);
+    background: var(--color-notice);
+    color: var(--color-text-on-notice);
+    font-size: var(--font-size-small);
+    overflow-wrap: anywhere;
+}
+
+.redo-line strong {
+    font-weight: var(--font-weight-strong);
+}
+
+.redo-line-actions {
+    display: inline-flex;
+    gap: var(--space-m);
+}
+
+.redo-line-action {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-accent-text);
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    text-decoration: underline;
+    cursor: pointer;
+}

@@ -19,4 +19,10 @@ public enum TagVariant
 
     /// <summary>Framed and written in the color of the deletions of the theme: a record deleted (the change log).</summary>
     Deletion,
+
+    /// <summary>Ringed with the green of a datum modified: a record added to a list of an entry form since it was read.</summary>
+    Added,
+
+    /// <summary>Dashed, muted and struck through: a record removed from a list of an entry form, until the saving.</summary>
+    Removed,
 }
