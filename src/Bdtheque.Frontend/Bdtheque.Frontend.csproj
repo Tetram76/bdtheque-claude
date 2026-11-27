@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bdtheque.Contracts\Bdtheque.Contracts.csproj" />
+    <ProjectReference Include="..\Bdtheque.Currencies\Bdtheque.Currencies.csproj" />
   </ItemGroup>
 
   <ItemGroup>

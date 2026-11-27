@@ -149,11 +149,13 @@ else
                 <Block Title="@L["Block.Value"]" Kicker="@L["Kicker.Value"]">
                     <div class="edition-row">
                         <AmountField Id="edition-price" Label="@AmountLabel" @bind-Amount="Entry.AcquisitionAmount" @bind-Currency="Entry.AcquisitionCurrency"
-                                     DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree" Error="@Errors.For("/acquisitionAmount", "/acquisitionCurrency")"
+                                     DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree"
+                                     Error="@Errors.ForAmount(Entry.AcquisitionCurrency ?? EditionEntry.DefaultCurrency, "/acquisitionAmount", "/acquisitionCurrency")"
                                      Help="@(IsPurchase ? L["Price.Help.Purchase"] : L["Price.Help.Other"])" />
                         <AmountField Id="edition-initial" Label="@L["InitialValue"]" @bind-Amount="Entry.InitialValueAmount"
                                      @bind-Currency="Entry.InitialValueCurrency" DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree"
-                                     Error="@Errors.For("/initialValueAmount", "/initialValueCurrency")" Help="@L["InitialValue.Help"]" />
+                                     Error="@Errors.ForAmount(Entry.InitialValueCurrency ?? EditionEntry.DefaultCurrency, "/initialValueAmount", "/initialValueCurrency")"
+                                     Help="@L["InitialValue.Help"]" />
                         @* A free edition has no value: its amounts are emptied and disabled; a purchase is never free, the box
                            disabled by the mode « Achat » (fonctionnel/presentation/libelles-contextuels-sur-l-edition.md). *@
                         <div class="edition-flag edition-free">

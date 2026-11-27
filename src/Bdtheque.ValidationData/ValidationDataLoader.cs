@@ -265,6 +265,8 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var collectiveEdition = await data.EditionAsync(collective, Owned(bubbles.Id, null, 2019, AcquisitionMode.Won, new DateOnly(2019, 10, 31)) with
         {
             Isbn = "2-905123-02", Category = EditionCategory.SpecialEdition, AcquisitionAmount = 15m, AcquisitionCurrency = "EUR",
+            // An initial value in yen, a currency without decimals (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant).
+            InitialValueAmount = 1500m, InitialValueCurrency = "JPY",
         });
         await data.VisualAsync(collective, collectiveEdition, VisualType.Cover, Images.Portrait(0.85));
 
@@ -274,6 +276,8 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var summerEdition = await data.EditionAsync(summer, Owned(lagoon.Id, lagoon.Collections[1], 2021, AcquisitionMode.Purchase, new DateOnly(2021, 7, 3)) with
         {
             Isbn = WrongIsbn("979109123470"), AcquisitionAmount = 19.99m, AcquisitionCurrency = "USD",
+            // An initial value in Kuwaiti dinars, a currency with three decimals.
+            InitialValueAmount = 6.250m, InitialValueCurrency = "KWD",
         });
         await data.AcceptIsbnErrorAsync(summer, summerEdition);
         await data.VisualAsync(summer, summerEdition, VisualType.Cover, Images.Portrait(0.48));

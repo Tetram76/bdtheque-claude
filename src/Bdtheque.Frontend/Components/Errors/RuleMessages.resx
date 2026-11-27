@@ -105,6 +105,12 @@
   <data name="Edition.InitialValueAmountPositive" xml:space="preserve">
     <value>La valeur initiale doit être supérieure à zéro.</value>
   </data>
+  <data name="Edition.AcquisitionAmountTooPrecise" xml:space="preserve">
+    <value>Le montant d&apos;acquisition a plus de décimales que n&apos;en admet sa devise.</value>
+  </data>
+  <data name="Edition.InitialValueAmountTooPrecise" xml:space="preserve">
+    <value>La valeur initiale a plus de décimales que n&apos;en admet sa devise.</value>
+  </data>
   <data name="Edition.AcquisitionPriceReferenceDateRequired" xml:space="preserve">
     <value>Un montant d&apos;acquisition demande une date de référence : la date d&apos;acquisition, l&apos;année d&apos;édition ou la date de première publication de l&apos;album.</value>
   </data>

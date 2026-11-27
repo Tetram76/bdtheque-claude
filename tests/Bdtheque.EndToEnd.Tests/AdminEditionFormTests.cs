@@ -230,6 +230,39 @@ public sealed class AdminEditionFormTests(ApplicationHost application) : Browser
     }
 
     [Theory, InEachTheme]
+    public async Task Amount_TakesNoMoreDecimalsThanItsCurrencyAdmits_WhichChangesWithIt(string theme)
+    {
+        // fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant: the field itself keeps the decimals beyond those of
+        // the currency from being typed (wwwroot/amount-field.js), two for the euro, none for the yen, three for the Kuwaiti dinar.
+        await CreatePublisherAsync();
+        var album = await CreateAlbumAsync();
+        var page = await OpenAsync(theme, AppPaths.AdminNewAlbumEdition(album.Id));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        var price = page.Locator("#edition-price");
+
+        await price.PressSequentiallyAsync("12,345");
+        await Assertions.Expect(price).ToHaveValueAsync("12,34");
+
+        await page.Locator("#edition-price-currency").SelectOptionAsync("other");
+        await page.Locator("#edition-price-code").FillAsync("JPY");
+        await page.Locator("#edition-price-code").PressAsync("Tab");
+        await Assertions.Expect(price).ToHaveAttributeAsync("data-decimals", "0");
+        await price.FillAsync("");
+        // The separator let in, the digit after it kept out, rather than joining the units (15005).
+        await price.PressSequentiallyAsync("1500,5");
+        await Assertions.Expect(price).ToHaveValueAsync("1500,");
+        await price.PressAsync("Tab");
+        await Assertions.Expect(price).ToHaveValueAsync("1500");
+
+        await page.Locator("#edition-price-code").FillAsync("KWD");
+        await page.Locator("#edition-price-code").PressAsync("Tab");
+        await Assertions.Expect(price).ToHaveAttributeAsync("data-decimals", "3");
+        await price.FillAsync("");
+        await price.PressSequentiallyAsync("1,2345");
+        await Assertions.Expect(price).ToHaveValueAsync("1,234");
+    }
+
+    [Theory, InEachTheme]
     public async Task Visuals_Added_Refused_Retyped_Reordered_AndDeleted_SavedWithTheForm(string theme)
     {
         // visuel/saisie-edition/contenu.md, Les visuels: a block of the form, saved with it.

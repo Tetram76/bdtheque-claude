@@ -1,4 +1,6 @@
+using System.Globalization;
 using Bdtheque.Contracts.Admin;
+using Bdtheque.Currencies;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
 using Microsoft.Extensions.Localization;
@@ -34,6 +36,14 @@ public sealed class FieldErrors(
     /// of the form: when two lines are bordered, the name cited says which one to correct (decision of the user, #464).
     /// </summary>
     public string? ForNamed(string name, params string[] fields) => Text(field => fields.Contains(field), name);
+
+    /// <summary>
+    /// What to correct in the control that enters an amount and its currency (<paramref name="fields"/>), the text citing the
+    /// number of decimals <paramref name="currency"/> admits, rather than the subject of the form: the decimals to remove are those
+    /// beyond it (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant).
+    /// </summary>
+    public string? ForAmount(string currency, params string[] fields) =>
+        Text(field => fields.Contains(field), CurrencyDecimals.Of(currency).ToString(CultureInfo.CurrentCulture));
 
     /// <summary>
     /// What to correct in the record added on the spot under <paramref name="key"/> (an author, a genre, a universe, a series, a

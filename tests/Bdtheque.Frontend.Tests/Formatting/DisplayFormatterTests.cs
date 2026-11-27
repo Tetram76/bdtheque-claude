@@ -31,6 +31,23 @@ public sealed class DisplayFormatterTests : IDisposable
     public void Amount_InAnotherCurrency_IsFollowedByItsSymbol(string currency, string symbol) =>
         Assert.Equal($"1{Group}000,00 {symbol}", _formatter.Amount(1000m, currency));
 
+    // With the decimals of its currency, and not always two (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant);
+    // read back from the database with four decimals, trailing zeros included. {0} is the group separator, {1} the space before
+    // the symbol.
+    [Theory]
+    [InlineData("1500.0000", "JPY", "1{0}500{1}JPY")]
+    [InlineData("1.5000", "KWD", "1,500{1}KWD")]
+    [InlineData("12.3400", "CLF", "12,3400{1}CLF")]
+    [InlineData("45.9000", "FRF", "45,90{1}F")]
+    public void Amount_HasTheDecimalsOfItsCurrency(string amount, string currency, string expected) =>
+        Assert.Equal(
+            string.Format(CultureInfo.InvariantCulture, expected, Group, ' '),
+            _formatter.Amount(decimal.Parse(amount, CultureInfo.InvariantCulture), currency));
+
+    [Fact]
+    public void Amount_InEuros_ReadBackWithFourDecimals_HasTwo() =>
+        Assert.Equal(12.5m.ToString("C", CultureInfo.GetCultureInfo("fr-FR")), _formatter.Amount(12.5000m, "EUR"));
+
     [Fact]
     public void Date_IsWrittenAsInFrance() =>
         Assert.Equal("05/03/2020", _formatter.Date(new DateOnly(2020, 3, 5)));
