@@ -31,6 +31,13 @@ public abstract record AdminListQuery(string? Text, string? Entry, int Page, boo
         $"{ApiRoute}?{Join([(TextName, text), ("pageSize", (count + 1).ToString(System.Globalization.CultureInfo.InvariantCulture))])}";
 
     /// <summary>
+    /// The records of the list of the API that resemble <paramref name="subject"/>, the closest first, the record itself never
+    /// among them (fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties): at most <paramref name="count"/>.
+    /// </summary>
+    public string MergeSuggestionsApiPath(Guid subject, int count) =>
+        $"{ApiRoute}?{Join([("resembling", subject.ToString()), ("pageSize", count.ToString(System.Globalization.CultureInfo.InvariantCulture))])}";
+
+    /// <summary>
     /// The entry of a record the address opens over the list, for a list whose records are entered in it
     /// (visuel/listes/saisie-selon-l-entite.md): none by default, the records being entered on a page of their own.
     /// </summary>

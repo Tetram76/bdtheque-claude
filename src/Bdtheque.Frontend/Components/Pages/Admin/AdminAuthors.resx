@@ -168,4 +168,10 @@
   <data name="Refusal.Hint.Series.Other" xml:space="preserve">
     <value>retirez l'auteur de leurs auteurs, ou fusionnez-le avec un autre auteur</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Auteurs pressentis</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre auteur par son nom, son prénom ou son pseudonyme.</value>
+  </data>
 </root>

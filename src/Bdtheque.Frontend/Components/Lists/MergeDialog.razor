@@ -1,3 +1,4 @@
+@using Bdtheque.Frontend.Components.Merge
 @inject IStringLocalizer<MergeDialog> L
 
 @* The merge of a record of a list of the administration with another one of the same type (visuel/liste-albums/contenu.md,
@@ -18,8 +19,21 @@
             </span>
             <Button Type="submit" Icon="IconName.Search" Label="@L["Search"]" />
         </form>
-        @if (Candidates is null)
+        @if (Candidates is null && SuggestionsShown)
         {
+            @* The records that resemble the record chosen, proposed before any search (fonctionnel/regles-metier/fusion-des-fiches.md,
+               fiches pressenties); a search replaces them by what it finds, and its cross brings them back. *@
+            <p class="merge-suggestions" id="@SuggestionsId">@SuggestionsLabel</p>
+            @Choices(Suggestions!, "aria-labelledby", SuggestionsId)
+            <p class="dialog-note">@SuggestionsPrompt</p>
+        }
+        else if (Candidates is null)
+        {
+            @* The records proposed could not be read: said at the scale of the dialog, whose search remains. *@
+            @if (SuggestionsProblem is not null)
+            {
+                <ErrorMessage Problem="SuggestionsProblem" Compact="true" TechnicalText="@L["SuggestionsFailed"]" />
+            }
             <p class="dialog-note">@Prompt</p>
         }
         else if (Candidates.Count == 0)
@@ -28,25 +42,18 @@
         }
         else
         {
-            <div class="merge-candidates" role="radiogroup" aria-label="@CandidatesLabel">
-                @foreach (var (candidate, index) in Candidates.Select((candidate, index) => (candidate, index)))
-                {
-                    <label class="merge-candidate">
-                        <input type="radio" name="other" value="@candidate.Id" form="@ContinueId" checked="@(index == 0)" />
-                        <span>
-                            <strong><LabelText Text="@candidate.Label" /></strong>
-                            <span>@candidate.Detail</span>
-                        </span>
-                    </label>
-                }
-            </div>
+            @Choices(Candidates, "aria-label", CandidatesLabel)
         }
         <p class="dialog-note">@Note</p>
     </ChildContent>
     <Actions>
         <form id="@ContinueId" method="get" action="@ContinueAction">
             <input type="hidden" name="@SubjectName" value="@SubjectId" />
-            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Continue"]" Disabled="@(Candidates is not { Count: > 0 })" />
+            @if (Candidates is null && SuggestionsShown)
+            {
+                <input type="hidden" name="@MergeSuggestedAudience.ParameterName" value="true" />
+            }
+            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Continue"]" Disabled="@(Offered is not { Count: > 0 })" />
         </form>
     </Actions>
 </Dialog>
@@ -96,9 +103,25 @@
     [Parameter]
     public IReadOnlyList<MergeCandidate>? Candidates { get; set; }
 
-    /// <summary>What to search, before any search.</summary>
+    /// <summary>What to search, before any search, when no record resembles the record chosen.</summary>
     [Parameter, EditorRequired]
     public string Prompt { get; set; } = null!;
+
+    /// <summary>The other records that resemble the record chosen, the closest first, proposed before any search.</summary>
+    [Parameter]
+    public IReadOnlyList<MergeCandidate>? Suggestions { get; set; }
+
+    /// <summary>Why the records proposed could not be read, if they could not.</summary>
+    [Parameter]
+    public ApiProblem? SuggestionsProblem { get; set; }
+
+    /// <summary>The name of the records proposed (e.g. « Albums pressentis »).</summary>
+    [Parameter, EditorRequired]
+    public string SuggestionsLabel { get; set; } = null!;
+
+    /// <summary>What to search instead, below the records proposed (e.g. « Ou recherchez l'autre album… »).</summary>
+    [Parameter, EditorRequired]
+    public string SuggestionsPrompt { get; set; } = null!;
 
     /// <summary>What a search that found no other record says.</summary>
     [Parameter, EditorRequired]
@@ -123,7 +146,33 @@
     [Parameter, EditorRequired]
     public Guid SubjectId { get; set; }
 
+    /// <summary>How many records resembling the record chosen the dialog proposes at most (decision of the user, #655).</summary>
+    public const int SuggestionCount = 5;
+
     private string ContinueId => $"{Id}-continue";
+
+    private string SuggestionsId => $"{Id}-suggestions";
+
+    // Without a record that resembles, nothing says so: the dialog presents the search alone (decision of the user, #655).
+    private bool SuggestionsShown => Suggestions is { Count: > 0 };
+
+    // The records « Continuer » chooses among: those the search found, or, before any search, those proposed.
+    private IReadOnlyList<MergeCandidate>? Offered => Candidates ?? Suggestions;
+
+    // The records to choose from, the first chosen: those a search found, or those proposed.
+    private RenderFragment Choices(IReadOnlyList<MergeCandidate> candidates, string nameAttribute, string name) =>
+        @<div class="merge-candidates" role="radiogroup" @attributes="new Dictionary<string, object> { [nameAttribute] = name }">
+            @foreach (var (candidate, index) in candidates.Select((candidate, index) => (candidate, index)))
+            {
+                <label class="merge-candidate">
+                    <input type="radio" name="other" value="@candidate.Id" form="@ContinueId" checked="@(index == 0)" />
+                    <span>
+                        <strong><LabelText Text="@candidate.Label" /></strong>
+                        <span>@candidate.Detail</span>
+                    </span>
+                </label>
+            }
+        </div>;
 
     // The list with the dialog open, without the search of the other record: the criteria the search keeps, alone.
     private string ClearHref => AdminListQuery.HrefOf(Action, Criteria);

@@ -30,7 +30,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         ["/catalog/settings"] = new ApplicationSettings(AlbumLabelFormat.TitleSeriesVolume, Contracts.Enums.DisplayCulture.FrenchFrance),
     };
 
-    /// <summary>The paths that fail, with their status.</summary>
+    /// <summary>The paths that fail, with their status; a path with its query fails only so asked.</summary>
     public Dictionary<string, HttpStatusCode> Failures { get; } = [];
 
     public List<string> Requested { get; } = [];
@@ -148,7 +148,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         Requested.Add(request.RequestUri.PathAndQuery);
         if (Hold is not null)
             await Hold(path, default);
-        if (Failures.TryGetValue(path, out var status))
+        if (Failures.TryGetValue(request.RequestUri.PathAndQuery, out var status) || Failures.TryGetValue(path, out status))
             return Problem(ProblemTypes.Technical, status);
 
         return Answers.TryGetValue(request.RequestUri.PathAndQuery, out var answer) || Answers.TryGetValue(path, out answer)

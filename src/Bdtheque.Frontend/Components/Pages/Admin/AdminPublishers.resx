@@ -168,4 +168,10 @@
   <data name="Refusal.Hint.Series.Other" xml:space="preserve">
     <value>retirez l'éditeur des valeurs de leurs nouvelles éditions</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Éditeurs pressentis</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre éditeur par son nom.</value>
+  </data>
 </root>

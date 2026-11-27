@@ -23,6 +23,7 @@
    of an album, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
    title gives. *@
 <PageTitle>@L["Title"]</PageTitle>
+<MergeSuggestedAudience Function="AudienceFunctions.AdminAlbumsMergeSuggested" Subject="album" RecordId="AlbumId" />
 <AudienceScreen Function="AudienceFunctions.AdminAlbumMerge" />
 
 @if (Preview is null)

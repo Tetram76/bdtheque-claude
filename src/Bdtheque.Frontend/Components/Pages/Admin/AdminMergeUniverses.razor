@@ -17,6 +17,7 @@
    then the confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge, which the API alone
    holds: it sends, data by data, the record whose value is kept, the API saying which parent cannot be kept. *@
 <PageTitle>@L["Title"]</PageTitle>
+<MergeSuggestedAudience Function="AudienceFunctions.AdminUniversesMergeSuggested" Subject="universe" RecordId="UniverseId" />
 <AudienceScreen Function="AudienceFunctions.AdminUniverseMerge" />
 
 @if (Preview is null)

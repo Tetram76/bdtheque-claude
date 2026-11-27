@@ -1,0 +1,34 @@
+@inject AudienceRecorder Recorder
+
+@* Records that the merge is pursued with a record the dialog of the list proposed from its opening, rather than with one its
+   search found (fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties), which the address of the merge says: an
+   action of the list, with the record the merge started from, recorded once by the request that renders the merge, before
+   its screen, as a list records an action before its screen. *@
+
+@code {
+    /// <summary>The parameter of the address of a merge that says the other record is one the dialog proposed.</summary>
+    public const string ParameterName = "suggested";
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromQuery(Name = ParameterName)]
+    private bool Suggested { get; set; }
+
+    /// <summary>The action of the list (e.g. <see cref="AudienceFunctions.AdminGenresMergeSuggested"/>).</summary>
+    [Parameter, EditorRequired]
+    public AudienceFunction Function { get; set; } = null!;
+
+    /// <summary>The name of the record in the parameters of the action, as the dialog of its list names it (e.g. <c>genre</c>).</summary>
+    [Parameter, EditorRequired]
+    public string Subject { get; set; } = null!;
+
+    /// <summary>The record the merge started from, if the address gives it.</summary>
+    [Parameter]
+    public Guid? RecordId { get; set; }
+
+    protected override Task OnInitializedAsync() =>
+        Suggested && RecordId is { } record && HttpContext is { } context && HttpMethods.IsGet(context.Request.Method)
+            ? Recorder.RecordActionAsync(Function, $"{Subject}={record}", context.RequestAborted)
+            : Task.CompletedTask;
+}

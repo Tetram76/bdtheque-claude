@@ -58,6 +58,28 @@ public sealed partial class AdminMergeTests(MergeApplication application) : Brow
         Assert.Equal(System.Net.HttpStatusCode.NotFound, (await api.GetAsync($"/admin/genres/{first.Id}")).StatusCode);
     }
 
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: from its opening, the dialog proposes the genres that
+    // resemble the genre, the first chosen; « Continuer » leads to the merge with it, the address saying it was proposed.
+    [Theory, InEachTheme]
+    public async Task GenreMerge_TheDialogProposesTheGenresThatResembleIt_AndContinuesWithTheFirst(string theme)
+    {
+        var first = await CreateGenreAsync($"Science-fiction {_marker}");
+        var alike = await CreateGenreAsync($"SCIENCE FICTION {_marker}");
+        await CreateGenreAsync($"Western {_marker}");
+        var page = await OpenAsync(theme, $"{AppPaths.AdminGenres}?q={_marker}&merge={first.Id}");
+
+        var dialog = page.GetByRole(AriaRole.Dialog, new() { Name = "Fusionner deux genres" });
+        var proposed = dialog.GetByRole(AriaRole.Radiogroup, new() { Name = "Genres pressentis" });
+        await Assertions.Expect(proposed.GetByRole(AriaRole.Radio)).ToHaveCountAsync(1);
+        await Assertions.Expect(proposed.GetByRole(AriaRole.Radio, new() { Name = $"SCIENCE FICTION {_marker}" })).ToBeCheckedAsync();
+        await Assertions.Expect(dialog).ToContainTextAsync("Ou recherchez l'autre genre par son libellé.");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Continuer" }).ClickAsync();
+
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminMergeGenres, $"?other={alike.Id}&genre={first.Id}&suggested=true"));
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Fusionner deux genres");
+    }
+
     [Theory, InEachTheme]
     public async Task AuthorMerge_PresentsWhatTheNamesChosenGive_AndKeepsEachDataChosen(string theme)
     {

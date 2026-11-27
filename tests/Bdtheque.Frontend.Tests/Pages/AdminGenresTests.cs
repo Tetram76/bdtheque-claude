@@ -6,6 +6,7 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
+using Bdtheque.Frontend.Components.Lists;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
@@ -317,6 +318,68 @@ public sealed class AdminGenresTests : BunitContext, IDisposable
             dialog.QuerySelectorAll(".merge-candidate").Select(c => (Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!))));
         Assert.Equal(AppPaths.AdminMergeGenres, dialog.QuerySelector("#genre-merge-continue")!.GetAttribute("action"));
     }
+
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: before any search, the dialog proposes the genres
+    // the API finds resembling the genre, the closest first, the first chosen, as it presents the genres a search finds.
+    [Fact]
+    public void Merge_BeforeAnySearch_ProposesTheGenresThatResembleIt()
+    {
+        _api.Answers[Suggestions(Adventure.Id)] = new Page<GenreAdminListItem>([Western, Biography], 1, 5, 2);
+
+        var dialog = Open($"merge={Adventure.Id}").Find("dialog");
+
+        Assert.Equal("Genres pressentis", Text(dialog.QuerySelector(".merge-suggestions")!));
+        var choices = dialog.QuerySelector($"[role='radiogroup'][aria-labelledby='{dialog.QuerySelector(".merge-suggestions")!.Id}']")!;
+        Assert.Equal(
+            [("Western", "Ni série ni album", true), ("Biographie", "37 albums", false)],
+            choices.QuerySelectorAll(".merge-candidate").Select(c => (
+                Text(c.QuerySelector("strong")!), Text(c.QuerySelector("strong + span")!), c.QuerySelector("input")!.HasAttribute("checked"))));
+        Assert.Equal("Ou recherchez l'autre genre par son libellé.", Text(choices.NextElementSibling!));
+        var continuation = dialog.QuerySelector("#genre-merge-continue")!;
+        Assert.Equal("true", continuation.QuerySelector("input[name='suggested']")!.GetAttribute("value"));
+        Assert.False(continuation.QuerySelector("button")!.HasAttribute("disabled"));
+    }
+
+    // Without a genre that resembles it, nothing says so: the dialog presents the search alone (decision of the user, #655).
+    [Fact]
+    public void Merge_WithoutAGenreThatResemblesIt_PresentsTheSearchAlone()
+    {
+        _api.Answers[Suggestions(Adventure.Id)] = new Page<GenreAdminListItem>([], 1, 5, 0);
+
+        var dialog = Open($"merge={Adventure.Id}").Find("dialog");
+
+        Assert.Null(dialog.QuerySelector(".merge-suggestions"));
+        Assert.Empty(dialog.QuerySelectorAll(".merge-candidate"));
+        Assert.Equal("Recherchez l'autre genre par son libellé.", Text(dialog.QuerySelector(".dialog-note")!));
+        Assert.Null(dialog.QuerySelector("#genre-merge-continue input[name='suggested']"));
+        Assert.True(dialog.QuerySelector("#genre-merge-continue button")!.HasAttribute("disabled"));
+    }
+
+    // A search replaces the genres proposed by what it finds, chosen as a search, not as a genre proposed.
+    [Fact]
+    public void Merge_ASearch_ReplacesTheGenresProposed()
+    {
+        var dialog = Open($"merge={Adventure.Id}&mergeQ=e").Find("dialog");
+
+        Assert.Null(dialog.QuerySelector(".merge-suggestions"));
+        Assert.DoesNotContain(_api.Requested, path => path.Contains("resembling", StringComparison.Ordinal));
+        Assert.Null(dialog.QuerySelector("#genre-merge-continue input[name='suggested']"));
+    }
+
+    // The genres proposed that cannot be read are said at the scale of the dialog, whose search remains: never a silent failure.
+    [Fact]
+    public void Merge_GenresProposedThatCannotBeRead_AreSaid_AndTheSearchRemains()
+    {
+        _api.Failures[Suggestions(Adventure.Id)] = HttpStatusCode.InternalServerError;
+
+        var dialog = Open($"merge={Adventure.Id}").Find("dialog");
+
+        Assert.Contains("Les fiches pressenties n'ont pas pu être lues.", Text(dialog.QuerySelector(".dialog-body")!));
+        Assert.NotNull(dialog.QuerySelector("form.merge-search input[name='mergeQ']"));
+        Assert.Contains("Recherchez l'autre genre par son libellé.", dialog.QuerySelectorAll(".dialog-note").Select(Text));
+    }
+
+    private static string Suggestions(Guid genre) => $"/admin/genres?resembling={genre}&pageSize={MergeDialog.SuggestionCount}";
 
     // The cross of the search of the other genre leads back to the dialog before any search, the list under it kept; right
     // after the field, before its button (visuel/liste-albums/controles.md).

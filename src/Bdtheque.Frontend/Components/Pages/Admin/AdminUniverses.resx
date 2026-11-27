@@ -153,4 +153,10 @@
   <data name="Refusal.Hint.Universe.Other" xml:space="preserve">
     <value>rangez-les sous un autre univers, ou supprimez-les</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Univers pressentis</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre univers par son nom.</value>
+  </data>
 </root>

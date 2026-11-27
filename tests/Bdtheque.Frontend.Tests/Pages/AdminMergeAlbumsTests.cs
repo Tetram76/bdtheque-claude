@@ -271,9 +271,28 @@ public sealed class AdminMergeAlbumsTests : BunitContext, IDisposable
         Assert.Contains(page.FindAll("button"), button => button.TextContent.Trim() == "Recharger la fiche");
     }
 
-    private IRenderedComponent<AdminMergeAlbums> Open()
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: the merge pursued with an album the dialog of the list
+    // proposed is an action of the list, recorded with the album the merge started from, before the screen of the merge.
+    [Fact]
+    public void Audience_TheMergeWithAnAlbumProposed_IsAnActionOfTheList_BeforeTheScreen()
     {
-        Services.GetRequiredService<NavigationManager>().NavigateTo($"{AppPaths.AdminMergeAlbums}?album={First}&other={Second}");
+        Open("&suggested=true");
+
+        Assert.Equal(["admin.albums.merge.suggested", "admin.album-merge"], _audience.Functions.Where(f => f.Contains("merge", StringComparison.Ordinal)));
+        Assert.Contains(_audience.Sent, sent => sent.Content.ToString().Contains($"album={First}", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Audience_TheMergeWithAnAlbumSearched_RecordsTheScreenAlone()
+    {
+        Open();
+
+        Assert.Equal(["admin.album-merge"], _audience.Functions.Where(f => f.Contains("merge", StringComparison.Ordinal)));
+    }
+
+    private IRenderedComponent<AdminMergeAlbums> Open(string more = "")
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo($"{AppPaths.AdminMergeAlbums}?album={First}&other={Second}{more}");
         return Render<AdminMergeAlbums>(parameters => parameters.AddCascadingValue(_request.Context));
     }
 

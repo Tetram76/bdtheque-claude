@@ -18,4 +18,7 @@
   <data name="Continue" xml:space="preserve">
     <value>Continuer</value>
   </data>
+  <data name="SuggestionsFailed" xml:space="preserve">
+    <value>Les fiches pressenties n'ont pas pu être lues. Recherchez l'autre fiche.</value>
+  </data>
 </root>

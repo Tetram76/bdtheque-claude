@@ -7,6 +7,7 @@ using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
 using Bdtheque.Frontend.Components.Controls;
+using Bdtheque.Frontend.Components.Lists;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
@@ -333,6 +334,22 @@ public sealed class AdminUniversesTests : BunitContext, IDisposable
                 .Select(input => (input.GetAttribute("name"), input.GetAttribute("value"))));
     }
 
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: before any search, the dialog proposes the records the
+    // API finds resembling the record, as the dialog of every list does (pinned by AdminGenresTests).
+    [Fact]
+    public void Merge_BeforeAnySearch_ProposesTheRecordsThatResembleIt()
+    {
+        var path = $"/admin/universes?resembling={Cities.Id}&pageSize={MergeDialog.SuggestionCount}";
+        _api.Answers[path] = new Page<UniverseAdminListItem>([Pratt], 1, MergeDialog.SuggestionCount, 1);
+
+        var dialog = Open($"merge={Cities.Id}").Find("dialog");
+
+        Assert.Equal("Univers pressentis", Text(dialog.QuerySelector(".merge-suggestions")!));
+        Assert.Equal(["Univers Hugo Pratt"], dialog.QuerySelectorAll(".merge-candidate strong").Select(Text));
+        Assert.Contains("Ou recherchez l'autre univers par son nom.", dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Contains(_api.Requested, requested => requested == path);
+        Assert.Equal("true", dialog.QuerySelector("#universe-merge-continue input[name='suggested']")!.GetAttribute("value"));
+    }
     [Fact]
     public void Merge_ADialogThatSearchesTheOtherUniverse_EachCandidateWithItsPlaceInTheHierarchy()
     {

@@ -192,4 +192,10 @@
   <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
     <value>retirez l'album de leurs critères</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Albums pressentis</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre album par son titre ou par celui de sa série.</value>
+  </data>
 </root>
