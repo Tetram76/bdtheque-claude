@@ -387,7 +387,12 @@ else
     // deleted meanwhile being done already.
     private static string CollectionsChanged(PublisherEntry entry, IReadOnlySet<Guid> present) =>
         string.Join(' ', entry.Collections
-            .Select(c => c.Id is { } id ? (c.Removed && present.Contains(id) ? $"-{id}" : null) : $"+{c.Key}")
+            .Select(c => c switch
+            {
+                { Id: null } => $"+{c.Key}",
+                { Removed: true, Id: { } id } when present.Contains(id) => $"-{id}",
+                _ => null,
+            })
             .OfType<string>().Order(StringComparer.Ordinal));
 
     // The removals and additions entered, made again in the record reloaded: a collection added is copied, under its key, so that
