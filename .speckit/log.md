@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-27
+
+* **Choix** : les décimales d'une devise sont l'unité mineure de l'ISO 4217, deux pour une devise à laquelle elle n'en donne pas (devise retirée, ancien franc, code inconnu), dans une table partagée par le domaine, qui refuse un montant trop précis, et le frontend, qui présente chaque montant avec elles et retient la frappe au-delà par un script ([Représentation de la devise](choix-implementation/domaine/representation-de-la-devise.md), [Valeur d'une édition : mise en œuvre](choix-implementation/domaine/valeur-d-une-edition-mise-en-oeuvre.md), [Organisation du code](choix-implementation/organisation-du-code.md), [Frontend](choix-implementation/socle/frontend.md)) ; un prix reconverti par la reprise des données est arrondi aux décimales de sa devise ([Reprise des prix antérieurs à l'euro : devise retenue](choix-implementation/reprise-donnees/reprise-des-prix-anterieurs-a-l-euro-devise-retenue.md)) (#679).
+
 ## 2026-11-26
 
 * **Choix** : le point de passage d'un contrôle est garanti par la structure du code, et non par une convention : le remplacement des contributions, qui contrôle chaque rôle, est seul à créer une contribution ([Conventions de persistance (EF Core)](choix-implementation/persistance/conventions-de-persistance-ef-core.md)) (#676).
