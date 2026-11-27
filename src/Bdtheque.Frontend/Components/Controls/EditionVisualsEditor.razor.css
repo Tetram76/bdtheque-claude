@@ -3,14 +3,16 @@
    thumbnails in the proportions of a cover, each marked with its type (visuel/saisie-edition/contenu.md, Les visuels). */
 .edition-visuals-help,
 .edition-visuals-later,
-.edition-visuals-heading {
-    margin: 0;
-}
-
 .edition-visuals-count {
     margin: 0;
     font-size: var(--font-size-small);
     color: var(--color-text-muted);
+}
+
+/* The count of the visuals and the mark of their list modified, on one line, at the size of the count: the line keeps its height. */
+.edition-visuals-heading {
+    margin: 0;
+    font-size: var(--font-size-small);
 }
 
 .edition-visuals-count {
