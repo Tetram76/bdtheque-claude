@@ -167,28 +167,44 @@ public static partial class Resemblance
         return folded.ToString();
     }
 
+    // Each word, a run of number words read as one number: the next word follows the run.
     private static IEnumerable<string> Numbers(List<string> words)
     {
-        for (var index = 0; index < words.Count; index++)
+        var index = 0;
+        while (index < words.Count)
         {
-            var word = words[index];
-            if (NumberWords.ContainsKey(word))
+            if (NumberWords.ContainsKey(words[index]))
             {
-                // A run of number words, « et » joining two of them (« vingt et un », « mille et une »).
-                var end = index;
-                while (end + 1 < words.Count && (NumberWords.ContainsKey(words[end + 1])
-                       || (words[end + 1] == "et" && end + 2 < words.Count && NumberWords.ContainsKey(words[end + 2]))))
-                    end++;
+                var end = EndOfNumberWords(words, index);
                 yield return FromWords(words.Skip(index).Take(end - index + 1).Where(w => w != "et")).ToString(CultureInfo.InvariantCulture);
-                index = end;
+                index = end + 1;
             }
-            else if (word.All(char.IsAsciiDigit))
-                yield return word.TrimStart('0') is { Length: > 0 } figures ? figures : "0";
-            else if (FromRoman(word) is { } roman)
-                yield return roman.ToString(CultureInfo.InvariantCulture);
             else
-                yield return word;
+            {
+                yield return Figures(words[index]);
+                index++;
+            }
         }
+    }
+
+    // The last word of the run of number words that starts at start, « et » joining two of them (« vingt et un », « mille et une »).
+    private static int EndOfNumberWords(List<string> words, int start)
+    {
+        var end = start;
+        while (end + 1 < words.Count && (NumberWords.ContainsKey(words[end + 1])
+               || (words[end + 1] == "et" && end + 2 < words.Count && NumberWords.ContainsKey(words[end + 2]))))
+            end++;
+        return end;
+    }
+
+    // A word in figures: Arabic figures without their leading zeros, a Roman numeral as its value; any other word as it is.
+    private static string Figures(string word)
+    {
+        if (word.All(char.IsAsciiDigit))
+            return word.TrimStart('0') is { Length: > 0 } figures ? figures : "0";
+        if (FromRoman(word) is { } roman)
+            return roman.ToString(CultureInfo.InvariantCulture);
+        return word;
     }
 
     private static int FromWords(IEnumerable<string> words)
