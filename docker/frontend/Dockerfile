@@ -6,12 +6,14 @@ WORKDIR /src
 
 COPY Directory.Build.props Directory.Packages.props global.json ./
 COPY src/Bdtheque.Contracts/Bdtheque.Contracts.csproj src/Bdtheque.Contracts/
+COPY src/Bdtheque.Currencies/Bdtheque.Currencies.csproj src/Bdtheque.Currencies/
 COPY src/Bdtheque.Frontend/Bdtheque.Frontend.csproj src/Bdtheque.Frontend/
 COPY src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj src/Bdtheque.HealthProbe/
 RUN dotnet restore src/Bdtheque.Frontend/Bdtheque.Frontend.csproj -a $TARGETARCH \
     && dotnet restore src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj -a $TARGETARCH
 
 COPY src/Bdtheque.Contracts/ src/Bdtheque.Contracts/
+COPY src/Bdtheque.Currencies/ src/Bdtheque.Currencies/
 COPY src/Bdtheque.Frontend/ src/Bdtheque.Frontend/
 COPY src/Bdtheque.HealthProbe/ src/Bdtheque.HealthProbe/
 # Compiled without debugging symbols, which the image does not need (the stack traces of its logs

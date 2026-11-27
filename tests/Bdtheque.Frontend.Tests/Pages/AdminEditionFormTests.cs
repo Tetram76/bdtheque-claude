@@ -796,6 +796,9 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     [InlineData("Edition.AcquisitionPriceReferenceDateRequired", "/acquisitionAmount", "edition-price", "Sans date de référence, ce prix ne peut pas être enregistré.")]
     [InlineData("Edition.InitialValueReferenceDateRequired", "/initialValueAmount", "edition-initial", "Sans date de référence, cette valeur ne peut pas être enregistrée.")]
     [InlineData("Edition.PageCountPositive", "/pageCount", "edition-pages", "Supérieur à zéro.")]
+    // The text of an amount too precise cites the decimals its currency admits, the euro of the edition read.
+    [InlineData("Edition.AcquisitionAmountTooPrecise", "/acquisitionAmount", "edition-price", "Décimales admises par cette devise : 2.")]
+    [InlineData("Edition.InitialValueAmountTooPrecise", "/initialValueAmount", "edition-initial", "Décimales admises par cette devise : 2.")]
     public async Task BusinessError_ToCorrect_PointsToItsField(string rule, string pointer, string field, string message)
     {
         var page = OpenOwned();
@@ -920,20 +923,56 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Theory]
-    [InlineData("16.9500", "16,95")]
-    [InlineData("10", "10,00")]
-    [InlineData("0.1234", "0,1234")]
-    public void Amount_ReadWithTheScaleOfTheDatabase_ShownAsAnAmountOfMoney(string stored, string shown)
+    [InlineData("16.9500", "EUR", "16,95")]
+    [InlineData("10", "EUR", "10,00")]
+    [InlineData("1500.0000", "JPY", "1500")]
+    [InlineData("1.5000", "KWD", "1,500")]
+    [InlineData("1.2000", "CLF", "1,2000")]
+    // More precise than its currency (a currency changed after the amount was typed): shown as it will be saved, never rounded.
+    [InlineData("0.1234", "EUR", "0,1234")]
+    [InlineData("12.5000", "JPY", "12,5")]
+    public void Amount_ReadWithTheScaleOfTheDatabase_ShownWithTheDecimalsOfItsCurrency(string stored, string currency, string shown)
     {
-        // Stored with four decimals, an amount reads back with its trailing zeros (16.9500): shown with two at least, the others
-        // only when they count.
+        // Stored with four decimals, an amount reads back with its trailing zeros (16.9500): shown with the decimals of its currency
+        // (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant), the others only when they count.
         var field = Render<AmountField>(parameters => parameters
             .Add(p => p.Id, "price")
             .Add(p => p.Label, "Prix d'achat")
             .Add(p => p.Amount, decimal.Parse(stored, CultureInfo.InvariantCulture))
+            .Add(p => p.Currency, currency)
             .Add(p => p.DefaultCurrency, "EUR"));
 
         Assert.Equal(shown, field.Find("#price").GetAttribute("value"));
+    }
+
+    [Theory]
+    [InlineData(null, "2")]
+    [InlineData("JPY", "0")]
+    [InlineData("KWD", "3")]
+    [InlineData("QZF", "2")]
+    public void Amount_AdmitsTheDecimalsOfItsCurrency_WhichTheBrowserKeepsFromTyping(string? currency, string decimals)
+    {
+        // The field says how many decimals its currency admits, and the separator of the display culture, which the script of the
+        // amounts (wwwroot/amount-field.js) keeps from typing beyond; none chosen, those of the currency shown by default.
+        var field = Render<AmountField>(parameters => parameters
+            .Add(p => p.Id, "price")
+            .Add(p => p.Label, "Prix d'achat")
+            .Add(p => p.Currency, currency)
+            .Add(p => p.DefaultCurrency, "EUR"));
+
+        var amount = field.Find("#price");
+        Assert.Equal((decimals, ","), (amount.GetAttribute("data-decimals"), amount.GetAttribute("data-decimal-separator")));
+    }
+
+    [Fact]
+    public async Task Amount_AnotherCurrencyChosen_AdmitsItsDecimals()
+    {
+        var page = OpenOwned();
+
+        await page.ChangeAsync("#edition-price-currency", "other");
+        await page.ChangeAsync("#edition-price-code", "jpy");
+
+        Assert.Equal("0", page.Find("#edition-price").GetAttribute("data-decimals"));
     }
 
     [Fact]

@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Bdtheque.Api/Bdtheque.Api.csproj" />
     <Project Path="src/Bdtheque.Contracts/Bdtheque.Contracts.csproj" />
+    <Project Path="src/Bdtheque.Currencies/Bdtheque.Currencies.csproj" />
     <Project Path="src/Bdtheque.Domain/Bdtheque.Domain.csproj" />
     <Project Path="src/Bdtheque.Frontend/Bdtheque.Frontend.csproj" />
     <Project Path="src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj" />

@@ -4,4 +4,8 @@
     <RootNamespace>Bdtheque.Domain</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Bdtheque.Currencies\Bdtheque.Currencies.csproj" />
+  </ItemGroup>
+
 </Project>

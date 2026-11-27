@@ -4,7 +4,7 @@ title: 'Frontend'
 description: 'Blazor rendu côté serveur, statique par défaut, CSS sans framework, parties, chemins, appels à l''API, contrôles, fiches de saisie, en-têtes et navigation, listes de la consultation et de l''administration, fiches de la consultation, libellés, tirages, erreurs ; à lire pour tout écran.'
 applies_to:
   - 'src/Bdtheque.Frontend/**'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T16:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:00:00Z }
 ---
 
 # Frontend
@@ -96,6 +96,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-26T16:00:00Z }
   - **Alternative écartée (une page par cas)** : six pages pour une seule fiche, dont plusieurs ne diffèrent que de deux blocs ou de leur enregistrement.
 - **ISBN vérifié à chaque frappe** par le point de contrôle de l'API ([Validation de l'ISBN](../domaine/validation-de-l-isbn.md)), numéroté comme le choix d'une fiche : seule la réponse du dernier ISBN tapé s'affiche.
 - **Montant et devise côte à côte** ([Contenu](../../visuel/saisie-edition/contenu.md)) : une liste nomme les devises qu'une collection de bandes dessinées rencontre, l'ancien franc compris, l'euro, devise de la culture, en tête et proposé à tout montant saisi sans devise ; « Autre devise… » fait saisir n'importe quel code ([Gestion des devises](../../fonctionnel/valorisation/gestion-des-devises.md)), que le domaine valide. Le montant se saisit dans la culture d'affichage ; un texte qui n'est pas un montant laisse le montant tel qu'il était, et le champ le présente de nouveau : il est lié par `@bind:get`/`@bind:set`, seule liaison qui remet le champ à la valeur du composant quand celle-ci ne change pas (documentation de Blazor, *data binding*).
+  - **Décimales de la devise choisie** ([Représentation de la devise](../domaine/representation-de-la-devise.md), décimales d'une devise) : le champ présente le montant avec elles, celles qu'il a en plus n'apparaissant que si elles comptent, et un script ne laisse pas taper au-delà ; changer de devise change ce que le champ admet, sans toucher au montant déjà saisi, que l'enregistrement refuse s'il est trop précis pour la nouvelle devise, le message sous le champ disant les décimales qu'elle admet.
+    - **Alternative écartée (montant arrondi au changement de devise)** : le montant changerait sans que l'utilisateur l'ait saisi.
   - **Alternative écartée (valeur et gestionnaire `@onchange`)** : une liaison à sens unique, qui laisse à l'écran le texte refusé (constaté sur un montant vide) alors que le montant précédent, ou aucun, est enregistré.
   - **Alternative écartée (liste fermée)** : elle contredirait « n'importe quelle devise ».
   - **Alternative écartée (code seul, avec suggestions)** : l'ancien franc n'a pas de code ISO 4217 qui parle à l'utilisateur ([Représentation de la devise](../domaine/representation-de-la-devise.md)).

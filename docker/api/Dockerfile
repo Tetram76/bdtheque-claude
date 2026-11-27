@@ -7,6 +7,7 @@ WORKDIR /src
 # Copy only the project files first: the Docker cache for `dotnet restore`
 # is only invalidated by a dependency change, not a code change.
 COPY Directory.Build.props Directory.Packages.props global.json ./
+COPY src/Bdtheque.Currencies/Bdtheque.Currencies.csproj src/Bdtheque.Currencies/
 COPY src/Bdtheque.Domain/Bdtheque.Domain.csproj src/Bdtheque.Domain/
 COPY src/Bdtheque.Contracts/Bdtheque.Contracts.csproj src/Bdtheque.Contracts/
 COPY src/Bdtheque.Infrastructure/Bdtheque.Infrastructure.csproj src/Bdtheque.Infrastructure/
@@ -15,6 +16,7 @@ COPY src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj src/Bdtheque.HealthPro
 RUN dotnet restore src/Bdtheque.Api/Bdtheque.Api.csproj -a $TARGETARCH \
     && dotnet restore src/Bdtheque.HealthProbe/Bdtheque.HealthProbe.csproj -a $TARGETARCH
 
+COPY src/Bdtheque.Currencies/ src/Bdtheque.Currencies/
 COPY src/Bdtheque.Domain/ src/Bdtheque.Domain/
 COPY src/Bdtheque.Contracts/ src/Bdtheque.Contracts/
 COPY src/Bdtheque.Infrastructure/ src/Bdtheque.Infrastructure/

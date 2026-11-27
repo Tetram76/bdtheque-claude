@@ -54,6 +54,9 @@
   <data name="Edition.AcquisitionAmountPositive" xml:space="preserve">
     <value>Supérieur à zéro.</value>
   </data>
+  <data name="Edition.AcquisitionAmountTooPrecise" xml:space="preserve">
+    <value>Décimales admises par cette devise : {0}.</value>
+  </data>
   <data name="Edition.AcquisitionModeRequired" xml:space="preserve">
     <value>Obligatoire pour une édition possédée.</value>
   </data>
@@ -74,6 +77,9 @@
   </data>
   <data name="Edition.InitialValueAmountPositive" xml:space="preserve">
     <value>Supérieure à zéro.</value>
+  </data>
+  <data name="Edition.InitialValueAmountTooPrecise" xml:space="preserve">
+    <value>Décimales admises par cette devise : {0}.</value>
   </data>
   <data name="Edition.InitialValueReferenceDateRequired" xml:space="preserve">
     <value>Sans date de référence, cette valeur ne peut pas être enregistrée.</value>

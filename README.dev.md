@@ -57,6 +57,7 @@ pwsh ./scripts/Get-TechnicalDocumentationImpact.ps1
 ├── scripts/                       # Relevé des dépendances, validation, documentation technique
 ├── src/
 │   ├── Bdtheque.Domain/           # Entités, enums, value objects — aucune dépendance externe
+│   ├── Bdtheque.Currencies/       # Décimales de chaque devise (ISO 4217), partagées par le domaine et le frontend
 │   ├── Bdtheque.Contracts/        # DTOs échangés entre api et frontend
 │   ├── Bdtheque.Infrastructure/   # DbContext EF Core, configurations, migrations
 │   ├── Bdtheque.Api/              # Conteneur api : endpoints, sécurité, règles applicatives

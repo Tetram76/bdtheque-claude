@@ -1,4 +1,5 @@
 using System.Globalization;
+using Bdtheque.Currencies;
 using Microsoft.Extensions.Localization;
 
 namespace Bdtheque.Frontend.Formatting;
@@ -16,16 +17,18 @@ public sealed class DisplayFormatter(IStringLocalizer<CurrencySymbols> symbols, 
     /// An amount in its own currency (ISO 4217 code, or <c>QZF</c> for the old franc,
     /// choix-implementation/domaine/representation-de-la-devise.md). The currency of the culture keeps the culture's
     /// own currency format; any
-    /// other one, which the culture does not know, is followed by its symbol, its code when it has none.
+    /// other one, which the culture does not know, is followed by its symbol, its code when it has none. Either has the decimals
+    /// of its currency (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant).
     /// </summary>
     public string Amount(decimal amount, string currency)
     {
         var culture = CultureInfo.CurrentCulture;
+        var decimals = CurrencyDecimals.Of(currency);
         if (string.Equals(currency, new RegionInfo(culture.Name).ISOCurrencySymbol, StringComparison.Ordinal))
-            return amount.ToString("C", culture);
+            return amount.ToString($"C{decimals}", culture);
 
         var symbol = symbols[currency];
-        return string.Create(culture, $"{amount:N2} {(symbol.ResourceNotFound ? currency : symbol.Value)}");
+        return string.Create(culture, $"{amount.ToString($"N{decimals}", culture)} {(symbol.ResourceNotFound ? currency : symbol.Value)}");
     }
 
     public string Date(DateOnly date) => date.ToString("d", CultureInfo.CurrentCulture);

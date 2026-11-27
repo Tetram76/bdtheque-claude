@@ -20,6 +20,7 @@ Le premier répond à une question : quel projet de l'application référence di
 flowchart LR
     Bdtheque_Api["Bdtheque.Api"]
     Bdtheque_Contracts["Bdtheque.Contracts"]
+    Bdtheque_Currencies["Bdtheque.Currencies"]
     Bdtheque_Domain["Bdtheque.Domain"]
     Bdtheque_Frontend["Bdtheque.Frontend"]
     Bdtheque_HealthProbe["Bdtheque.HealthProbe"]
@@ -28,7 +29,9 @@ flowchart LR
     Bdtheque_Api --> Bdtheque_Contracts
     Bdtheque_Api --> Bdtheque_Domain
     Bdtheque_Api --> Bdtheque_Infrastructure
+    Bdtheque_Domain --> Bdtheque_Currencies
     Bdtheque_Frontend --> Bdtheque_Contracts
+    Bdtheque_Frontend --> Bdtheque_Currencies
     Bdtheque_Infrastructure --> Bdtheque_Domain
     Bdtheque_ValidationData --> Bdtheque_Contracts
 ```
@@ -68,8 +71,9 @@ flowchart LR
 | --- | --- | --- |
 | `Bdtheque.Api` | `src` | `Bdtheque.Contracts`, `Bdtheque.Domain`, `Bdtheque.Infrastructure` |
 | `Bdtheque.Contracts` | `src` | — |
-| `Bdtheque.Domain` | `src` | — |
-| `Bdtheque.Frontend` | `src` | `Bdtheque.Contracts` |
+| `Bdtheque.Currencies` | `src` | — |
+| `Bdtheque.Domain` | `src` | `Bdtheque.Currencies` |
+| `Bdtheque.Frontend` | `src` | `Bdtheque.Contracts`, `Bdtheque.Currencies` |
 | `Bdtheque.HealthProbe` | `src` | — |
 | `Bdtheque.Infrastructure` | `src` | `Bdtheque.Domain` |
 | `Bdtheque.ValidationData` | `src` | `Bdtheque.Contracts` |

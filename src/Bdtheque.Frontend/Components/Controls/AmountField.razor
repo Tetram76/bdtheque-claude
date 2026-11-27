@@ -1,3 +1,4 @@
+@using Bdtheque.Currencies
 @inject IStringLocalizer<AmountField> L
 
 @* An amount and its currency, side by side, under one legend (visuel/saisie-edition/contenu.md): the currency of origin, chosen
@@ -8,7 +9,8 @@
     <legend id="@($"{Id}-legend")">@Label</legend>
     <span class="amount-field-controls">
         <label class="visually-hidden" for="@Id">@L["Amount"]</label>
-        <input id="@Id" type="text" inputmode="decimal" class="amount-field-amount" disabled="@Disabled"
+        <input id="@Id" type="text" inputmode="decimal" class="amount-field-amount" disabled="@Disabled" data-decimals="@Decimals"
+               data-decimal-separator="@CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator"
                aria-invalid="@(Error is null ? null : "true")" aria-describedby="@DescribedBy" @bind:get="AmountText" @bind:set="EnterAmountAsync" />
         <label class="visually-hidden" for="@CurrencyId">@L["Currency"]</label>
         <select id="@CurrencyId" class="amount-field-currency" value="@SelectedCurrency" disabled="@Disabled" @onchange="ChooseCurrencyAsync">
@@ -87,9 +89,15 @@
     // Bound by @bind:get/@bind:set, and not by a value and a handler: only a binding makes Blazor set the field again to the
     // amount when a text that is no amount leaves it unchanged (data-binding of the documentation of Blazor); a handler would leave
     // that text on screen, while the previous amount, or none, is saved.
-    // An amount of money, with two decimals at least, the others (up to the four the database keeps) only when they count: read
-    // back, 16.95 is 16.9500.
-    private string? AmountText => Amount?.ToString("0.00##", CultureInfo.CurrentCulture);
+    // The decimals of the currency (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant), which the script of the
+    // amounts keeps from typing beyond (wwwroot/amount-field.js); those of the currency shown while none is chosen.
+    private int Decimals => CurrencyDecimals.Of(Currency ?? DefaultCurrency);
+
+    // An amount of money, with the decimals of its currency, the others (up to the four the database keeps) only when they count:
+    // read back, 16.95 is 16.9500. An amount more precise than its currency, whose currency changed since it was typed, is shown as
+    // it will be saved, never rounded: the saving refuses it.
+    private string? AmountText => Amount?.ToString(
+        Decimals == 0 ? "0.####" : $"0.{new string('0', Decimals)}{new string('#', Math.Max(0, 4 - Decimals))}", CultureInfo.CurrentCulture);
 
     private string SelectedCurrency => _otherChosen || (Currency is { } code && !Named.Contains(code)) ? Other : Currency ?? DefaultCurrency;
 

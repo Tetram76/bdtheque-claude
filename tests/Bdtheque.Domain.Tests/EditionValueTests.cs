@@ -1,3 +1,4 @@
+using System.Globalization;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 
@@ -224,6 +225,69 @@ public sealed class EditionValueTests
         edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: currency));
 
         Assert.Equal(currency, edition.AcquisitionCurrency);
+    }
+
+    // An amount has no more decimals than its currency, by the minor unit of ISO 4217; a currency it does not give one, the old
+    // franc included, two (fonctionnel/valorisation/gestion-des-devises.md, précision d'un montant). Trailing zeros are no decimals:
+    // read back from the database, 12.5 is 12.5000.
+    [Theory]
+    [InlineData("12.34", "EUR")]
+    [InlineData("12.5000", "EUR")]
+    [InlineData("1500", "JPY")]
+    [InlineData("1500.000", "JPY")]
+    [InlineData("1.234", "KWD")]
+    [InlineData("1.2345", "CLF")]
+    [InlineData("45.90", "FRF")] // withdrawn from ISO 4217, without a minor unit
+    [InlineData("500.50", "QZF")] // the old franc, out of ISO 4217
+    [InlineData("12.34", "XAU")] // a minor unit not applicable
+    [InlineData("12.34", "QQQ")] // a code unknown to ISO 4217
+    public void SetPublicationYearAndAcquisition_AmountsWithinTheDecimalsOfTheirCurrency_Succeed(string amount, string currency)
+    {
+        var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
+        var value = decimal.Parse(amount, CultureInfo.InvariantCulture);
+
+        edition.SetPublicationYearAndAcquisition(
+            null, Acquisition(AcquisitionMode.Purchase, price: value, priceCurrency: currency, initialValue: value, initialValueCurrency: currency));
+
+        Assert.Equal((value, value), (edition.AcquisitionAmount, edition.InitialValueAmount));
+    }
+
+    [Theory]
+    [InlineData("12.341", "EUR")]
+    [InlineData("1500.5", "JPY")]
+    [InlineData("1.2345", "KWD")]
+    [InlineData("1.23456", "CLF")]
+    [InlineData("89.125", "FRF")]
+    [InlineData("500.505", "QZF")]
+    [InlineData("12.345", "QQQ")]
+    public void SetPublicationYearAndAcquisition_AmountMorePreciseThanItsCurrency_Throws(string amount, string currency)
+    {
+        var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
+        var value = decimal.Parse(amount, CultureInfo.InvariantCulture);
+
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionAcquisitionAmountTooPrecise, nameof(Edition.AcquisitionAmount),
+            () => edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: value, priceCurrency: currency)));
+        DomainAssert.Violates<Edition>(
+            DomainRules.EditionInitialValueAmountTooPrecise, nameof(Edition.InitialValueAmount),
+            () => edition.SetPublicationYearAndAcquisition(
+                null, Acquisition(AcquisitionMode.Purchase, initialValue: value, initialValueCurrency: currency)));
+        Assert.Null(edition.AcquisitionAmount);
+        Assert.Null(edition.InitialValueAmount);
+    }
+
+    [Fact]
+    public void SetPublicationYear_OfAnEditionReadWithoutItsAlbum_IsAProgrammingError_ThatSaysWhy()
+    {
+        // A price dated by the album alone: an edition read without its album (EF Core leaves the navigation empty) cannot tell
+        // whether it stays dated; the error, technical, says why in the log (gestion-projet/gouvernance/qualite-du-code.md).
+        var edition = CreateOwnedEdition(AcquisitionMode.Purchase, albumYear: 1978);
+        edition.SetPublicationYearAndAcquisition(null, Acquisition(AcquisitionMode.Purchase, price: 10m, priceCurrency: "EUR"));
+        typeof(Edition).GetProperty(nameof(Edition.Album))!.SetValue(edition, null);
+
+        var error = DomainAssert.Throws<InvalidOperationException>(() => edition.SetPublicationYear(null));
+
+        Assert.Equal("The album of the edition must be loaded to check the reference date of its amounts.", error.Message);
     }
 
     [Fact]

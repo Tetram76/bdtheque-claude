@@ -6,7 +6,7 @@ applies_to:
   - 'Bdtheque.slnx'
   - 'src/*/*.csproj'
   - 'tests/*/*.csproj'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T18:20:07Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:00:00Z }
 ---
 
 # Organisation du code
@@ -18,6 +18,7 @@ La solution est découpée en **projets par responsabilité** (`src/`), chacun n
 | `Bdtheque.Domain` | Modèle métier et ses règles, sans EF Core ni framework web : les règles se testent sans base ni serveur. |
 | `Bdtheque.Infrastructure` | Persistance EF Core / Npgsql. |
 | `Bdtheque.Contracts` | Contrats d'échange de l'API, découplés des entités : les clients de l'API (`frontend`, `mcp`) ne dépendent pas du domaine, qui évolue sans casser leurs contrats. |
+| `Bdtheque.Currencies` | Décimales de chaque devise selon l'ISO 4217 ([Représentation de la devise](domaine/representation-de-la-devise.md)), sans aucune dépendance : le domaine, qui refuse un montant trop précis, et le frontend, qui présente et saisit les montants, la partagent sans que le frontend dépende du domaine. Testé par les tests de ceux qui l'emploient. |
 | `Bdtheque.Api` | Conteneur `api` : endpoints et règles applicatives. |
 | `Bdtheque.Frontend` | Conteneur `frontend` : l'interface web, cliente de l'API par `Bdtheque.Contracts`. |
 | `Bdtheque.Mcp` | Conteneur `mcp` (Phase 6) : [Outil pour agents IA](agents-ia.md), client de l'API par `Bdtheque.Contracts`, sans référence à `Bdtheque.Api` ni à `Bdtheque.Domain`. |

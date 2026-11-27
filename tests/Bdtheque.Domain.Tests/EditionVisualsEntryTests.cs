@@ -52,21 +52,25 @@ public sealed class EditionVisualsEntryTests
     [MemberData(nameof(RefusedEntries))]
     public void SetVisuals_RefusedEntries_ChangeNothing(string refused)
     {
+        // Two visuals, each refused entry beside valid ones: a single refused entry among valid ones refuses them all, and a
+        // visual of another edition is refused even when the edition has others.
         var edition = CreateEdition();
         var cover = edition.AppendVisual(VisualType.Cover, "cover.jpg", TestPalette.Any);
+        var plate = edition.AppendVisual(VisualType.Plate, "plate.jpg", TestPalette.Any);
         var pending = new PendingVisual("new.png", TestPalette.Any);
         (Guid?, PendingVisual?, VisualType)[] entries = refused switch
         {
-            "neither" => [(null, null, VisualType.Cover)],
-            "both" => [(cover.Id, pending, VisualType.Cover)],
+            "neither" => [(cover.Id, null, VisualType.Cover), (plate.Id, null, VisualType.Plate), (null, null, VisualType.Plate)],
+            "both" => [(cover.Id, pending, VisualType.Cover), (plate.Id, null, VisualType.Plate)],
             "twice" => [(cover.Id, null, VisualType.Cover), (cover.Id, null, VisualType.Plate)],
+            // The plate left out: refused before it is removed.
             "foreign" => [(cover.Id, null, VisualType.Cover), (Guid.NewGuid(), null, VisualType.Plate)],
             _ => [(cover.Id, null, VisualType.Cover), (null, pending, VisualType.Plate), (null, pending, VisualType.Plate)],
         };
 
         DomainAssert.Throws<ArgumentException>(() => edition.SetVisuals(entries));
 
-        Assert.Equal([("cover.jpg", VisualType.Cover)], edition.Visuals.Select(v => (v.MediaReference, v.Type)));
+        Assert.Equal([("cover.jpg", VisualType.Cover), ("plate.jpg", VisualType.Plate)], edition.Visuals.Select(v => (v.MediaReference, v.Type)));
     }
 
     [Fact]

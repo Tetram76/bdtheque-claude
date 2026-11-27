@@ -396,6 +396,8 @@ public sealed class EditionTests
         var secondLoad = edition.GetOrderedVisuals().ToList();
 
         Assert.Equal(firstLoad, secondLoad);
+        // By their identifier, which never changes.
+        Assert.Equal(edition.Visuals.OrderBy(v => v.Id), firstLoad);
     }
 
     [Fact]
