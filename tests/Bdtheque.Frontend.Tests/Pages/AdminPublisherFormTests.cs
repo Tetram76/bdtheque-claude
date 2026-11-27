@@ -617,6 +617,21 @@ public sealed class AdminPublisherFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task NameEnteredOfACollection_RemovedSince_IsNoLongerOffered_NorWarnedOfOnSaving()
+    {
+        // A collection removed presents no field for its name: its name entered before the reload is no longer offered.
+        var page = await ReloadedAfterAsync(form => form.InputAsync($"#publisher-collection-{Romans}", "Les Romans"));
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Casterman with { Version = 13 });
+
+        await page.ClickAsync("button[aria-label='Retirer Les Romans (À suivre)']");
+
+        Assert.Empty(page.FindAll(".redo-line"));
+        var written = _api.Written.Count;
+        await page.SubmitAsync("form");
+        Assert.Empty(page.FindAll("dialog"));
+        Assert.Equal(written + 1, _api.Written.Count);
+    }
+    [Fact]
     public async Task Taking_TheCollectionsEntered_AddsAndRemovesThemAgain_UnderTheirList()
     {
         var page = await ReloadedAfterAsync(async form =>

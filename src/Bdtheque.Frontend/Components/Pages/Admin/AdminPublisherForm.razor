@@ -372,13 +372,15 @@ else
 
     private static CollectionEntry? Collection(PublisherEntry entry, Guid id) => entry.Collections.FirstOrDefault(c => c.Id == id);
 
-    // The name of a collection read, taken back into the same collection, if the record reloaded still has it.
+    // The name of a collection read, taken back into the same collection, if the record reloaded still has it; offered only while
+    // the collection is kept, a collection removed presenting no field for its name (its removal being the datum of the collections).
     private static EntryDatum<PublisherEntry> CollectionName(Guid id, string label) => new(
         CollectionKey(id), label, e => Collection(e, id)?.Name, e => Collection(e, id)?.Name, (from, to) =>
         {
             if (Collection(to, id) is { } collection)
                 collection.Name = Collection(from, id)?.Name;
-        });
+        },
+        e => Collection(e, id) is { Removed: false });
 
     // What the entry changes to the collections read: those it removes and those it adds, nothing for the record as read. Told
     // against the collections read rather than listing those kept, so that what is taken back into a record reloaded equals
