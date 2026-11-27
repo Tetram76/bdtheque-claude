@@ -1,6 +1,6 @@
 /* Built on the contracts of the theme only (choix-implementation/socle/themes.md): a dashed frame, as anything only expected
    (visuel/liste-albums/contenu.md), the intents one under the other, apart by a rule; what each targets, then its date,
-   which goes under it on a narrow screen. */
+   at the bottom of the intent, which goes under it on a narrow screen. */
 .album-intents {
     display: grid;
     gap: var(--space-xs);
@@ -25,10 +25,12 @@
     list-style: none;
 }
 
+/* The date and the link to the entry form at the bottom of the intent, level with its last line: under the visuals of the
+   edition targeted when it has some (decision of the user, #632). */
 .album-intents li {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     gap: 0.125rem var(--space-l);
     padding-block: var(--space-xs);

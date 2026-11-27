@@ -48,6 +48,22 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
         await Assertions.Expect(viewer.Locator(".visual-position")).ToHaveTextAsync("1 sur 2");
     }
 
+    // The date an intent was posed sits at the bottom of the intent, under the visuals of the edition targeted (decision of the
+    // user, #632), on a wide screen where it is beside what the intent targets.
+    [Theory, InEachTheme]
+    public async Task Intent_DateSitsAtTheBottom_LevelWithTheVisualsOfTheEditionWishedFor(string theme)
+    {
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1280, Height = 720 });
+        await PageReadiness.GotoAsync(page, AppPaths.Album(Application.AlbumId));
+
+        var bottoms = await page.Locator(".album-intents > ul > li").EvaluateAsync<double[]>("""
+            intent => [intent.querySelector('.intent-target'), intent.querySelector('.intent-date')]
+                .map(element => element.getBoundingClientRect().bottom)
+            """);
+
+        Assert.True(Math.Abs(bottoms[0] - bottoms[1]) <= 1, $"{theme}: what the intent targets ends at {bottoms[0]}px, its date at {bottoms[1]}px.");
+    }
+
     // A theme that draws at random (the balloons of « La planche encrée ») keeps its drawing on the same page.
     [Theory, InEachTheme]
     public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas(string theme)
