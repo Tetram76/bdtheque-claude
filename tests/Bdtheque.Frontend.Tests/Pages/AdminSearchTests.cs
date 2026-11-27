@@ -273,7 +273,7 @@ public sealed class AdminSearchTests : BunitContext, IDisposable
             new Page<EditionAdminListItem>([new(Album, Edition, null, null, AcquisitionMode.Purchase, 2001, Modified, 1)], 1, AdminSearch.HitCount, 1),
             new EditionListFilters(null, null, null, null));
         _api.Answers["/admin/purchase-intents"] = new Page<PurchaseIntentAdminListItem>(
-            [new(IntentId, Album, AlbumCollectionState.PurchaseIntent, Edition, null, false, Modified, 1)], 1, AdminSearch.HitCount, 1);
+            [new(IntentId, Album, AlbumCollectionState.PurchaseIntent, Edition, null, null, false, Modified, 1)], 1, AdminSearch.HitCount, 1);
         _api.Answers["/admin/authors"] = new Page<AuthorAdminListItem>(
             [new(AuthorId, "Dupont", "Anne", "Astrid", null, 3, [], Modified, 1)], 1, AdminSearch.HitCount, 1);
         _api.Answers["/admin/genres"] = new Page<GenreAdminListItem>([new(GenreId, "Aventure astrale", 0, 0, Modified, 1)], 1, AdminSearch.HitCount, 1);

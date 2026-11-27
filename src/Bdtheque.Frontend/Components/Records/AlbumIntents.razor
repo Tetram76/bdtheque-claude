@@ -1,13 +1,14 @@
 @using Bdtheque.Contracts.Catalog
 @inject IStringLocalizer<AlbumIntents> L
-@inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject RecordLabels Labels
+@inject EditionTraitTexts TraitTexts
 
 @* The purchase intents of an album, under the detail of its editions (visuel/fiche-album/contenu.md): never presented as
    editions (fonctionnel/regles-metier/intention-d-acquisition.md), each is told by what it targets, without a tag, the block being
-   that of the editions — the label of the edition targeted, with its category, format, binding and pages, or any edition of
-   the album for an intent on the album itself —, then the date it was posed, in the time zone of the browser. An intent is
-   not chosen like an edition and has no visual to present. *@
+   that of the editions — the label of the edition targeted, with its summary, then its visuals as a strip like an edition's,
+   or any edition of the album for an intent on the album itself —, then the date it was posed, in the time zone of the browser.
+   An intent is not chosen like an edition, and presents neither its detail nor its copy, which its summary stands for. *@
 @if (_intents.Count > 0)
 {
     <div class="album-intents" data-local>
@@ -27,18 +28,24 @@
                                 @L["WholeAlbum"]
                             }
                         </span>
-                        @if (intent.Facts is { } facts)
+                        @if (intent.Summary is { } summary)
                         {
-                            <span class="intent-facts">@facts</span>
+                            <span class="intent-facts">@summary</span>
+                        }
+                        @if (intent.Edition is { } targeted)
+                        {
+                            @* Its visuals, which open the same viewer, on those of the edition targeted (decision of the user, #632). *@
+                            <EditionVisuals AlbumId="AlbumId" Edition="targeted" EditionLabel="@Labels.Edition(targeted.Edition)"
+                                            Open="@(targeted.Edition.Id == OpenEdition ? OpenPosition : null)" />
                         }
                     </span>
-                    @if (EditHref is not null && intent.Edition is { } targeted)
+                    @if (EditHref is not null && intent.Edition is { } modified)
                     {
                         @* For the administrator, the link to the entry form of the edition the intent targets; an intent on the
                            album itself has nothing to modify (visuel/fiche-album/contenu.md, decision of the user, #658). *@
                         <span class="intent-end">
                             <span class="intent-date">@L["Posed", Format.LocalDate(intent.PosedAt)]</span>
-                            <RecordEditLink Href="@EditHref(targeted.Edition.Id)" Label="@L["Edit"]" Part="edit-intent" />
+                            <RecordEditLink Href="@EditHref(modified.Edition.Id)" Label="@L["Edit"]" Part="edit-intent" />
                         </span>
                     }
                     else
@@ -52,6 +59,10 @@
 }
 
 @code {
+    /// <summary>The album, whose record the thumbnails of the visuals lead back to, with the viewer open.</summary>
+    [Parameter, EditorRequired]
+    public Guid AlbumId { get; set; }
+
     /// <summary>The intent on the whole album, which then has no edition at all.</summary>
     [Parameter]
     public PurchaseIntentItem? AlbumIntent { get; set; }
@@ -60,6 +71,14 @@
     [Parameter, EditorRequired]
     public IReadOnlyList<EditionDetail> Editions { get; set; } = [];
 
+    /// <summary>The edition whose visual the viewer shows, if any.</summary>
+    [Parameter]
+    public Guid? OpenEdition { get; set; }
+
+    /// <summary>The position of the visual the viewer shows, from 1.</summary>
+    [Parameter]
+    public int? OpenPosition { get; set; }
+
     /// <summary>
     /// The entry form of the edition an intent targets, for the authenticated administrator only; none for a visitor.
     /// </summary>
@@ -67,22 +86,12 @@
     public Func<Guid, string>? EditHref { get; set; }
 
     // The edition targeted, none for an intent on the whole album.
-    private List<(EditionDetail? Edition, string? Facts, DateTimeOffset PosedAt)> _intents = [];
+    private List<(EditionDetail? Edition, string? Summary, DateTimeOffset PosedAt)> _intents = [];
 
     protected override void OnParametersSet() => _intents = AlbumIntent is { } whole
         ? [(null, null, whole.CreatedAt)]
-        : [.. Editions.Where(e => e.PurchaseIntent is not null).Select(e => ((EditionDetail?)e, Facts(e), e.PurchaseIntent!.CreatedAt))];
+        : [.. Editions.Where(e => e.PurchaseIntent is not null).Select(e => ((EditionDetail?)e, TraitTexts.Summary(TraitsOf(e)), e.PurchaseIntent!.CreatedAt))];
 
-    // What tells an edition apart beyond its label, as far as it is known; nothing when none is.
-    private string? Facts(EditionDetail edition)
-    {
-        string?[] facts =
-        [
-            edition.Category is { } category ? Values.Of(category) : null,
-            edition.Format is { } format ? Values.Of(format) : null,
-            edition.Binding is { } binding ? Values.Of(binding) : null,
-            edition.PageCount is { } pages ? L["Pages", Format.Number(pages)].Value : null,
-        ];
-        return facts.Any(f => f is not null) ? string.Join(" · ", facts.OfType<string>()) : null;
-    }
+    private static EditionTraits TraitsOf(EditionDetail edition) =>
+        new(edition.Category, edition.Format, edition.Binding, edition.Orientation, edition.ReadingDirection, edition.PageCount, edition.IsColor);
 }

@@ -322,8 +322,8 @@ internal static class AlbumEndpoints
             {
                 p.Id,
                 Edition = p.Edition == null ? null : p.Edition.ToSummary(),
-                Category = p.Edition == null ? null : p.Edition.Category,
-                Binding = p.Edition == null ? null : p.Edition.Binding,
+                Traits = p.Edition == null ? null : p.Edition.ToTraits(),
+                VisualCount = p.Edition == null ? 0 : p.Edition.Visuals.Count,
                 // fonctionnel/regles-metier/intention-d-acquisition.md: an intent on an edition turns into one on the album only when
                 // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.
                 IsConvertible = p.EditionId == null || p.Album.Editions.Count == 1,
@@ -338,8 +338,7 @@ internal static class AlbumEndpoints
                 e.Edition, e.Cover, EnumMapping.Map<ContractEnums.EditionCategory>(e.Category), EnumMapping.Map<ContractEnums.BindingType>(e.Binding),
                 e.PageCount, EnumMapping.Map<ContractEnums.AcquisitionMode>(e.AcquisitionMode)!.Value, e.AcquisitionDate?.Year, e.VisualCount))],
             [.. intents.Select(p => new AlbumPurchaseIntentItem(
-                p.Id, p.Edition, EnumMapping.Map<ContractEnums.EditionCategory>(p.Category), EnumMapping.Map<ContractEnums.BindingType>(p.Binding),
-                p.IsConvertible, p.CreatedAt))]);
+                p.Id, p.Edition, p.Traits, p.VisualCount, p.IsConvertible, p.CreatedAt))]);
     }
 
     private static AlbumAdminListItem WithEachAuthorOnce(AlbumAdminListItem item) => item with { Authors = EachOnce(item.Authors) };

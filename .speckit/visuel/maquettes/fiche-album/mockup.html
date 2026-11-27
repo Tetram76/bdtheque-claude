@@ -283,10 +283,23 @@ summary{cursor:pointer}
             <span style="font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: {{t.muted}}">{{intentsTitle}}</span>
             <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
               <sc-for list="{{intents}}" as="i" hint-placeholder-count="1">
-                <li style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 16px; padding: 4px 0; border-top: {{i.sep}}">
+                <li style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 2px 16px; padding: 4px 0; border-top: {{i.sep}}">
                   <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
                     <span style="font-weight: 700; overflow-wrap: anywhere">{{i.label}}</span>
                     <span style="font-size: 12px; color: {{t.muted}}">{{i.sub}}</span>
+                    <sc-if value="{{i.hasVis}}" hint-placeholder-val="{{false}}">
+                      <ul aria-label="Visuels de l'édition visée" style="margin: 6px 0 0; padding: 2px 2px 6px; list-style: none; display: flex; gap: 4px; width: max-content">
+                        <sc-for list="{{i.vis}}" as="v" hint-placeholder-count="2">
+                          <li><button type="button" aria-label="{{v.type}}" style="width: 38px; padding: 2px 2px 1px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 3px solid transparent; border-radius: 6px; background: transparent; color: {{t.muted}}; font-family: {{t.fb}}; cursor: pointer">
+                            <span aria-hidden="true" style="display: block; width: 30px; height: 40px; overflow: hidden; border-radius: 3px; box-shadow: 0 0 0 1px {{t.line}}">
+                              <sc-if value="{{v.isCover}}" hint-placeholder-val="{{true}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="{{v.art.sky}}"></rect><rect y="27" width="30" height="13" fill="{{v.art.sea}}"></rect><rect width="30" height="10" fill="{{v.art.band}}"></rect><circle cx="21" cy="18" r="4.5" fill="{{v.art.sun}}"></circle></svg></sc-if>
+                              <sc-if value="{{v.isBack}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 30 40" width="30" height="40" style="display: block"><rect width="30" height="40" fill="{{v.art.band}}"></rect><path d="M4 8 h22 M4 12 h20 M4 16 h21 M4 20 h14" stroke="{{v.art.title}}" stroke-width="1.5" opacity=".6"></path><rect x="17" y="29" width="10" height="7" fill="#FFFFFF"></rect></svg></sc-if>
+                            </span>
+                            <span style="font-size: 10px; font-weight: 700; line-height: 1.2">{{v.short}}</span>
+                          </button></li>
+                        </sc-for>
+                      </ul>
+                    </sc-if>
                   </span>
                   <span style="display: inline-flex; align-items: center; gap: 12px"><span style="font-size: 12px; color: {{t.muted}}">{{i.date}}</span><sc-if value="{{i.editable}}" hint-placeholder-val="{{false}}"><a href="#" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: {{t.link}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z M13.5 6.5l4 4"></path></svg>Modifier l'intention</a></sc-if></span>
                 </li>
@@ -542,7 +555,7 @@ const EDITIONS = [
     label: 'Casterman [2023] - ISBN 978-2-203-26633-9',
     owned: false,
     art: { sky: '#BFE3E0', sea: '#1D6A7A', sun: '#E86A3A', ink: '#123038', band: '#E86A3A', title: '#FFFFFF' },
-    visuals: [['Couverture', 'cover', 'Couv.']],
+    visuals: [['Couverture', 'cover', 'Couv.'], ['4e de couverture', 'back', '4e']],
     objet: [
       ['Éditeur', 'Casterman', 'https://www.casterman.com'], ['Collection', '', ''], ["Année d'édition", '2023', ''],
       ['ISBN', '978-2-203-26633-9', ''], ['Catégorie', 'Édition spéciale', ''], ['Format', 'Grand (> A4)', ''],
@@ -558,15 +571,16 @@ const EDITIONS = [
 ];
 const OWNED = EDITIONS.filter((e) => e.owned);
 const INTENT = EDITIONS.find((e) => !e.owned);
-const summary = (e) => ['Catégorie', 'Format', 'Reliure', 'Pages'].map((k) => e.objet.find(([key]) => key === k)?.[1]).filter(Boolean).map((v) => (/^\d+$/.test(v) ? v + ' pages' : v)).join(' · ');
+const summary = (e) => [...['Catégorie', 'Format', 'Reliure', 'Orientation', 'Sens de lecture', 'Pages'].map((k) => e.objet.find(([key]) => key === k)?.[1]).filter(Boolean).map((v) => (/^\d+$/.test(v) ? v + ' pages' : v)), ...(e.objet.find(([key]) => key === 'Couleur')?.[1] === 'Noir et blanc' ? ['Noir et blanc'] : [])].join(' · ');
+const intentVisuals = (e) => e.visuals.map(([type, kind, short]) => ({ type, short, art: e.art, isCover: kind === 'cover', isBack: kind === 'back' }));
 // What the album's intents aim at. Each is told by what it names, without a tag: an edition by its
 // label, the album itself by "any edition", the only intent an album without any edition may have.
 const INTENT_SCENARIOS = {
-  une: { intents: [{ label: INTENT.label, sub: summary(INTENT), date: 'Posée le 9 octobre 2026' }] },
+  une: { intents: [{ label: INTENT.label, sub: summary(INTENT), date: 'Posée le 9 octobre 2026', vis: intentVisuals(INTENT) }] },
   plusieurs: {
     intents: [
-      { label: INTENT.label, sub: summary(INTENT), date: 'Posée le 9 octobre 2026' },
-      { label: 'Casterman (Corto Maltese en couleur) [2016] - ISBN 978-2-203-10012-2', sub: 'Grand (> A4) · Cartonnée · 64 pages', date: 'Posée le 12 octobre 2026' }
+      { label: INTENT.label, sub: summary(INTENT), date: 'Posée le 9 octobre 2026', vis: intentVisuals(INTENT) },
+      { label: 'Casterman (Corto Maltese en couleur) [2016] - ISBN 978-2-203-10012-2', sub: 'Grand (> A4) · Cartonnée · 64 pages', date: 'Posée le 12 octobre 2026', vis: [] }
     ]
   },
   album: { albumOnly: true, intents: [{ label: 'Toute édition de l\'album', sub: 'N\'importe quelle édition la réalisera.', date: 'Posée le 9 octobre 2026' }] }
@@ -717,7 +731,7 @@ class View extends Mockup {
       hasEdition, noEdition: !hasEdition,
       hasIntents: intents.length > 0,
       intentsTitle: intents.length > 1 ? 'Intentions d\'acquisition' : 'Intention d\'acquisition',
-      intents: intents.map((v, i) => ({ ...v, sep: i > 0 ? t.rowB : '0', editable: this.props.administrateur && !scenario.albumOnly })),
+      intents: intents.map((v, i) => ({ ...v, sep: i > 0 ? t.rowB : '0', editable: this.props.administrateur && !scenario.albumOnly, hasVis: (v.vis?.length ?? 0) > 0 })),
       editions: OWNED.map((e, i) => ({
         label: e.label, pressed: i === edIndex ? 'true' : 'false', ...pick(i === edIndex),
         // Switching edition also shows its own visuals, from its cover.

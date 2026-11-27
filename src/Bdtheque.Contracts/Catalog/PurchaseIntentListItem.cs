@@ -9,6 +9,7 @@ namespace Bdtheque.Contracts.Catalog;
 /// </summary>
 /// <param name="State">The possession of the album, never outside the collection for an album targeted.</param>
 /// <param name="Edition">The edition targeted; <c>null</c> for an intent on the whole album.</param>
+/// <param name="Traits">What the summary of the edition targeted is built from; <c>null</c> for an intent on the whole album.</param>
 /// <param name="PublisherWebsite">
 /// Where the publisher of the edition targeted leads (fonctionnel/presentation/libelle-d-une-edition.md); <c>null</c> when unknown,
 /// or for an intent on the whole album.
@@ -23,6 +24,7 @@ public sealed record PurchaseIntentListItem(
     AlbumSummary Album,
     AlbumCollectionState State,
     EditionSummary? Edition,
+    EditionTraits? Traits,
     string? PublisherWebsite,
     AlbumCover? Cover,
     DateTimeOffset CreatedAt);

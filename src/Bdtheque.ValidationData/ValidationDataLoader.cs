@@ -291,9 +291,14 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         // Owned, and wished for again from another publisher, which no owned edition names. The edition wished for has a cover:
         // the cover of the album in the list of all the albums, the generic visual in the list of the owned ones, which presents
         // its owned edition only (fonctionnel/regles-metier/couverture-d-un-album.md). Its ISBN-10 has a wrong check digit: an
-        // intent among the ISBN to check.
-        var fogIntents = await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(horizon.Id, null, 2023, "2-905123-02-4", null, null, null, null, null, null, true));
-        await data.VisualAsync(fog, fogIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.3));
+        // intent among the ISBN to check. Every trait of the edition wished for is set, and it is in black and white: its whole
+        // summary, and its two visuals, under the intent (fonctionnel/regles-metier/intention-d-acquisition.md, visuel/fiche-album/contenu.md).
+        var fogIntents = await data.IntentOnEditionAsync(fog, new PurchaseIntentEditionContent(
+            horizon.Id, null, 2023, "2-905123-02-4", BindingType.Hardcover, BookOrientation.Landscape, ReadingDirection.RightToLeft,
+            EditionFormat.Large, 48, EditionCategory.SpecialEdition, false));
+        var fogWished = fogIntents.Intents.Single().EditionId!.Value;
+        await data.VisualAsync(fog, fogWished, VisualType.Cover, Images.Portrait(0.3));
+        await data.VisualAsync(fog, fogWished, VisualType.BackCover, Images.Portrait(0.62));
 
         // Wished for as a whole, with no edition known yet.
         var convoy = await data.AlbumAsync(OneShot("Le Dernier Convoi", 2025, 3, [western], [wildWest], [Credit(rambert, ContributionRole.Illustrator), Credit(ganier, ContributionRole.Scenarist), Credit(mareuil, ContributionRole.Colorist)]));
@@ -306,7 +311,9 @@ public sealed class ValidationDataLoader(HttpClient client, TimeProvider clock)
         var trail = await data.SeriesAsync(Series(IntendedSeriesTitle, SeriesStatus.InProgress, Template(horizon.Id, null, null), [western], [wildWest],
             [Credit(ganier, ContributionRole.Scenarist), Credit(rambert, ContributionRole.Illustrator)]));
         var trailFirst = await data.AlbumAsync(Album("Le Gué du Coyote", trail, 1, 2022));
-        var trailIntents = await data.IntentOnEditionAsync(trailFirst, new PurchaseIntentEditionContent(horizon.Id, null, 2022, null, null, null, null, null, null, null, true));
+        // Some traits of the edition wished for only, in colour: its summary leaves out the others and its colour.
+        var trailIntents = await data.IntentOnEditionAsync(trailFirst, new PurchaseIntentEditionContent(
+            horizon.Id, null, 2022, null, BindingType.Paperback, null, null, EditionFormat.Standard, 46, null, true));
         await data.VisualAsync(trailFirst, trailIntents.Intents.Single().EditionId!.Value, VisualType.Cover, Images.Portrait(0.07));
         await data.AlbumAsync(Album("Le Canyon des Murmures", trail, 2, 2024));
 
