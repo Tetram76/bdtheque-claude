@@ -48,13 +48,16 @@ public sealed class PurchaseIntentCatalogListTests(ApiWebApplicationFactory fact
         await UploadCoverAsync(album.Id, owned);
         // Older, but only targeted by the intent: the list, where everything can be consulted, presents every edition
         // (fonctionnel/regles-metier/couverture-d-un-album.md).
-        var targeted = await CreateIntendedEditionAsync(album.Id, publisher.Id, 1985);
+        var traits = new EditionTraits(EditionCategory.FirstEdition, EditionFormat.Standard, BindingType.Paperback, null, null, 46, true);
+        var targeted = await CreateIntendedEditionAsync(album.Id, publisher.Id, 1985, traits: traits);
         var targetedCover = await UploadCoverAsync(album.Id, targeted);
 
         var row = Assert.Single((await ListAsync($"q={_marker}")).Items);
 
         Assert.Equal(AlbumCollectionState.InCollection, row.State);
         Assert.Equal(new EditionSummary(targeted, publisher.Id, $"Dargaud {_marker}", null, null, 1985, null), row.Edition);
+        // The summary of the edition targeted (fonctionnel/regles-metier/intention-d-acquisition.md).
+        Assert.Equal(traits, row.Traits);
         Assert.Equal("https://www.example.org/dargaud", row.PublisherWebsite);
         Assert.Equal(targetedCover, row.Cover);
     }
@@ -203,13 +206,16 @@ public sealed class PurchaseIntentCatalogListTests(ApiWebApplicationFactory fact
     }
 
     /// <returns>The edition targeted by the new intent, not owned.</returns>
-    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? year, string? isbn = null)
+    private async Task<Guid> CreateIntendedEditionAsync(
+        Guid albumId, Guid publisherId, int? year, string? isbn = null, EditionTraits? traits = null)
     {
         var before = (await GetAsync<PurchaseIntentsForm>($"/admin/albums/{albumId}/purchase-intents")).Intents.Select(i => i.Id).ToHashSet();
         var form = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{albumId}/purchase-intents",
             new CreatePurchaseIntentRequest(
-                new PurchaseIntentEditionContent(publisherId, null, year, isbn, null, null, null, null, null, null, true),
+                new PurchaseIntentEditionContent(
+                    publisherId, null, year, isbn, traits?.Binding, traits?.Orientation, traits?.ReadingDirection, traits?.Format,
+                    traits?.PageCount, traits?.Category, traits?.IsColor ?? true),
                 await GetAlbumVersionAsync(albumId)));
         return form.Intents.Single(i => !before.Contains(i.Id)).EditionId!.Value;
     }

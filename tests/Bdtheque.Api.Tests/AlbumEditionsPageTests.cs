@@ -59,6 +59,7 @@ public sealed class AlbumEditionsPageTests(ApiWebApplicationFactory factory) : I
             BindingType.Hardcover, 62);
         var cover = await UploadCoverAsync(album.Id, original.Id);
         var targeted = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2013, EditionCategory.SpecialEdition, BindingType.Hardcover);
+        await UploadCoverAsync(album.Id, targeted);
 
         var page = await GetPageAsync(album.Id);
 
@@ -75,7 +76,13 @@ public sealed class AlbumEditionsPageTests(ApiWebApplicationFactory factory) : I
 
         var intent = Assert.Single(page.PurchaseIntents);
         Assert.Equal(targeted, intent.Edition?.Id);
-        Assert.Equal((EditionCategory.SpecialEdition, BindingType.Hardcover), (intent.Category, intent.Binding));
+        // The summary of the edition targeted, the same wherever an intent is presented, and its visuals
+        // (fonctionnel/regles-metier/intention-d-acquisition.md, visuel/editions-album/contenu.md).
+        Assert.Equal(
+            new EditionTraits(EditionCategory.SpecialEdition, EditionFormat.Large, BindingType.Hardcover, BookOrientation.Landscape,
+                ReadingDirection.RightToLeft, 48, false),
+            intent.Traits);
+        Assert.Equal(1, intent.VisualCount);
         // The album has other editions: the intent cannot turn into one on the whole album.
         Assert.False(intent.IsConvertible);
         Assert.NotEqual(default, intent.CreatedAt);
@@ -141,7 +148,11 @@ public sealed class AlbumEditionsPageTests(ApiWebApplicationFactory factory) : I
         var form = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{albumId}/purchase-intents",
             new CreatePurchaseIntentRequest(
-                new PurchaseIntentEditionContent(publisherId, null, year, null, binding, null, null, null, null, category, true),
+                category is null
+                    ? new PurchaseIntentEditionContent(publisherId, null, year, null, binding, null, null, null, null, null, true)
+                    : new PurchaseIntentEditionContent(
+                        publisherId, null, year, null, binding, BookOrientation.Landscape, ReadingDirection.RightToLeft, EditionFormat.Large, 48,
+                        category, false),
                 await GetAlbumVersionAsync(albumId)));
         return Assert.Single(form.Intents, i => !before.Contains(i.EditionId)).EditionId!.Value;
     }

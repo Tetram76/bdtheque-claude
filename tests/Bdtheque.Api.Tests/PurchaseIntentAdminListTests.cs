@@ -36,6 +36,7 @@ public sealed class PurchaseIntentAdminListTests(ApiWebApplicationFactory factor
         // (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album).
         Assert.Equal((intent, album.Id, AlbumCollectionState.PurchaseIntent), (row.Id, row.Album.Id, row.State));
         Assert.Null(row.Edition);
+        Assert.Null(row.Traits);
         // An album without an edition has no cover: the generic visual stands for it.
         Assert.Null(row.Cover);
         // An intent on the album always turns into one on an edition (fonctionnel/regles-metier/intention-d-acquisition.md).
@@ -52,12 +53,16 @@ public sealed class PurchaseIntentAdminListTests(ApiWebApplicationFactory factor
         var album = await CreateAlbumAsync($"Tintin {_marker}");
         var owned = await CreateOwnedEditionAsync(album.Id, publisher.Id);
         var cover = await UploadCoverAsync(album.Id, owned.Id);
-        var targeted = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2013);
+        var traits = new EditionTraits(
+            EditionCategory.SpecialEdition, EditionFormat.Large, BindingType.Hardcover, BookOrientation.Landscape, ReadingDirection.RightToLeft, 48, false);
+        var targeted = await CreateIntendedEditionAsync(album.Id, publisher.Id, 2013, traits: traits);
 
         var row = Assert.Single(await ListAsync(_marker));
 
         Assert.Equal(AlbumCollectionState.InCollection, row.State);
         Assert.Equal(new EditionSummary(targeted, publisher.Id, $"Casterman {_marker}", null, null, 2013, null), row.Edition);
+        // The summary of the edition targeted (fonctionnel/regles-metier/intention-d-acquisition.md).
+        Assert.Equal(traits, row.Traits);
         Assert.Equal(cover, row.Cover);
         // The album has another edition: the intent cannot turn into one on the whole album.
         Assert.False(row.IsConvertible);
@@ -176,12 +181,15 @@ public sealed class PurchaseIntentAdminListTests(ApiWebApplicationFactory factor
     }
 
     // The edition targeted by the new intent: the one the intents of the album did not target yet.
-    private async Task<Guid> CreateIntendedEditionAsync(Guid albumId, Guid publisherId, int? year = null, string? isbn = null)
+    private async Task<Guid> CreateIntendedEditionAsync(
+        Guid albumId, Guid publisherId, int? year = null, string? isbn = null, EditionTraits? traits = null)
     {
         var form = await PostAsync<PurchaseIntentsForm>(
             $"/admin/albums/{albumId}/purchase-intents",
             new CreatePurchaseIntentRequest(
-                new PurchaseIntentEditionContent(publisherId, null, year, isbn, null, null, null, null, null, null, true),
+                new PurchaseIntentEditionContent(
+                    publisherId, null, year, isbn, traits?.Binding, traits?.Orientation, traits?.ReadingDirection, traits?.Format,
+                    traits?.PageCount, traits?.Category, traits?.IsColor ?? true),
                 await GetAlbumVersionAsync(albumId)));
         return Assert.Single(form.Intents).EditionId!.Value;
     }

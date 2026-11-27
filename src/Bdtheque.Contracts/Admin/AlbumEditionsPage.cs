@@ -33,8 +33,8 @@ public sealed record AlbumEditionItem(
 
 /// <summary>A purchase intent of the album, on the whole album or on an edition it targets.</summary>
 /// <param name="Edition">The edition targeted; <c>null</c> for an intent on the whole album, any edition doing.</param>
-/// <param name="Category">The category of the edition targeted.</param>
-/// <param name="Binding">The binding of the edition targeted.</param>
+/// <param name="Traits">What the summary of the edition targeted is built from; <c>null</c> for an intent on the whole album.</param>
+/// <param name="VisualCount">The number of visuals of the edition targeted; none for an intent on the whole album.</param>
 /// <param name="IsConvertible">
 /// Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-acquisition.md): always for an intent
 /// on the album; for an intent on an edition, only when that edition is the only one of its album.
@@ -43,7 +43,7 @@ public sealed record AlbumEditionItem(
 public sealed record AlbumPurchaseIntentItem(
     Guid Id,
     EditionSummary? Edition,
-    EditionCategory? Category,
-    BindingType? Binding,
+    EditionTraits? Traits,
+    int VisualCount,
     bool IsConvertible,
     DateTimeOffset CreatedAt);
