@@ -62,9 +62,10 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Créer l'auteur « {_marker} »" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel auteur" });
-        Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
-        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        // Interactive once its circuit has rendered it, which inserts the panel anew, opened again as a modal by the script of
+        // the dialogs: what is typed before would be lost, and the dialog judged on the panel of the prerendering.
         await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
+        Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
         // The search that finds no author proposes it as the name of the new one.
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true })).ToHaveValueAsync(_marker);
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Prénom" }).FillAsync("Jean");

@@ -40,9 +40,10 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel univers" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
-        Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
-        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        // Interactive once its circuit has rendered it, which inserts the panel anew, opened again as a modal by the script of
+        // the dialogs: what is typed before would be lost, and the dialog judged on the panel of the prerendering.
         await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
+        Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom" }).FillAsync($"Corto Maltese {_marker}");
         await ControlsPage.WaitUntilInteractiveAsync(page);
         await panel.GetByRole(AriaRole.Combobox, new() { Name = "Univers parent" }).PressSequentiallyAsync($"Hugo Pratt {_marker}");
