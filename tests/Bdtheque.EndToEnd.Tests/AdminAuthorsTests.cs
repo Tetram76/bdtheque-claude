@@ -179,7 +179,7 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         var nationality = panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" });
         await Assertions.Expect(nationality).ToHaveValueAsync("Suisse");
         await Assertions.Expect(panel.Locator("[data-error-category]")).ToHaveCountAsync(0);
-        await Assertions.Expect(panel.Locator(".redo-line")).ToHaveTextAsync(new Regex("Votre saisie : Belge"));
+        await Assertions.Expect(panel.Locator(".redo-line")).ToContainTextAsync("Votre saisie : Belge");
         await panel.Locator(".redo-line").GetByRole(AriaRole.Button, new() { Name = "Reprendre" }).ClickAsync();
         await Assertions.Expect(nationality).ToHaveValueAsync("Belge");
         await Assertions.Expect(panel.Locator("label[for=author-nationality] .modified-mark")).ToHaveTextAsync("Modifié");
