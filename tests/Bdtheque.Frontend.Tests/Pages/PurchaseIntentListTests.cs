@@ -28,6 +28,7 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
             AlbumType.Regular, false, 21, null, null, true),
         AlbumCollectionState.InCollection,
         new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "Casterman", Guid.NewGuid(), "Petit format", 2013, null),
+        new EditionTraits(EditionCategory.SpecialEdition, EditionFormat.Pocket, BindingType.Paperback, null, null, 64, true),
         "https://www.example.org/casterman",
         new AlbumCover(Guid.Parse("01900000-0000-7000-8000-0000000000c1"), TestCovers.Palette),
         new DateTimeOffset(2026, 3, 14, 10, 0, 0, TimeSpan.Zero));
@@ -40,12 +41,14 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
         null,
         null,
         null,
+        null,
         new DateTimeOffset(2026, 5, 2, 10, 0, 0, TimeSpan.Zero));
 
     private static readonly PurchaseIntentListItem WithoutSite = OnEdition with
     {
         Id = Guid.Parse("01900000-0000-7000-8000-0000000000e3"),
         Edition = new EditionSummary(Guid.NewGuid(), Guid.NewGuid(), "13 Bulles", null, null, null, null),
+        Traits = new EditionTraits(null, null, null, null, null, null, true),
         PublisherWebsite = null,
     };
 
@@ -100,7 +103,17 @@ public sealed class PurchaseIntentListTests : BunitContext, IDisposable
 
         Assert.Equal("Album toute édition", Text(rows[1].QuerySelector(".intent-target")!));
         // Its publisher, which leads to its site, announced as such to screen readers.
-        Assert.Equal("Édition Casterman, site externe (Petit format) [2013]", Text(rows[0].QuerySelector(".intent-target")!));
+        Assert.Equal("Casterman, site externe (Petit format) [2013]", Text(rows[0].QuerySelector(".intent-target-detail")!));
+    }
+
+    [Fact]
+    // The summary of the edition targeted, the same wherever an intent is presented
+    // (fonctionnel/regles-metier/intention-d-acquisition.md); nothing under an intent on the album, or an edition with nothing to say.
+    public void Row_OfAnEdition_GivesItsSummary()
+    {
+        var summaries = Rows(Open("")).Select(row => row.QuerySelector(".intent-target-sub") is { } sub ? Text(sub) : null);
+
+        Assert.Equal(["Édition spéciale · Poche · Brochée · 64 pages", null, null], summaries);
     }
 
     [Fact]

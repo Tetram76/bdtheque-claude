@@ -76,6 +76,13 @@
     font-weight: var(--font-weight-strong);
 }
 
+/* The summary of the edition targeted, on its own line under the tag and the label. */
+.intent-target-sub {
+    flex-basis: 100%;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
 .intent-row-head .intent-target {
     display: block;
 }

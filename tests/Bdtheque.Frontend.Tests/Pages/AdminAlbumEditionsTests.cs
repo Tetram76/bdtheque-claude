@@ -39,10 +39,11 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
     private static readonly AlbumPurchaseIntentItem OnEdition = new(
         Guid.Parse("01900000-0000-7000-8000-000000000001"),
         new EditionSummary(Guid.Parse("01900000-0000-7000-8000-0000000000e3"), Guid.NewGuid(), "Casterman", Guid.NewGuid(), "Fac-similé", 2013, null),
-        EditionCategory.SpecialEdition, BindingType.Hardcover, false, new DateTimeOffset(2026, 10, 8, 8, 0, 0, TimeSpan.Zero));
+        new EditionTraits(EditionCategory.SpecialEdition, EditionFormat.Standard, BindingType.Hardcover, BookOrientation.Portrait, null, 62, true), 2,
+        false, new DateTimeOffset(2026, 10, 8, 8, 0, 0, TimeSpan.Zero));
 
     private static readonly AlbumPurchaseIntentItem OnAlbum = new(
-        Guid.Parse("01900000-0000-7000-8000-000000000002"), null, null, null, true, new DateTimeOffset(2026, 10, 8, 8, 0, 0, TimeSpan.Zero));
+        Guid.Parse("01900000-0000-7000-8000-000000000002"), null, null, 0, true, new DateTimeOffset(2026, 10, 8, 8, 0, 0, TimeSpan.Zero));
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
@@ -188,7 +189,9 @@ public sealed class AdminAlbumEditionsTests : BunitContext, IDisposable
         Assert.Equal("1 intention d'acquisition", Text(intents.QuerySelector(".album-editions-count")!));
         var row = Assert.Single(intents.QuerySelectorAll(".intent-row"));
         Assert.Equal(
-            ("Édition", "Casterman (Fac-similé) [2013]", "Édition spéciale · Cartonnée", "Posée le 08/10/2026"),
+            // The summary of the edition targeted, the same wherever an intent is presented, and the number of its visuals after the
+            // date, as the detail of an edition (fonctionnel/regles-metier/intention-d-acquisition.md, visuel/editions-album/contenu.md).
+            ("Édition", "Casterman (Fac-similé) [2013]", "Édition spéciale · Normal (A4) · Cartonnée · Portrait · 62 pages", "Posée le 08/10/2026 · 2 visuels"),
             (Text(row.QuerySelector(".tag")!), Text(row.QuerySelector(".intent-target-detail")!), Text(row.QuerySelector(".intent-sub")!),
                 Text(row.QuerySelector(".intent-created")!)));
         // Its main action is « Modifier », presented as that of an edition, which opens its form; the purchase is confirmed from
