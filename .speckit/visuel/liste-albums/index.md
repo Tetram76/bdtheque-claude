@@ -2,6 +2,6 @@
 
 * [Liste des albums](liste-des-albums.md) - Liste des albums de l'administration, modèle des autres listes.
 * [Maquettes](maquettes.md) - Maquettes de la liste des albums et leurs réglages.
-* [Contenu](contenu.md) - Contenu de la liste des albums : recherche, filtres, navigation, lignes, actions, suppression, fusion.
+* [Contenu](contenu.md) - Contenu de la liste des albums : recherche, filtres, navigation, lignes, actions, suppression, fusion et ses fiches pressenties.
 * [Contrôles](controles.md) - Texte indicatif, focus clavier et croix d'effacement des zones de recherche, dans tous les thèmes.
 * [Déclinaison par thème](declinaison-par-theme.md) - Déclinaison par thème de la liste des albums.
