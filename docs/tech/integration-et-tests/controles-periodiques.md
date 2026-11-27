@@ -1,12 +1,14 @@
 ---
 title: 'Contrôles périodiques'
-description: 'Cette page explique les deux contrôles planifiés de main, le contrôle qualité hebdomadaire et le contrôle de sécurité quotidien, comment ils tiennent leur ticket de suivi et quand ils échouent, ainsi que le relevé des versions que mène l''agent et les scripts qui relient la dette au fil de l''eau à la branche d''un chantier ; à lire pour comprendre un échec de ces contrôles, une entrée de leur ticket, ou modifier ce qu''ils relèvent.'
+description: 'Cette page explique les deux contrôles planifiés de main, le contrôle qualité hebdomadaire et le contrôle de sécurité quotidien, comment ils tiennent leur ticket de suivi et quand ils échouent, ainsi que le relevé des versions que mène l''agent et le workflow qui relie la dette au fil de l''eau aux Pull Requests ; à lire pour comprendre un échec de ces contrôles, une entrée de leur ticket, ou modifier ce qu''ils relèvent.'
 code:
   - '.github/workflows/quality-audit.yml'
   - '.github/workflows/security-audit.yml'
   - 'scripts/Get-DependencyUpdates.ps1'
-  - 'scripts/Get-QualityDebt.ps1'
-  - 'scripts/Remove-QualityDebt.ps1'
+  - '.github/workflows/quality-debt.yml'
+  - '.github/scripts/QualityDebt.psm1'
+  - '.github/scripts/Test-QualityDebtHandled.ps1'
+  - '.github/scripts/Remove-QualityDebt.ps1'
 ---
 
 # Contrôles périodiques
@@ -62,23 +64,15 @@ Le job `Report` range chaque entrée dans l'une des trois sections de la descrip
 
 Le contrôle échoue à chaque exécution tant qu'une entrée critique demeure, et une seule fois pour chaque entrée prioritaire nouvelle ; il n'échoue jamais pour une entrée au fil de l'eau. Lors de la toute première exécution, faute de ticket, aucune entrée n'est tenue pour nouvelle.
 
-### La dette au fil de l'eau d'une branche
+### La dette au fil de l'eau d'une Pull Request
 
-Les entrées au fil de l'eau ne sont corrigées que par les chantiers qui modifient leurs fichiers ([Dette qualité au fil de l'eau des fichiers modifiés](../../../.speckit/gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md)). Deux scripts relient pour cela le ticket de suivi à la branche d'un chantier ; tous deux demandent un `gh` authentifié et retrouvent le ticket par ses deux étiquettes, comme le job `Report`.
+Les entrées au fil de l'eau ne sont corrigées que par les chantiers qui modifient leurs fichiers ([Dette qualité au fil de l'eau des fichiers modifiés](../../../.speckit/gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md)). Le workflow [`quality-debt.yml`](../../../.github/workflows/quality-debt.yml) relie pour cela le ticket de suivi aux Pull Requests. Comme il s'exécute dans le CI, il fonctionne de la même façon quel que soit l'environnement de la session qui a ouvert la Pull Request, dans le cloud ou sur le poste. Ses deux jobs partagent les fonctions de [`QualityDebt.psm1`](../../../.github/scripts/QualityDebt.psm1), qui retrouvent le ticket par ses deux étiquettes, comme le job `Report`, et lisent sa section « Au fil de l'eau ».
 
-[`Get-QualityDebt.ps1`](../../../scripts/Get-QualityDebt.ps1) lit la section « Au fil de l'eau » du ticket et la confronte aux fichiers que la branche modifie depuis qu'elle a quitté `origin/main`, modifications non commitées et fichiers non suivis compris. Il retrouve le fichier d'une entrée d'après sa forme, en deuxième position pour un mutant et en troisième pour un écart de style. Un fichier déplacé compte à son ancien chemin, où le contrôle a relevé ses entrées, autant qu'au nouveau. Le script écrit chaque entrée en entier sous son fichier, ou dit qu'il n'y en a aucune ; s'il ne peut pas lire le ticket, il échoue au lieu de laisser croire qu'il n'y a rien à corriger.
+Sur une Pull Request, le job `Quality debt along the way` exécute [`Test-QualityDebtHandled.ps1`](../../../.github/scripts/Test-QualityDebtHandled.ps1) à chaque push et à chaque modification de la description. Le script lit les fichiers que la Pull Request modifie, y compris l'ancien chemin d'un fichier déplacé, où le contrôle a relevé ses entrées, puis retrouve le fichier de chaque entrée d'après sa forme : il est en deuxième position pour un mutant et en troisième pour un écart de style. Chaque entrée qui porte sur un fichier modifié doit avoir sa ligne dans la description, entre les marqueurs `<!-- quality-debt -->` et `<!-- end-quality-debt -->`, sous la forme `fixed <entrée>`, `rejected <entrée>` ou `deferred #<ticket> <entrée>`. Le job échoue tant qu'il en manque une, et son journal comme son résumé donnent les lignes à ajouter. Comme il s'exécute de nouveau quand la description change, ajouter les lignes suffit, sans nouveau commit. Il échoue aussi s'il ne peut lire ni le ticket ni la Pull Request, pour ne pas laisser croire qu'il n'y a pas de dette. Ce job est un check requis du Ruleset.
 
-```powershell
-./scripts/Get-QualityDebt.ps1
-```
+Sur un push de `main`, le job `Remove the handled quality debt` exécute [`Remove-QualityDebt.ps1`](../../../.github/scripts/Remove-QualityDebt.ps1). Le script retrouve la Pull Request que le commit a fusionnée, puis retire du ticket les entrées que sa description dit `fixed` ou `rejected`, et elles seules ; une entrée reportée reste. Il relit la description du ticket juste avant de la réécrire. GitHub ne réécrit une description qu'en entier, sans écriture conditionnelle : les retraits partagent donc un groupe de concurrence qui garde en file toutes les exécutions en attente (`queue: max`), si bien qu'ils s'exécutent l'un après l'autre. Un retrait et la réécriture du contrôle hebdomadaire peuvent encore se recouvrir ; une entrée ainsi rétablie disparaît à la réécriture du contrôle suivant.
 
-[`Remove-QualityDebt.ps1`](../../../scripts/Remove-QualityDebt.ps1) retire du ticket, une fois la Pull Request fusionnée, les entrées qu'elle a corrigées ou rejetées. Il relit la description juste avant de la réécrire et n'en retire que les lignes nommées. Comme GitHub ne réécrit une description qu'en entier, sans écriture conditionnelle, deux retraits faits au même instant peuvent encore se recouvrir ; une entrée ainsi rétablie disparaît à la réécriture du contrôle suivant. Il refuse toute modification si une entrée nommée ne figure pas dans le ticket, ce qui arrive le plus souvent quand elle a été mal recopiée. Il accepte plusieurs entrées, une par chaîne ou une par ligne d'une même chaîne, telles que les liste le premier script.
-
-```powershell
-./scripts/Remove-QualityDebt.ps1 -Entry 'style IDE0005 src/Bdtheque.Infrastructure/Migrations/20261028193613_InitialCreate.cs'
-```
-
-Les deux scripts décodent la sortie de `gh` en UTF-8, car les entrées des mutants contiennent des caractères non ASCII, comme la flèche entre le code muté et son remplacement, qui doivent se retrouver tels que le ticket les porte.
+Les scripts décodent la sortie de `gh` en UTF-8, car les entrées des mutants contiennent des caractères non ASCII, comme la flèche entre le code muté et son remplacement, qui doivent se retrouver tels que le ticket les porte.
 
 ## Le contrôle de sécurité quotidien
 
@@ -109,7 +103,7 @@ La colonne `TooRecent` signale une version publiée depuis moins de sept jours, 
 
 ## Invariants à préserver
 
-- Aucun de ces contrôles n'écrit dans le dépôt ni n'ouvre de Pull Request : ils ne tiennent que leur ticket. Les scripts de la dette au fil de l'eau n'écrivent pas non plus dans le dépôt ; seul le second modifie le ticket.
+- Aucun de ces contrôles n'écrit dans le dépôt ni n'ouvre de Pull Request : ils ne tiennent que leur ticket. Le workflow de la dette au fil de l'eau n'écrit pas non plus dans le dépôt ; seul son job de retrait modifie le ticket.
 - Une entrée ne porte ni numéro de ligne ni version. Sinon, chaque modification voisine ou chaque montée de version en ferait une entrée nouvelle, et déclencherait une notification.
 - Le ticket de suivi est retrouvé par ses deux étiquettes, jamais par son titre, que l'utilisateur peut changer.
 - Aucun des deux n'est un check requis : une vulnérabilité sans correction ou une dette de qualité ne bloque aucune fusion.

@@ -42,7 +42,7 @@ Il en va de même de tout ce que demande l'environnement de l'agent (consignes d
 | Commenter une Pull Request (demande de revue comprise) | `gh pr comment`, `add_issue_comment` | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md) |
 | Traiter un retour de revue (Codex, SonarQube Cloud) | — | [`gestion-projet/revue-tickets/revue-codex-bloquante.md`](.speckit/gestion-projet/revue-tickets/revue-codex-bloquante.md), [`gestion-projet/revue-tickets/analyse-sonarqube-cloud.md`](.speckit/gestion-projet/revue-tickets/analyse-sonarqube-cloud.md) |
 | Réaliser un chantier dont le ticket exige la validation fonctionnelle | — | [`gestion-projet/revue-tickets/validation-fonctionnelle.md`](.speckit/gestion-projet/revue-tickets/validation-fonctionnelle.md) |
-| Fusionner une Pull Request | `gh pr merge`, `merge_pull_request` | [`gestion-projet/revue-tickets/suivi-par-tickets.md`](.speckit/gestion-projet/revue-tickets/suivi-par-tickets.md), [`gestion-projet/revue-tickets/verrouillage-des-pull-requests-fusionnees.md`](.speckit/gestion-projet/revue-tickets/verrouillage-des-pull-requests-fusionnees.md), [`gestion-projet/revue-tickets/validation-fonctionnelle.md`](.speckit/gestion-projet/revue-tickets/validation-fonctionnelle.md), [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md), [`gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md`](.speckit/gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md) |
+| Fusionner une Pull Request | `gh pr merge`, `merge_pull_request` | [`gestion-projet/revue-tickets/suivi-par-tickets.md`](.speckit/gestion-projet/revue-tickets/suivi-par-tickets.md), [`gestion-projet/revue-tickets/verrouillage-des-pull-requests-fusionnees.md`](.speckit/gestion-projet/revue-tickets/verrouillage-des-pull-requests-fusionnees.md), [`gestion-projet/revue-tickets/validation-fonctionnelle.md`](.speckit/gestion-projet/revue-tickets/validation-fonctionnelle.md), [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
 | Publier une version | `gh release create`, `create_release` | [`gestion-projet/depot/versions-et-releases.md`](.speckit/gestion-projet/depot/versions-et-releases.md) |
 | Lancer un lot de chantiers en parallèle, ou l'un de ses chantiers | — | [`gestion-projet/gouvernance/chantiers-en-parallele.md`](.speckit/gestion-projet/gouvernance/chantiers-en-parallele.md) |
 | Contrôle de cohérence fonctionnelle dû ou demandé | — | [`gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md`](.speckit/gestion-projet/revue-tickets/controle-de-coherence-fonctionnelle.md) |
@@ -62,10 +62,11 @@ Il en va de même de tout ce que demande l'environnement de l'agent (consignes d
 
 ## Dette qualité au fil de l'eau
 
-Les écarts de style et les mutants survivants que relève le contrôle qualité hebdomadaire ne sont corrigés que par les chantiers qui modifient leurs fichiers. Les règles sont celles de [Dette qualité au fil de l'eau des fichiers modifiés](.speckit/gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md) (socle), et valent pour tout agent :
+Les écarts de style et les mutants survivants que relève le contrôle qualité hebdomadaire ne sont corrigés que par les chantiers qui modifient leurs fichiers. Les règles sont celles de [Dette qualité au fil de l'eau des fichiers modifiés](.speckit/gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md) (socle), et valent pour tout agent, quel que soit l'environnement de sa session :
 
-- **Liste** : dès que les fichiers que modifie le chantier sont connus, puis avant chaque push, `scripts/Get-QualityDebt.ps1` liste les entrées au fil de l'eau du ticket de suivi du harnais qualité qui portent sur les fichiers modifiés de la branche ; chacune est traitée dans la même Pull Request.
-- **Retrait** : à la fusion, `scripts/Remove-QualityDebt.ps1` retire du ticket de suivi les entrées corrigées ou rejetées.
+- **Lecture** : dès que les fichiers que modifie le chantier sont connus, la section « Au fil de l'eau » du ticket de suivi du harnais qualité (étiquettes `quality-audit` et `harness`) est lue ; chaque entrée qui porte sur l'un d'eux est traitée dans la même Pull Request.
+- **Description** : la description de la Pull Request dit le traitement de chacune (`fixed`, `rejected` ou `deferred #<ticket>`), entre les marqueurs `<!-- quality-debt -->` et `<!-- end-quality-debt -->` ; le check requis `Quality debt along the way` échoue tant qu'il en manque une, et donne les lignes à ajouter.
+- **Retrait** : à la fusion, le CI retire lui-même du ticket de suivi les entrées corrigées ou rejetées.
 
 ## Dossiers
 

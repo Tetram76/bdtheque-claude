@@ -2,7 +2,7 @@
 type: Gouvernance
 title: 'Configuration du repository GitHub'
 description: 'Réglages du dépôt GitHub, Ruleset de main, sécurité du dépôt, GitHub Pages, merge fait par l''agent au nom de l''utilisateur, jamais par un collaborateur ; à lire pour toute modification de la configuration GitHub.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:25:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T13:00:00Z }
 ---
 
 # Configuration du repository GitHub
@@ -21,6 +21,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-17T12:25:00Z }
   - Squash merge uniquement
   - **Commits signés obligatoires** (`required_signatures`)
   - **Checks de la CI requis** (`required_status_checks`) : chaque job du workflow CI est un check requis (cf. [Intégration continue (CI)](integration-continue-ci.md)). Le Ruleset n'exige pas que la branche soit à jour avec `main` avant le merge : les PR sont fusionnées en squash une à une, et cette exigence imposerait d'intégrer `main` de nouveau, puis d'attendre CI et revue, après chaque fusion d'une autre PR. L'agent tient néanmoins chaque branche de travail à jour de sa branche de destination ([Stratégie de branches](strategie-de-branches.md)).
+  - **Dette qualité au fil de l'eau traitée** : le check `Quality debt along the way` du workflow `.github/workflows/quality-debt.yml`, requis comme ceux du CI, en échec tant que la description d'une Pull Request ne traite pas une entrée au fil de l'eau d'un fichier qu'elle modifie ([Dette qualité au fil de l'eau des fichiers modifiés](dette-qualite-au-fil-de-l-eau.md)).
   - **Porte de qualité de SonarQube Cloud requise** : le check `SonarCloud Code Analysis`, que l'application GitHub de SonarQube Cloud (`integration_id` `12526`) publie sur chaque commit analysé, en échec si la porte de qualité échoue (cf. [Analyse de la qualité du code](analyse-de-la-qualite-du-code.md)).
 - **Sécurité du dépôt** (`security_and_analysis`, disponible gratuitement car dépôt public) :
   - **Secret scanning** : activé
