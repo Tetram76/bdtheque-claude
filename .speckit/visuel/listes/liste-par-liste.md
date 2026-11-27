@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Liste par liste'
 description: 'Visuel, entrée, colonnes et filtres de chaque liste de l''administration.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T20:28:41Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:42:30Z }
 ---
 
 # Liste par liste
