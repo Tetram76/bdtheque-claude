@@ -2,7 +2,7 @@
 
 ## 2026-11-27
 
-* **Choix** : la recherche par texte (listes, choix d'une fiche en tapant son nom, recherche avancée, journal des modifications) tient pour équivalentes les variantes typographiques d'une apostrophe, d'une espace ou d'un tiret, de part et d'autre, par une liste unique des variantes et la fonction `translate` de PostgreSQL ; les séparateurs ignorés d'un ISBN en sont les espaces et les tirets ([Recherche](choix-implementation/api/recherche.md)) (#PR).
+* **Choix** : la recherche par texte (listes, choix d'une fiche en tapant son nom, recherche avancée, journal des modifications) tient pour équivalentes les variantes typographiques d'une apostrophe, d'une espace ou d'un tiret, de part et d'autre, par une liste unique des variantes et la fonction `translate` de PostgreSQL ; les séparateurs ignorés d'un ISBN en sont les espaces et les tirets ([Recherche](choix-implementation/api/recherche.md)) (#678).
 
 ## 2026-11-26
 
