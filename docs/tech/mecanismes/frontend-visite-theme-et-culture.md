@@ -93,7 +93,7 @@ Le fuseau horaire est porté par [`BrowserTimeZone`](../../../src/Bdtheque.Front
 
 La présentation des valeurs est confiée à quelques classes, dans `Formatting/` :
 
-- [`DisplayFormatter`](../../../src/Bdtheque.Frontend/Formatting/DisplayFormatter.cs) présente les dates, les nombres et les montants dans la culture et le fuseau de la requête.
+- [`DisplayFormatter`](../../../src/Bdtheque.Frontend/Formatting/DisplayFormatter.cs) présente les dates, les nombres et les montants dans la culture et le fuseau de la requête. Un montant y prend les décimales de sa devise, que donne [`CurrencyDecimals`](../../../src/Bdtheque.Currencies/CurrencyDecimals.cs) d'après l'ISO 4217 : aucune pour le yen, trois pour le dinar koweïtien, deux pour l'euro et pour toute devise que la table ne connaît pas.
 - [`RecordLabels`](../../../src/Bdtheque.Frontend/Formatting/RecordLabels.cs) produit les libellés des fiches.
 - [`ValueLabels`](../../../src/Bdtheque.Frontend/Formatting/ValueLabels.cs) donne le libellé des valeurs des énumérations.
 - [`IsbnFormatter`](../../../src/Bdtheque.Frontend/Formatting/IsbnFormatter.cs) place les tirets d'un ISBN d'après les plages publiées par l'Agence internationale de l'ISBN, que [`IsbnRangesRefresher`](../../../src/Bdtheque.Frontend/Formatting/IsbnRangesRefresher.cs) télécharge chaque jour.

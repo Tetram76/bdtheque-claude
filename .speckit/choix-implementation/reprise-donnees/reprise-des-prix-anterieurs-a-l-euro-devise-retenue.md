@@ -2,7 +2,7 @@
 type: Choix d'implémentation
 title: 'Reprise des prix antérieurs à l''euro : devise retenue'
 description: 'Règle déterministe de la devise d''un prix antérieur à l''euro ; à lire pour la reprise des données.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T17:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:00:00Z }
 ---
 
 # Reprise des prix antérieurs à l'euro : devise retenue
@@ -14,5 +14,7 @@ La devise d'un prix d'acquisition antérieur à l'euro ([Correspondances particu
   - en euros, des centimes multiples de 5 ou terminés par 9 ;
   - en francs, un prix multiple de 0,50 franc dont la conversion, arrondie au centime, donne le montant stocké, ce prix étant alors repris.
 - Les deux devises vraisemblables, ou aucune, et toute année de référence antérieure à 1960 : **doute persistant**, le prix est soumis à l'arbitrage de l'utilisateur au lieu d'être repris d'office. Avant 1960, anciens francs, francs ou euros sont possibles, et un multiple de 0,50 ancien franc (moins d'un dixième de centime) rend tout montant vraisemblable : aucune comparaison ne départage les devises.
+
+**Prix reconverti arrondi aux décimales de sa devise**, au centime du franc ou de l'ancien franc : le domaine refuse un montant plus précis que sa devise ([Gestion des devises](../../fonctionnel/valorisation/gestion-des-devises.md), précision d'un montant), quand la reconversion d'un prix en euros (6,55957 francs, ou 655,957 anciens francs, pour 1 €) en donne bien plus de deux (7,01 € donnent 45,9825857 francs).
 
 Mesuré sur la base existante : 64 prix de devise incertaine, dont 16 classés en francs, 43 en euros et 5 laissés à l'arbitrage (dont l'édition datée de l'an 200, année à corriger).

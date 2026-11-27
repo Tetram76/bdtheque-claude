@@ -2,7 +2,7 @@
 
 * [Intention d'acquisition : agrégat porté par l'album](intention-d-acquisition-agregat-porte-par-l-album.md) - Intentions d'acquisition portées par l'agrégat Album : acquisition, conversion, édition non possédée indissociable de son intention, fusion de deux albums et de deux éditions.
 * [Valeur d'une édition : mise en œuvre](valeur-d-une-edition-mise-en-oeuvre.md) - Règles des montants d'une édition, écriture atomique de l'acquisition, date de référence.
-* [Représentation de la devise](representation-de-la-devise.md) - Devise en code ISO 4217, ancien franc sous le code QZF.
+* [Représentation de la devise](representation-de-la-devise.md) - Devise en code ISO 4217, ancien franc sous le code QZF, décimales d'une devise tirées de l'ISO 4217 dans une table partagée par le domaine et le frontend, deux par défaut.
 * [Version de l'API Frankfurter](version-de-l-api-frankfurter.md) - Taux de change par l'API Frankfurter v2, taux fixes en constantes (Phase 4).
 * [Journal des modifications : mise en œuvre](journal-des-modifications-mise-en-oeuvre.md) - Capture des écritures à l'enregistrement, correspondance des attributs, libellés et valeurs en données, stockage JSON, API, recherche et filtres du journal entier, existence d'une fiche ; à lire pour toute fiche ou attribut ajouté, ou pour l'écran du journal.
 * [Paramétrage de l'application : mise en œuvre](parametrage-de-l-application-mise-en-oeuvre.md) - Paramétrage en fiche unique, provisionnée au démarrage, adressée sans identifiant.
