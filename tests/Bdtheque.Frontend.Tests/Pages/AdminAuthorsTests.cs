@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net;
+using System.Text.Json;
 using AngleSharp.Dom;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
@@ -333,6 +334,24 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
             panel.QuerySelectorAll(".side-panel-actions .button").Select(button => (Text(button), button.GetAttribute("href"))));
     }
 
+    [Fact]
+    public async Task Panel_SaveInProgress_DisablesItsFieldsAndItsSaving_UntilItEnds()
+    {
+        // A field changed during the saving would be lost, the panel leaving once the author it sent is saved.
+        var saved = new TaskCompletionSource();
+        _api.Hold = (_, body) => body.ValueKind == JsonValueKind.Undefined ? Task.CompletedTask : saved.Task;
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Technical, HttpStatusCode.InternalServerError);
+        var page = Open($"q=gib&edit={Gotlib.Id}", recorded: true);
+        await page.InputAsync("#author-nationality", "Belge");
+
+        var saving = await page.StartSubmitAsync("form.side-panel-form");
+
+        Assert.True(page.Find(".entry-panel-fields").HasAttribute("disabled"));
+        Assert.True(page.Find(".side-panel-actions button[type=submit]").HasAttribute("disabled"));
+        saved.SetResult();
+        await saving.EndAsync("The saving");
+        Assert.False(page.Find(".entry-panel-fields").HasAttribute("disabled"));
+    }
     [Fact]
     public async Task Panel_SavesTheAuthorWithItsVersion_ThenLeadsBackToTheList()
     {

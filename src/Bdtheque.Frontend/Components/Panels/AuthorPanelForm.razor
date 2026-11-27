@@ -16,7 +16,7 @@
    administrator alone (AuthorEntryPanel), it still saves nothing without the authentication of its circuit. *@
 @if (_administrator && Entry is not null)
 {
-    <EntryPanel @ref="_panel" Id="author-panel" Title="@(Entry.Id is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@CloseHref"
+    <EntryPanel @ref="_panel" Saving="_saving" Id="author-panel" Title="@(Entry.Id is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@CloseHref"
                 SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" OnSave="SaveAsync" HasRedo="Tracker.HasRedo"
                 Problem="SaveProblem" Dates="Dates">
         <div class="author-panel-names">

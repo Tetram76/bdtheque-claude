@@ -14,11 +14,15 @@
             {
                 <p class="side-panel-dates">@Dates</p>
             }
-            @ChildContent
+            @* Disabled while the record is saved, as an entry form (EntryForm): a field changed meanwhile would be lost, the panel
+               leaving once the record it sent is saved. *@
+            <fieldset class="entry-panel-fields" disabled="@Saving">
+                @ChildContent
+            </fieldset>
         </ChildContent>
         <Actions>
             @* Saved from the circuit only, as an entry form (EntryForm). *@
-                <Button Type="submit" Variant="ButtonVariant.Primary" Label="@SaveLabel" Disabled="@(!RendererInfo.IsInteractive)" />
+            <Button Type="submit" Variant="ButtonVariant.Primary" Label="@SaveLabel" Disabled="@(Saving || !RendererInfo.IsInteractive)" />
         </Actions>
     </SidePanel>
 </form>
@@ -73,6 +77,10 @@
 
     [Parameter]
     public EventCallback OnSave { get; set; }
+
+    /// <summary>Whether the record is being saved: its fields are then disabled, and so is its saving.</summary>
+    [Parameter]
+    public bool Saving { get; set; }
 
     /// <summary>
     /// Whether data of the entry left behind when the record was reloaded are still to take or reject (EntryTracker.HasRedo):
