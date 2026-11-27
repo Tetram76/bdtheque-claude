@@ -270,15 +270,24 @@
         if (_query is { Adding: true, Text: { } searched } && _list.Items.Count == 0 && !IsPost)
             NewLabel ??= searched;
 
-        if (_dialogGenre is not null && _query.Delete is { } deleted)
-            await LoadImpactAsync(deleted);
-        else if (_dialogGenre is not null && _query.MergeText is { } text)
-            _candidates = await LoadCandidatesAsync(text);
-        else if (_dialogGenre is not null && _query.Merge is not null)
-            await LoadSuggestionsAsync();
+        await LoadDialogAsync();
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
+    }
+
+    // What the dialog open on a genre of the page presents: the impact of its deletion, or the other genres its merge finds
+    // by its search or proposes before any search.
+    private async Task LoadDialogAsync()
+    {
+        if (_dialogGenre is null)
+            return;
+        if (_query.Delete is { } deleted)
+            await LoadImpactAsync(deleted);
+        else if (_query.MergeText is { } text)
+            _candidates = await LoadCandidatesAsync(text);
+        else if (_query.Merge is not null)
+            await LoadSuggestionsAsync();
     }
 
     // The page of the list searched on the label of the genre that shows it, read page after page: labels that contain it may
