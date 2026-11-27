@@ -30,6 +30,24 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
             .GetByRole(AriaRole.Link, new() { Name = "Albums" })).ToHaveAttributeAsync("aria-current", "page");
     }
 
+    // The visuals of the edition wished for, under its intent, open the same viewer, on them (visuel/fiche-album/contenu.md, #632).
+    [Theory, InEachTheme]
+    public async Task Viewer_OpensOnAThumbnailOfAnIntent_OnTheVisualsOfTheEditionWishedFor(string theme)
+    {
+        var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = 1280, Height = 720 });
+        await PageReadiness.GotoAsync(page, AppPaths.Album(Application.AlbumId));
+        var viewer = page.GetByRole(AriaRole.Dialog);
+
+        await page.Locator(".album-intents").GetByRole(AriaRole.Link, new() { Name = "4e de couverture" }).ClickAsync();
+        await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("4e de couverture");
+        await Assertions.Expect(viewer.Locator(".visual-position")).ToHaveTextAsync("2 sur 2");
+        await Assertions.Expect(viewer.Locator(".visual-dialog-edition")).ToHaveTextAsync("Casterman, site externe [2023]");
+
+        await viewer.GetByRole(AriaRole.Link, new() { Name = "Visuel suivant" }).ClickAsync();
+        await Assertions.Expect(viewer.Locator(".visual-dialog-title")).ToHaveTextAsync("Couverture");
+        await Assertions.Expect(viewer.Locator(".visual-position")).ToHaveTextAsync("1 sur 2");
+    }
+
     // A theme that draws at random (the balloons of « La planche encrée ») keeps its drawing on the same page.
     [Theory, InEachTheme]
     public async Task Viewer_OpensOnAThumbnail_GoesToTheNext_AndCloses_ThePageStayingWhereItWas(string theme)
@@ -80,7 +98,8 @@ public sealed partial class AlbumRecordTests(RecordsApplication application) : B
     {
         var page = await NewPageAsync(theme);
         await page.GotoAsync(AppPaths.Album(Application.AlbumId));
-        await page.GetByRole(AriaRole.Link, new() { Name = "Couverture", Exact = true }).ClickAsync();
+        // The cover of the first edition, the edition wished for having one too.
+        await page.Locator(".editions").GetByRole(AriaRole.Link, new() { Name = "Couverture", Exact = true }).ClickAsync();
 
         var href = await page.GetByRole(AriaRole.Dialog).GetByRole(AriaRole.Link, new() { Name = "Voir l'image originale" }).GetAttributeAsync("href");
         var response = await page.APIRequest.GetAsync(href!);
@@ -241,6 +260,9 @@ public sealed class RecordsApplication : ApplicationHost
     /// <summary>The first edition of <see cref="AlbumId"/>, with its four visuals.</summary>
     public Guid FirstEditionId { get; private set; }
 
+    /// <summary>The edition of <see cref="AlbumId"/> wished for by a purchase intent, with a cover and a back cover.</summary>
+    public Guid IntendedEditionId { get; private set; }
+
     /// <summary>An album of the series targeted by a purchase intent on itself.</summary>
     public Guid IntendedAlbumId { get; private set; }
 
@@ -323,11 +345,15 @@ public sealed class RecordsApplication : ApplicationHost
         await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{intended.Id}/purchase-intents", new CreatePurchaseIntentRequest(null, intended.Version));
         CataloguedAlbumId = (await AlbumAsync(api, series.Id, "Les Éthiopiques", 7, [new(hugo.Id, ContributionRole.Scenarist)])).Id;
 
-        // Owned, and wished for again in a special edition, presented under its editions.
-        await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
+        // Owned, and wished for again in a special edition, presented under its editions, with its two visuals; newer than the
+        // first edition, whose cover stays that of the album (fonctionnel/regles-metier/couverture-d-un-album.md).
+        var wishedFor = await PostAsync<PurchaseIntentsForm>(api, $"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
             new PurchaseIntentEditionContent(casterman.Id, null, 2023, null, BindingType.Hardcover, null, null, EditionFormat.Large, 112,
                 EditionCategory.SpecialEdition, true),
             gift.AlbumVersion));
+        IntendedEditionId = wishedFor.Intents.Single().EditionId!.Value;
+        version = await UploadAsync(api, album.Id, IntendedEditionId, VisualType.Cover, SKColors.Salmon, wishedFor.AlbumVersion);
+        await UploadAsync(api, album.Id, IntendedEditionId, VisualType.BackCover, SKColors.Khaki, version);
 
         // Last, so that no date of the albums above changes.
         EmptySeriesId = (await PostAsync<SeriesForm>(api, "/admin/series", new SeriesContent(
