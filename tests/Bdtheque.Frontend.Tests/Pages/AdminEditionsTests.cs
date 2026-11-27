@@ -5,6 +5,7 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Frontend.Components.Lists;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Components.Presentation;
 using Bdtheque.Frontend.Lists;
@@ -253,6 +254,22 @@ public sealed class AdminEditionsTests : BunitContext, IDisposable
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
     }
 
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: before any search, the dialog proposes the records the
+    // API finds resembling the record, as the dialog of every list does (pinned by AdminGenresTests).
+    [Fact]
+    public void Merge_BeforeAnySearch_ProposesTheRecordsThatResembleIt()
+    {
+        var path = $"/admin/editions?resembling={Glenat.Edition.Id}&pageSize={MergeDialog.SuggestionCount}";
+        _api.Answers[path] = new EditionAdminList(Page([Dupuis], 1), NoFilters);
+
+        var dialog = Open($"merge={Glenat.Edition.Id}").Find("dialog");
+
+        Assert.Equal("Éditions pressenties", Text(dialog.QuerySelector(".merge-suggestions")!));
+        Assert.Equal(["Dupuis (Repérages)"], dialog.QuerySelectorAll(".merge-candidate strong").Select(Text));
+        Assert.Contains("Ou recherchez l'autre édition par son ISBN ou par le titre de son album.", dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Contains(_api.Requested, requested => requested == path);
+        Assert.Equal("true", dialog.QuerySelector("#edition-merge-continue input[name='suggested']")!.GetAttribute("value"));
+    }
     [Fact]
     public void Merge_ADialogThatSearchesTheOtherEditionByItsIsbnOrItsAlbum_AndContinuesWithTheOneChosen()
     {

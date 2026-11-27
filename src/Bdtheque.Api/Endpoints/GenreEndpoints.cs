@@ -4,6 +4,7 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -102,10 +103,14 @@ internal static class GenreEndpoints
     /// and the order of the list of the consultation. Each row counts the albums and series of the genre as the lists filtered
     /// on it find them, and carries its modification and its version, which its modification and its deletion send back.
     /// </summary>
-    private static Task<Page<GenreAdminListItem>> ListForAdministrationAsync(
+    /// <param name="resembling">A genre whose merge proposes the genres that resemble it (<see cref="MergeSuggestions"/>):
+    /// the list is then restricted to them, the closest first.</param>
+    private static async Task<Page<GenreAdminListItem>> ListForAdministrationAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
-        int pageSize = Paging.DefaultSize) =>
-        Search(context, q, entry)
+        int pageSize = Paging.DefaultSize, Guid? resembling = null)
+    {
+        var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
+        var rows = await Search(context, q, entry, ranked)
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Genre g) => new GenreAdminListItem(
                 g.Id,
                 g.Label,
@@ -113,13 +118,27 @@ internal static class GenreEndpoints
                 context.Series.Count(s => s.IsOfGenre(g.Id)),
                 g.ModifiedAt,
                 EF.Property<uint>(g, BdthequeDbContext.VersionProperty))), cancellationToken);
+        return rows with { Items = MergeSuggestions.InRankOrder(rows.Items, ranked, g => g.Id) };
+    }
+
+    // A longer label names another, more precise genre (« Humour noir »): no inclusion (fonctionnel/regles-metier/fusion-des-fiches.md).
+    private static async Task<IReadOnlyList<Guid>> ResemblingAsync(
+        BdthequeDbContext context, Guid subject, int count, CancellationToken cancellationToken)
+    {
+        var genres = await Search(context, text: null, entry: null).Select(g => new { g.Id, g.Label }).ToListAsync(cancellationToken);
+        return MergeSuggestions.Rank(genres, subject, g => g.Id, (a, b) => Resemblance.Compare([a.Label], [b.Label], inclusion: false), count);
+    }
 
     /// <summary>The genres found by their label, under the entry of the navigation, by label.</summary>
+    /// <param name="only">The genres the list is restricted to, if any.</param>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
-    private static IOrderedQueryable<Genre> Search(BdthequeDbContext context, string? text, string? entry)
+    private static IOrderedQueryable<Genre> Search(
+        BdthequeDbContext context, string? text, string? entry, IReadOnlyList<Guid>? only = null)
     {
         CatalogFilters.EnsureNavigationEntry(entry);
         var genres = context.Genres.AsNoTracking().WhereContains(text, g => g.Label);
+        if (only is not null)
+            genres = genres.Where(g => only.Contains(g.Id));
         if (entry is not null)
             genres = genres.Where(g => g.NavigationEntry == entry);
         return genres.OrderByEntry(g => g.NavigationEntry).ThenBy(g => g.Label).ThenBy(g => g.Id);

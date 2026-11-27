@@ -22,7 +22,7 @@ public static class TitleSortKeyCalculator
 
     // Space-separated forms: only moved when followed by a word boundary (a space),
     // so a title that merely starts with the same letters (e.g. "Larousse") is untouched.
-    private static readonly string[] SpaceSeparatedArticles = ["Le", "La", "Les", "Un", "Une", "Des"];
+    internal static readonly string[] SpaceSeparatedArticles = ["Le", "La", "Les", "Un", "Une", "Des"];
 
     public static string Compute(string title)
     {

@@ -5,6 +5,7 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Frontend.Components.Lists;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
@@ -249,6 +250,22 @@ public sealed class AdminPublishersTests : BunitContext, IDisposable
             dialog.QuerySelectorAll(".deletion-refusal li").Select(Text));
     }
 
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: before any search, the dialog proposes the records the
+    // API finds resembling the record, as the dialog of every list does (pinned by AdminGenresTests).
+    [Fact]
+    public void Merge_BeforeAnySearch_ProposesTheRecordsThatResembleIt()
+    {
+        var path = $"/admin/publishers?resembling={Casterman.Id}&pageSize={MergeDialog.SuggestionCount}";
+        _api.Answers[path] = new Page<PublisherAdminListItem>([Dargaud], 1, MergeDialog.SuggestionCount, 1);
+
+        var dialog = Open($"merge={Casterman.Id}").Find("dialog");
+
+        Assert.Equal("Éditeurs pressentis", Text(dialog.QuerySelector(".merge-suggestions")!));
+        Assert.Equal(["Dargaud"], dialog.QuerySelectorAll(".merge-candidate strong").Select(Text));
+        Assert.Contains("Ou recherchez l'autre éditeur par son nom.", dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Contains(_api.Requested, requested => requested == path);
+        Assert.Equal("true", dialog.QuerySelector("#publisher-merge-continue input[name='suggested']")!.GetAttribute("value"));
+    }
     [Fact]
     public void Merge_ADialogThatSearchesTheOtherPublisher_AndContinuesWithTheOneChosen()
     {

@@ -7,6 +7,7 @@ using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
 using Bdtheque.Contracts.Enums;
 using Bdtheque.Contracts.Errors;
+using Bdtheque.Frontend.Components.Lists;
 using Bdtheque.Frontend.Components.Pages.Admin;
 using Bdtheque.Frontend.Lists;
 using Bdtheque.Frontend.Navigation;
@@ -280,6 +281,22 @@ public sealed class AdminAuthorsTests : BunitContext, IDisposable
         Assert.Equal(["Fermer"], dialog.QuerySelectorAll(".dialog-actions .button").Select(Text));
     }
 
+    // fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties: before any search, the dialog proposes the records the
+    // API finds resembling the record, as the dialog of every list does (pinned by AdminGenresTests).
+    [Fact]
+    public void Merge_BeforeAnySearch_ProposesTheRecordsThatResembleIt()
+    {
+        var path = $"/admin/authors?resembling={Gotlib.Id}&pageSize={MergeDialog.SuggestionCount}";
+        _api.Answers[path] = new Page<AuthorAdminListItem>([Gomez], 1, MergeDialog.SuggestionCount, 1);
+
+        var dialog = Open($"merge={Gotlib.Id}").Find("dialog");
+
+        Assert.Equal("Auteurs pressentis", Text(dialog.QuerySelector(".merge-suggestions")!));
+        Assert.Equal(["Alain Gomez"], dialog.QuerySelectorAll(".merge-candidate strong").Select(Text));
+        Assert.Contains("Ou recherchez l'autre auteur par son nom, son prénom ou son pseudonyme.", dialog.QuerySelectorAll(".dialog-note").Select(Text));
+        Assert.Contains(_api.Requested, requested => requested == path);
+        Assert.Equal("true", dialog.QuerySelector("#author-merge-continue input[name='suggested']")!.GetAttribute("value"));
+    }
     [Fact]
     public void Merge_ADialogThatSearchesTheOtherAuthor_AndContinuesWithTheOneChosen()
     {

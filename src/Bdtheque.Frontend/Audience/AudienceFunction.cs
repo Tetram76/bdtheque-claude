@@ -713,6 +713,31 @@ public static class AudienceFunctions
     /// <summary>A visual of one of the two editions shown in the viewer, with the visual: the one of a thumbnail, the previous or the next.</summary>
     public static readonly AudienceFunction AdminEditionMergeVisual = new("admin.edition-merge.visual", AudienceFunctionKind.Action);
 
+    // The merge pursued with a record the dialog of the list proposes from its opening, rather than with one its search found
+    // (fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties): an action of the list, recorded by the merge it
+    // leads to, whose address says so, before its screen.
+
+    /// <summary>The merge of an album pursued with an album the dialog proposed, with the album.</summary>
+    public static readonly AudienceFunction AdminAlbumsMergeSuggested = new("admin.albums.merge.suggested", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of a series pursued with a series the dialog proposed, with the series.</summary>
+    public static readonly AudienceFunction AdminSeriesMergeSuggested = new("admin.series.merge.suggested", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of an author pursued with an author the dialog proposed, with the author.</summary>
+    public static readonly AudienceFunction AdminAuthorsMergeSuggested = new("admin.authors.merge.suggested", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of a publisher pursued with a publisher the dialog proposed, with the publisher.</summary>
+    public static readonly AudienceFunction AdminPublishersMergeSuggested = new("admin.publishers.merge.suggested", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of an edition pursued with an edition the dialog proposed, with the edition.</summary>
+    public static readonly AudienceFunction AdminEditionsMergeSuggested = new("admin.editions.merge.suggested", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of a genre pursued with a genre the dialog proposed, with the genre.</summary>
+    public static readonly AudienceFunction AdminGenresMergeSuggested = new("admin.genres.merge.suggested", AudienceFunctionKind.Action);
+
+    /// <summary>The merge of a universe pursued with a universe the dialog proposed, with the universe.</summary>
+    public static readonly AudienceFunction AdminUniversesMergeSuggested = new("admin.universes.merge.suggested", AudienceFunctionKind.Action);
+
     /// <summary>The whole change log (visuel/journal/journal-des-modifications.md).</summary>
     public static readonly AudienceFunction AdminChangeLog = new("admin.change-log", AudienceFunctionKind.Screen);
 
@@ -771,6 +796,8 @@ public static class AudienceFunctions
         AdminUniverseMerge, AdminUniverseMerged,
         AdminAlbumMerge, AdminAlbumMerged,
         AdminEditionMerge, AdminEditionMerged, AdminEditionMergeVisual,
+        AdminAlbumsMergeSuggested, AdminSeriesMergeSuggested, AdminAuthorsMergeSuggested, AdminPublishersMergeSuggested,
+        AdminEditionsMergeSuggested, AdminGenresMergeSuggested, AdminUniversesMergeSuggested,
         AdminChangeLog, AdminChangeLogSearch, AdminChangeLogFilter, AdminChangeLogPage,
     ];
 }

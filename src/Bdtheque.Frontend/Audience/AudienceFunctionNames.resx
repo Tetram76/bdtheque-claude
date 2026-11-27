@@ -648,4 +648,25 @@
   <data name="admin.edition-merge.visual" xml:space="preserve">
     <value>Fusion de deux éditions · visuel montré</value>
   </data>
+  <data name="admin.albums.merge.suggested" xml:space="preserve">
+    <value>Liste des albums · fusion avec un album pressenti</value>
+  </data>
+  <data name="admin.series.merge.suggested" xml:space="preserve">
+    <value>Liste des séries · fusion avec une série pressentie</value>
+  </data>
+  <data name="admin.authors.merge.suggested" xml:space="preserve">
+    <value>Liste des auteurs · fusion avec un auteur pressenti</value>
+  </data>
+  <data name="admin.publishers.merge.suggested" xml:space="preserve">
+    <value>Liste des éditeurs · fusion avec un éditeur pressenti</value>
+  </data>
+  <data name="admin.editions.merge.suggested" xml:space="preserve">
+    <value>Liste des éditions · fusion avec une édition pressentie</value>
+  </data>
+  <data name="admin.genres.merge.suggested" xml:space="preserve">
+    <value>Liste des genres · fusion avec un genre pressenti</value>
+  </data>
+  <data name="admin.universes.merge.suggested" xml:space="preserve">
+    <value>Liste des univers · fusion avec un univers pressenti</value>
+  </data>
 </root>

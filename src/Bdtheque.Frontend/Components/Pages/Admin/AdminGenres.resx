@@ -159,4 +159,10 @@
   <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
     <value>retirez le genre de leurs critères</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Genres pressentis</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre genre par son libellé.</value>
+  </data>
 </root>

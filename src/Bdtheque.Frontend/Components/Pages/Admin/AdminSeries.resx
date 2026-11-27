@@ -183,4 +183,10 @@
   <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
     <value>retirez la série de leurs critères</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Séries pressenties</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre série par son titre.</value>
+  </data>
 </root>

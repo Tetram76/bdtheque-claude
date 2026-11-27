@@ -143,7 +143,8 @@
                 <MergeDialog Id="author-merge" Title="@L["Merge.Title"]" Subject="@Name(_dialogAuthor)" Lead="@L["Merge.Lead"]"
                              CloseHref="@ListOnly.Href()" Action="@AppPaths.AdminAuthors"
                              Criteria="@((ListOnly with { Merge = _dialogAuthor.Id }).Parameters())" Text="@_query.MergeText"
-                             SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]" Candidates="_candidates"
+                             SearchLabel="@L["Merge.Search"]" Placeholder="@L["Merge.Placeholder"]" Candidates="_candidates" Suggestions="_suggestions" SuggestionsProblem="_suggestionsProblem"
+                             SuggestionsLabel="@L["Merge.Suggestions"]" SuggestionsPrompt="@L["Merge.SuggestionsPrompt"]"
                              Prompt="@L["Merge.Prompt"]" None="@L["Merge.None", _query.MergeText ?? ""]" CandidatesLabel="@L["Merge.Candidates"]"
                              Note="@L["Merge.Note"]" ContinueAction="@AppPaths.AdminMergeAuthors" SubjectName="author" SubjectId="_dialogAuthor.Id" />
             }
@@ -183,6 +184,8 @@
     private DeletionImpact? _impact;
     private ApiProblem? _deletionProblem;
     private IReadOnlyList<MergeDialog.MergeCandidate>? _candidates;
+    private IReadOnlyList<MergeDialog.MergeCandidate>? _suggestions;
+    private ApiProblem? _suggestionsProblem;
 
     // The list with its criteria, without its dialogs nor its panel: where a link of the list, or their closing, leads.
     private AuthorListQuery ListOnly => _query with { Delete = null, Merge = null, MergeText = null, Edit = null, Adding = false };
@@ -221,6 +224,8 @@
             await LoadImpactAsync(deleted);
         else if (_dialogAuthor is not null && _query.MergeText is { } text)
             _candidates = await LoadCandidatesAsync(text);
+        else if (_dialogAuthor is not null && _query.Merge is not null)
+            await LoadSuggestionsAsync();
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && _query.Action is { } action)
             await Recorder.RecordActionAsync(action.Function, action.Parameters, context.RequestAborted);
@@ -247,9 +252,26 @@
             .. found.Items
                 .Where(row => row.Id != _dialogAuthor!.Id)
                 .Take(CandidateCount)
-                .Select(row => new MergeDialog.MergeCandidate(row.Id, Name(row), CandidateDetail(row))),
+                .Select(Candidate),
         ];
     }
+
+    // The other records that resemble the record of the dialog, the closest first, proposed before any search
+    // (fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties). Unread, they are said in the dialog, whose search remains.
+    private async Task LoadSuggestionsAsync()
+    {
+        try
+        {
+            var found = await Api.GetAsync<Page<AuthorAdminListItem>>(_query.MergeSuggestionsApiPath(_dialogAuthor!.Id, MergeDialog.SuggestionCount));
+            _suggestions = [.. found.Items.Select(Candidate)];
+        }
+        catch (ApiProblemException exception)
+        {
+            _suggestionsProblem = exception.Problem;
+        }
+    }
+
+    private MergeDialog.MergeCandidate Candidate(AuthorAdminListItem row) => new(row.Id, Name(row), CandidateDetail(row));
 
     private async Task DeleteAsync()
     {

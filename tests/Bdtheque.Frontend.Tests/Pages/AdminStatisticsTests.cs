@@ -158,8 +158,9 @@ public sealed class AdminStatisticsTests : BunitContext, IDisposable
         var names = page.FindAll(".audience-row:not(.audience-row-head) .row-entry").Select(entry => Text(entry)).ToList();
         Assert.Equal(["Liste des albums", "Liste des albums · recherche"], names.Take(2));
         Assert.All(names, name => Assert.True(name == "Liste des albums" || name.StartsWith("Liste des albums · ", StringComparison.Ordinal), name));
-        Assert.Equal(AudienceFunctions.Followed.Count(f => f.Key.StartsWith("admin.albums", StringComparison.Ordinal)), names.Count);
-        Assert.StartsWith("2 fonctions utilisées sur 8 suivies", Text(page.Find(".audience-summary")));
+        var followed = AudienceFunctions.Followed.Count(f => f.Key.StartsWith("admin.albums", StringComparison.Ordinal));
+        Assert.Equal(followed, names.Count);
+        Assert.StartsWith($"2 fonctions utilisées sur {followed} suivies", Text(page.Find(".audience-summary")));
     }
 
     [Fact]
