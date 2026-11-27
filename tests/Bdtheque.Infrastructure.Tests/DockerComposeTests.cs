@@ -57,6 +57,17 @@ public sealed partial class DockerComposeTests
     }
 
     [Fact]
+    public void AccountOfTheValidation_HasNoSecondFactor()
+    {
+        // The validation environment is no deployment exposed in HTTPS: its login asks for the login and the password
+        // alone, never for a code (choix-implementation/deploiement/environnement-de-validation-fonctionnelle.md).
+        var settings = RepositoryFiles.Read("docker/validation/validation.env");
+
+        Assert.Contains("ADMIN_LOGIN=", settings);
+        Assert.DoesNotContain("ADMIN_TOTP_SECRET", settings);
+    }
+
+    [Fact]
     public void Networks_AreNamedAfterTheServiceTheyGiveAccessTo()
     {
         // One naming rule for every network, so that a network says which container it protects and joining it says
