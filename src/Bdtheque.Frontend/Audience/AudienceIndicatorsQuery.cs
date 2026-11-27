@@ -1,5 +1,6 @@
 using System.Globalization;
 using Bdtheque.Contracts.Enums;
+using Bdtheque.Contracts.Search;
 using Bdtheque.Frontend.Navigation;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -112,11 +113,12 @@ public sealed record AudienceIndicatorsQuery(
 
     /// <summary>
     /// Whether the function named <paramref name="name"/> is presented: that of the screen chosen, if any, whose name contains
-    /// the text searched, if any, regardless of case and accents, as the search of a list.
+    /// the text searched, if any, regardless of case, accents and the typographic variants of a character, as the search of a list.
     /// </summary>
     public bool Presents(string name) =>
         (Screen is null || AudienceFunctionNames.ScreenOf(name) == Screen)
-        && (Text is null || CultureInfo.CurrentCulture.CompareInfo.IndexOf(name, Text, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
+        && (Text is null || CultureInfo.CurrentCulture.CompareInfo.IndexOf(
+            SearchText.Normalize(name), SearchText.Normalize(Text), CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
 
     // The filters that differ from the default, in their fixed order.
     private List<(string Name, string Value)> Filters()

@@ -85,6 +85,20 @@ public sealed class CatalogListTests(ApiWebApplicationFactory factory) : IClassF
         Assert.Equal([epervier.Id], Ids(found));
     }
 
+    // choix-implementation/api/recherche.md: a text pasted from an office application writes an apostrophe, a space or a hyphen
+    // in one of its typographic variants, on either side.
+    [Fact]
+    public async Task Search_TreatsTheTypographicVariantsOfACharacterAsTheSame()
+    {
+        var typographic = await CreateSeriesAsync($"L\u2019Étoile\u00A0polaire\u2011{_marker}");
+        var plain = await CreateSeriesAsync($"L'Aube rouge-{_marker}");
+        var author = await CreateAuthorAsync($"D\u2019Arras{_marker}", "Jean\u2011Michel", null);
+
+        Assert.Equal([typographic.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={Uri.EscapeDataString($"l'etoile polaire-{_marker}")}")));
+        Assert.Equal([plain.Id], Ids(await ListAsync<SeriesListItem>("series", $"q={Uri.EscapeDataString($"L\u2018aube\u202Frouge\u2013{_marker}")}")));
+        Assert.Equal([author.Id], Ids(await ListAsync<AuthorCatalogListItem>("authors", $"q={Uri.EscapeDataString($"jean-michel d'arras{_marker}")}")));
+    }
+
     [Fact]
     public async Task Search_LooksForTheWildcardsOfLikeAsTheyAre()
     {

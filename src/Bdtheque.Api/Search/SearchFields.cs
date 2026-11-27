@@ -122,7 +122,10 @@ internal abstract class SearchField(string key, LambdaExpression selector, bool 
     private static Expression IsSetCondition(Expression data) => Expression.NotEqual(data, Expression.Constant(null, data.Type));
 }
 
-/// <summary>A text, compared ignoring case and accents unless the criterion asks otherwise.</summary>
+/// <summary>
+/// A text, compared ignoring case and accents unless the criterion asks otherwise, and ignoring the typographic variants of a
+/// character in any case (<see cref="SearchText"/>), on both sides.
+/// </summary>
 /// <param name="normalize">
 /// Applied to the value as the selector applies it to the data (e.g. the separators of an ISBN, ignored on
 /// both sides).
@@ -147,6 +150,9 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
     private static readonly MethodInfo Replace = typeof(string).GetMethod(nameof(string.Replace), [typeof(string), typeof(string)])!;
     private static readonly MethodInfo Concat = typeof(string).GetMethod(nameof(string.Concat), [typeof(string), typeof(string)])!;
 
+    private static readonly Expression<Func<string, string>> WithoutVariants =
+        text => DatabaseFunctions.Translate(text, SearchText.Variants, SearchText.Characters);
+
     protected override IReadOnlyList<SearchComparison> TypeComparisons => [Contains, DoesNotContain, StartsWith, EqualTo, NotEqualTo];
 
     public override IReadOnlyList<SearchComparison> DataComparisons => TypeComparisons;
@@ -157,8 +163,9 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
         Expression record, Expression data, SearchDataComparison comparison, SearchField other, Expression otherRecord, Expression otherData, SearchScope scope)
     {
         var text = Compared(data, comparison.MatchCaseAndAccents);
+        var otherText = Inline(WithoutVariants, otherData);
         var escaped = new[] { LikeEscapeCharacter, "%", "_" }.Aggregate(
-            otherData,
+            otherText,
             (escaping, character) => Expression.Call(
                 escaping, Replace, Expression.Constant(character), Expression.Constant(LikeEscapeCharacter + character)));
         static Expression Joined(Expression left, Expression right) => Expression.Call(Concat, left, right);
@@ -168,15 +175,16 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
             Contains => Inline(Like, text, anywhere),
             DoesNotContain => Expression.Not(Inline(Like, text, anywhere)),
             StartsWith => Inline(Like, text, Joined(escaped, Expression.Constant("%"))),
-            EqualTo => Expression.Equal(text, otherData),
-            NotEqualTo => Expression.NotEqual(text, otherData),
+            EqualTo => Expression.Equal(text, otherText),
+            NotEqualTo => Expression.NotEqual(text, otherText),
             _ => throw new ArgumentOutOfRangeException(nameof(comparison)),
         };
     }
 
     protected override Expression Compare(Expression record, Expression data, SearchCriterion criterion, IReadOnlyList<string> values, SearchScope scope)
     {
-        var value = normalize is null ? values[0] : normalize(values[0]);
+        var value = SearchText.Normalize(values[0]);
+        value = normalize is null ? value : normalize(value);
         var text = Compared(data, criterion.MatchCaseAndAccents);
         return criterion.Comparison switch
         {
@@ -190,7 +198,7 @@ internal sealed class TextField(string key, LambdaExpression selector, bool isOp
     }
 
     private static Expression Compared(Expression data, bool matchCaseAndAccents) =>
-        Inline(matchCaseAndAccents ? MatchingCaseAndAccents : IgnoringCaseAndAccents, data);
+        Inline(matchCaseAndAccents ? MatchingCaseAndAccents : IgnoringCaseAndAccents, Inline(WithoutVariants, data));
 
     private static Expression LikeOf(Expression text, string pattern) => Inline(Like, text, SearchValues.Parameter(pattern));
 

@@ -108,6 +108,21 @@ public sealed class RecordPickerTests : BunitContext
     }
 
     [Fact]
+    public async Task Typing_FindsTheRecordsAddedOnTheSpot_WhateverTheTypographicVariantsOfTheirCharacters()
+    {
+        // Compared as the search of the lists compares (choix-implementation/api/recherche.md).
+        _answer = _ => Json("""{"items":[],"number":1,"size":10,"totalCount":0}""");
+        var picker = Render<RecordPicker>(parameters => parameters
+            .Add(p => p.Id, "f-author")
+            .Add(p => p.Kind, RecordKind.Author)
+            .Add(p => p.Pending, [new RecordOption(Guid.NewGuid(), "Jean\u2011Michel D\u2019Arras", "nouvel auteur")]));
+
+        await TypeAsync(picker, "jean-michel d'arras");
+
+        Assert.Single(picker.FindAll("[role=option]"));
+    }
+
+    [Fact]
     public async Task ChoosingASuggestion_MakesItTheValue()
     {
         RecordOption? chosen = null;

@@ -1,4 +1,5 @@
 @implements IAsyncDisposable
+@using Bdtheque.Contracts.Search
 @inject RecordSearch Search
 @inject IStringLocalizer<RecordPicker> L
 @inject IJSRuntime JS
@@ -239,10 +240,10 @@
     // A record added on the spot: its detail says so, marked apart from the name.
     private bool IsPending(RecordOption option) => Pending.Any(p => p.Id == option.Id);
 
-    // Compared as the search of the lists compares, whatever the case and the accents.
+    // Compared as the search of the lists compares, whatever the case, the accents and the typographic variants of a character.
     private IEnumerable<RecordOption> PendingMatching(string text) =>
         Pending.Where(p => CultureInfo.CurrentCulture.CompareInfo.IndexOf(
-            p.Label, text.Trim(), CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
+            SearchText.Normalize(p.Label), SearchText.Normalize(text.Trim()), CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace) >= 0);
 
     private async Task OnKeyDownAsync(KeyboardEventArgs args)
     {
