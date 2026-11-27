@@ -33,11 +33,9 @@ internal sealed record ChangeLogFilters(
     Guid? Record,
     [FromQuery(Name = AdvancedSearchQuery.TimeZoneParameter)] string? TimeZone)
 {
-    // The separators an ISBN is searched without, as one string for the SQL function translate (IsbnSearch).
-    private static readonly string IsbnSeparators = string.Concat(IsbnSearch.Separators);
-
     // Each text of the label, decoded (->>), with whether it is an ISBN: a constant, every value searched being a parameter
-    // ({0} the pattern of the text, {1} that of an ISBN, {2} the separators of an ISBN), any other brace being read as one.
+    // ({0} the pattern of the text, {1} that of an ISBN, {2} the separators of an ISBN, {3} the typographic variants of a
+    // character and {4} the characters they stand for, SearchText), any other brace being read as one.
     private const string SearchSql =
         $$"""
         SELECT * FROM "ChangeLogEntries" AS entry
