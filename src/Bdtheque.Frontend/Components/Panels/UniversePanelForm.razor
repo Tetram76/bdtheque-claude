@@ -1,0 +1,232 @@
+@rendermode InteractiveServer
+@using Bdtheque.Contracts.Admin
+@using Bdtheque.Contracts.Catalog
+@using Bdtheque.Frontend.Entries
+@inject IStringLocalizer<UniversePanelForm> L
+@inject IStringLocalizer<FieldMessages> FieldTexts
+@inject IStringLocalizer<RuleMessages> Rules
+@inject ApiClient Api
+@inject AudienceRecorder Recorder
+@inject NavigationManager Navigation
+
+@* The side panel of a universe (visuel/listes/saisie-selon-l-entite.md), interactive: each datum changed is marked as it is
+   typed, and the universe reloaded after it was modified meanwhile offers again what was typed, under each datum
+   (visuel/saisie-album/contenu.md, données modifiées, #355, #329), what is typed being compared with what was read by the
+   tracker of the entry forms. Its parent is chosen by typing its name, or created on the spot, by a child of the panel. Read
+   once, by the prerendering, its state handed to the circuit, from which it is saved. A universe deleted meanwhile keeps the
+   panel open, with what was typed and the error of its saving; an address on a universe deleted opens none. Rendered for the
+   administrator alone (UniverseEntryPanel), it still saves nothing without the authentication of its circuit. *@
+@if (_administrator && Entry is not null)
+{
+    <EntryPanel @ref="_panel" Saving="_saving" Id="universe-panel" Title="@(Entry.Id is null ? L["Panel.New"] : L["Panel.Edit"])" CloseHref="@CloseHref"
+                SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" OnSave="SaveAsync" HasRedo="Tracker.HasRedo"
+                Problem="SaveProblem" Dates="Dates">
+        <Field Id="universe-name" Label="@L["Name"]" Required Error="@Errors.For(NameField)" State="@DatumState(NameField)" Context="control">
+            <input id="@control.Id" type="text" autofocus tabindex="0" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
+                   @bind="Entry.Name" @bind:event="oninput" />
+        </Field>
+        @* Rendered anew for each reading, its choice then the parent of the universe reloaded. *@
+        <ParentUniverseField @key="_reading" Id="universe-parent" Value="Entry.Parent" ValueChanged="(RecordOption? parent) => Entry.Parent = parent"
+                             NewParent="Entry.NewParent" NewParentChanged="(NewUniverse created) => Entry.NewParent = created" Error="@ParentError"
+                             State="@DatumState(ParentField)" />
+        <Field Id="universe-description" Label="@L["Description"]" Error="@Errors.For(DescriptionField)" State="@DatumState(DescriptionField)"
+               Context="control">
+            <textarea id="@control.Id" rows="5" placeholder="@L["Description.Placeholder"]" aria-describedby="@control.DescribedBy"
+                      aria-invalid="@control.Invalid" @bind="Entry.Description" @bind:event="oninput"></textarea>
+        </Field>
+    </EntryPanel>
+}
+
+@code {
+    private bool _administrator;
+    private ApiProblem? _problem;
+    // The parent created on the spot that the last saving sent, under the key standing for its identifier: what lets its error
+    // designate it (choix-implementation/socle/frontend.md, erreur d'une fiche créée sur place).
+    private NewRecords? _sentNewRecords;
+    private bool _saving;
+    private bool _revealProblem;
+    private EntryPanel? _panel;
+    private EntryTracker<UniverseEntry>? _tracker;
+    // The number of the reading of the universe: the field of the parent is rendered anew for each.
+    private int _reading;
+
+    /// <summary>The universe changed; none for a new universe.</summary>
+    [Parameter]
+    public Guid? UniverseId { get; set; }
+
+    /// <summary>The text searched in vain in the list, which a new universe takes as its name (« Créer l'univers « … » »).</summary>
+    [Parameter]
+    public string? Searched { get; set; }
+
+    /// <summary>Where the closing of the panel leads: the page under it.</summary>
+    [Parameter, EditorRequired]
+    public string CloseHref { get; set; } = null!;
+
+    /// <summary>Where the universe saved leads: the page under the panel, without it.</summary>
+    [Parameter, EditorRequired]
+    public string SavedHref { get; set; } = null!;
+
+    /// <summary>The action the opening of the panel is, recorded by the panel; none when the page under it records it.</summary>
+    [Parameter]
+    public AudienceFunction? Opening { get; set; }
+
+    /// <summary>The universe as the panel holds it, read once, by the prerendering.</summary>
+    [PersistentState]
+    public UniverseEntry? Entry { get; set; }
+
+    /// <summary>The universe as it was read: what the user changed since.</summary>
+    [PersistentState]
+    public UniverseEntry? ReadEntry { get; set; }
+
+    // The request of the prerendering, which the opening of the panel is recorded by; none in the circuit.
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? Authentication { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _administrator = await IsAdministratorAsync();
+        if (!_administrator || Entry is not null)
+            return;
+
+        if (UniverseId is { } edited)
+        {
+            if (await FindAsync(edited) is not { } universe)
+                return;
+            Entry = UniverseEntry.Of(universe);
+            if (Opening is { } opening && HttpContext is { } context && HttpMethods.IsGet(context.Request.Method))
+                await Recorder.RecordActionAsync(opening, $"universe={universe.Id}", context.RequestAborted);
+        }
+        else
+            Entry = UniverseEntry.New(Searched);
+        ReadEntry = Entry.Copy();
+    }
+
+    // The only authenticated user is the administrator (contraintes-techniques/architecture-deploiement/authentification.md).
+    private async Task<bool> IsAdministratorAsync() =>
+        Authentication is not null && (await Authentication).User.Identity?.IsAuthenticated == true;
+
+    // The universe, or none if it no longer exists: the page is then shown without its panel.
+    private async Task<UniverseForm?> FindAsync(Guid id)
+    {
+        try
+        {
+            return await Api.GetAsync<UniverseForm>($"/admin/universes/{id}");
+        }
+        catch (ApiProblemException exception) when (exception.Problem.Status == StatusCodes.Status404NotFound)
+        {
+            return null;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        // The API knows no user (docs/tech/mecanismes/authentification-et-appels-internes.md): over a public page, a circuit
+        // whose session ended writes nothing.
+        if (_saving || !await IsAdministratorAsync())
+            return;
+        _saving = true;
+        _problem = null;
+        // A parent created on the spot is created with the universe, in the same transaction, or not at all.
+        _sentNewRecords = Entry!.NewRecordsSent();
+        try
+        {
+            // The universe changed, as its panel read it, even deleted meanwhile: the API then says so, never a new universe.
+            var saved = Entry.Id is { } edited
+                ? await Api.PutAsync<UpdateUniverseRequest, UniverseForm>($"/admin/universes/{edited}", Entry.ToUpdate(_sentNewRecords))
+                : await Api.PostAsync<CreateUniverseRequest, UniverseForm>("/admin/universes", Entry.ToCreation(_sentNewRecords));
+            if (_sentNewRecords is not null)
+                await Recorder.RecordActionAsync(AudienceFunctions.AdminUniverseParentCreated, $"universe={saved.ParentId}");
+            await Recorder.RecordActionAsync(
+                Entry.Id is null ? AudienceFunctions.AdminUniverseCreated : AudienceFunctions.AdminUniverseSaved, $"universe={saved.Id}");
+            Navigation.NavigateTo(SavedHref);
+        }
+        catch (ApiProblemException exception)
+        {
+            _problem = exception.Problem;
+            _revealProblem = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // Once the error of a saving is rendered, what is to correct is brought into view.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_revealProblem && _panel is not null)
+        {
+            _revealProblem = false;
+            await _panel.RevealProblemAsync();
+        }
+    }
+
+    // The universe as it is now, read anew within the circuit: the entry left behind offers again, under each datum, what the
+    // user had entered (visuel/saisie-album/contenu.md, #329).
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var reloaded = UniverseEntry.Of(await Api.GetAsync<UniverseForm>($"/admin/universes/{Entry!.Id!.Value}"));
+            Tracker.Abandon();
+            // The parent created on the spot stays suggested, as long as the panel is open.
+            reloaded.NewParent = Entry.NewParent;
+            Entry = reloaded;
+            ReadEntry = reloaded.Copy();
+            _problem = null;
+            _sentNewRecords = null;
+            _reading++;
+        }
+        catch (ApiProblemException exception)
+        {
+            // Deleted meanwhile, or unreadable: said as the error of the saving was, what was typed staying as it is.
+            _problem = exception.Problem;
+        }
+    }
+
+    // The three categories told apart at first glance, as on an entry form (visuel/listes/saisie-selon-l-entite.md): no
+    // « Voir mes changements », what was typed staying in the panel until the reload.
+    private RenderFragment? SaveProblem => _problem is not { } problem ? null
+        : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="ReloadAsync" OnRetry="SaveAsync" />;
+
+    private RenderFragment? Dates => Entry is { CreatedAt: { } created, ModifiedAt: { } modified }
+        ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>
+        : null;
+
+    // The fields of the content the panel enters, in their order in the panel, each the datum the tracker compares.
+    private const string NameField = "/name";
+    private const string ParentField = "/parentId";
+    private const string DescriptionField = "/description";
+
+    // The data of the universe, in the order of the panel, compared on what is typed against what was read
+    // (visuel/saisie-album/contenu.md, données modifiées): for their mark and the entry left behind at a reload. Taking the
+    // parent created on the spot takes it with its creation.
+    private EntryTracker<UniverseEntry> Tracker => _tracker ??= new(() => ReadEntry, () => Entry,
+    [
+        new(NameField, L["Name"], e => e.Name, e => e.Name, (from, to) => to.Name = from.Name),
+        new(ParentField, L["Parent"], e => e.Parent?.Id.ToString(), e => e.Parent?.Label, (from, to) =>
+        {
+            to.Parent = from.Parent;
+            if (from.ChosenNewParent() is { } created)
+                to.NewParent = created;
+        }),
+        new(DescriptionField, L["Description"], e => e.Description, e => e.Description, (from, to) => to.Description = from.Description),
+    ]);
+
+    // Nothing is modified on a new universe, all of which is new.
+    private EntryDatumState? DatumState(string key) => Entry!.Id is null ? null : Tracker.State(key, this);
+
+    // The fields a refused saving designates (choix-implementation/socle/frontend.md, champ d'une erreur métier): a name already
+    // taken under the parent has the text shared by every name unique regardless of case and accents (modele-metier/univers.md),
+    // naming the universe as typed.
+    private FieldErrors Errors => new(_problem, FieldTexts, Rules, Entry!.Name?.Trim() ?? "");
+
+    // The parent refused (a cycle), or the parent created on the spot that the saving refused (its name already taken at the top
+    // of the hierarchy), designated on the field of the parent, which cites it by its name.
+    private string? ParentError => Errors.For(ParentField)
+                                   ?? (_sentNewRecords is { Universes: [var sent] } ? Errors.ForAdded(_sentNewRecords, sent.Key) : null);
+}

@@ -9,6 +9,12 @@
     color: var(--color-text-muted);
 }
 
+/* The count of the visuals and the mark of their list modified, on one line, at the size of the count: the line keeps its height. */
+.edition-visuals-heading {
+    margin: 0;
+    font-size: var(--font-size-small);
+}
+
 .edition-visuals-count {
     font-weight: var(--font-weight-strong);
     color: var(--color-text);

@@ -1,0 +1,6 @@
+@inject IStringLocalizer<ModifiedMark> L
+
+@* The mark of a datum the user changed since the record was read (visuel/saisie-album/contenu.md, données modifiées,
+   decisions of the user, #355): a filled pill « Modifié », green, after the label of the datum, inside it, so that screen
+   readers read the word with the label, the color not being the only signal. Written once, for every point of entry. *@
+<span class="modified-mark">@L["Modified"]</span>

@@ -1,4 +1,5 @@
 @using Bdtheque.Currencies
+@using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<AmountField> L
 
 @* An amount and its currency, side by side, under one legend (visuel/saisie-edition/contenu.md): the currency of origin, chosen
@@ -6,7 +7,7 @@
    entered in any currency (fonctionnel/valorisation/gestion-des-devises.md). The amount is entered in the display culture; a
    text that is no amount leaves the amount as it was, and the field shows it again, so that it always shows what will be saved. *@
 <fieldset class="amount-field">
-    <legend id="@($"{Id}-legend")">@Label</legend>
+    <legend id="@($"{Id}-legend")">@Label@if (State?.Modified == true) { <ModifiedMark /> }</legend>
     <span class="amount-field-controls">
         <label class="visually-hidden" for="@Id">@L["Amount"]</label>
         <input id="@Id" type="text" inputmode="decimal" class="amount-field-amount" disabled="@Disabled" data-decimals="@Decimals"
@@ -34,6 +35,10 @@
     @if (Help is not null)
     {
         <p class="amount-field-help" id="@($"{Id}-help")">@Help</p>
+    }
+    @if (State is { } state)
+    {
+        <RedoLine Id="@($"{Id}-redo")" State="state" />
     }
 </fieldset>
 
@@ -83,6 +88,10 @@
     /// <summary>What to correct: the amount is then in error.</summary>
     [Parameter]
     public string? Error { get; set; }
+
+    /// <summary>What the form tells of its datum, the amount and its currency together (EntryTracker): its mark once modified, and what the user had entered before the record was reloaded (visuel/saisie-album/contenu.md).</summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
 
     private string CurrencyId => $"{Id}-currency";
 

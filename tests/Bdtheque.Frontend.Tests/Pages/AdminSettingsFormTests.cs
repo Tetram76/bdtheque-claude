@@ -172,8 +172,113 @@ public sealed class AdminSettingsFormTests : BunitContext, IDisposable
 
         await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
 
-        // Reloaded whole: the setting as it is now, the changes of the form left behind.
+        // Reloaded within the page (visuel/saisie-album/contenu.md, #329): the setting as it is now, what the user had entered
+        // offered under its field.
+        Assert.Empty(page.FindAll("[role=alert]"));
         Assert.Equal(AppPaths.AdminSettings, new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+        Assert.Equal(nameof(AlbumLabelFormat.TitleSeriesVolume), page.Find("#settings-album-label-format").GetAttribute("value"));
+        Assert.NotNull(page.Find("#settings-album-label-format-redo"));
+    }
+
+    [Fact]
+    public async Task Datum_ChangedSinceTheReading_IsMarkedAfterItsLabel_UntilSetBackToWhatWasRead()
+    {
+        // visuel/saisie-album/contenu.md, données modifiées (#355): the setting, always present, is always compared to what was read.
+        var page = Open();
+        Assert.Empty(page.FindAll(".modified-mark"));
+
+        await page.ChangeAsync("#settings-album-label-format", nameof(AlbumLabelFormat.VolumeTitleSeries));
+
+        Assert.Equal("Modifié", page.Find("label[for=settings-album-label-format] .modified-mark").TextContent);
+        Assert.Single(page.FindAll(".modified-mark"));
+
+        await page.ChangeAsync("#settings-album-label-format", nameof(AlbumLabelFormat.TitleSeriesVolume));
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Reload_AfterAModificationMeanwhile_OffersUnderTheDatum_WhatDiffersFromTheSettingReloaded()
+    {
+        var page = await ReloadedWithAFormatEnteredAsync();
+
+        Assert.Empty(page.FindAll("[role=alert]"));
+        var line = page.Find("#settings-album-label-format-redo");
+        Assert.Equal("Votre saisie : Tome - Album (Série)", line.QuerySelector("span")!.TextContent.Trim());
+        Assert.Equal(["Reprendre", "Rejeter"], line.QuerySelectorAll("button").Select(b => b.TextContent));
+        Assert.Single(page.FindAll(".redo-line"));
+        Assert.Empty(page.FindAll(".modified-mark"));
+        Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
+    }
+
+    [Fact]
+    public async Task Reload_OfWhatTheOtherModificationEnteredToo_OffersNothing()
+    {
+        var page = Open();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#settings-album-label-format", nameof(AlbumLabelFormat.VolumeTitleSeries));
+        await page.SubmitAsync("form");
+        _api.Answers["/admin/settings"] = Settings with { AlbumLabelFormat = AlbumLabelFormat.VolumeTitleSeries, Version = 8 };
+
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+
+        Assert.Equal(nameof(AlbumLabelFormat.VolumeTitleSeries), page.Find("#settings-album-label-format").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Taking_WhatWasEntered_PutsItBack_TheDatumThenMarked()
+    {
+        var page = await ReloadedWithAFormatEnteredAsync();
+
+        await page.ClickAsync(() => page.Find("#settings-album-label-format-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal(nameof(AlbumLabelFormat.VolumeTitleSeries), page.Find("#settings-album-label-format").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.NotNull(page.Find("label[for=settings-album-label-format] .modified-mark"));
+    }
+
+    [Fact]
+    public async Task Rejecting_WhatWasEntered_LeavesTheSettingReloaded()
+    {
+        var page = await ReloadedWithAFormatEnteredAsync();
+
+        await page.ClickAsync(() => page.Find("#settings-album-label-format-redo").QuerySelectorAll("button")[1]);
+
+        Assert.Equal(nameof(AlbumLabelFormat.TitleSeriesVolume), page.Find("#settings-album-label-format").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Saving_WhileWhatWasEnteredIsNeitherTakenNorRejected_WarnsFirst()
+    {
+        var page = await ReloadedWithAFormatEnteredAsync();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Settings);
+        var written = _api.Written.Count;
+
+        await page.SubmitAsync("form");
+
+        var dialog = page.Find("dialog");
+        Assert.Equal("Saisie précédente à reprendre ou rejeter", dialog.QuerySelector(".dialog-title")!.TextContent);
+        Assert.Equal(written, _api.Written.Count);
+
+        await page.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
+
+        Assert.Equal(written + 1, _api.Written.Count);
+        // Saved at the version reloaded.
+        Assert.Equal(8u, _api.Written[^1].Body.Deserialize<UpdateApplicationSettingsRequest>(JsonSerializerOptions.Web)!.Version);
+    }
+
+    // The form once reloaded after a saving refused, the setting modified meanwhile, the format entered left behind.
+    private async Task<IRenderedComponent<AdminSettingsForm>> ReloadedWithAFormatEnteredAsync()
+    {
+        var page = Open();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#settings-album-label-format", nameof(AlbumLabelFormat.VolumeTitleSeries));
+        await page.SubmitAsync("form");
+        _api.Answers["/admin/settings"] = Settings with { Version = 8 };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        return page;
     }
 
     [Fact]

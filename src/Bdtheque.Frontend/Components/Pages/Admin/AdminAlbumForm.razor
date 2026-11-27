@@ -33,26 +33,26 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(Entry.Id is null ? L["New"] : Label)])"
+    <EntryForm @key="_reading" @ref="_form" HasRedo="Tracker.HasRedo" Breadcrumb="@([new(L["Administration"], AppPaths.AdminHome), new(L["Albums"], AppPaths.AdminAlbums), new(Entry.Id is null ? L["New"] : Label)])"
                Title="@(Entry.Id is null ? L["New"] : L["Edit"])" Subject="@Label" State="State" Saving="_saving"
                SaveLabel="@(Entry.Id is null ? L["Create"] : L["Save"])" CancelHref="@ReturnHref" OnSave="SaveAsync"
                Problem="@SaveProblem" Dates="@Dates" Status="@Status">
         <Block Title="@L["Block.Album"]" Kicker="@L["Kicker.Album"]">
             <div class="album-fields">
-                <Field Id="album-series" Label="@L["Series"]" Help="@(Entry.Series is null ? L["Series.Help.None"] : L["Series.Help"])"
+                <Field Id="album-series" Label="@L["Series"]" State="SeriesState" Help="@(Entry.Series is null ? L["Series.Help.None"] : L["Series.Help"])"
                        Error="@(Entry.Series is { } chosen ? AddedError(chosen.Id) : null)" Context="control">
                     <RecordPicker Id="@control.Id" Kind="RecordKind.Series" Value="Entry.Series" ValueChanged="ChooseSeriesAsync"
                                   Placeholder="@L["Series.Placeholder"]" OnCreate="text => _seriesCreation = text"
                                   CreateLabel="@(text => L["Series.Create", text].Value)" Pending="PendingSeries"
                                   aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" />
                 </Field>
-                <Field Id="album-title" Label="@L["Title"]" Required="@(Entry.Series is null)"
+                <Field Id="album-title" Label="@L["Title"]" Required="@(Entry.Series is null)" State="@DatumState("title")"
                        Error="@Errors.For("/title")" Context="control">
                     <input id="@control.Id" type="text" placeholder="@(Entry.Series is null ? L["Title.Placeholder"] : L["Title.Placeholder.Series"])"
                            aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="Entry.Title" @bind:event="oninput" />
                 </Field>
                 <TitleSortKeyField Id="album-sort-key" Title="@Entry.Title" StoredKey="@Entry.StoredSortKey" @bind-ManualKey="Entry.ManualSortKey"
-                                   UntitledKey="@Entry.SeriesSortKey"
+                                   UntitledKey="@Entry.SeriesSortKey" State="@DatumState("sortKey")"
                                    UntitledHelp="@(Entry.Series is null ? L["SortKey.Help.None"] : L["SortKey.Help.Series"])" Error="@Errors.For("/manualSortKey")" />
             </div>
         </Block>
@@ -60,18 +60,18 @@ else
         <div class="album-pair">
             <Block Title="@L["Block.Volume"]" Kicker="@L["Kicker.Volume"]">
                 <div class="album-volume">
-                    <Field Id="album-volume" Label="@(Entry.IsOmnibus ? L["Volume.Omnibus"] : L["Volume"])" Characters="4" Error="@Errors.For("/volumeNumber")" Context="control">
+                    <Field Id="album-volume" Label="@(Entry.IsOmnibus ? L["Volume.Omnibus"] : L["Volume"])" Characters="4" Error="@Errors.For("/volumeNumber")" State="@DatumState("volume")" Context="control">
                         <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" aria-describedby="@control.DescribedBy"
                                aria-invalid="@control.Invalid" @bind="Entry.VolumeNumber" />
                     </Field>
                     @* Next to the volumes covered it shows (visuel/saisie-album/contenu.md). *@
                     <div class="album-flag">
-                        <Choice Label="@L["Type.Omnibus"]"><input type="checkbox" @bind="Entry.IsOmnibus" /></Choice>
+                        <Choice Id="album-omnibus" Label="@L["Type.Omnibus"]" State="@DatumState("omnibus")"><input type="checkbox" @bind="Entry.IsOmnibus" /></Choice>
                     </div>
                     @if (Entry.IsOmnibus)
                     {
                         <fieldset class="album-range" aria-describedby="album-range-help">
-                            <legend>@L["Range"]</legend>
+                            <legend>@L["Range"]@if (RangeState.Modified) { <ModifiedMark /> }</legend>
                             <div class="album-range-fields">
                                 <label class="visually-hidden" for="album-range-start">@L["Range.Start"]</label>
                                 <input id="album-range-start" type="text" inputmode="numeric" maxlength="4" aria-invalid="@RangeInvalid"
@@ -86,16 +86,17 @@ else
                                 <p class="album-field-error"><Icon Name="IconName.Alert" />@rangeError</p>
                             }
                             <p id="album-range-help" class="album-help">@L["Range.Help"]</p>
+                            <RedoLine Id="album-range-redo" State="RangeState" />
                         </fieldset>
                     }
                     <div class="album-flag">
-                        <Choice Label="@L["Type.SpecialIssue"]"><input type="checkbox" @bind="Entry.IsSpecialIssue" /></Choice>
+                        <Choice Id="album-special-issue" Label="@L["Type.SpecialIssue"]" State="@DatumState("specialIssue")"><input type="checkbox" @bind="Entry.IsSpecialIssue" /></Choice>
                     </div>
                 </div>
             </Block>
             <Block Title="@L["Block.Publication"]" Kicker="@L["Kicker.Publication"]">
                 <PartialDateInput Id="album-publication" Legend="@L["Publication"]" @bind-Year="Entry.FirstPublicationYear"
-                                  @bind-Month="Entry.FirstPublicationMonth" Error="@Errors.For("/firstPublicationYear", "/firstPublicationMonth")" />
+                                  @bind-Month="Entry.FirstPublicationMonth" Error="@Errors.For("/firstPublicationYear", "/firstPublicationMonth")" State="@DatumState("publication")" />
             </Block>
         </div>
 
@@ -105,14 +106,14 @@ else
                 {
                     <Notice Icon="IconName.Copy">@L["Authors.Copied", series]</Notice>
                 }
-                <RoleCredits Id="album" Records="Entry.Cited" ErrorOf="AddedError" Help="@L["Authors.Help"]" AuthorCreated="AudienceFunctions.AdminAlbumAuthorCreated"
+                <RoleCredits Id="album" Records="Entry.Cited" Read="ReadCited" StateOf="DatumState" ErrorOf="AddedError" Help="@L["Authors.Help"]" AuthorCreated="AudienceFunctions.AdminAlbumAuthorCreated"
                              OnChange="AuthorsChanged" />
             </div>
         </Block>
 
         <Block Title="@L["Block.Classification"]" Kicker="@L["Kicker.Classification"]">
             <div class="album-fields">
-                <ClassificationTags Id="album" Records="Entry.Cited" ErrorOf="AddedError" Help="@L["Classification.Help"]" OnChange="StateHasChanged" InheritedLabel="@L["BySeries"]"
+                <ClassificationTags Id="album" Records="Entry.Cited" Read="ReadCited" GenresState="@DatumState(CitedRecords.GenresKey)" UniversesState="@DatumState(CitedRecords.UniversesKey)" ErrorOf="AddedError" Help="@L["Classification.Help"]" OnChange="StateHasChanged" InheritedLabel="@L["BySeries"]"
                                     InheritedGenres="Entry.SeriesGenres" InheritedUniverses="Entry.SeriesUniverses"
                                     GenreCreated="AudienceFunctions.AdminAlbumGenreCreated" UniverseCreated="AudienceFunctions.AdminAlbumUniverseCreated" />
             </div>
@@ -120,13 +121,13 @@ else
 
         <Block Title="@L["Block.Reading"]" Kicker="@L["Kicker.Reading"]">
             <div class="album-fields">
-                <Field Id="album-summary" Label="@L["Summary"]" Context="control">
+                <Field Id="album-summary" Label="@L["Summary"]" State="@DatumState("summary")" Context="control">
                     <textarea id="@control.Id" rows="4" placeholder="@L["Summary.Placeholder"]" @bind="Entry.Summary"></textarea>
                 </Field>
-                <Field Id="album-notes" Label="@L["Notes"]" Context="control">
+                <Field Id="album-notes" Label="@L["Notes"]" State="@DatumState("notes")" Context="control">
                     <textarea id="@control.Id" rows="3" placeholder="@L["Notes.Placeholder"]" @bind="Entry.PersonalNotes"></textarea>
                 </Field>
-                <RatingInput Id="album-rating" Legend="@L["Rating"]" @bind-Value="Entry.Rating" />
+                <RatingInput Id="album-rating" Legend="@L["Rating"]" @bind-Value="Entry.Rating" State="@DatumState("rating")" />
             </div>
         </Block>
     </EntryForm>
@@ -137,7 +138,7 @@ else
     }
     @if (_changesShown)
     {
-        <ChangesDialog Id="album-changes" Subject="@Label" Changes="Changes()" OnClose="() => _changesShown = false" />
+        <ChangesDialog Id="album-changes" Subject="@Label" Changes="Tracker.Changes()" OnClose="() => _changesShown = false" />
     }
 }
 
@@ -154,6 +155,9 @@ else
     private string? _savedFingerprint;
     private string? _authorsCopiedFrom;
     private bool _changesShown;
+    private EntryTracker<AlbumEntry>? _tracker;
+    // The number of the reading of the album: the form is rendered anew for each, its controls reading the record reloaded.
+    private int _reading;
     // The title typed in the choice of the series, while its creation on the spot is being confirmed.
     private string? _seriesCreation;
 
@@ -375,9 +379,28 @@ else
         await Recorder.RecordActionAsync(AudienceFunctions.AdminAlbumChanges, $"album={Entry!.Id}");
     }
 
-    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew.
-    private void Reload() => Navigation.NavigateTo(AppPaths.IsFromRecord(From) ? Navigation.Uri : AppPaths.AdminEditAlbum(Entry!.Id!.Value), forceLoad: true);
-
+    // The record as it is now, read anew within the circuit: the entry left behind offers again, under each datum, what the
+    // user had entered (visuel/saisie-album/contenu.md, #329). The form is rendered anew, its controls reading the record reloaded.
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var reloaded = await ReadAsync(Entry!.Id!.Value);
+            Tracker.Abandon();
+            Entry = reloaded;
+            ReadEntry = reloaded.Copy();
+            _savedFingerprint = ReadEntry.Fingerprint();
+            _saveProblem = null;
+            _authorsCopiedFrom = null;
+            _seriesChoice++;
+            _reading++;
+        }
+        catch (ApiProblemException exception)
+        {
+            // Deleted meanwhile, or unreadable: said as the error of the saving was, the entry staying as it is.
+            _saveProblem = exception.Problem;
+        }
+    }
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md).
     private FieldErrors Errors => new(_saveProblem, FieldTexts, RuleTexts, Label);
 
@@ -387,7 +410,7 @@ else
     // The three categories told apart at first glance, each with what the user can do about it (visuel/saisie-album/contenu.md).
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="@(Entry!.Id is not null)" OnReload="ReloadAsync" OnShowChanges="ShowChangesAsync"
                       OnRetry="SaveAsync" />;
 
     // An album not in the collection, at first glance; nothing for a new album, not saved yet.
@@ -397,55 +420,62 @@ else
         ? @<text>@L["Dates.Created"] <LocalDateTime Value="created" />@L["Dates.Modified"] <LocalDateTime Value="modified" />.</text>
         : null;
 
-    // Each field the user changed since the album was read, with what they entered, to enter it again once the album is reloaded:
-    // block by block of the form.
-    private List<EntryChange> Changes() =>
-        [.. AlbumChanges(ReadEntry!, Entry!), .. CreditAndClassificationChanges(ReadEntry!.Cited, Entry!.Cited), .. ReadingChanges(ReadEntry!, Entry!)];
+    // The data of the album, in the order of the form, compared on what is entered against what was read
+    // (visuel/saisie-album/contenu.md, données modifiées): for their mark, « Voir mes changements » and the entry left behind
+    // at a reload.
+    private EntryTracker<AlbumEntry> Tracker => _tracker ??= new(() => ReadEntry, () => Entry,
+    [
+        new("series", L["Series"], e => e.Series?.Id.ToString(), e => e.Series?.Label, (from, to) =>
+        {
+            to.Series = from.Series;
+            to.NewSeries.AddRange(from.NewSeries.Where(s => s.Key == from.Series?.Id && to.NewSeries.All(o => o.Key != s.Key)));
+        }),
+        new("title", L["Title"], e => e.Title, e => e.Title, (from, to) => to.Title = from.Title),
+        new("sortKey", L["Changes.SortKey"], e => e.ManualSortKey, e => e.ManualSortKey ?? L["Changes.SortKey.Auto"],
+            (from, to) => to.ManualSortKey = from.ManualSortKey),
+        new("volume", L["Volume"], e => Number(e.VolumeNumber), e => Number(e.VolumeNumber), (from, to) => to.VolumeNumber = from.VolumeNumber),
+        new("omnibus", L["Type.Omnibus"], e => YesNo(e.IsOmnibus), e => YesNo(e.IsOmnibus), (from, to) => to.IsOmnibus = from.IsOmnibus),
+        new("range", L["Range"], RangeValue, e => L["Changes.Range", Bound(e.StartVolumeNumber), Bound(e.EndVolumeNumber)],
+            (from, to) => (to.StartVolumeNumber, to.EndVolumeNumber) = (from.StartVolumeNumber, from.EndVolumeNumber), e => e.IsOmnibus),
+        new("specialIssue", L["Type.SpecialIssue"], e => YesNo(e.IsSpecialIssue), e => YesNo(e.IsSpecialIssue),
+            (from, to) => to.IsSpecialIssue = from.IsSpecialIssue),
+        new("publication", L["Publication"], e => $"{e.FirstPublicationYear}-{e.FirstPublicationMonth}", PublicationText,
+            (from, to) => (to.FirstPublicationYear, to.FirstPublicationMonth) = (from.FirstPublicationYear, from.FirstPublicationMonth)),
+        .. CitedRecords.AuthorData<AlbumEntry>(e => e.Cited, Values.Of),
+        .. CitedRecords.ClassificationData<AlbumEntry>(e => e.Cited, L["Genres"], L["Universes"]),
+        new("summary", L["Summary"], e => e.Summary, e => e.Summary, (from, to) => to.Summary = from.Summary),
+        new("notes", L["Notes"], e => e.PersonalNotes, e => e.PersonalNotes, (from, to) => to.PersonalNotes = from.PersonalNotes),
+        new("rating", L["Rating"], e => e.Rating?.ToString(), e => e.Rating is { } rating ? Values.Of(rating) : L["Rating.None"],
+            (from, to) => to.Rating = from.Rating),
+    ]);
 
-    private IEnumerable<EntryChange> AlbumChanges(AlbumEntry read, AlbumEntry entry)
+    // Nothing is modified on a new album, all of which is new, as its save bar says (« Nouvelle fiche »).
+    private EntryDatumState? DatumState(string key) => Entry!.Id is null ? null : Tracker.State(key, this);
+
+    // The range of an omnibus only, whose fields alone show it.
+    private static string? RangeValue(AlbumEntry entry) => entry.IsOmnibus ? $"{entry.StartVolumeNumber}-{entry.EndVolumeNumber}" : null;
+
+    private EntryDatumState RangeState => DatumState("range") ?? EntryDatumState.None;
+
+    // Taking the series chooses it again, as the user would: what the album displays through it, and its authors if it has none.
+    private EntryDatumState? SeriesState => DatumState("series") is { } state
+        ? state with { Take = EventCallback.Factory.Create(this, TakeSeriesAsync) }
+        : null;
+
+    private async Task TakeSeriesAsync()
     {
-        if (read.Series?.Id != entry.Series?.Id)
-            yield return new(L["Series"], entry.Series?.Label);
-        if (read.Title != entry.Title)
-            yield return new(L["Title"], entry.Title);
-        if (read.ManualSortKey != entry.ManualSortKey)
-            yield return new(L["Changes.SortKey"], entry.ManualSortKey ?? L["Changes.SortKey.Auto"]);
-        if ((read.IsOmnibus, read.IsSpecialIssue) != (entry.IsOmnibus, entry.IsSpecialIssue))
-            yield return new(L["Type"], TypeText(entry));
-        if (read.VolumeNumber != entry.VolumeNumber)
-            yield return new(L["Volume"], entry.VolumeNumber?.ToString(CultureInfo.CurrentCulture));
-        if (entry.IsOmnibus && (read.StartVolumeNumber, read.EndVolumeNumber) != (entry.StartVolumeNumber, entry.EndVolumeNumber))
-            yield return new(L["Range"], L["Changes.Range", Bound(entry.StartVolumeNumber), Bound(entry.EndVolumeNumber)]);
-        if ((read.FirstPublicationYear, read.FirstPublicationMonth) != (entry.FirstPublicationYear, entry.FirstPublicationMonth))
-            yield return new(L["Publication"], PublicationText(entry));
+        var series = Tracker.Entered!.Series;
+        Tracker.Take("series");
+        await ChooseSeriesAsync(series);
     }
 
-    private IEnumerable<EntryChange> CreditAndClassificationChanges(CitedRecords read, CitedRecords cited)
-    {
-        foreach (var role in cited.RolesChangedSince(read))
-            yield return new(Values.Of(role), EntryChange.Names(cited.AuthorsOf(role)));
-        if (cited.GenresChangedSince(read))
-            yield return new(L["Genres"], EntryChange.Names(cited.Genres));
-        if (cited.UniversesChangedSince(read))
-            yield return new(L["Universes"], EntryChange.Names(cited.Universes));
-    }
+    private CitedRecords? ReadCited => Entry!.Id is null ? null : ReadEntry!.Cited;
 
-    private IEnumerable<EntryChange> ReadingChanges(AlbumEntry read, AlbumEntry entry)
-    {
-        if (read.Summary != entry.Summary)
-            yield return new(L["Summary"], entry.Summary);
-        if (read.PersonalNotes != entry.PersonalNotes)
-            yield return new(L["Notes"], entry.PersonalNotes);
-        if (read.Rating != entry.Rating)
-            yield return new(L["Rating"], entry.Rating is { } rating ? Values.Of(rating) : L["Rating.None"]);
-    }
+    private string YesNo(bool value) => value ? L["Changes.Yes"] : L["Changes.No"];
 
+    private static string? Number(int? value) => value?.ToString(CultureInfo.CurrentCulture);
     // A bound of the range, « — » when empty, inside the text of the range.
     private string Bound(int? volume) => volume?.ToString(CultureInfo.CurrentCulture) ?? L["Changes.Empty"];
-
-    private string TypeText(AlbumEntry entry) =>
-        string.Join(", ", new[] { entry.IsOmnibus ? L["Type.Omnibus"].Value : null, entry.IsSpecialIssue ? L["Type.SpecialIssue"].Value : null }
-            .OfType<string>().DefaultIfEmpty(L["Type.Regular"]));
 
     private static string PublicationText(AlbumEntry entry) => string.Join(' ', new[]
     {

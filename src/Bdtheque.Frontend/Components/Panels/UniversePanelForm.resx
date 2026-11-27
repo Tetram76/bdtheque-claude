@@ -21,6 +21,9 @@
   <data name="Name" xml:space="preserve">
     <value>Nom</value>
   </data>
+  <data name="Parent" xml:space="preserve">
+    <value>Univers parent</value>
+  </data>
   <data name="Description" xml:space="preserve">
     <value>Description</value>
   </data>

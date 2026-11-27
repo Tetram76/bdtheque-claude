@@ -860,8 +860,12 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
 
         await page.ClickAsync("[role=alert] button");
 
+        // Reloaded within the page, at the same address: the new record read anew, what the user had entered offered again.
         var navigation = Services.GetRequiredService<NavigationManager>();
         Assert.Equal(path, new Uri(navigation.Uri).AbsolutePath);
+        Assert.Empty(page.FindAll("[role=alert]"));
+        Assert.Equal("", page.Find("#edition-year").GetAttribute("value") ?? "");
+        Assert.Equal("Votre saisie : 2011", page.Find("#edition-year-redo span").TextContent.Trim());
     }
 
     [Fact]
@@ -1291,6 +1295,289 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
         var changes = page.Find("dialog .changes-dialog-list");
         Assert.Equal(["Visuels"], changes.QuerySelectorAll("dt").Select(dt => dt.TextContent));
         Assert.Equal(["3 visuels"], changes.QuerySelectorAll("dd").Select(dd => dd.TextContent));
+    }
+
+    [Fact]
+    public async Task Datum_ChangedSinceTheReading_IsMarkedAfterItsLabel_UntilSetBackToWhatWasRead()
+    {
+        // visuel/saisie-album/contenu.md, données modifiées (#355): the mark compares what is entered to what was read.
+        var page = OpenOwned();
+        Assert.Empty(page.FindAll(".modified-mark"));
+
+        await page.ChangeAsync("#edition-year", "2011");
+
+        Assert.Equal("Modifié", page.Find("label[for=edition-year] .modified-mark").TextContent);
+        Assert.Single(page.FindAll(".modified-mark"));
+
+        await page.ChangeAsync("#edition-year", "2007");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Amount_Changed_IsMarkedAfterItsLegend_TheAmountAndItsCurrencyTogether()
+    {
+        var page = OpenOwned();
+
+        await page.ChangeAsync("#edition-price-currency", "USD");
+
+        Assert.NotNull(page.Find("#edition-price-legend .modified-mark"));
+        Assert.Single(page.FindAll(".modified-mark"));
+
+        await page.ChangeAsync("#edition-price-currency", "EUR");
+        await page.ChangeAsync("#edition-price", "10,950");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Visuals_Changed_AreMarkedAfterTheirCount()
+    {
+        var page = OpenOwned();
+
+        await page.DragAndDropAsync(() => page.FindAll(".edition-visual")[2], () => page.FindAll(".edition-visual")[1]);
+
+        Assert.Equal("Modifié", page.Find(".edition-visuals-heading .modified-mark").TextContent);
+        Assert.Single(page.FindAll(".modified-mark"));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task NewEdition_HasNoMark_AllOfItBeingNew(bool intent)
+    {
+        var page = intent ? OpenNewIntent() : OpenNewOwned();
+
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.ChangeAsync("#edition-pages", "64");
+
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Reload_AfterAModificationMeanwhile_OffersUnderEachDatum_OnlyWhatDiffersFromTheRecordReloaded()
+    {
+        // visuel/saisie-album/contenu.md (#329): the record reloaded within the page, what the user had entered offered again.
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.ChangeAsync("#edition-pages", "64");
+        await page.SubmitAsync("form");
+        // The other modification entered the same number of pages, and a reference the user did not touch.
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with
+        {
+            AlbumVersion = 13,
+            Content = Owned.Content with { PageCount = 64, PersonalReference = "T-21c" },
+        };
+
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+
+        Assert.Equal(AppPaths.AdminEditEdition(AlbumId, EditionId), new Uri(Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath);
+        Assert.Empty(page.FindAll("[role=alert]"));
+        Assert.Equal("2007", page.Find("#edition-year").GetAttribute("value"));
+        Assert.Equal("T-21c", page.Find("#edition-reference").GetAttribute("value"));
+        var line = page.Find("#edition-year-redo");
+        Assert.Equal("Votre saisie : 2011", line.QuerySelector("span")!.TextContent.Trim());
+        Assert.Equal(["Reprendre", "Rejeter"], line.QuerySelectorAll("button").Select(b => b.TextContent));
+        Assert.Single(page.FindAll(".redo-line"));
+        Assert.Empty(page.FindAll(".modified-mark"));
+        Assert.Equal("Aucune modification", page.Find(".save-bar-state-long").TextContent);
+    }
+
+    [Fact]
+    public async Task Reload_ThatFails_SaysWhy_TheEntryStayingAsItIs()
+    {
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.SubmitAsync("form");
+        _api.Failures[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = HttpStatusCode.InternalServerError;
+
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("technical", page.Find("[role=alert]").GetAttribute("data-error-category"));
+        Assert.Equal("2011", page.Find("#edition-year").GetAttribute("value"));
+    }
+
+    [Fact]
+    public async Task Taking_WhatWasEntered_PutsItBack_TheDatumThenMarked()
+    {
+        var page = await ReloadedWithAYearEnteredAsync();
+
+        await page.ClickAsync(() => page.Find("#edition-year-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("2011", page.Find("#edition-year").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.NotNull(page.Find("label[for=edition-year] .modified-mark"));
+    }
+
+    [Fact]
+    public async Task Rejecting_WhatWasEntered_LeavesTheRecordReloaded()
+    {
+        var page = await ReloadedWithAYearEnteredAsync();
+
+        await page.ClickAsync(() => page.Find("#edition-year-redo").QuerySelectorAll("button")[1]);
+
+        Assert.Equal("2007", page.Find("#edition-year").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Saving_WhileWhatWasEnteredIsNeitherTakenNorRejected_WarnsFirst()
+    {
+        var page = await ReloadedWithAYearEnteredAsync();
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
+        var written = _api.Written.Count;
+
+        await page.SubmitAsync("form");
+
+        var dialog = page.Find("dialog");
+        Assert.Equal("Saisie précédente à reprendre ou rejeter", dialog.QuerySelector(".dialog-title")!.TextContent);
+        Assert.Equal(written, _api.Written.Count);
+
+        await page.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
+
+        Assert.Equal(written + 1, _api.Written.Count);
+    }
+
+    [Fact]
+    public async Task Taking_ThePublisherEntered_ChoosesItAgain_WithItsOwnCollections()
+    {
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        ChoosePublisher(page, new RecordOption(Dargaud, "Dargaud", null));
+        await page.SubmitAsync("form");
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal(["—", "Fac-similé", "Pastiches", "Nouvelle collection…"], CollectionOptions(page));
+
+        await page.ClickAsync(() => page.Find("#edition-publisher-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Dargaud", page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher).Instance.Value?.Label);
+        Assert.Equal(["—", "Nouvelle collection…"], CollectionOptions(page));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Taking_ACollectionEmptied_KeepsThePublisherReloaded()
+    {
+        // An edition of no collection is of no publisher in particular: emptying the collection, the user said nothing of the
+        // publisher, which another modification changed meanwhile.
+        var longCourrier = Guid.Parse("01900000-0000-7000-8000-0000000000e5");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with
+        {
+            Content = Owned.Content with { PublisherCollectionId = FacSimile },
+            References = new(new PublisherListItem(Casterman, "Casterman", null), new PublisherCollectionListItem(FacSimile, "Fac-similé", Casterman, "Casterman")),
+        };
+        _api.Answers[$"/admin/publishers/{Dargaud}/collections"] = new List<PublisherCollectionForm> { new(longCourrier, Dargaud, "Long courrier", 3) };
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await ChooseCollectionAsync(page, 0);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with
+        {
+            AlbumVersion = 13,
+            Content = Owned.Content with { PublisherId = Dargaud, PublisherCollectionId = longCourrier },
+            References = new(new PublisherListItem(Dargaud, "Dargaud", null), new PublisherCollectionListItem(longCourrier, "Long courrier", Dargaud, "Dargaud")),
+        };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Votre saisie : —", page.Find("#edition-collection-redo span").TextContent.Trim());
+
+        await page.ClickAsync(() => page.Find("#edition-collection-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Dargaud", page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher).Instance.Value?.Label);
+        Assert.Equal("—", page.Find("#edition-collection").TextContent.Trim());
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Taking_AFreenessEntered_UnderAPurchaseReloaded_TakesBackTheModeThatAllowedIt()
+    {
+        // A purchase is never free: the free box taken alone would leave a free purchase, which the form never allows.
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#edition-mode", "Gift");
+        await page.ChangeAsync("#edition-free", true);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with { AlbumVersion = 13 };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Purchase", page.Find("#edition-mode").GetAttribute("value"));
+
+        await page.ClickAsync(() => page.Find("#edition-free-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Gift", page.Find("#edition-mode").GetAttribute("value"));
+        Assert.True(Free(page).HasAttribute("checked"));
+        Assert.False(Free(page).HasAttribute("disabled"));
+        Assert.All(Amounts, id => Assert.True(string.IsNullOrEmpty(page.Find($"#edition-{id}").GetAttribute("value"))));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
+    public async Task Taking_TheVisualsEntered_PutsTheirListBack()
+    {
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.DragAndDropAsync(() => page.FindAll(".edition-visual")[2], () => page.FindAll(".edition-visual")[1]);
+        await page.SubmitAsync("form");
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Votre saisie : 3 visuels", page.Find("#edition-visuals-redo span").TextContent.Trim());
+
+        await page.ClickAsync(() => page.Find("#edition-visuals-redo").QuerySelectorAll("button")[0]);
+        _api.Write = (_, _, _) => FakeAdminApi.Json(Owned);
+        await page.SubmitAsync("form");
+
+        Assert.Equal([(CoverId, null, "Cover"), (SecondPlateId, null, "Plate"), (FirstPlateId, null, "Plate")], VisualsSent());
+    }
+
+    [Fact]
+    public async Task NewEdition_Reloaded_OffersWhatWasEntered_WithoutAnyMark()
+    {
+        // A new edition is written under the version of its album, which a reload reads anew: no mark, all of it being new, but what
+        // the user had entered is offered again against what the new edition is pre-filled with.
+        var page = OpenNewOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/new"] = NewOwned with { AlbumVersion = 13 };
+
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Votre saisie : 2011", page.Find("#edition-year-redo span").TextContent.Trim());
+        Assert.Single(page.FindAll(".redo-line"));
+
+        await page.ClickAsync(() => page.Find("#edition-year-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("2011", page.Find("#edition-year").GetAttribute("value"));
+        Assert.Empty(page.FindAll(".redo-line"));
+        Assert.Empty(page.FindAll(".modified-mark"));
+    }
+
+    [Fact]
+    public async Task Taking_TheIsbnEntered_ChecksIt_AsOneTyped()
+    {
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        _api.Answers["/admin/editions/isbn-check?isbn=978-2-203-00120-7"] = new IsbnCheck(false, "978-2-203-00120-7");
+        await page.InputAsync("#edition-isbn", "978-2-203-00120-7");
+        await page.SubmitAsync("form");
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Contains("Chiffre de contrôle correct.", page.Find("#edition-isbn-help").TextContent);
+
+        await page.ClickAsync(() => page.Find("#edition-isbn-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("978-2-203-00120-7", page.Find("#edition-isbn").GetAttribute("value"));
+        Assert.Contains("Chiffre de contrôle incohérent", page.Find("#edition-isbn-help").TextContent);
+        Assert.NotNull(page.Find("label[for=edition-isbn] .modified-mark"));
+    }
+
+    private async Task<IRenderedComponent<AdminEditionForm>> ReloadedWithAYearEnteredAsync()
+    {
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#edition-year", "2011");
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with { AlbumVersion = 13 };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        return page;
     }
 
     // The visuals the last saving sent, in their order.

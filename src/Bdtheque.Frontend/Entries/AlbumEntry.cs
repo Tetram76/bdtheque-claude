@@ -30,7 +30,7 @@ public sealed class AlbumEntry
 
     public DateTimeOffset? ModifiedAt { get; set; }
 
-    public string? Title { get; set; }
+    public string? Title { get; set => field = EntryText.Typed(value); }
 
     /// <summary>The sort key entered by hand; <c>null</c> for the automatic mode.</summary>
     public string? ManualSortKey { get; set; }
@@ -63,9 +63,9 @@ public sealed class AlbumEntry
 
     public int? FirstPublicationMonth { get; set; }
 
-    public string? Summary { get; set; }
+    public string? Summary { get; set => field = EntryText.Typed(value); }
 
-    public string? PersonalNotes { get; set; }
+    public string? PersonalNotes { get; set => field = EntryText.Typed(value); }
 
     public AlbumRating? Rating { get; set; }
 

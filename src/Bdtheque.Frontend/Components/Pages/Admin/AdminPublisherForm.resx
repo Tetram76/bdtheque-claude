@@ -168,4 +168,7 @@
   <data name="Changes.Collections" xml:space="preserve">
     <value>Collections</value>
   </data>
+  <data name="Changes.Collection" xml:space="preserve">
+    <value>Collection « {0} »</value>
+  </data>
 </root>

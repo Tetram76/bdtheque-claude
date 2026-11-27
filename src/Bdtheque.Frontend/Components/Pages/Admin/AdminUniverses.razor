@@ -12,8 +12,8 @@
 @* The list of the universes of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
    (visuel/listes/listes-de-l-administration.md): in the order of the hierarchy, each universe in retreat under its parent.
    Rendered statically, its search, its page and its dialogs are carried by its address (Lists/UniverseListQuery.cs). A universe
-   is entered in a side panel over the list (visuel/listes/saisie-selon-l-entite.md), which the address opens, its form sent to
-   the list, whose error is presented in place; only the choice of the parent is interactive. Its styles read the contracts of
+   is entered in a side panel over the list (visuel/listes/saisie-selon-l-entite.md), which the address opens, interactive,
+   saved from its circuit. Its styles read the contracts of
    the base theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminUniverses" />
@@ -109,8 +109,7 @@
         {
             @* The panel of the universe, changed or new, over the list (visuel/listes/saisie-selon-l-entite.md): its closing and its
                saving lead back to the list, with its criteria. *@
-            <UniverseEntryPanel UniverseId="_query.Edit" Searched="@NewSearched" CloseHref="@ListOnly.Href()" SavedHref="@ListOnly.Href()"
-                                ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />
+            <UniverseEntryPanel UniverseId="_query.Edit" Searched="@NewSearched" CloseHref="@ListOnly.Href()" SavedHref="@ListOnly.Href()" />
         }
         else if (_dialogUniverse is not null)
         {

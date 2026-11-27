@@ -46,6 +46,9 @@
     --color-text-on-accent: var(--day-text-on-accent);
     --color-accent-text: var(--day-link);
     --color-tag: var(--day-tint);
+    /* The line of what was entered before a reload, in the tint of the day, as a tag. */
+    --color-redo: var(--day-tint);
+    --color-text-on-redo: var(--color-text-on-tag);
     --color-text-on-tag: var(--day-deep-text);
     /* The accent of a pale cover hardly stands out from the papers: what is highlighted takes the deep colour. */
     --color-highlight: var(--day-deep);

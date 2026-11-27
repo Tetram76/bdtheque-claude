@@ -132,7 +132,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
         Assert.Equal("Dargaud", page.Find("#series-publisher").GetAttribute("value"));
         Assert.Equal("Ligne noire", page.Find("#series-collection").TextContent.Trim());
         Assert.Equal("Juan Díaz Canales", page.Find(".role-credits-line .tag").TextContent.Trim());
-        Assert.Equal(["Polar"], page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag").Select(tag => tag.TextContent.Trim()));
+        Assert.Equal(["Polar"], page.FindAll(".classification-tags")[0].QuerySelectorAll(".tag .tag-text").Select(tag => tag.TextContent.Trim()));
         Assert.Equal("John Blacksad, détective privé.", page.Find("#series-summary").GetAttribute("value") ?? page.Find("#series-summary").TextContent);
         Assert.Equal("Série créée le 12/01/2026 11:00, modifiée le 08/10/2026 22:08.", page.Find(".entry-form-dates").TextContent.Trim());
     }
@@ -497,6 +497,38 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Taking_ACollectionEmptied_KeepsThePublisherReloaded()
+    {
+        // A template of no collection is of no publisher in particular: emptying the collection, the user said nothing of the
+        // publisher, which another modification changed meanwhile.
+        var page = OpenSeries();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await ChooseCollectionAsync(page, 0);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/series/{SeriesId}"] = Blacksad with
+        {
+            Version = 13,
+            Content = Blacksad.Content with
+            {
+                EditionTemplate = Blacksad.Content.EditionTemplate with { PublisherId = Casterman, PublisherCollectionId = Ecritures },
+            },
+            References = Blacksad.References with
+            {
+                Publisher = new PublisherListItem(Casterman, "Casterman", null),
+                PublisherCollection = new PublisherCollectionListItem(Ecritures, "Écritures", Casterman, "Casterman"),
+            },
+        };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Votre saisie : —", page.Find("#series-collection-redo span").TextContent.Trim());
+
+        await page.ClickAsync(() => page.Find("#series-collection-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Casterman", page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher).Instance.Value?.Label);
+        Assert.Equal("—", page.Find("#series-collection").TextContent.Trim());
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
     public async Task TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
         var page = OpenSeries();
@@ -548,7 +580,7 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
 
         await page.SubmitAsync("form");
 
-        var tag = page.FindAll(".classification-tags")[1].QuerySelectorAll(".tag").Single(t => t.TextContent.Trim() == "Le port");
+        var tag = page.FindAll(".classification-tags")[1].QuerySelectorAll(".tag").Single(t => t.QuerySelector(".tag-text")!.TextContent.Trim() == "Le port");
         Assert.Equal("true", tag.GetAttribute("data-invalid"));
         var removal = tag.QuerySelector(".tag-remove")!;
         Assert.Equal("true", removal.GetAttribute("data-error-focus"));

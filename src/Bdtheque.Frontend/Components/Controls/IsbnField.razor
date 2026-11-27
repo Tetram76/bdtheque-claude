@@ -1,4 +1,5 @@
 @using Bdtheque.Contracts.Admin
+@using Bdtheque.Frontend.Entries
 @implements IDisposable
 @inject IStringLocalizer<IsbnField> L
 @inject ApiClient Api
@@ -10,7 +11,7 @@
    that fails, with nothing to correct in the ISBN, is presented under the field at its scale until the next ISBN is checked
    (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
 <div class="@(_checked == false ? "isbn-field isbn-field-warning" : "isbn-field")">
-    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Error="@Error" Failure="_failure" FailureText="@L["Failed"]" Context="control">
+    <Field Id="@Id" Label="@L["Label"]" Help="@Help" Error="@Error" Failure="_failure" FailureText="@L["Failed"]" State="State" Context="control">
         <span class="isbn-field-control">
             <input id="@control.Id" type="text" inputmode="numeric" autocomplete="off" placeholder="@L["Placeholder"]" value="@Value"
                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
@@ -49,17 +50,38 @@
     [Parameter]
     public bool? ReadCheck { get; set; }
 
+    /// <summary>What the form tells of its datum (EntryTracker): its mark once modified, and what the user had entered before the record was reloaded (visuel/saisie-album/contenu.md).</summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
+
+    // The ISBN whose check is shown, or under way: another one given by the form (what the user had entered, taken back after a
+    // reload) is checked as one typed.
+    private string? _known;
+
     private string? Help => _checked switch { true => L["Valid"].Value, false => L["Inconsistent"].Value, null => null };
 
-    protected override void OnInitialized() => _checked = ReadCheck;
+    protected override void OnInitialized()
+    {
+        _checked = ReadCheck;
+        _known = Value;
+    }
+
+    protected override Task OnParametersSetAsync() => Value == _known ? Task.CompletedTask : CheckAsync(Value);
 
     private async Task EnterAsync(ChangeEventArgs args)
     {
         var isbn = args.Value as string;
+        _known = isbn;
+        await ValueChanged.InvokeAsync(isbn);
+        await CheckAsync(isbn);
+    }
+
+    private async Task CheckAsync(string? isbn)
+    {
+        _known = isbn;
         var number = ++_number;
         // The failure was that of the check of the ISBN typed before.
         _failure = null;
-        await ValueChanged.InvokeAsync(isbn);
         if (string.IsNullOrWhiteSpace(isbn))
         {
             _checked = null;
@@ -75,7 +97,10 @@
                 // The check character in capitals as soon as it is typed, as it will be saved; the spaces around the ISBN,
                 // which the saving also removes, are left while typing, where one may be the next separator.
                 if (check.Isbn is { } saved && saved != isbn && string.Equals(saved, isbn, StringComparison.OrdinalIgnoreCase))
+                {
+                    _known = saved;
                     await ValueChanged.InvokeAsync(saved);
+                }
             }
         }
         catch (ApiProblemException exception) when (number == _number)

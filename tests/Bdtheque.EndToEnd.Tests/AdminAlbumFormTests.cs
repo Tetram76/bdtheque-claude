@@ -245,6 +245,14 @@ public sealed class AdminAlbumFormTests(ApplicationHost application) : BrowserTe
         await error.GetByRole(AriaRole.Button, new() { Name = "Recharger la fiche" }).ClickAsync();
         await Assertions.Expect(page.GetByLabel("Résumé")).ToHaveValueAsync("Modifié ailleurs");
         await Assertions.Expect(page.GetByLabel("Titre")).ToHaveValueAsync($"Album {_marker}");
+
+        // What was entered, offered again under its field (visuel/saisie-album/contenu.md, #329), then taken: the field is marked.
+        var entered = page.Locator("#album-title-redo");
+        await Assertions.Expect(entered).ToContainTextAsync($"Votre saisie : Autre titre {_marker}");
+        await entered.GetByRole(AriaRole.Button, new() { Name = "Reprendre" }).ClickAsync();
+        await Assertions.Expect(page.GetByLabel("Titre")).ToHaveValueAsync($"Autre titre {_marker}");
+        await Assertions.Expect(entered).ToHaveCountAsync(0);
+        await Assertions.Expect(page.Locator("label[for=album-title] .modified-mark")).ToHaveTextAsync("Modifié");
     }
 
     [Theory, InEachTheme]

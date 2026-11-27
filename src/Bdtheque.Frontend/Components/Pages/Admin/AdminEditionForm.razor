@@ -42,7 +42,7 @@
 }
 else
 {
-    <EntryForm @ref="_form" Breadcrumb="Breadcrumb" Title="@Title" Subject="@Subject" State="State" Saving="_saving"
+    <EntryForm @key="_reading" @ref="_form" HasRedo="Tracker.HasRedo" Breadcrumb="Breadcrumb" Title="@Title" Subject="@Subject" State="State" Saving="_saving"
                SaveLabel="@SaveLabel" CancelHref="@ReturnHref" OnSave="SaveAsync" Problem="@SaveProblem"
                Dates="@Dates">
         <Status>
@@ -59,7 +59,7 @@ else
             <Block Title="@L["Block.Edition"]" Kicker="@L["Kicker.Edition"]">
                 <div class="edition-fields">
                     <div class="edition-publisher">
-                        <Field Id="edition-publisher" Label="@L["Publisher"]" Required
+                        <Field Id="edition-publisher" Label="@L["Publisher"]" Required State="PublisherState"
                                Error="@(Errors.For("/publisherId") ?? (Entry.Publisher is { } chosen ? AddedError(chosen.Id) : null))" Context="control">
                             <RecordPicker Id="@control.Id" Kind="RecordKind.Publisher" Value="Entry.Publisher" ValueChanged="ChoosePublisherAsync"
                                           Placeholder="@L["Publisher.Placeholder"]" OnCreate="text => _publisherCreation = text"
@@ -69,7 +69,7 @@ else
                         @* One of the collections of the publisher, in the list of them all, which ends with the creation of a new
                            one: unavailable until one is chosen, and removed when it changes (choix-implementation/socle/frontend.md,
                            Fiches de saisie). *@
-                        <Field Id="edition-collection" Label="@L["Collection"]"
+                        <Field Id="edition-collection" Label="@L["Collection"]" State="CollectionState"
                                Error="@(Errors.For("/publisherCollectionId") ?? (Entry.PublisherCollection is { } collection ? AddedError(collection.Id) : null))"
                                Failure="CollectionsProblem" FailureText="@L["Collection.Unread"]" Help="@L["Collection.Help"]" Context="control">
                             <ListPicker Id="@control.Id" Label="@L["Collection"]" Options="CollectionOptions" Value="Entry.PublisherCollection"
@@ -80,12 +80,12 @@ else
                         </Field>
                     </div>
                     <div class="edition-row">
-                        <Field Id="edition-year" Label="@L["Year"]" Characters="4" Error="@Errors.For("/publicationYear")" Context="control">
+                        <Field Id="edition-year" Label="@L["Year"]" Characters="4" State="@DatumState("year")" Error="@Errors.For("/publicationYear")" Context="control">
                             <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" placeholder="@L["Year.Placeholder"]"
                                    aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid" @bind="Entry.PublicationYear" />
                         </Field>
-                        <IsbnField Id="edition-isbn" @bind-Value="Entry.Isbn" ReadCheck="Entry.IsbnChecksumValid" Error="@Errors.For("/isbn")" />
-                        @EnumList("edition-category", L["Category"], () => Entry.Category, value => Entry.Category = value)
+                        <IsbnField Id="edition-isbn" @bind-Value="Entry.Isbn" ReadCheck="Entry.IsbnChecksumValid" Error="@Errors.For("/isbn")" State="@DatumState("isbn")" />
+                        @EnumList("edition-category", "category", L["Category"], () => Entry.Category, value => Entry.Category = value)
                     </div>
                 </div>
             </Block>
@@ -93,16 +93,16 @@ else
             <Block Title="@L["Block.Making"]" Kicker="@L["Kicker.Making"]">
                 <div class="edition-fields">
                     <div class="edition-row">
-                        @EnumList("edition-format", L["Format"], () => Entry.Format, value => Entry.Format = value)
-                        @EnumList("edition-binding", L["Binding"], () => Entry.Binding, value => Entry.Binding = value)
-                        @EnumList("edition-orientation", L["Orientation"], () => Entry.Orientation, value => Entry.Orientation = value)
-                        @EnumList("edition-direction", L["ReadingDirection"], () => Entry.ReadingDirection, value => Entry.ReadingDirection = value)
-                        <Field Id="edition-pages" Label="@L["Pages"]" Characters="4" Error="@Errors.For("/pageCount")" Context="control">
+                        @EnumList("edition-format", "format", L["Format"], () => Entry.Format, value => Entry.Format = value)
+                        @EnumList("edition-binding", "binding", L["Binding"], () => Entry.Binding, value => Entry.Binding = value)
+                        @EnumList("edition-orientation", "orientation", L["Orientation"], () => Entry.Orientation, value => Entry.Orientation = value)
+                        @EnumList("edition-direction", "readingDirection", L["ReadingDirection"], () => Entry.ReadingDirection, value => Entry.ReadingDirection = value)
+                        <Field Id="edition-pages" Label="@L["Pages"]" Characters="4" State="@DatumState("pages")" Error="@Errors.For("/pageCount")" Context="control">
                             <input id="@control.Id" type="text" inputmode="numeric" maxlength="4" aria-describedby="@control.DescribedBy"
                                    aria-invalid="@control.Invalid" @bind="Entry.PageCount" />
                         </Field>
                         <div class="edition-flag">
-                            <Choice Label="@L["Color"]"><input type="checkbox" @bind="Entry.IsColor" /></Choice>
+                            <Choice Id="edition-color" Label="@L["Color"]" State="@DatumState("color")"><input type="checkbox" @bind="Entry.IsColor" /></Choice>
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,7 @@ else
                 <Block Title="@L["Block.Copy"]" Kicker="@L["Kicker.Copy"]">
                     <div class="edition-fields">
                         <div class="edition-row">
-                            <Field Id="edition-mode" Label="@L["Mode"]" Required Error="@Errors.For("/acquisitionMode")" Context="control">
+                            <Field Id="edition-mode" Label="@L["Mode"]" Required State="@DatumState("mode")" Error="@Errors.For("/acquisitionMode")" Context="control">
                                 <select id="@control.Id" class="edition-list" aria-describedby="@control.DescribedBy" aria-invalid="@control.Invalid"
                                         value="@(Entry.AcquisitionMode?.ToString() ?? "")"
                                         @onchange="args => Entry.ChooseAcquisitionMode(Enum.TryParse<AcquisitionMode>(args.Value as string, out var mode) ? mode : null)">
@@ -124,22 +124,22 @@ else
                                     }
                                 </select>
                             </Field>
-                            <Field Id="edition-date" Label="@DateLabel" Error="@Errors.For("/acquisitionDate")" Context="control">
+                            <Field Id="edition-date" Label="@DateLabel" State="@DatumState("date")" Error="@Errors.For("/acquisitionDate")" Context="control">
                                 <input id="@control.Id" type="date" class="edition-date" aria-describedby="@control.DescribedBy"
                                        aria-invalid="@control.Invalid" @bind="Entry.AcquisitionDate" />
                             </Field>
-                            @EnumList("edition-condition", L["Condition"], () => Entry.Condition, value => Entry.Condition = value)
+                            @EnumList("edition-condition", "condition", L["Condition"], () => Entry.Condition, value => Entry.Condition = value)
                             <div class="edition-flag edition-flags">
-                                <Choice Label="@L["SecondHand"]"><input type="checkbox" @bind="Entry.IsSecondHand" /></Choice>
-                                <Choice Label="@L["Dedicated"]"><input type="checkbox" @bind="Entry.IsDedicated" /></Choice>
+                                <Choice Id="edition-second-hand" Label="@L["SecondHand"]" State="@DatumState("secondHand")"><input type="checkbox" @bind="Entry.IsSecondHand" /></Choice>
+                                <Choice Id="edition-dedicated" Label="@L["Dedicated"]" State="@DatumState("dedicated")"><input type="checkbox" @bind="Entry.IsDedicated" /></Choice>
                             </div>
-                            <Field Id="edition-reference" Label="@L["Reference"]" Characters="12" Error="@Errors.For("/personalReference")"
+                            <Field Id="edition-reference" Label="@L["Reference"]" Characters="12" State="@DatumState("reference")" Error="@Errors.For("/personalReference")"
                                    Context="control">
                                 <input id="@control.Id" type="text" placeholder="@L["Reference.Placeholder"]" aria-describedby="@control.DescribedBy"
                                        aria-invalid="@control.Invalid" @bind="Entry.PersonalReference" />
                             </Field>
                         </div>
-                        <Field Id="edition-notes" Label="@L["Notes"]" Error="@Errors.For("/personalNotes")" Context="control">
+                        <Field Id="edition-notes" Label="@L["Notes"]" State="@DatumState("notes")" Error="@Errors.For("/personalNotes")" Context="control">
                             <textarea id="@control.Id" rows="2" placeholder="@L["Notes.Placeholder"]" aria-describedby="@control.DescribedBy"
                                       aria-invalid="@control.Invalid" @bind="Entry.PersonalNotes"></textarea>
                         </Field>
@@ -149,17 +149,17 @@ else
                 <Block Title="@L["Block.Value"]" Kicker="@L["Kicker.Value"]">
                     <div class="edition-row">
                         <AmountField Id="edition-price" Label="@AmountLabel" @bind-Amount="Entry.AcquisitionAmount" @bind-Currency="Entry.AcquisitionCurrency"
-                                     DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree"
+                                     DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree" State="@DatumState("price")"
                                      Error="@Errors.ForAmount(Entry.AcquisitionCurrency ?? EditionEntry.DefaultCurrency, "/acquisitionAmount", "/acquisitionCurrency")"
                                      Help="@(IsPurchase ? L["Price.Help.Purchase"] : L["Price.Help.Other"])" />
                         <AmountField Id="edition-initial" Label="@L["InitialValue"]" @bind-Amount="Entry.InitialValueAmount"
-                                     @bind-Currency="Entry.InitialValueCurrency" DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree"
+                                     @bind-Currency="Entry.InitialValueCurrency" DefaultCurrency="@EditionEntry.DefaultCurrency" Disabled="Entry.IsFree" State="@DatumState("initialValue")"
                                      Error="@Errors.ForAmount(Entry.InitialValueCurrency ?? EditionEntry.DefaultCurrency, "/initialValueAmount", "/initialValueCurrency")"
                                      Help="@L["InitialValue.Help"]" />
                         @* A free edition has no value: its amounts are emptied and disabled; a purchase is never free, the box
                            disabled by the mode « Achat » (fonctionnel/presentation/libelles-contextuels-sur-l-edition.md). *@
                         <div class="edition-flag edition-free">
-                            <Choice Label="@L["Free"]">
+                            <Choice Id="edition-free" Label="@L["Free"]" State="@DatumState("free")">
                                 <input id="edition-free" type="checkbox" checked="@Entry.IsFree" disabled="@IsPurchase" aria-describedby="edition-free-help"
                                        @onchange="args => Entry.SetFree(args.Value is true)" />
                             </Choice>
@@ -170,7 +170,7 @@ else
             }
 
             <EditionVisualsEditor Id="edition-visuals" Visuals="Entry.Visuals" VisualsChanged="StateHasChanged" Limits="Limits!"
-                                  SendingChanged="sending => _sendingVisuals = sending" Functions="VisualFunctions" />
+                                  SendingChanged="sending => _sendingVisuals = sending" Functions="VisualFunctions" State="@DatumState("visuals")" />
         </ChildContent>
     </EntryForm>
 
@@ -186,7 +186,7 @@ else
     }
     @if (_changesShown)
     {
-        <ChangesDialog Id="edition-changes" Subject="@Subject" Changes="Changes()" OnClose="() => _changesShown = false" />
+        <ChangesDialog Id="edition-changes" Subject="@Subject" Changes="Tracker.Changes()" OnClose="() => _changesShown = false" />
     }
 }
 
@@ -200,6 +200,9 @@ else
     private bool _sendingVisuals;
     private string? _savedFingerprint;
     private bool _changesShown;
+    private EntryTracker<EditionEntry>? _tracker;
+    // The number of the reading of the edition: the form is rendered anew for each, its controls reading the record reloaded.
+    private int _reading;
     private int _publisherChoice;
     // The name typed in the choice of the publisher, while its creation on the spot is being confirmed.
     private string? _publisherCreation;
@@ -418,21 +421,7 @@ else
         {
             try
             {
-                var format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
-                var entry = await ReadEntryAsync();
-                // Read after the edition: a write between both readings leaves the form the older version of the album, which its
-                // saving sends, refused as a conflict rather than writing over what it did not read.
-                if (entry.Id is { } edition)
-                    entry.Visuals = [.. (await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals")).Visuals.Select(VisualItem.Of)];
-                var limits = await Api.GetAsync<VisualLimits>("/admin/visuals/limits");
-                var collections = entry.Publisher is { } publisher ? await CollectionsOfAsync(publisher.Id) : ([], null);
-
-                // Published once all of it is read: the form is shown only whole, a reading that fails showing the error instead.
-                AlbumFormat = format;
-                Limits = limits;
-                (PublisherCollections, CollectionsProblem) = collections;
-                ReadEntry = entry.Copy();
-                Entry = entry;
+                Publish(await ReadFormAsync());
             }
             catch (ApiProblemException exception)
             {
@@ -443,6 +432,33 @@ else
 
         _savedFingerprint = ReadEntry!.Fingerprint();
     }
+
+    // All the form reads, as the page enters it.
+    private async Task<FormReading> ReadFormAsync()
+    {
+        var format = (await Api.GetAsync<ApplicationSettings>("/catalog/settings")).AlbumLabelFormat;
+        var entry = await ReadEntryAsync();
+        // Read after the edition: a write between both readings leaves the form the older version of the album, which its
+        // saving sends, refused as a conflict rather than writing over what it did not read.
+        if (entry.Id is { } edition)
+            entry.Visuals = [.. (await Api.GetAsync<EditionVisualsForm>($"/admin/albums/{AlbumId}/editions/{edition}/visuals")).Visuals.Select(VisualItem.Of)];
+        var limits = await Api.GetAsync<VisualLimits>("/admin/visuals/limits");
+        var collections = entry.Publisher is { } publisher ? await CollectionsOfAsync(publisher.Id) : ([], null);
+        return new FormReading(format, limits, entry, collections.Collections, collections.Problem);
+    }
+
+    // Published once all of it is read: the form is shown only whole, a reading that fails showing the error instead.
+    private void Publish(FormReading reading)
+    {
+        AlbumFormat = reading.Format;
+        Limits = reading.Limits;
+        (PublisherCollections, CollectionsProblem) = (reading.Collections, reading.CollectionsProblem);
+        ReadEntry = reading.Entry.Copy();
+        Entry = reading.Entry;
+    }
+
+    private sealed record FormReading(
+        AlbumLabelFormat Format, VisualLimits Limits, EditionEntry Entry, List<RecordOption> Collections, ApiProblem? CollectionsProblem);
 
     // The form as the page enters it, read from the API.
     private async Task<EditionEntry> ReadEntryAsync()
@@ -478,8 +494,8 @@ else
     private static readonly ApiProblem IntentGone = new(ProblemCategory.Functional, StatusCodes.Status404NotFound, null, null);
 
     // A list of the values of an enumeration, « — » leaving the data empty, sized to its longest choice.
-    private RenderFragment EnumList<TEnum>(string id, string label, Func<TEnum?> get, Action<TEnum?> set) where TEnum : struct, Enum =>
-        @<Field Id="@id" Label="@label" Context="control">
+    private RenderFragment EnumList<TEnum>(string id, string key, string label, Func<TEnum?> get, Action<TEnum?> set) where TEnum : struct, Enum =>
+        @<Field Id="@id" Label="@label" State="@DatumState(key)" Context="control">
             <select id="@control.Id" class="edition-list" value="@(get()?.ToString() ?? "")"
                     @onchange="args => set(Enum.TryParse<TEnum>(args.Value as string, out var value) ? value : null)">
                 <option value="">@L["None"]</option>
@@ -719,9 +735,29 @@ else
         Conversion,
     }
 
-    // The record as it is now, the changes of the form left behind: a navigation that loads the page anew, the same page, which
-    // reads anew the edition or, for a new one, the album and what the series pre-fills.
-    private void Reload() => Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    // The record as it is now, read anew within the circuit as the page reads it (the edition, or, for a new one, the album and
+    // what the series pre-fills): the entry left behind offers again, under each datum, what the user had entered
+    // (visuel/saisie-album/contenu.md, #329). The form is rendered anew, its controls reading the record reloaded; the files
+    // still being sent go with the visuals block left behind.
+    private async Task ReloadAsync()
+    {
+        try
+        {
+            var reading = await ReadFormAsync();
+            Tracker.Abandon();
+            Publish(reading);
+            _savedFingerprint = ReadEntry!.Fingerprint();
+            _saveProblem = null;
+            _sendingVisuals = false;
+            _publisherChoice++;
+            _reading++;
+        }
+        catch (ApiProblemException exception)
+        {
+            // Deleted meanwhile, or unreadable: said as the error of the saving was, the entry staying as it is.
+            _saveProblem = exception.Problem;
+        }
+    }
 
     // What to correct in each field the error of the saving designates (visuel/saisie-album/contenu.md); an amount and its
     // currency, entered side by side, are a single field of the form.
@@ -735,7 +771,7 @@ else
     // which the form read and which only a reload reads anew.
     private RenderFragment? SaveProblem => _saveProblem is not { } problem ? null
         : @<SaveError Problem="problem" Conflict="@L["Problem.Functional.Conflict"]" NotFound="@L["Problem.Functional.NotFound"]"
-                      Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="Reload" OnShowChanges="ShowChangesAsync"
+                      Technical="@L["Problem.Technical.Text"]" CanReload="true" OnReload="ReloadAsync" OnShowChanges="ShowChangesAsync"
                       OnRetry="SaveAsync" />;
 
     // Just above the first block, as on the other entry forms (decision of the user, #209): those of the edition, or, for an
@@ -749,72 +785,127 @@ else
         _ => null,
     };
 
-    // Each field the user changed since the edition was read, with what they entered, to enter it again once the edition is
-    // reloaded: block by block of the form.
-    private List<EntryChange> Changes() => [.. EditionChanges(ReadEntry!, Entry!), .. CopyChanges(ReadEntry!, Entry!), .. VisualChanges(ReadEntry!, Entry!)];
+    // The data of the edition, in the order of the form, compared on what is entered against what was read
+    // (visuel/saisie-album/contenu.md, données modifiées): for their mark, « Voir mes changements » and the entry left behind at
+    // a reload. The fields of a copy and of a value, absent from an intent, are the same on both sides of it. The labels of the
+    // date and of the price follow the mode of acquisition, as their fields do: the data are written anew at each reading.
+    private EntryTracker<EditionEntry> Tracker => _tracker ??= new(() => ReadEntry, () => Entry, new LiveData(Data));
 
-    // Les visuels: their number, whichever were added, removed, ordered or retyped, to add again once the edition is reloaded.
-    private IEnumerable<EntryChange> VisualChanges(EditionEntry read, EditionEntry entry)
+    private IReadOnlyList<EntryDatum<EditionEntry>> Data() =>
+    [
+        new("publisher", L["Publisher"], e => e.Publisher?.Id.ToString(), e => e.Publisher?.Label, (from, to) =>
+            to.NewPublishers.AddRange(from.NewPublishers.Where(p => p.Key == from.Publisher?.Id && to.NewPublishers.All(o => o.Key != p.Key)))),
+        new("collection", L["Collection"], e => e.PublisherCollection?.Id.ToString(), e => e.PublisherCollection?.Label, (from, to) =>
+        {
+            to.PublisherCollection = from.PublisherCollection;
+            to.NewPublisherCollections.AddRange(from.NewPublisherCollections.Where(c =>
+                c.Key == from.PublisherCollection?.Id && to.NewPublisherCollections.All(o => o.Key != c.Key)));
+        }),
+        new("year", L["Year"], e => Invariant(e.PublicationYear), e => e.PublicationYear?.ToString(CultureInfo.CurrentCulture),
+            (from, to) => to.PublicationYear = from.PublicationYear),
+        new("isbn", L["Isbn"], e => e.Isbn, e => e.Isbn, (from, to) => to.Isbn = from.Isbn),
+        Listed("category", L["Category"], e => e.Category, (e, v) => e.Category = v),
+        Listed("format", L["Format"], e => e.Format, (e, v) => e.Format = v),
+        Listed("binding", L["Binding"], e => e.Binding, (e, v) => e.Binding = v),
+        Listed("orientation", L["Orientation"], e => e.Orientation, (e, v) => e.Orientation = v),
+        Listed("readingDirection", L["ReadingDirection"], e => e.ReadingDirection, (e, v) => e.ReadingDirection = v),
+        new("pages", L["Pages"], e => Invariant(e.PageCount), e => e.PageCount?.ToString(CultureInfo.CurrentCulture),
+            (from, to) => to.PageCount = from.PageCount),
+        new("color", L["Color"], e => Checked(e.IsColor), e => Checked(e.IsColor), (from, to) => to.IsColor = from.IsColor),
+        // Taken as the user chooses it: a purchase is never free.
+        new("mode", L["Mode"], e => e.AcquisitionMode?.ToString(), e => Named(e.AcquisitionMode),
+            (from, to) => to.ChooseAcquisitionMode(from.AcquisitionMode)),
+        new("date", DateLabel, e => e.AcquisitionDate?.ToString("O", CultureInfo.InvariantCulture),
+            e => e.AcquisitionDate is { } date ? Format.Date(date) : null, (from, to) => to.AcquisitionDate = from.AcquisitionDate),
+        Listed("condition", L["Condition"], e => e.Condition, (e, v) => e.Condition = v),
+        new("secondHand", L["SecondHand"], e => Checked(e.IsSecondHand), e => Checked(e.IsSecondHand), (from, to) => to.IsSecondHand = from.IsSecondHand),
+        new("dedicated", L["Dedicated"], e => Checked(e.IsDedicated), e => Checked(e.IsDedicated), (from, to) => to.IsDedicated = from.IsDedicated),
+        new("reference", L["Reference"], e => e.PersonalReference, e => e.PersonalReference, (from, to) => to.PersonalReference = from.PersonalReference),
+        new("notes", L["Notes"], e => e.PersonalNotes, e => e.PersonalNotes, (from, to) => to.PersonalNotes = from.PersonalNotes),
+        // An amount and its currency, entered side by side, are a single datum, as they are a single field.
+        new("price", AmountLabel, e => AmountValue(e.AcquisitionAmount, e.AcquisitionCurrency), e => Amount(e.AcquisitionAmount, e.AcquisitionCurrency),
+            (from, to) => TakeAmount(to, () => (to.AcquisitionAmount, to.AcquisitionCurrency) = (from.AcquisitionAmount, from.AcquisitionCurrency), from.AcquisitionAmount)),
+        new("initialValue", L["InitialValue"], e => AmountValue(e.InitialValueAmount, e.InitialValueCurrency), e => Amount(e.InitialValueAmount, e.InitialValueCurrency),
+            (from, to) => TakeAmount(to, () => (to.InitialValueAmount, to.InitialValueCurrency) = (from.InitialValueAmount, from.InitialValueCurrency), from.InitialValueAmount)),
+        // Taken as the user checks it: a free edition has no value. A purchase is never free, the mode « Achat » disabling the box:
+        // an edition free entered under another mode takes that mode back with it, which allowed it.
+        new("free", L["Free"], e => Checked(e.IsFree), e => Checked(e.IsFree), (from, to) =>
+        {
+            if (from.IsFree && to.AcquisitionMode == AcquisitionMode.Purchase)
+                to.ChooseAcquisitionMode(from.AcquisitionMode);
+            to.SetFree(from.IsFree);
+        }),
+        // Les visuels: the ordered list of them, each by what it is (one the edition has, or one added, waiting) and its type. Taken
+        // back whole, those added included: one no longer kept is removed by the block, which a dialog tells.
+        new("visuals", L["Visuals"], e => string.Join(',', e.Visuals.Select(v => $"{v.Key}:{v.Type}")), e => e.Visuals.Count switch
+        {
+            0 => L["Visuals.None"],
+            1 => L["Visuals.One"],
+            var count => L["Visuals.Other", count],
+        }, (from, to) =>
+        {
+            to.Visuals.Clear();
+            to.Visuals.AddRange(from.Visuals);
+        }),
+    ];
+
+    private EntryDatum<EditionEntry> Listed<TEnum>(string key, string label, Func<EditionEntry, TEnum?> get, Action<EditionEntry, TEnum?> set)
+        where TEnum : struct, Enum =>
+        new(key, label, e => get(e)?.ToString(), e => Named(get(e)), (from, to) => set(to, get(from)));
+
+    // An amount taken back on a free edition makes it no longer free, as the user unchecks the box to enter one.
+    private static void TakeAmount(EditionEntry to, Action take, decimal? amount)
     {
-        if (!read.VisualEntries().SequenceEqual(entry.VisualEntries()))
-            yield return new(L["Visuals"], entry.Visuals.Count switch
-            {
-                0 => L["Visuals.None"],
-                1 => L["Visuals.One"],
-                var count => L["Visuals.Other", count],
-            });
+        if (amount is not null)
+            to.SetFree(false);
+        take();
     }
 
-    // L'édition, Fabrication.
-    private IEnumerable<EntryChange> EditionChanges(EditionEntry read, EditionEntry entry)
+    // The value of an amount, whatever the scale it was read or typed with (16.95 is 16.9500), with its currency.
+    private static string? AmountValue(decimal? amount, string? currency) =>
+        amount is null && currency is null ? null : $"{amount?.ToString("G29", CultureInfo.InvariantCulture)} {currency}";
+
+    private static string? Invariant(int? value) => value?.ToString(CultureInfo.InvariantCulture);
+
+    // Nothing is marked on a new edition or intent, all of which is new, as its save bar says (« Nouvelle fiche »); what the user
+    // had entered is offered again all the same once it is reloaded, being written under the version of its album.
+    private EntryDatumState DatumState(string key) =>
+        Entry!.Id is null ? Tracker.State(key, this) with { Modified = false } : Tracker.State(key, this);
+
+    // Taking the publisher chooses it again, as the user would: the collections offered are then its own.
+    private EntryDatumState PublisherState => DatumState("publisher") with { Take = EventCallback.Factory.Create(this, TakePublisherAsync) };
+
+    private async Task TakePublisherAsync()
     {
-        if (read.Publisher?.Id != entry.Publisher?.Id)
-            yield return new(L["Publisher"], entry.Publisher?.Label);
-        if (read.PublisherCollection?.Id != entry.PublisherCollection?.Id)
-            yield return new(L["Collection"], entry.PublisherCollection?.Label);
-        if (read.PublicationYear != entry.PublicationYear)
-            yield return new(L["Year"], entry.PublicationYear?.ToString(CultureInfo.CurrentCulture));
-        if (read.Isbn != entry.Isbn)
-            yield return new(L["Isbn"], entry.Isbn);
-        if (read.Category != entry.Category)
-            yield return new(L["Category"], Named(entry.Category));
-        if (read.Format != entry.Format)
-            yield return new(L["Format"], Named(entry.Format));
-        if (read.Binding != entry.Binding)
-            yield return new(L["Binding"], Named(entry.Binding));
-        if (read.Orientation != entry.Orientation)
-            yield return new(L["Orientation"], Named(entry.Orientation));
-        if (read.ReadingDirection != entry.ReadingDirection)
-            yield return new(L["ReadingDirection"], Named(entry.ReadingDirection));
-        if (read.PageCount != entry.PageCount)
-            yield return new(L["Pages"], entry.PageCount?.ToString(CultureInfo.CurrentCulture));
-        if (read.IsColor != entry.IsColor)
-            yield return new(L["Color"], Checked(entry.IsColor));
+        var publisher = Tracker.Entered!.Publisher;
+        Tracker.Take("publisher");
+        await ChoosePublisherAsync(publisher);
     }
 
-    // L'exemplaire, Valeur.
-    private IEnumerable<EntryChange> CopyChanges(EditionEntry read, EditionEntry entry)
+    // Taking a collection takes its publisher first, when the entry left behind had another: a collection is one of the
+    // collections of its publisher, and choosing the publisher again removes the collection, which is then put back. A collection
+    // emptied is that of no publisher: the publisher reloaded stays.
+    private EntryDatumState? CollectionState => DatumState("collection") is { } state
+        ? state with { Take = EventCallback.Factory.Create(this, TakeCollectionAsync) }
+        : null;
+
+    private async Task TakeCollectionAsync()
     {
-        if (read.AcquisitionMode != entry.AcquisitionMode)
-            yield return new(L["Mode"], Named(entry.AcquisitionMode));
-        if (read.AcquisitionDate != entry.AcquisitionDate)
-            yield return new(DateLabel, entry.AcquisitionDate is { } date ? Format.Date(date) : null);
-        if (read.Condition != entry.Condition)
-            yield return new(L["Condition"], Named(entry.Condition));
-        if (read.IsSecondHand != entry.IsSecondHand)
-            yield return new(L["SecondHand"], Checked(entry.IsSecondHand));
-        if (read.IsDedicated != entry.IsDedicated)
-            yield return new(L["Dedicated"], Checked(entry.IsDedicated));
-        if (read.PersonalReference != entry.PersonalReference)
-            yield return new(L["Reference"], entry.PersonalReference);
-        if (read.PersonalNotes != entry.PersonalNotes)
-            yield return new(L["Notes"], entry.PersonalNotes);
-        if (read.AcquisitionAmount != entry.AcquisitionAmount || read.AcquisitionCurrency != entry.AcquisitionCurrency)
-            yield return new(AmountLabel, Amount(entry.AcquisitionAmount, entry.AcquisitionCurrency));
-        if (read.InitialValueAmount != entry.InitialValueAmount || read.InitialValueCurrency != entry.InitialValueCurrency)
-            yield return new(L["InitialValue"], Amount(entry.InitialValueAmount, entry.InitialValueCurrency));
-        if (read.IsFree != entry.IsFree)
-            yield return new(L["Free"], Checked(entry.IsFree));
+        var entered = Tracker.Entered!;
+        if (entered.PublisherCollection is not null && entered.Publisher?.Id != Entry!.Publisher?.Id)
+            await TakePublisherAsync();
+        Tracker.Take("collection");
+    }
+    // The data of the form, written anew each time they are read, their labels following the entry.
+    private sealed class LiveData(Func<IReadOnlyList<EntryDatum<EditionEntry>>> data) : IReadOnlyList<EntryDatum<EditionEntry>>
+    {
+        public EntryDatum<EditionEntry> this[int index] => data()[index];
+
+        public int Count => data().Count;
+
+        public IEnumerator<EntryDatum<EditionEntry>> GetEnumerator() => data().GetEnumerator();
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     private string? Amount(decimal? amount, string? currency) =>

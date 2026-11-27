@@ -1,0 +1,52 @@
+/* A band of its own tint, framed by the color of information of the error that led to it (Fiche modifiée entre-temps), its
+   icon that of that error (contracts --color-redo, --color-text-on-redo, --color-redo-border): it stands out from the block
+   that holds it, in every theme. What was entered, then its two actions, underlined in the color of its text, which the tint keeps readable. */
+.redo-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs) var(--space-m);
+    margin: 0;
+    padding: var(--space-xs) var(--space-s);
+    border: 1px solid var(--color-redo-border);
+    border-inline-start-width: 4px;
+    border-radius: var(--radius-control);
+    background: var(--color-redo);
+    color: var(--color-text-on-redo);
+    font-size: var(--font-size-small);
+    overflow-wrap: anywhere;
+}
+
+.redo-line-text {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+}
+
+.redo-line ::deep .icon {
+    flex: none;
+    align-self: center;
+    inline-size: 1.1em;
+    block-size: 1.1em;
+    color: var(--color-redo-border);
+}
+
+.redo-line strong {
+    font-weight: var(--font-weight-strong);
+}
+
+.redo-line-actions {
+    display: inline-flex;
+    gap: var(--space-m);
+}
+
+.redo-line-action {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: var(--font-weight-strong);
+    text-decoration: underline;
+    cursor: pointer;
+}

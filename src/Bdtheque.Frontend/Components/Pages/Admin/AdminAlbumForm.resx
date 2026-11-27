@@ -54,6 +54,12 @@
   <data name="Changes.Range" xml:space="preserve">
     <value>{0} à {1}</value>
   </data>
+  <data name="Changes.No" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="Changes.Yes" xml:space="preserve">
+    <value>Oui</value>
+  </data>
   <data name="Changes.SortKey" xml:space="preserve">
     <value>Clé de tri</value>
   </data>
@@ -180,14 +186,8 @@
   <data name="Title.Placeholder.Series" xml:space="preserve">
     <value>Sans titre, l&apos;album prend celui de la série</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Type</value>
-  </data>
   <data name="Type.Omnibus" xml:space="preserve">
     <value>Intégrale</value>
-  </data>
-  <data name="Type.Regular" xml:space="preserve">
-    <value>Régulier</value>
   </data>
   <data name="Type.SpecialIssue" xml:space="preserve">
     <value>Hors-série</value>

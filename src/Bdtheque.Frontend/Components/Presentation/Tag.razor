@@ -5,15 +5,24 @@
    (choix-implementation/socle/frontend.md); in an interactive form, a button removes it in place. *@
 @* A tag in error (a record created on the spot that the saving refused) is bordered as a control in error; its removal, the
    only thing to act on in it, is described by the error and gets the focus as a field to correct does (entry-form.js). *@
+@* A tag removed from a list of an entry form is restored in place rather than removed (visuel/saisie-album/contenu.md, #355). *@
 <span class="tag" data-variant="@Variant.ToString().ToLowerInvariant()" data-invalid="@(Invalid ? "true" : null)">
     @if (Icon is { } icon)
     {
         <Icon Name="icon" />
     }
-    <span>@Text</span>
+    <span class="tag-text">@Text</span>
+    @if (Note is not null)
+    {
+        <span class="visually-hidden">@Note</span>
+    }
     @if (RemoveHref is not null)
     {
         <a class="tag-remove" href="@RemoveHref" aria-label="@L["Remove", Text]"><Icon Name="IconName.Close" /></a>
+    }
+    else if (OnRestore.HasDelegate)
+    {
+        <button type="button" class="tag-restore" aria-label="@L["Restore.Label", Text]" @onclick="OnRestore">@L["Restore"]</button>
     }
     else if (OnRemove.HasDelegate)
     {
@@ -32,6 +41,10 @@
     [Parameter]
     public IconName? Icon { get; set; }
 
+    /// <summary>What only assistive technologies read after the text, where the look alone tells it (e.g. « ajouté »).</summary>
+    [Parameter]
+    public string? Note { get; set; }
+
     /// <summary>The page without this tag: set, the tag can be removed.</summary>
     [Parameter]
     public string? RemoveHref { get; set; }
@@ -39,6 +52,10 @@
     /// <summary>Removes the tag in place, in an interactive form, rather than leading to the page without it.</summary>
     [Parameter]
     public EventCallback OnRemove { get; set; }
+
+    /// <summary>Restores a tag removed from a list of an entry form (« Rétablir »), in place of its removal.</summary>
+    [Parameter]
+    public EventCallback OnRestore { get; set; }
 
     /// <summary>What the removal says to assistive technologies, when the text alone does not (e.g. the role of an author).</summary>
     [Parameter]

@@ -5,6 +5,7 @@ using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Frontend.Api;
 using Bdtheque.Frontend.Components.Controls;
+using Bdtheque.Frontend.Entries;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Time.Testing;
 
@@ -12,8 +13,8 @@ namespace Bdtheque.Frontend.Tests.Controls;
 
 /// <summary>
 /// The parent of a universe, in its side panel (visuel/listes/saisie-selon-l-entite.md): chosen by typing its name, or created
-/// on the spot by its name alone (choix-implementation/socle/frontend.md, création sur place, #414), and sent with the static
-/// form of the panel, by its identifier or, created on the spot, by its name.
+/// on the spot by its name alone (choix-implementation/socle/frontend.md, création sur place, #414), each choice given to the
+/// interactive panel, which holds it, as the test does here.
 /// </summary>
 public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
 {
@@ -27,6 +28,11 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         Content = new StringContent(
             $$"""{"universe":{"id":"{{Pratt.Id}}","name":"{{Pratt.Name}}"},"ancestors":[]}""", Encoding.UTF8, "application/json"),
     };
+
+    // What the panel holds, as the field gives it: the parent chosen, and the one created on the spot.
+    private RecordOption? _chosen;
+    private bool _changed;
+    private NewUniverse? _created;
 
     public ParentUniverseFieldTests()
     {
@@ -59,16 +65,28 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
     }
 
     [Fact]
-    public void AnExistingParent_IsSentByItsIdentifier()
+    public void AnExistingParent_IsPresentedWithItsAncestors()
     {
-        var field = Open(parent: new UniverseInHierarchy(Pratt, []));
+        var field = Open(parent: UniverseEntry.Option(new UniverseInHierarchy(Pratt, [])));
 
         Assert.Equal("Univers Hugo Pratt", field.Find("input[role=combobox]").GetAttribute("value"));
-        Assert.Equal((Pratt.Id.ToString(), "", ""), Sent(field));
+        Assert.Equal("Ses séries et albums sont aussi ceux de Univers Hugo Pratt.", field.Find(".field-help").TextContent.Trim());
     }
 
     [Fact]
-    public async Task ACreation_OffersTheTextTyped_AsksItsNameAlone_ThenSendsTheParentByItsName()
+    public async Task AParentChosen_IsGivenToThePanel_ThenWithItsAncestors()
+    {
+        var field = Open();
+
+        await (await field.TypeAsync("input[role=combobox]", "Pratt", _clock)).EndAsync("The search of the text typed");
+        await field.ClickAsync("[role=option]");
+
+        Assert.Equal((Pratt.Id, "Univers Hugo Pratt"), (_chosen?.Id, _chosen?.Label));
+        Assert.Null(_created);
+    }
+
+    [Fact]
+    public async Task ACreation_OffersTheTextTyped_AsksItsNameAlone_ThenChoosesTheParentCreated()
     {
         var field = Open();
 
@@ -85,40 +103,39 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         Assert.Empty(field.FindAll("dialog"));
         Assert.Equal("Mers du Sud", field.Find("input[role=combobox]").GetAttribute("value"));
         Assert.Equal("Ses séries et albums sont aussi ceux de Mers du Sud.", field.Find(".field-help").TextContent.Trim());
-        // Created only with the universe of the panel: sent by its key and its name, without an identifier.
-        var (parentId, key, name) = Sent(field);
-        Assert.Equal(("", "Mers du Sud"), (parentId, name));
-        Assert.True(Guid.TryParse(key, out _));
+        // Created only with the universe of the panel, which cites it by its key.
+        Assert.Equal("Mers du Sud", _created?.Name);
+        Assert.Equal(_created!.Key, _chosen?.Id);
     }
 
     [Fact]
-    public async Task ACreationWithItsNameEmptied_IsStillSent_ForTheSavingToRefuseIt()
+    public async Task ACreationWithItsNameEmptied_IsStillChosen_ForTheSavingToRefuseIt()
     {
         // Told by its key, a parent whose name the user emptied is still a parent created on the spot, never no parent: the
         // saving refuses its name, rather than leaving the universe without its parent.
-        var field = Open(parent: new UniverseInHierarchy(Pratt, []));
+        var field = Open(parent: UniverseEntry.Option(new UniverseInHierarchy(Pratt, [])));
         await (await field.TypeAsync("input[role=combobox]", "Mers du Sud", _clock)).EndAsync("The search of the text typed");
         await field.ClickAsync(".option-list-create");
 
         await field.ChangeAsync("dialog input#universe-parent-creation-name", "  ");
         await field.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
 
-        var (parentId, key, name) = Sent(field);
-        Assert.Equal(("", ""), (parentId, name));
-        Assert.True(Guid.TryParse(key, out _));
+        Assert.Equal("", _created?.Name);
+        Assert.Equal(_created!.Key, _chosen?.Id);
     }
 
     [Fact]
     public async Task ACreationCancelled_LeavesTheParentAsItWas()
     {
-        var field = Open(parent: new UniverseInHierarchy(Pratt, []));
+        var field = Open(parent: UniverseEntry.Option(new UniverseInHierarchy(Pratt, [])));
 
         await (await field.TypeAsync("input[role=combobox]", "Mers du Sud", _clock)).EndAsync("The search of the text typed");
         await field.ClickAsync(".option-list-create");
         await field.ClickAsync("dialog [data-dialog-close]");
 
         Assert.Empty(field.FindAll("dialog"));
-        Assert.Equal((Pratt.Id.ToString(), "", ""), Sent(field));
+        Assert.False(_changed);
+        Assert.Null(_created);
     }
 
     [Fact]
@@ -128,27 +145,26 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         await (await field.TypeAsync("input[role=combobox]", "Mers du Sud", _clock)).EndAsync("The search of the text typed");
         await field.ClickAsync(".option-list-create");
         await field.ClickAsync("dialog .dialog-actions .button[data-variant=primary]");
+        // The panel renders the field anew with what it holds.
+        field.Render(parameters => parameters.Add(p => p.Value, _chosen).Add(p => p.NewParent, _created));
 
         await field.ClickAsync("button.record-picker-clear");
-        Assert.Equal(("", "", ""), Sent(field));
+        Assert.Null(_chosen);
         await (await field.TypeAsync("input[role=combobox]", "mers", _clock)).EndAsync("The search of the text typed");
         await field.ClickAsync(".option-list-pending");
 
-        Assert.Equal(("", "Mers du Sud"), (Sent(field).ParentId, Sent(field).NewParent));
-        Assert.NotEqual("", Sent(field).NewParentKey);
+        Assert.Equal((_created!.Key, "Mers du Sud"), (_chosen?.Id, _chosen?.Label));
     }
 
     [Fact]
     public void AParentCreatedOnTheSpotThatTheSavingRefused_IsPresentedAgain_WithItsError()
     {
-        // The form sent back with the error of its saving: the name of the parent created on the spot, which the page passes back.
         var sent = new NewUniverse(Guid.NewGuid(), "Ombrelune");
-        var field = Open(newParent: sent, error: "« Ombrelune » est déjà pris.");
+        var field = Open(parent: UniverseEntry.Option(sent), newParent: sent, error: "« Ombrelune » est déjà pris.");
 
         Assert.Equal("Ombrelune", field.Find("input[role=combobox]").GetAttribute("value"));
         Assert.Equal("true", field.Find("input[role=combobox]").GetAttribute("aria-invalid"));
         Assert.Equal("« Ombrelune » est déjà pris.", field.Find(".field-error").TextContent.Trim());
-        Assert.Equal(("", sent.Key.ToString(), "Ombrelune"), Sent(field));
     }
 
     // Ancestors that cannot be read leave the parent named alone: the failure is said under the field, as any control says its
@@ -163,7 +179,7 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         await field.ClickAsync("[role=option]");
 
         Assert.Equal("Univers Hugo Pratt", field.Find("input[role=combobox]").GetAttribute("value"));
-        Assert.Equal((Pratt.Id.ToString(), "", ""), Sent(field));
+        Assert.Equal(Pratt.Id, _chosen?.Id);
         var failure = field.Find("#universe-parent-failure [role=alert]");
         Assert.Equal("technical", failure.GetAttribute("data-error-category"));
         Assert.True(failure.HasAttribute("data-error-compact"));
@@ -174,20 +190,21 @@ public sealed class ParentUniverseFieldTests : BunitContext, IDisposable
         Assert.Empty(field.FindAll("#universe-parent-failure"));
     }
 
-    private IRenderedComponent<ParentUniverseField> Open(UniverseInHierarchy? parent = null, NewUniverse? newParent = null, string? error = null) =>
-        Render<ParentUniverseField>(parameters => parameters
+    private IRenderedComponent<ParentUniverseField> Open(RecordOption? parent = null, NewUniverse? newParent = null, string? error = null)
+    {
+        (_chosen, _created) = (parent, newParent);
+        return Render<ParentUniverseField>(parameters => parameters
             .Add(p => p.Id, "universe-parent")
-            .Add(p => p.Name, "parentId")
-            .Add(p => p.NewKeyName, "newParentKey")
-            .Add(p => p.NewName, "newParent")
-            .Add(p => p.Parent, parent)
+            .Add(p => p.Value, parent)
+            .Add(p => p.ValueChanged, (RecordOption? chosen) =>
+            {
+                _chosen = chosen;
+                _changed = true;
+            })
             .Add(p => p.NewParent, newParent)
+            .Add(p => p.NewParentChanged, (NewUniverse created) => _created = created)
             .Add(p => p.Error, error));
-
-    // What the static form of the panel sends: the identifier of an existing parent, the name of a parent created on the spot.
-    private static (string? ParentId, string? NewParentKey, string? NewParent) Sent(IRenderedComponent<ParentUniverseField> field) =>
-        (field.Find("input[type=hidden][name=parentId]").GetAttribute("value"), field.Find("input[type=hidden][name=newParentKey]").GetAttribute("value"),
-            field.Find("input[type=hidden][name=newParent]").GetAttribute("value"));
+    }
 
     private sealed class StubHandler(Func<HttpRequestMessage, Task<HttpResponseMessage>> answer) : HttpMessageHandler
     {

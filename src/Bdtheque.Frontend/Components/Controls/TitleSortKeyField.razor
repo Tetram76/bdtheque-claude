@@ -1,4 +1,5 @@
 @using Bdtheque.Contracts.Admin
+@using Bdtheque.Frontend.Entries
 @implements IDisposable
 @inject ApiClient Api
 @inject IStringLocalizer<TitleSortKeyField> L
@@ -10,7 +11,7 @@
    title is entered, a record without one being sorted by the key of its series, never by one entered by hand
    (visuel/saisie-album/contenu.md, #465). A computation that fails, with nothing to correct in the field, is presented under
    it at its scale until the next one (choix-implementation/socle/frontend.md, erreur dans un contrôle). *@
-<Field Id="@Id" Label="@L["Label"]" Required="true" Help="@Help" Error="@Error" Failure="_failure" FailureText="@L["Failed"]" Context="control">
+<Field Id="@Id" Label="@L["Label"]" Required="true" Help="@Help" Error="@Error" State="State" Failure="_failure" FailureText="@L["Failed"]" Context="control">
     <Beside>
         <span class="sort-key-mode" data-mode="@(IsManual ? "manual" : "auto")">@L[IsManual ? "Manual" : "Auto"]</span>
         @if (IsManual)
@@ -64,6 +65,10 @@
     /// <summary>What to correct: the field is then in error.</summary>
     [Parameter]
     public string? Error { get; set; }
+
+    /// <summary>What the form tells of its datum (EntryTracker): its mark once modified, and what the user had entered before the record was reloaded (visuel/saisie-album/contenu.md).</summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
 
     private bool IsManual => ManualKey is not null;
 

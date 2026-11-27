@@ -85,7 +85,13 @@
         </ul>
     }
 
-    <p class="edition-visuals-count">@Count()</p>
+    @* The count of the visuals heads their grid, as the label of their list: the mark of the list modified after it, what the
+       user had entered under it. *@
+    <p class="edition-visuals-heading"><span class="edition-visuals-count">@Count()</span>@if (State?.Modified == true) { <ModifiedMark /> }</p>
+    @if (State is { } state)
+    {
+        <RedoLine Id="@($"{Id}-redo")" State="state" />
+    }
     @if (Visuals.Count > 0)
     {
         <ul class="edition-visuals-grid">
@@ -180,6 +186,13 @@
     /// </summary>
     [Parameter]
     public EventCallback<bool> SendingChanged { get; set; }
+
+    /// <summary>
+    /// What the form tells of its list of visuals (EntryTracker): its mark once modified, and what the user had entered before the
+    /// record was reloaded (visuel/saisie-album/contenu.md).
+    /// </summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
 
     /// <summary>What api accepts and keeps, which the block announces.</summary>
     [Parameter, EditorRequired]

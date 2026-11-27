@@ -1,6 +1,7 @@
 extern alias frontend;
 
 using System.Net.Http.Json;
+using System.Text.RegularExpressions;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
 using Bdtheque.Contracts.Deletion;
@@ -61,6 +62,9 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
 
         await page.GetByRole(AriaRole.Link, new() { Name = $"Créer l'auteur « {_marker} »" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel auteur" });
+        // Interactive once its circuit has rendered it, which inserts the panel anew, opened again as a modal by the script of
+        // the dialogs: what is typed before would be lost, and the dialog judged on the panel of the prerendering.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
         Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
         // The search that finds no author proposes it as the name of the new one.
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true })).ToHaveValueAsync(_marker);
@@ -82,6 +86,8 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}");
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Victor Hugo {_marker}" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
 
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true }).FillAsync("");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
@@ -90,7 +96,8 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(panel.Locator("[data-error-category=business]")).ToContainTextAsync("Renseignez au moins le nom ou le pseudonyme de l'auteur.");
         await Assertions.Expect(panel).ToContainTextAsync("Au moins le nom ou le pseudonyme.");
         // The field in cause gets the focus (visuel/listes/saisie-selon-l-entite.md).
-        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom", Exact = true })).ToBeFocusedAsync();
+        // Emptied, the last name is marked as modified, which its label then says too.
+        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom Modifié", Exact = true })).ToBeFocusedAsync();
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" })).ToHaveAttributeAsync("aria-invalid", "true");
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Pseudonyme" }).FillAsync($"VH {_marker}");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
@@ -109,6 +116,8 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         var page = await OpenAsync(theme, $"{AppPaths.AdminAuthors}?q={_marker}&edit={author.Id}");
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
         await DeleteAuthorAsync(author);
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
 
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
@@ -133,6 +142,8 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await page.GotoAsync(AppPaths.AuthorRecordWithEntry(author.Id));
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
         await DeleteAuthorAsync(author);
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
 
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
@@ -142,7 +153,8 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
         await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" })).ToHaveValueAsync("Belge");
     }
 
-    // Changed meanwhile: nothing overwritten; « Recharger la fiche » presents the author as it now is.
+    // Changed meanwhile: nothing overwritten; « Recharger la fiche » presents the author as it now is, within the panel, and
+    // offers again what was typed (visuel/saisie-album/contenu.md, #329), which « Reprendre » puts back, marked as modified.
     [Theory, InEachTheme]
     public async Task Edit_OfAnAuthorChangedMeanwhile_IsReloadedAtItsCurrentState(string theme)
     {
@@ -154,17 +166,23 @@ public sealed class AdminAuthorsTests(ApplicationHost application) : BrowserTest
             (await api.PutAsJsonAsync($"/admin/authors/{author.Id}", new UpdateAuthorRequest(author.LastName, null, null, null, "Suisse", author.Version)))
                 .EnsureSuccessStatusCode();
         }
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
 
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" }).FillAsync("Belge");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();
         panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
         await Assertions.Expect(panel.Locator("[data-error-category=functional]")).ToContainTextAsync("rien n'a été écrasé");
         await Assertions.Expect(panel.GetByRole(AriaRole.Button, new() { Name = "Voir mes changements" })).ToHaveCountAsync(0);
-        await panel.GetByRole(AriaRole.Link, new() { Name = "Recharger la fiche" }).ClickAsync();
+        await panel.GetByRole(AriaRole.Button, new() { Name = "Recharger la fiche" }).ClickAsync();
 
-        panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'auteur" });
-        await Assertions.Expect(panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" })).ToHaveValueAsync("Suisse");
+        var nationality = panel.GetByRole(AriaRole.Textbox, new() { Name = "Nationalité" });
+        await Assertions.Expect(nationality).ToHaveValueAsync("Suisse");
         await Assertions.Expect(panel.Locator("[data-error-category]")).ToHaveCountAsync(0);
+        await Assertions.Expect(panel.Locator(".redo-line")).ToContainTextAsync("Votre saisie : Belge");
+        await panel.Locator(".redo-line").GetByRole(AriaRole.Button, new() { Name = "Reprendre" }).ClickAsync();
+        await Assertions.Expect(nationality).ToHaveValueAsync("Belge");
+        await Assertions.Expect(panel.Locator("label[for=author-nationality] .modified-mark")).ToHaveTextAsync("Modifié");
     }
 
     [Theory, InEachTheme]

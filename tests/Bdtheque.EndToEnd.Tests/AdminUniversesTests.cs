@@ -40,6 +40,9 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel univers" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" });
+        // Interactive once its circuit has rendered it, which inserts the panel anew, opened again as a modal by the script of
+        // the dialogs: what is typed before would be lost, and the dialog judged on the panel of the prerendering.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
         Assert.True(await panel.EvaluateAsync<bool>("dialog => dialog.matches(':modal')"));
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom" }).FillAsync($"Corto Maltese {_marker}");
         await ControlsPage.WaitUntilInteractiveAsync(page);
@@ -84,6 +87,8 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
 
         await page.GetByRole(AriaRole.Link, new() { Name = "Nouvel univers" }).ClickAsync();
         var name = page.GetByRole(AriaRole.Dialog, new() { Name = "Nouvel univers" }).GetByRole(AriaRole.Textbox, new() { Name = "Nom" });
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
         await name.FillAsync($"LES MONDES D'ALDEBARAN {_marker}");
         // Enter sends the form of the panel, which holds its submission (wwwroot/modal-dialog.js).
         await name.PressAsync("Enter");
@@ -186,6 +191,8 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         var page = await OpenAsync(theme, $"{AppPaths.AdminUniverses}?q={_marker}");
         await page.GetByRole(AriaRole.Link, new() { Name = $"Modifier Les Cités obscures {_marker}" }).ClickAsync();
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Nom" }).FillAsync("Autre chose");
 
         await page.Keyboard.PressAsync("Escape");
@@ -227,6 +234,8 @@ public sealed class AdminUniversesTests(ApplicationHost application) : BrowserTe
         await page.GotoAsync(AppPaths.UniverseRecordWithEntry(universe.Id));
         var panel = page.GetByRole(AriaRole.Dialog, new() { Name = "Modifier l'univers" });
         await DeleteUniverseAsync(universe);
+        // Interactive once its circuit has rendered it: what is typed before would be lost.
+        await PageReadiness.WaitUntilEntryPanelInteractiveAsync(page);
 
         await panel.GetByRole(AriaRole.Textbox, new() { Name = "Description" }).FillAsync("Une description");
         await panel.GetByRole(AriaRole.Button, new() { Name = "Enregistrer" }).ClickAsync();

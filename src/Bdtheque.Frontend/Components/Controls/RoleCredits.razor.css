@@ -25,6 +25,14 @@
     font-weight: var(--font-weight-strong);
 }
 
+/* Its authors, then what the user had entered before the record was reloaded, under them. */
+.role-credits-tags {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-inline-size: 0;
+}
+
 .role-credits-help {
     margin: 0;
     font-size: var(--font-size-small);

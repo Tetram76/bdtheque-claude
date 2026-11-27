@@ -334,12 +334,12 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
         var page = Open(AppPaths.UniverseRecordWithEntry(UniverseId));
 
         var panel = page.Find("dialog.side-panel");
-        Assert.Equal(Universe().Name, panel.QuerySelector("input[name='name']")!.GetAttribute("value"));
+        Assert.Equal(Universe().Name, panel.QuerySelector("#universe-name")!.GetAttribute("value"));
         Assert.Equal(AppPaths.UniverseRecord(UniverseId), panel.QuerySelector(".side-panel-actions a.button")!.GetAttribute("href"));
         Assert.NotNull(page.Find("h1"));
         Assert.Contains("admin.universes.edit", _audience.Functions);
 
-        await page.ChangeAsync("input[name='name']", "Corto");
+        await page.InputAsync("#universe-name", "Corto");
         await page.SubmitAsync("form.side-panel-form");
 
         Assert.Equal(("PUT", $"/admin/universes/{UniverseId}", "Corto"), Assert.Single(_catalog.Written));
@@ -361,6 +361,8 @@ public sealed class UniverseRecordTests : BunitContext, IDisposable
 
     private IRenderedComponent<UniverseRecord> Open(string? address = null)
     {
+        // The panel is rendered by its circuit (InteractiveServer), which its frame marks; set once the authorization is.
+        Renderer.SetRendererInfo(new RendererInfo("Server", isInteractive: true));
         Services.GetRequiredService<NavigationManager>().NavigateTo(address ?? AppPaths.UniverseRecord(UniverseId));
         return Render<UniverseRecord>(parameters => parameters.Add(p => p.Id, UniverseId).AddCascadingValue(_request.Context));
     }

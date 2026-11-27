@@ -13,8 +13,8 @@
 @* The list of the authors of the administration (visuel/listes/liste-par-liste.md), after the model of the list of the albums
    (visuel/listes/listes-de-l-administration.md): rendered statically, every criterion and the dialogs are carried by its
    address (Lists/AuthorListQuery.cs); the list has no filters. An author is entered in a side panel over the list
-   (visuel/listes/saisie-selon-l-entite.md, visuel/saisie-auteur/), which the address opens, its form sent to the list, whose
-   error is presented in place. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
+   (visuel/listes/saisie-selon-l-entite.md, visuel/saisie-auteur/), which the address opens, interactive, saved from its
+   circuit. Its styles read the contracts of the base theme only (visuel/listes/declinaison-par-theme.md). *@
 <PageTitle>@L["Title"]</PageTitle>
 <AudienceScreen Function="AudienceFunctions.AdminAuthors" />
 
@@ -134,8 +134,7 @@
         {
             @* The panel of the author, changed or new, over the list (visuel/listes/saisie-selon-l-entite.md): its closing and its
                saving lead back to the list, with its criteria. *@
-            <AuthorEntryPanel AuthorId="_query.Edit" Searched="@NewSearched" CloseHref="@ListOnly.Href()" SavedHref="@ListOnly.Href()"
-                              ReloadHref="@((ListOnly with { Edit = _query.Edit }).Href())" />
+            <AuthorEntryPanel AuthorId="_query.Edit" Searched="@NewSearched" CloseHref="@ListOnly.Href()" SavedHref="@ListOnly.Href()" />
         }
         else if (_dialogAuthor is not null)
         {

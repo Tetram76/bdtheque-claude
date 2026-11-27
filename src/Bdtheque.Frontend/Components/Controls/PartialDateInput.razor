@@ -1,10 +1,11 @@
+@using Bdtheque.Frontend.Entries
 @inject IStringLocalizer<PartialDateInput> L
 
 @* A date known to the year, or to the month and year, never to the day (modele-metier/album.md, date de première
    publication): a list of months, « — » for a month unknown, and the year, side by side (visuel/saisie-album/contenu.md).
    Each sized to its content. Interactive. *@
 <fieldset class="partial-date" aria-describedby="@DescribedBy">
-    <legend class="partial-date-legend">@Legend</legend>
+    <legend class="partial-date-legend">@Legend@if (State?.Modified == true) { <ModifiedMark /> }</legend>
     <div class="partial-date-fields">
         <label class="visually-hidden" for="@($"{Id}-month")">@L["Month"]</label>
         <select id="@($"{Id}-month")" class="partial-date-month" aria-invalid="@Invalid" @onchange="ChooseMonthAsync">
@@ -23,6 +24,10 @@
         <p class="partial-date-error" id="@ErrorId"><Icon Name="IconName.Alert" />@Error</p>
     }
     <p class="partial-date-help" id="@HelpId">@L["Help"]</p>
+    @if (State is { } state)
+    {
+        <RedoLine Id="@($"{Id}-redo")" State="state" />
+    }
 </fieldset>
 
 @code {
@@ -48,6 +53,10 @@
     /// <summary>What to correct: the date is then in error.</summary>
     [Parameter]
     public string? Error { get; set; }
+
+    /// <summary>What the form tells of its datum (EntryTracker): its mark once modified, and what the user had entered before the record was reloaded (visuel/saisie-album/contenu.md).</summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
 
     private string? Invalid => Error is null ? null : "true";
 

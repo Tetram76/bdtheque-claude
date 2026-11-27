@@ -11,19 +11,33 @@
    another (an album through its series), which are not modified here. A universe is presented with its ancestors.
    Interactive: it changes the cited records of the page, which it tells of each change (OnChange). *@
 <div class="classification-tags">
-    <span class="classification-tags-name">@L["Genres"]</span>
-    <RecordTags Id="@($"{Id}-add-genre")" Kind="RecordKind.Genre" Items="Records.Genres" AddText="@L["Add"]"
+    <span class="classification-tags-name">@L["Genres"]@if (GenresState?.Modified == true)
+        {
+            <ModifiedMark />
+        }</span>
+    <RecordTags Id="@($"{Id}-add-genre")" Kind="RecordKind.Genre" Items="Records.Genres" Read="@Read?.Genres" AddText="@L["Add"]"
                 AddLabel="@L["Genres.Add"]" OnAdd="AddGenreAsync" OnRemove="genre => RemoveAsync(Records.Genres, genre)"
                 OnCreate="text => _genreCreation = text" CreateLabel="@(text => L["Genres.Create", text].Value)"
                 ErrorOf="genre => ErrorOf(genre.Id)" />
+    @if (GenresState is { } genres)
+    {
+        <RedoLine Id="@($"{Id}-redo-genres")" State="genres" />
+    }
     <InheritedTags Label="@InheritedLabel" Items="InheritedGenres" />
 </div>
 <div class="classification-tags">
-    <span class="classification-tags-name">@L["Universes"]</span>
-    <RecordTags Id="@($"{Id}-add-universe")" Kind="RecordKind.Universe" Items="Records.Universes" AddText="@L["Add"]"
+    <span class="classification-tags-name">@L["Universes"]@if (UniversesState?.Modified == true)
+        {
+            <ModifiedMark />
+        }</span>
+    <RecordTags Id="@($"{Id}-add-universe")" Kind="RecordKind.Universe" Items="Records.Universes" Read="@Read?.Universes" AddText="@L["Add"]"
                 AddLabel="@L["Universes.Add"]" OnAdd="AddUniverseAsync" OnRemove="universe => RemoveAsync(Records.Universes, universe)"
                 OnCreate="text => _universeCreation = text" CreateLabel="@(text => L["Universes.Create", text].Value)"
                 ErrorOf="universe => ErrorOf(universe.Id)" />
+    @if (UniversesState is { } universes)
+    {
+        <RedoLine Id="@($"{Id}-redo-universes")" State="universes" />
+    }
     <InheritedTags Label="@InheritedLabel" Items="InheritedUniverses" />
     @if (UniverseFailure is { } failure)
     {
@@ -62,6 +76,18 @@
 
     [Parameter, EditorRequired]
     public CitedRecords Records { get; set; } = null!;
+
+    /// <summary>The cited records as the form read them, for a record already saved (<see cref="RecordTags.Read"/>).</summary>
+    [Parameter]
+    public CitedRecords? Read { get; set; }
+
+    /// <summary>What the form tells of the genres (<see cref="CitedRecords.GenresKey"/>); none tracked by default.</summary>
+    [Parameter]
+    public EntryDatumState? GenresState { get; set; }
+
+    /// <summary>What the form tells of the universes (<see cref="CitedRecords.UniversesKey"/>).</summary>
+    [Parameter]
+    public EntryDatumState? UniversesState { get; set; }
 
     /// <summary>What the genres and universes of the record are, under them.</summary>
     [Parameter, EditorRequired]

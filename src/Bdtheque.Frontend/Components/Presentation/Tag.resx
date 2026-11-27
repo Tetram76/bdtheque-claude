@@ -15,4 +15,10 @@
   <data name="Remove" xml:space="preserve">
     <value>Retirer « {0} »</value>
   </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Rétablir</value>
+  </data>
+  <data name="Restore.Label" xml:space="preserve">
+    <value>Rétablir « {0} »</value>
+  </data>
 </root>

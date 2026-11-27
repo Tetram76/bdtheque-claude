@@ -1,10 +1,16 @@
+@using Bdtheque.Frontend.Entries
+
 @* A box to check, or a radio button, and its label, which a click or a touch anywhere on it checks: a data with two values is
    entered by a box to check, never by a selector of buttons (visuel/saisie-album/contenu.md). The input is the caller's
    (a native input, an InputCheckbox bound to a form…), styled by the base theme. *@
 <label class="choice">
     @ChildContent
-    <span>@Label</span>
+    <span>@Label@if (State?.Modified == true) { <ModifiedMark /> }</span>
 </label>
+@if (State is { } state && Id is not null)
+{
+    <RedoLine Id="@($"{Id}-redo")" State="state" />
+}
 
 @code {
     [Parameter, EditorRequired]
@@ -13,4 +19,12 @@
     /// <summary>The box to check or the radio button.</summary>
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>What the form tells of its datum (EntryTracker): its mark once modified, and what the user had entered before the record was reloaded (visuel/saisie-album/contenu.md).</summary>
+    [Parameter]
+    public EntryDatumState? State { get; set; }
+
+    /// <summary>The identifier of the choice, unique in the page, required with <see cref="State"/>: that of what it offers again.</summary>
+    [Parameter]
+    public string? Id { get; set; }
 }

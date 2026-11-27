@@ -40,6 +40,34 @@
     color: var(--color-delete);
 }
 
+/* A record added to a list of an entry form since it was read: ringed with the green of a datum modified (#355). */
+.tag[data-variant="added"] {
+    border-color: var(--color-modified);
+    box-shadow: inset 0 0 0 1px var(--color-modified);
+}
+
+/* A record removed from a list of an entry form, presented until the saving: dashed, muted and struck through, as a
+   collection removed from its publisher (visuel/saisie-album/contenu.md, #355). */
+.tag[data-variant="removed"] {
+    border: var(--border-width-control) dashed var(--color-control-border);
+    background: transparent;
+    color: var(--color-text-muted);
+}
+
+.tag[data-variant="removed"] .tag-text {
+    text-decoration: line-through;
+}
+
+.tag-restore {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-accent-text);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 /* Bordered as a control in error (themes/base.css), whatever its variant. */
 .tag[data-invalid] {
     border-color: var(--color-alert);
