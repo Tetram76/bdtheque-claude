@@ -4,10 +4,9 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @inject IStringLocalizer<AdminLogin> L
-@inject AdminCredentials Credentials
+@inject AdminSignIn SignIn
 @inject AdminSecondFactor SecondFactor
 @inject AdminSessions Sessions
-@inject LoginThrottle Throttle
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
@@ -79,23 +78,16 @@
 
     private async Task SignInAsync()
     {
-        // Too many failures of late: refused without even checking, which would otherwise go on telling a right guess.
-        if (Throttle.IsBlocked())
+        switch (SignIn.Attempt(Login, Password, Code))
         {
-            Refuse(ProblemCategory.Functional, "TooManyAttempts", L["TooManyAttempts.Label"]);
-            return;
+            case AdminSignInOutcome.Suspended:
+                Refuse(ProblemCategory.Functional, "TooManyAttempts", L["TooManyAttempts.Label"]);
+                return;
+            case AdminSignInOutcome.Refused:
+                Refuse(ProblemCategory.Business, SecondFactor.IsRequired ? "InvalidCredentialsOrCode" : "InvalidCredentials", L["InvalidCredentials.Label"]);
+                return;
         }
 
-        // The code is checked only for the right credentials: once accepted it can no longer be used, and a typing error in
-        // the password must not spend the code of the administrator.
-        if (!Credentials.AreValid(Login, Password) || (SecondFactor.IsRequired && !SecondFactor.IsValid(Code)))
-        {
-            Throttle.RecordFailure();
-            Refuse(ProblemCategory.Business, SecondFactor.IsRequired ? "InvalidCredentialsOrCode" : "InvalidCredentials", L["InvalidCredentials.Label"]);
-            return;
-        }
-
-        Throttle.Reset();
         var administrator = Sessions.SignIn();
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, administrator);
         // The cookie only authenticates the requests that follow: this one, from now on that of the administrator, records

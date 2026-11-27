@@ -54,6 +54,8 @@ flowchart TD
     code -- "oui" --> accepte
 ```
 
+La décision est prise par [`AdminSignIn`](../../../src/Bdtheque.Frontend/Security/AdminSignIn.cs), que la page appelle. Le refus présenté au visiteur ne dit jamais lequel de l'identifiant, du mot de passe ou du code était faux, mais le journal de `frontend` le dit : chaque refus y est un avertissement qui nomme ce qui a été refusé, et une connexion réussie y laisse une information. L'exploitant comprend ainsi un refus sans rien en dire à un tiers.
+
 Ces trois temps reposent sur les éléments suivants :
 
 - Le limiteur [`LoginThrottle`](../../../src/Bdtheque.Frontend/Security/LoginThrottle.cs) mémorise l'heure des échecs récents. Il existe en un seul exemplaire pour toute l'application, car derrière le reverse proxy aucune requête ne dit de façon fiable qui l'envoie : les échecs de tous les visiteurs comptent donc ensemble. Dès que cinq échecs se sont produits dans les cinq dernières minutes, toute tentative est refusée sans même vérifier les identifiants, jusqu'à ce que le plus ancien échec sorte de cette fenêtre. Une connexion réussie efface les échecs mémorisés.

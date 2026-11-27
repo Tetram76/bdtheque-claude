@@ -110,6 +110,7 @@ builder.Services.AddSingleton<AdminCredentials>();
 // One for the application: a code accepted once is refused to every later request.
 builder.Services.AddSingleton<AdminSecondFactor>();
 builder.Services.AddSingleton<AdminSessions>();
+builder.Services.AddSingleton<AdminSignIn>();
 // One for the application: the failures of every request count against the same window.
 builder.Services.AddSingleton<LoginThrottle>();
 builder.Services.AddScoped<AdminRecordCounts>();
