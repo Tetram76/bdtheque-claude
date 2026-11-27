@@ -48,6 +48,8 @@
     --color-text-on-alert: #FBF3EA;
     --color-info: #5E3F63;
     --color-text-on-info: #FBF3EA;
+    /* The line of what was entered before a reload, on the paper of the boxes of the gazette, framed in its plum. */
+    --color-redo: #F1E6DC;
     --color-tag: #FFB547;
     --color-text-on-tag: #2B1030;
     /* Amber hardly stands out from the paper: what is highlighted is printed in reverse, cream on violet ink. */

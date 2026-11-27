@@ -7,7 +7,8 @@
 @if (State.Redo is { } entered)
 {
     <p class="redo-line" id="@Id">
-        <span id="@EnteredId">@L["Entered"] <strong>@(string.IsNullOrWhiteSpace(entered) ? L["Empty"] : entered)</strong></span>
+        <Icon Name="IconName.Reload" />
+        <span class="redo-line-text" id="@EnteredId">@L["Entered"] <strong>@(string.IsNullOrWhiteSpace(entered) ? L["Empty"] : entered)</strong></span>
         <span class="redo-line-actions">
             <button type="button" class="redo-line-action" aria-describedby="@EnteredId" @onclick="State.Take">@L["Take"]</button>
             <button type="button" class="redo-line-action" aria-describedby="@EnteredId" @onclick="State.Reject">@L["Reject"]</button>

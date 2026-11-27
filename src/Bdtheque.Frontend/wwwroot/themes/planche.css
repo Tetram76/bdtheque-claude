@@ -68,6 +68,9 @@
     --color-notice-border: #111111;
     /* The green pill of a datum modified is ringed with ink, as the tags: its green would not stand out from the cases. */
     --color-modified-border: #111111;
+    /* The line of what was entered before a reload, an inset ringed with ink, as a notice. */
+    --color-redo: #FFFFFF;
+    --color-redo-border: #111111;
     /* The seven hues of the cases, in their four-color process version. */
     --color-palette-1: #FFC93C;
     --color-palette-2: #4FB0E6;

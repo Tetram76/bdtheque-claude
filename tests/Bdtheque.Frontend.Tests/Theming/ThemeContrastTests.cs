@@ -69,8 +69,12 @@ public sealed partial class ThemeContrastTests
         // tells it from the block.
         ("text-on-notice", "notice", Text),
         ("notice-border", "notice", NonText),
-        // What the user had entered before the record was reloaded, offered under a datum: a notice whose actions are links.
-        ("accent-text", "notice", Text),
+        // What the user had entered before the record was reloaded, under a datum: its text and actions on its own tint, and its frame,
+        // which sets it apart from the block that holds it, whatever its tint.
+        ("text-on-redo", "redo", Text),
+        ("redo-border", "redo", NonText),
+        ("redo-border", "surface", NonText),
+        .. Enumerable.Range(1, 14).Select(index => ("redo-border", $"block-tint-{index}", NonText)),
         // A datum the user changed (#355): its pill, which must stand out from what holds it, and the ring of a tag added.
         ("text-on-modified", "modified", Text),
         ("modified-border", "surface", NonText),
