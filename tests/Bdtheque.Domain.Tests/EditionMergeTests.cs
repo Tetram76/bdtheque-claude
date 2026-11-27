@@ -1,3 +1,4 @@
+using System.Reflection;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Domain.Enums;
 
@@ -160,6 +161,26 @@ public sealed class EditionMergeTests
         Assert.Equal((0, 1, 0), (keptCover.DisplayOrder, mergedCover.DisplayOrder, mergedBack.DisplayOrder));
         Assert.All(kept.Visuals, v => Assert.Equal((kept, kept.Id), (v.Edition, v.EditionId)));
         Assert.Equal([keptPlate], removed);
+    }
+
+    [Fact]
+    public void MergeEditions_PassesTheDaysInTheSpotlightOfTheOtherEdition_ToTheEditionThatRemains()
+    {
+        // choix-implementation/ecritures/fusion-des-fiches-mise-en-oeuvre.md, historique « À la une » repris: each day of the other
+        // edition becomes a day of the one that remains, and of it alone. A day is only ever inserted by the draw of a day, which
+        // the domain does not hold: the test puts it on the other edition as the database would load it.
+        var album = new Album("Spirou à New York", null);
+        var kept = new Edition(album, Dupuis);
+        var merged = new Edition(album, Dupuis);
+        var day = (EditionSpotlight)Activator.CreateInstance(typeof(EditionSpotlight), nonPublic: true)!;
+        day.MoveTo(merged);
+        ((List<EditionSpotlight>)typeof(Edition).GetField("_spotlights", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(merged)!).Add(day);
+
+        Album.MergeEditions(kept, merged, album, null, kept, []);
+
+        Assert.Same(day, Assert.Single(kept.Spotlights));
+        Assert.Empty(merged.Spotlights);
+        Assert.Equal((kept, kept.Id), (day.Edition, day.EditionId));
     }
 
     [Fact]
