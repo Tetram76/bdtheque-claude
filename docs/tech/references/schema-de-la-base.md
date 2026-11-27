@@ -21,48 +21,155 @@ Le tableau suivant liste les collations que créent les migrations. Les colonnes
 
 ## Relations
 
-Les schémas de cette section sont générés depuis le catalogue de la base. Chaque clé étrangère y figure une fois, dans le schéma de la table qui la porte, reliée à la table qu'elle référence. Une clé qui admet `NULL` rend la référence facultative, ce que note `|o` ; une clé sur laquelle porte un index unique sans condition désigne au plus une ligne, ce que note `o|`. Les règles `ON DELETE` ne figurent pas sur les schémas : elles se lisent dans les contraintes de chaque table, plus bas.
+Les schémas de cette section sont générés depuis le catalogue de la base, et chacun ne répond qu'à une question, pour rester lisible. Chaque clé étrangère y figure une fois, sur le schéma consacré à la table qui la porte, reliée à la table qu'elle référence et accompagnée du nom de sa colonne ; une table référencée depuis plusieurs schémas apparaît donc sur chacun d'eux. La table référencée est placée au-dessus de la table qui la référence, sauf quand une table en référence trop pour qu'elles tiennent toutes côte à côte : une partie d'entre elles est alors placée en dessous. Une clé qui admet `NULL` rend la référence facultative, ce que note `|o` ; une clé sur laquelle porte un index unique sans condition désigne au plus une ligne, ce que note `o|`. Les règles `ON DELETE` ne figurent pas sur les schémas : elles se lisent dans les contraintes de chaque table, plus bas.
 
 Certaines tables ne référencent aucune autre table, et aucune ne les référence ; elles n'apparaissent donc sur aucun schéma : `ApplicationSettings`, `ChangeLogEntries`, `PendingVisuals`, `__EFMigrationsHistory`.
 
-### Albums, séries et éditions
+### Albums, séries et auteurs
 
-Ce schéma généré répond à une question : quelles tables du catalogue référencent quelles autres ?
+Ce schéma généré répond à une question : comment un album se rattache-t-il à sa série, et une contribution à un album ou à une série et à un auteur ?
 
 ```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
 erDiagram
-    direction TB
+    Series
+    Albums
+    Authors
+    Contributions
     Series |o--o{ Albums : "SeriesId"
     Albums |o--o{ Contributions : "AlbumId"
     Authors ||--o{ Contributions : "AuthorId"
     Series |o--o{ Contributions : "SeriesId"
+```
+
+### Éditions et éditeurs
+
+Ce schéma généré répond à une question : comment une édition se rattache-t-elle à son album, à son éditeur et à sa collection, et qu'est-ce qui la référence ?
+
+```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
+erDiagram
+    Albums
+    Publishers
+    PublisherCollections
+    Editions
+    EditionSpotlights
+    EditionVisuals
     Editions ||--o{ EditionSpotlights : "EditionId"
     Editions ||--o{ EditionVisuals : "EditionId"
     Albums ||--o{ Editions : "AlbumId"
     PublisherCollections |o--o{ Editions : "PublisherCollectionId"
     Publishers ||--o{ Editions : "PublisherId"
     Publishers ||--o{ PublisherCollections : "PublisherId"
+```
+
+### Intentions d'acquisition
+
+Ce schéma généré répond à une question : à quel album et à quelle édition une intention d'acquisition se rapporte-t-elle ?
+
+```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
+erDiagram
+    Albums
+    Editions
+    PurchaseIntents
     Albums ||--o{ PurchaseIntents : "AlbumId"
     Editions |o--o| PurchaseIntents : "EditionId"
+```
+
+### Valeurs des nouvelles éditions d'une série
+
+Ce schéma généré répond à une question : quel éditeur et quelle collection une série peut-elle proposer à ses nouvelles éditions ?
+
+```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
+erDiagram
+    Publishers
+    PublisherCollections
+    Series
     PublisherCollections |o--o{ Series : "TemplatePublisherCollectionId"
     Publishers |o--o{ Series : "TemplatePublisherId"
 ```
 
-### Genres et univers
+### Genres
 
-Ce schéma généré répond à une question : comment albums et séries sont-ils rattachés aux genres et aux univers ?
+Ce schéma généré répond à une question : comment albums et séries sont-ils rattachés à leurs genres ?
 
 ```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
 erDiagram
-    direction LR
+    Albums
+    Genres
+    Series
+    AlbumGenres
+    SeriesGenres
     Albums ||--o{ AlbumGenres : "AlbumId"
     Genres ||--o{ AlbumGenres : "GenresId"
-    Albums ||--o{ AlbumUniverses : "AlbumId"
-    Universes ||--o{ AlbumUniverses : "UniversesId"
     Genres ||--o{ SeriesGenres : "GenresId"
     Series ||--o{ SeriesGenres : "SeriesId"
+```
+
+### Univers
+
+Ce schéma généré répond à une question : comment albums et séries sont-ils rattachés à leurs univers ?
+
+```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
+erDiagram
+    Albums
+    Universes
+    Series
+    AlbumUniverses
+    SeriesUniverses
+    Albums ||--o{ AlbumUniverses : "AlbumId"
+    Universes ||--o{ AlbumUniverses : "UniversesId"
     Series ||--o{ SeriesUniverses : "SeriesId"
     Universes ||--o{ SeriesUniverses : "UniversesId"
+```
+
+### Hiérarchie des univers
+
+Ce schéma généré répond à une question : comment un univers se rattache-t-il à son univers parent ?
+
+```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
+erDiagram
+    Universes
     Universes |o--o{ Universes : "ParentId"
 ```
 
@@ -71,19 +178,36 @@ erDiagram
 Ce schéma généré répond à une question : quelles fiches une recherche enregistrée peut-elle désigner ?
 
 ```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
 erDiagram
-    direction LR
+    SavedSearches
+    Albums
+    Authors
+    Contributions
+    Editions
+    EditionVisuals
+    SavedSearchDesignations
+    Genres
+    PublisherCollections
+    Publishers
+    Series
+    Universes
     Albums |o--o{ SavedSearchDesignations : "AlbumId"
     Authors |o--o{ SavedSearchDesignations : "AuthorId"
     Contributions |o--o{ SavedSearchDesignations : "ContributionId"
     Editions |o--o{ SavedSearchDesignations : "EditionId"
     EditionVisuals |o--o{ SavedSearchDesignations : "EditionVisualId"
-    Genres |o--o{ SavedSearchDesignations : "GenreId"
-    PublisherCollections |o--o{ SavedSearchDesignations : "PublisherCollectionId"
-    Publishers |o--o{ SavedSearchDesignations : "PublisherId"
+    SavedSearchDesignations }o--o| Genres : "GenreId"
+    SavedSearchDesignations }o--o| PublisherCollections : "PublisherCollectionId"
+    SavedSearchDesignations }o--o| Publishers : "PublisherId"
     SavedSearches ||--o{ SavedSearchDesignations : "SavedSearchId"
-    Series |o--o{ SavedSearchDesignations : "SeriesId"
-    Universes |o--o{ SavedSearchDesignations : "UniverseId"
+    SavedSearchDesignations }o--o| Series : "SeriesId"
+    SavedSearchDesignations }o--o| Universes : "UniverseId"
 ```
 
 ### Mesure d'audience
@@ -91,8 +215,17 @@ erDiagram
 Ce schéma généré répond à une question : comment les tables de la mesure d'audience se référencent-elles ?
 
 ```mermaid
+---
+config:
+  er:
+    nodeSpacing: 60
+    rankSpacing: 60
+---
 erDiagram
-    direction TB
+    AudienceCounters
+    AudienceVisits
+    AudienceCounterObjects
+    AudienceUsages
     AudienceCounters ||--o{ AudienceCounterObjects : "CounterId"
     AudienceVisits ||--o{ AudienceUsages : "VisitId"
 ```

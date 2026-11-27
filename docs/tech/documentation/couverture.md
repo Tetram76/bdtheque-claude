@@ -27,6 +27,6 @@ Le tableau suivant associe chaque sujet documenté à la page, ou aux pages, qui
 | La capture du journal des modifications, la correspondance des attributs, son stockage, sa lecture filtrée et son écran dans l'administration. | [Journal des modifications](../mecanismes/journal-des-modifications.md) |
 | Le workflow CI : classement des fichiers modifiés, jobs et leurs conditions, tests de bout en bout par thème, analyse SonarQube Cloud et analyse des images. | [Intégration continue](../integration-et-tests/integration-continue.md) |
 | Les projets de tests et leurs ressources, les tests du dépôt, l'horloge et le thème imposés, les API interdites et les captures de référence. | [Stratégie de tests](../integration-et-tests/strategie-de-tests.md) |
-| Le contrôle qualité hebdomadaire, le contrôle de sécurité quotidien et le relevé des versions. | [Contrôles périodiques](../integration-et-tests/controles-periodiques.md) |
+| Le contrôle qualité hebdomadaire, le contrôle de sécurité quotidien, le relevé des versions et la dette au fil de l'eau d'une Pull Request. | [Contrôles périodiques](../integration-et-tests/controles-periodiques.md) |
 | Les familles de routes de l'API, son contrat OpenAPI et la façon de le consulter. | [Contrat HTTP de l'API](../references/api-http.md), contrat [`openapi-v1.json`](../references/openapi-v1.json) (généré) |
 | La documentation technique elle-même. | [Consulter, construire, vérifier et maintenir](consulter-et-maintenir.md) |
