@@ -27,6 +27,9 @@ public sealed class SecondFactorApplication : ApplicationHost
 
     protected override string? TotpSecret => Secret;
 
+    // An interactive page sees its session end within a test, not a minute later.
+    protected override TimeSpan? CircuitRevalidationInterval => TimeSpan.FromMilliseconds(500);
+
     /// <summary>
     /// Moves the clock of the application to a step of the code that no sign-in has used yet, and gives its code, computed
     /// here after RFC 6238 rather than by the application: a code is accepted once only, and the tests of every theme
@@ -140,6 +143,25 @@ public sealed class AdminSecondFactorLoginTests(SecondFactorApplication applicat
 
         Application.Clock.UtcNow = signedIn.AddHours(12);
         await PageReadiness.GotoAsync(page, AppPaths.AdminHome);
+
+        await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Connexion à l'administration");
+    }
+
+    // An interactive page keeps its circuit, and the principal it was opened with, out of reach of the cookie: left open
+    // without activity, it still leads back to the login once the session is over, before any write
+    // (choix-implementation/socle/transverse/authentification-mise-en-oeuvre.md).
+    [Theory, InEachTheme]
+    public async Task InteractivePage_LeftOpenPastTheIdleTimeout_LeadsBackToTheLogin(string theme)
+    {
+        var page = await NewPageAsync(theme);
+        await SignInAsync(page, Application.NextCode());
+        await Assertions.Expect(page).ToHaveURLAsync(PageAddress.Of(AppPaths.AdminHome));
+        var signedIn = Application.Clock.UtcNow!.Value;
+        await PageReadiness.GotoAsync(page, AppPaths.AdminSettings);
+        await PageReadiness.WaitUntilEntryFormInteractiveAsync(page);
+
+        // Past the timeout, for the cookie as for the circuit.
+        Application.Clock.UtcNow = signedIn + frontend::Bdtheque.Frontend.Security.AdminSessions.IdleTimeout + TimeSpan.FromSeconds(1);
 
         await Assertions.Expect(page.Locator("h1")).ToHaveTextAsync("Connexion à l'administration");
     }

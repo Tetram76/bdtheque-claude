@@ -11,6 +11,8 @@ using Bdtheque.Frontend.Theming;
 using Bdtheque.Frontend.Visits;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Options;
 
@@ -111,6 +113,11 @@ builder.Services.AddSingleton<AdminCredentials>();
 builder.Services.AddSingleton<AdminSecondFactor>();
 builder.Services.AddSingleton<AdminSessions>();
 builder.Services.AddSingleton<AdminSignIn>();
+// An interactive circuit keeps its principal for as long as it lives: the same session limits, checked again in it.
+builder.Services.AddOptions<AdminCircuitOptions>();
+builder.Services.AddScoped<AdminCircuitSession>();
+builder.Services.AddScoped<CircuitHandler, AdminCircuitActivityHandler>();
+builder.Services.AddScoped<AuthenticationStateProvider, AdminCircuitAuthenticationStateProvider>();
 // One for the application: the failures of every request count against the same window.
 builder.Services.AddSingleton<LoginThrottle>();
 builder.Services.AddScoped<AdminRecordCounts>();

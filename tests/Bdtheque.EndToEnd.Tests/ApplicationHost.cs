@@ -90,7 +90,7 @@ public class ApplicationHost : IAsyncLifetime
     {
         await _api.InitializeAsync();
 
-        _frontend = new FrontendFactory(_api, PaintedByItsSpotlight, TotpSecret);
+        _frontend = new FrontendFactory(_api, PaintedByItsSpotlight, TotpSecret, CircuitRevalidationInterval);
         _frontend.UseKestrel(0);
         _frontend.StartServer();
         BaseAddress = new Uri(_frontend.Services.GetRequiredService<IServer>()
@@ -132,6 +132,12 @@ public class ApplicationHost : IAsyncLifetime
     protected virtual string? TotpSecret => null;
 
     /// <summary>
+    /// How often an interactive circuit checks the session of the administrator again, which an application of its own
+    /// shortens to see a session end within a test; the application's own otherwise.
+    /// </summary>
+    protected virtual TimeSpan? CircuitRevalidationInterval => null;
+
+    /// <summary>
     /// A browser context of its own, on <c>frontend</c>: no cookie nor history shared with another one. The caller owns
     /// it, and closes it once done: an open context keeps its pages, their connections to the application, and on the
     /// server the circuits of their interactive components. Its theme is the one its options fix, if any: the tests
@@ -161,7 +167,7 @@ public class ApplicationHost : IAsyncLifetime
         await _api.DisposeAsync();
     }
 
-    private sealed class FrontendFactory(ApiHostFactory api, bool paintedByItsSpotlight, string? totpSecret) : WebApplicationFactory<FrontendProgram>
+    private sealed class FrontendFactory(ApiHostFactory api, bool paintedByItsSpotlight, string? totpSecret, TimeSpan? circuitRevalidationInterval) : WebApplicationFactory<FrontendProgram>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -185,6 +191,8 @@ public class ApplicationHost : IAsyncLifetime
                 services.AddHttpClient(ApiClient.HttpClientName).ConfigurePrimaryHttpMessageHandler(() => api.Server.CreateHandler());
                 // One time for the whole application, as one machine gives it to its containers.
                 services.Replace(ServiceDescriptor.Singleton<TimeProvider>(api.Clock));
+                if (circuitRevalidationInterval is { } interval)
+                    services.PostConfigure<frontend::Bdtheque.Frontend.Security.AdminCircuitOptions>(options => options.RevalidationInterval = interval);
                 FixTheThemeByRequest(services);
                 if (!paintedByItsSpotlight)
                     services.Replace(ServiceDescriptor.Scoped<IDayColorsSource, OwnDayColors>());
