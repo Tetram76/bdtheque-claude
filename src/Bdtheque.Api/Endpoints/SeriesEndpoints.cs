@@ -4,6 +4,7 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -322,11 +323,16 @@ internal static class SeriesEndpoints
     /// albums of the series, as the consultation presents them, its albums in the collection, its status, whether it is
     /// complete, its modification and its version, which its deletion sends back.
     /// </summary>
+    /// <param name="resembling">A series whose merge proposes the series that resemble it (<see cref="MergeSuggestions"/>):
+    /// the list is then restricted to them, the closest first.</param>
     private static async Task<SeriesAdminList> ListForAdministrationAsync(
         BdthequeDbContext context, [AsParameters] SeriesFilters filters, CancellationToken cancellationToken, int page = 1,
-        int pageSize = Paging.DefaultSize)
+        int pageSize = Paging.DefaultSize, Guid? resembling = null)
     {
         var series = await filters.ApplyAsync(context.Series.AsNoTracking(), context, cancellationToken);
+        var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
+        if (ranked is not null)
+            series = series.Where(s => ranked.Contains(s.Id));
         var rows = await series
             .OrderByEntry(s => s.NavigationEntry)
             .ThenBy(s => s.SortKey)
@@ -343,14 +349,25 @@ internal static class SeriesEndpoints
             }), cancellationToken);
         var overviews = await CatalogWorks.OverviewsAsync(context, [.. rows.Items.Select(r => r.Id)], cancellationToken);
 
-        var items = rows.Items
+        var items = MergeSuggestions.InRankOrder(rows.Items
             .Select(r => new SeriesAdminListItem(
                 r.Id, r.Title, EnumMapping.Map<ContractEnums.SeriesStatus>(r.Status), overviews[r.Id], r.AlbumsInCollectionCount, r.IsComplete,
-                r.ModifiedAt, r.Version))
-            .ToList();
+                r.ModifiedAt, r.Version)), ranked, s => s.Id);
         return new SeriesAdminList(
             new Page<SeriesAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount),
             await filters.NameAsync(context, cancellationToken));
+    }
+
+    // « Blake et Mortimer » within « Les aventures de Blake et Mortimer »: inclusion applies to series
+    // (fonctionnel/regles-metier/fusion-des-fiches.md).
+    private static async Task<IReadOnlyList<Guid>> ResemblingAsync(
+        BdthequeDbContext context, Guid subject, int count, CancellationToken cancellationToken)
+    {
+        var series = await context.Series.AsNoTracking()
+            .OrderByEntry(s => s.NavigationEntry).ThenBy(s => s.SortKey).ThenBy(s => s.Id)
+            .Select(s => new { s.Id, s.Title })
+            .ToListAsync(cancellationToken);
+        return MergeSuggestions.Rank(series, subject, s => s.Id, (a, b) => Resemblance.Compare([a.Title], [b.Title], inclusion: true), count);
     }
 
     /// <summary>

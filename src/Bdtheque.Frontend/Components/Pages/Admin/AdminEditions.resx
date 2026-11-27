@@ -168,4 +168,10 @@
   <data name="Refusal.Hint.SavedSearch.Other" xml:space="preserve">
     <value>retirez l'édition de leurs critères</value>
   </data>
+  <data name="Merge.Suggestions" xml:space="preserve">
+    <value>Éditions pressenties</value>
+  </data>
+  <data name="Merge.SuggestionsPrompt" xml:space="preserve">
+    <value>Ou recherchez l&apos;autre édition par son ISBN ou par le titre de son album.</value>
+  </data>
 </root>

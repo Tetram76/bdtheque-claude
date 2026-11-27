@@ -15,7 +15,7 @@
    confirmation. Merged or cancelled, it leads back to the list. It applies no rule of the merge, which the API alone holds:
    it sends, data by data, the record whose value is kept. *@
 <PageTitle>@L["Title"]</PageTitle>
-<AudienceScreen Function="AudienceFunctions.AdminGenreMerge" />
+<MergeAudience Screen="AudienceFunctions.AdminGenreMerge" Suggestion="AudienceFunctions.AdminGenresMergeSuggested" Subject="genre" RecordId="GenreId" />
 
 @if (Preview is null)
 {

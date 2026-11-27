@@ -222,10 +222,28 @@ internal static class PublisherEndpoints
     /// its editions in the collection and, apart, the purchase intents on its editions, its modification and its version,
     /// which its deletion sends back.
     /// </summary>
-    private static Task<Page<PublisherAdminListItem>> ListForAdministrationAsync(
+    /// <param name="resembling">A publisher whose merge proposes the publishers that resemble it (<see cref="MergeSuggestions"/>):
+    /// the list is then restricted to them, the closest first.</param>
+    private static async Task<Page<PublisherAdminListItem>> ListForAdministrationAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
-        int pageSize = Paging.DefaultSize) =>
-        Search(context, q, entry)
+        int pageSize = Paging.DefaultSize, Guid? resembling = null)
+    {
+        var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
+        var rows = await AdminRowsAsync(context, Search(context, q, entry, ranked), page, pageSize, cancellationToken);
+        return rows with { Items = MergeSuggestions.InRankOrder(rows.Items, ranked, p => p.Id) };
+    }
+
+    // « Dupuis » within « Éditions Dupuis »: inclusion applies to publishers (fonctionnel/regles-metier/fusion-des-fiches.md).
+    private static async Task<IReadOnlyList<Guid>> ResemblingAsync(
+        BdthequeDbContext context, Guid subject, int count, CancellationToken cancellationToken)
+    {
+        var publishers = await Search(context, text: null, entry: null).Select(p => new { p.Id, p.Name }).ToListAsync(cancellationToken);
+        return MergeSuggestions.Rank(publishers, subject, p => p.Id, (a, b) => Resemblance.Compare([a.Name], [b.Name], inclusion: true), count);
+    }
+
+    private static Task<Page<PublisherAdminListItem>> AdminRowsAsync(
+        BdthequeDbContext context, IOrderedQueryable<Publisher> publishers, int page, int pageSize, CancellationToken cancellationToken) =>
+        publishers
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Publisher p) => new PublisherAdminListItem(
                 p.Id,
                 p.Name,
@@ -238,10 +256,13 @@ internal static class PublisherEndpoints
 
     /// <summary>The publishers found by their name, under the entry of the navigation, by name.</summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
-    private static IOrderedQueryable<Publisher> Search(BdthequeDbContext context, string? text, string? entry)
+    private static IOrderedQueryable<Publisher> Search(
+        BdthequeDbContext context, string? text, string? entry, IReadOnlyList<Guid>? only = null)
     {
         CatalogFilters.EnsureNavigationEntry(entry);
         var publishers = context.Publishers.AsNoTracking().WhereContains(text, p => p.Name);
+        if (only is not null)
+            publishers = publishers.Where(p => only.Contains(p.Id));
         if (entry is not null)
             publishers = publishers.Where(p => p.NavigationEntry == entry);
         return publishers.OrderByEntry(p => p.NavigationEntry).ThenBy(p => p.Name).ThenBy(p => p.Id);

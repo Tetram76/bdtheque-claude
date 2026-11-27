@@ -255,8 +255,9 @@ input::placeholder{color:var(--placeholder);opacity:1}
           </ul>
           <sc-if value="{{dialog.pick}}">
             <label for="d-pick" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Rechercher l'autre album</label>
-            <input id="d-pick" type="search" value="{{dialog.pick.query}}" style="height: 40px; padding: 0 14px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit">
-            <div role="radiogroup" aria-label="Autre album" style="display: flex; flex-direction: column; gap: 4px">
+            <input id="d-pick" type="search" value="{{dialog.pick.query}}" placeholder="Titre de l'autre album ou de sa série…" style="height: 40px; padding: 0 14px; box-sizing: border-box; border: {{t.inB}}; border-radius: {{t.inR}}; background: {{t.inBg}}; color: {{t.text}}; font: inherit">
+            <sc-if value="{{dialog.pick.title}}"><span id="d-pick-title" style="font-size: 14px; font-weight: 700">{{dialog.pick.title}}</span></sc-if>
+            <div role="radiogroup" aria-label="{{dialog.pick.title}}" style="display: flex; flex-direction: column; gap: 4px">
               <sc-for list="{{dialog.pick.items}}" as="c">
                 <label style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: {{c.bd}}; border-radius: {{t.tR}}; cursor: pointer">
                   <input type="radio" name="d-other" checked="{{c.checked}}" style="accent-color: {{t.acc}}; width: 16px; height: 16px; margin: 0">
@@ -264,6 +265,7 @@ input::placeholder{color:var(--placeholder);opacity:1}
                 </label>
               </sc-for>
             </div>
+            <sc-if value="{{dialog.pick.after}}"><span style="font-size: 13px; color: {{t.muted}}">{{dialog.pick.after}}</span></sc-if>
           </sc-if>
           <sc-if value="{{dialog.note}}"><span style="font-size: 13px; color: {{t.muted}}">{{dialog.note}}</span></sc-if>
         </div>
@@ -466,17 +468,19 @@ const DIALOGS = {
     note: "Les genres et l'univers restent : seul leur lien avec l'album disparaît.",
     cancel: 'Annuler', confirm: 'Supprimer définitivement', confirmBg: t.warn, confirmFg: t.onWarn, icon: TRASH, iconBg: t.warn, iconFg: t.onWarn
   }),
-  // Merging two albums starts from one of them: the other one is chosen here. What the merge keeps
-  // of each is still to be defined (fonctionnel/index.md § Structure de l'application, Administration).
+  // Merging two albums starts from one of them: the other one is chosen here, among the albums that resemble it, proposed
+  // from the opening of the dialog, the closest first, or by a search, which replaces them (visuel/liste-albums/contenu.md, fusion).
   fusion: (t) => ({
     title: 'Fusionner deux albums', label: 'Barracuda - Tome 1',
     lead: 'Avec quel album fusionner celui-ci ?',
     lines: [],
     pick: {
-      query: 'barracuda',
+      query: '',
+      title: 'Albums pressentis',
+      after: 'Ou recherchez l’autre album par son titre ou par celui de sa série.',
       items: [
         { label: 'Esclaves (Barracuda - T. 1)', detail: 'Jean Dufaux · Jérémy · nov. 2010 · 1 édition', checked: true },
-        { label: 'Barracuda - Intégrale [1 à 3]', detail: 'Jean Dufaux · Jérémy · 2016 · aucune édition', checked: false }
+        { label: 'Barracuda - Esclave', detail: 'Jean Dufaux · Jérémy · 2010 · aucune édition', checked: false }
       ].map((c) => ({ ...c, bd: c.checked ? '2px solid ' + t.acc : t.rowB }))
     },
     note: 'L’étape suivante présentera les deux albums côte à côte, avec ce que la fusion garde de chacun.',
