@@ -5,6 +5,7 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -273,15 +274,44 @@ internal static class AlbumEndpoints
     /// The list of the albums of the administration (visuel/liste-albums/contenu.md): the search, navigation and filters of
     /// the consultation, and where each album stands with regard to the collection, in the same order.
     /// </summary>
+    /// <param name="resembling">An album whose merge proposes the albums that resemble it (<see cref="MergeSuggestions"/>):
+    /// the list is then restricted to them, the closest first.</param>
     private static async Task<AlbumAdminList> ListForAdministrationAsync(
         BdthequeDbContext context, [AsParameters] AlbumFilters filters, CancellationToken cancellationToken,
-        int page = 1, int pageSize = Paging.DefaultSize)
+        int page = 1, int pageSize = Paging.DefaultSize, Guid? resembling = null)
     {
         var albums = await filters.ApplyAsync(context.Albums.AsNoTracking(), context, cancellationToken);
+        var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
+        if (ranked is not null)
+            albums = albums.Where(a => ranked.Contains(a.Id));
         var rows = await albums.OrderByAlbum(a => a).ToPageAsync(page, pageSize, AdminListItem, cancellationToken);
         return new AlbumAdminList(
-            new Page<AlbumAdminListItem>([.. rows.Items.Select(WithEachAuthorOnce)], rows.Number, rows.Size, rows.TotalCount),
+            new Page<AlbumAdminListItem>(
+                MergeSuggestions.InRankOrder(rows.Items.Select(WithEachAuthorOnce), ranked, row => row.Album.Id), rows.Number, rows.Size,
+                rows.TotalCount),
             await filters.NameAsync(context, cancellationToken));
+    }
+
+    /// <summary>
+    /// The albums that resemble an album (fonctionnel/regles-metier/fusion-des-fiches.md): by its label, series and title, a title
+    /// within the other included (« Le Lotus bleu », « Tintin – Le Lotus bleu »), or, whatever their titles, two albums of a
+    /// same series and a same volume. An album without a title of its own resembles another only by its series and volume:
+    /// its label, the series and the volume, would be a character away from that of every other volume of its series.
+    /// </summary>
+    private static async Task<IReadOnlyList<Guid>> ResemblingAsync(
+        BdthequeDbContext context, Guid subject, int count, CancellationToken cancellationToken)
+    {
+        var albums = await context.Albums.AsNoTracking()
+            .OrderByAlbum(a => a)
+            .Select(a => new { a.Id, a.Title, a.SeriesId, SeriesTitle = a.Series!.Title, a.VolumeNumber })
+            .ToListAsync(cancellationToken);
+        return MergeSuggestions.Rank(albums, subject, a => a.Id, (a, b) =>
+            a.SeriesId is not null && a.SeriesId == b.SeriesId && a.VolumeNumber is not null && a.VolumeNumber == b.VolumeNumber
+                ? Resemblance.Identical
+                : Resemblance.Compare(Texts(a.Title, a.SeriesTitle), Texts(b.Title, b.SeriesTitle), inclusion: true), count);
+
+        static string?[] Texts(string? title, string? seriesTitle) =>
+            title is null ? [] : seriesTitle is null ? [title] : [title, $"{seriesTitle} {title}"];
     }
 
     /// <summary>

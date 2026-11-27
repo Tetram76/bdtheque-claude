@@ -4,6 +4,7 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -188,23 +189,39 @@ internal static class AuthorEndpoints
     /// is credited on, the roles it holds on albums and series, its modification and its version, which its deletion sends
     /// back.
     /// </summary>
+    /// <param name="resembling">An author whose merge proposes the authors that resemble them (<see cref="MergeSuggestions"/>):
+    /// the list is then restricted to them, the closest first.</param>
     private static async Task<Page<AuthorAdminListItem>> ListForAdministrationAsync(
         BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, string? entry = null, int page = 1,
-        int pageSize = Paging.DefaultSize)
+        int pageSize = Paging.DefaultSize, Guid? resembling = null)
     {
-        var rows = await RowsAsync(context, q, entry, state: null, page, pageSize, cancellationToken);
+        var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
+        var rows = await RowsAsync(context, q, entry, state: null, page, pageSize, cancellationToken, ranked);
         return new Page<AuthorAdminListItem>(
-            [.. rows.Items.Select(r => new AuthorAdminListItem(
-                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.Roles, r.ModifiedAt, r.Version))],
+            MergeSuggestions.InRankOrder(rows.Items.Select(r => new AuthorAdminListItem(
+                r.Id, r.LastName, r.FirstName, r.Pseudonym, r.Nationality, r.CreditedAlbumCount, r.Roles, r.ModifiedAt, r.Version)), ranked, a => a.Id),
             rows.Number, rows.Size, rows.TotalCount);
+    }
+
+    // Each identifier of an author, against each of the other's: the pseudonym of one may be the name of the other; a name
+    // alone within the first and last name is one more, as « Gotlib » within « Marcel Gotlib » (fonctionnel/regles-metier/fusion-des-fiches.md).
+    private static async Task<IReadOnlyList<Guid>> ResemblingAsync(
+        BdthequeDbContext context, Guid subject, int count, CancellationToken cancellationToken)
+    {
+        var authors = await Search(context, text: null, entry: null, state: null)
+            .Select(a => new { a.Id, a.LastName, a.FirstName, a.Pseudonym })
+            .ToListAsync(cancellationToken);
+        return MergeSuggestions.Rank(authors, subject, a => a.Id, (a, b) => Resemblance.Compare(
+            [a.Pseudonym, a.LastName, $"{a.FirstName} {a.LastName}", $"{a.LastName} {a.FirstName}"],
+            [b.Pseudonym, b.LastName, $"{b.FirstName} {b.LastName}", $"{b.LastName} {b.FirstName}"], inclusion: true), count);
     }
 
     // A page of the authors as both lists read them, each list keeping what it presents.
     private static async Task<Page<AuthorRow>> RowsAsync(
         BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state, int page, int pageSize,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken, IReadOnlyList<Guid>? only = null)
     {
-        var rows = await Search(context, text, entry, state).ToPageAsync(page, pageSize, CatalogExpressions.Expand((Author a) => new
+        var rows = await Search(context, text, entry, state, only).ToPageAsync(page, pageSize, CatalogExpressions.Expand((Author a) => new
         {
             a.Id,
             a.LastName,
@@ -238,11 +255,14 @@ internal static class AuthorEndpoints
     /// least one album in the possession chosen (fonctionnel/regles-metier/perimetre-de-la-consultation.md), by sort key.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
-    private static IOrderedQueryable<Author> Search(BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state)
+    private static IOrderedQueryable<Author> Search(
+        BdthequeDbContext context, string? text, string? entry, AlbumCollectionState? state, IReadOnlyList<Guid>? only = null)
     {
         CatalogFilters.EnsureNavigationEntry(entry);
         var authors = context.Authors.AsNoTracking()
             .WhereContains(text, a => a.LastName, a => a.FirstName, a => a.Pseudonym, a => a.FirstName + " " + a.LastName, a => a.SortKey);
+        if (only is not null)
+            authors = authors.Where(a => only.Contains(a.Id));
         if (entry is not null)
             authors = authors.Where(a => a.NavigationEntry == entry);
         if (state is { } wanted)

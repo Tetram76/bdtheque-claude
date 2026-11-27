@@ -50,6 +50,14 @@
               "format": "int32",
               "default": 50
             }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -656,6 +664,14 @@
               ],
               "format": "int32",
               "default": 50
+            }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -1340,6 +1356,14 @@
               ],
               "format": "int32",
               "default": 50
+            }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -2442,6 +2466,14 @@
               "format": "int32",
               "default": 50
             }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -3184,6 +3216,14 @@
               ],
               "format": "int32",
               "default": 50
+            }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -4062,6 +4102,14 @@
               "format": "int32",
               "default": 50
             }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         ],
         "responses": {
@@ -4861,6 +4909,14 @@
               ],
               "format": "int32",
               "default": 50
+            }
+          },
+          {
+            "name": "resembling",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],

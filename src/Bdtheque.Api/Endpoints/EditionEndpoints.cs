@@ -295,11 +295,17 @@ internal static class EditionEndpoints
     /// edition and its album, its cover, its category, its acquisition, its modification and the version of its album,
     /// which its deletion sends back.
     /// </summary>
+    /// <param name="resembling">An edition whose merge proposes the editions that resemble it (<see cref="MergeSuggestions"/>):
+    /// the list is then restricted to them, the closest first.</param>
     private static async Task<EditionAdminList> ListForAdministrationAsync(
         BdthequeDbContext context, [AsParameters] EditionFilters filters, CancellationToken cancellationToken, int page = 1,
-        int pageSize = Paging.DefaultSize)
+        int pageSize = Paging.DefaultSize, Guid? resembling = null)
     {
-        var rows = await InListOrder(filters.Apply(context.Editions.AsNoTracking().Where(CollectionMembership.IsOwned)))
+        var editions = filters.Apply(context.Editions.AsNoTracking().Where(CollectionMembership.IsOwned));
+        var ranked = resembling is { } subject ? await ResemblingAsync(context, subject, pageSize, cancellationToken) : null;
+        if (ranked is not null)
+            editions = editions.Where(e => ranked.Contains(e.Id));
+        var rows = await InListOrder(editions)
             .ToPageAsync(page, pageSize, CatalogExpressions.Expand((Edition e) => new
             {
                 Album = e.Album.ToSummary(),
@@ -312,15 +318,29 @@ internal static class EditionEndpoints
                 AlbumVersion = EF.Property<uint>(e.Album, BdthequeDbContext.VersionProperty),
             }), cancellationToken);
 
-        var items = rows.Items
+        var items = MergeSuggestions.InRankOrder(rows.Items
             .Select(r => new EditionAdminListItem(
                 r.Album, r.Edition, r.Cover, EnumMapping.Map<ContractEnums.EditionCategory>(r.Category),
                 EnumMapping.Map<ContractEnums.AcquisitionMode>(r.AcquisitionMode)!.Value, r.AcquisitionDate?.Year, r.ModifiedAt,
-                r.AlbumVersion))
-            .ToList();
+                r.AlbumVersion)), ranked, e => e.Edition.Id);
         return new EditionAdminList(
             new Page<EditionAdminListItem>(items, rows.Number, rows.Size, rows.TotalCount),
             await filters.NameAsync(context, cancellationToken));
+    }
+
+    /// <summary>
+    /// The editions that resemble an edition (fonctionnel/regles-metier/fusion-des-fiches.md): a same ISBN, its ten-digit and
+    /// thirteen-digit forms alike, or a same album and a same publisher, among the editions the list presents, the owned ones.
+    /// </summary>
+    private static async Task<IReadOnlyList<Guid>> ResemblingAsync(
+        BdthequeDbContext context, Guid subject, int count, CancellationToken cancellationToken)
+    {
+        var editions = await InListOrder(context.Editions.AsNoTracking().Where(CollectionMembership.IsOwned))
+            .Select(e => new { e.Id, e.Isbn, e.AlbumId, e.PublisherId })
+            .ToListAsync(cancellationToken);
+        return MergeSuggestions.Rank(editions, subject, e => e.Id, (a, b) =>
+            Resemblance.SameIsbn(a.Isbn, b.Isbn) || (a.AlbumId == b.AlbumId && a.PublisherId == b.PublisherId) ? Resemblance.Identical : null,
+            count);
     }
 
     internal static IOrderedQueryable<Edition> InListOrder(IQueryable<Edition> editions) =>

@@ -5,6 +5,7 @@ using Bdtheque.Api.Errors;
 using Bdtheque.Api.Merge;
 using Bdtheque.Contracts.Admin;
 using Bdtheque.Contracts.Catalog;
+using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -303,8 +304,12 @@ internal static class UniverseEndpoints
     /// (choix-implementation/api/organisation-de-l-api.md), is ordered in memory and paged there; only the rows of the page
     /// are then counted.
     /// </remarks>
+    /// <param name="resembling">A universe whose merge proposes the universes that resemble it, whatever their parent
+    /// (<see cref="MergeSuggestions"/>): the list is then restricted to them, the closest first. A longer name names another,
+    /// more precise universe (« Star Wars : Clone Wars »): no inclusion (fonctionnel/regles-metier/fusion-des-fiches.md).</param>
     private static async Task<Page<UniverseAdminListItem>> ListForAdministrationAsync(
-        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize)
+        BdthequeDbContext context, CancellationToken cancellationToken, string? q = null, int page = 1, int pageSize = Paging.DefaultSize,
+        Guid? resembling = null)
     {
         // A single snapshot: the rows counted are those of the hierarchy read.
         await using var snapshot = await context.Database.BeginTransactionAsync(IsolationLevel.RepeatableRead, cancellationToken);
@@ -312,7 +317,11 @@ internal static class UniverseEndpoints
         var found = string.IsNullOrWhiteSpace(q)
             ? null
             : (await context.Universes.AsNoTracking().WhereContains(q, u => u.Name).Select(u => u.Id).ToListAsync(cancellationToken)).ToHashSet();
-        var ordered = tree.InHierarchyOrder().Where(id => found is null || found.Contains(id)).ToList();
+        var inHierarchy = tree.InHierarchyOrder().Select(id => (Id: id, tree.InHierarchy(id).Universe.Name)).ToList();
+        var ordered = resembling is { } subject
+            ? MergeSuggestions.Rank(inHierarchy, subject, u => u.Id, (a, b) => Resemblance.Compare([a.Name], [b.Name], inclusion: false), pageSize)
+                .Where(id => found is null || found.Contains(id)).ToList()
+            : inHierarchy.Select(u => u.Id).Where(id => found is null || found.Contains(id)).ToList();
         var ids = Paging.Slice(ordered, page, pageSize);
 
         var rows = await context.Universes.AsNoTracking()
