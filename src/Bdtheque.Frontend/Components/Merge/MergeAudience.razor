@@ -1,0 +1,44 @@
+@inject AudienceRecorder Recorder
+
+@* Records the display of the screen of a merge (fonctionnel/mesure-audience.md, Fonctions suivies), once, by the request
+   that renders it, whose method is GET, as AudienceScreen does. When its address says that the merge is pursued with a
+   record the dialog of the list proposed from its opening, rather than with one its search found
+   (fonctionnel/regles-metier/fusion-des-fiches.md, fiches pressenties), the action of the list is recorded first, with the
+   record the merge started from. Both in one lifecycle, awaited one after the other: whether a use repeats the one before it
+   depends on their order (AudienceUsage.Follow), which two components recording at once would leave to chance. *@
+
+@code {
+    /// <summary>The parameter of the address of a merge that says the other record is one the dialog proposed.</summary>
+    public const string SuggestedParameterName = "suggested";
+
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    [SupplyParameterFromQuery(Name = SuggestedParameterName)]
+    private bool Suggested { get; set; }
+
+    /// <summary>The screen of the merge (e.g. <see cref="AudienceFunctions.AdminGenreMerge"/>).</summary>
+    [Parameter, EditorRequired]
+    public AudienceFunction Screen { get; set; } = null!;
+
+    /// <summary>The action of the list, a merge with a record proposed (e.g. <see cref="AudienceFunctions.AdminGenresMergeSuggested"/>).</summary>
+    [Parameter, EditorRequired]
+    public AudienceFunction Suggestion { get; set; } = null!;
+
+    /// <summary>The name of the record in the parameters of the action, as the dialog of its list names it (e.g. <c>genre</c>).</summary>
+    [Parameter, EditorRequired]
+    public string Subject { get; set; } = null!;
+
+    /// <summary>The record the merge started from, if the address gives it.</summary>
+    [Parameter]
+    public Guid? RecordId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpContext is not { } context || !HttpMethods.IsGet(context.Request.Method))
+            return;
+        if (Suggested && RecordId is { } record)
+            await Recorder.RecordActionAsync(Suggestion, $"{Subject}={record}", context.RequestAborted);
+        await Recorder.RecordScreenAsync(Screen, cancellationToken: context.RequestAborted);
+    }
+}

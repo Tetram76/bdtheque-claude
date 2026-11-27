@@ -19,8 +19,7 @@
    a series, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the sort key a
    title gives. *@
 <PageTitle>@L["Title"]</PageTitle>
-<MergeSuggestedAudience Function="AudienceFunctions.AdminSeriesMergeSuggested" Subject="series" RecordId="SeriesId" />
-<AudienceScreen Function="AudienceFunctions.AdminTwoSeriesMerge" />
+<MergeAudience Screen="AudienceFunctions.AdminTwoSeriesMerge" Suggestion="AudienceFunctions.AdminSeriesMergeSuggested" Subject="series" RecordId="SeriesId" />
 
 @if (Preview is null)
 {

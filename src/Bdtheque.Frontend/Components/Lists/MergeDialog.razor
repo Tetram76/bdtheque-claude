@@ -51,7 +51,7 @@
             <input type="hidden" name="@SubjectName" value="@SubjectId" />
             @if (Candidates is null && SuggestionsShown)
             {
-                <input type="hidden" name="@MergeSuggestedAudience.ParameterName" value="true" />
+                <input type="hidden" name="@MergeAudience.SuggestedParameterName" value="true" />
             }
             <Button Type="submit" Variant="ButtonVariant.Primary" Label="@L["Continue"]" Disabled="@(Offered is not { Count: > 0 })" />
         </form>

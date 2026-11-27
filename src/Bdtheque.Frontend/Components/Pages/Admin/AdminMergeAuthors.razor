@@ -16,8 +16,7 @@
    of an author, which the API alone holds: it sends, data by data, the record whose value is kept, and asks the API the
    identity the names chosen give. *@
 <PageTitle>@L["Title"]</PageTitle>
-<MergeSuggestedAudience Function="AudienceFunctions.AdminAuthorsMergeSuggested" Subject="author" RecordId="AuthorId" />
-<AudienceScreen Function="AudienceFunctions.AdminAuthorMerge" />
+<MergeAudience Screen="AudienceFunctions.AdminAuthorMerge" Suggestion="AudienceFunctions.AdminAuthorsMergeSuggested" Subject="author" RecordId="AuthorId" />
 
 @if (Preview is null)
 {
