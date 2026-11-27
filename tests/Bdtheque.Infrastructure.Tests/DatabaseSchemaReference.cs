@@ -25,21 +25,50 @@ internal static partial class DatabaseSchemaReference
     private const string Description =
         "Cette page, générée depuis une base qui a reçu les migrations, présente les tables de la base avec leurs colonnes, contraintes et index, ainsi que ses collations et ses relations ; à lire pour un fait exact sur le schéma physique.";
 
-    // The relations, in one diagram per part of the schema: in a single one, Mermaid shrinks them past legibility. Each
-    // table is placed here by hand, which is the only interpretation of the page; a table left out fails the generation.
-    // A part where many tables reference the same one is laid out from left to right: from top to bottom, they would all
-    // stand side by side, wider than the page.
+    // The relations, in one small diagram per question: in a larger one, Mermaid crosses its links and shrinks it past
+    // legibility. The diagrams are the only interpretation of the page, made here by hand: which tables bear the keys a
+    // diagram draws, and the order of its tables from left to right, declared before the relations: Mermaid starts from it,
+    // and only swaps two tables to spare a crossing. A table that bears a key and no diagram, or a diagram that leaves out
+    // one of its tables, fails the generation.
     private static readonly DiagramGroup[] Groups =
     [
-        new("Albums, séries et éditions", "quelles tables du catalogue référencent quelles autres ?", "TB",
-            ["Albums", "Authors", "Contributions", "EditionSpotlights", "EditionVisuals", "Editions", "PublisherCollections", "Publishers", "PurchaseIntents", "Series"]),
-        new("Genres et univers", "comment albums et séries sont-ils rattachés aux genres et aux univers ?", "LR",
-            ["AlbumGenres", "AlbumUniverses", "Genres", "SeriesGenres", "SeriesUniverses", "Universes"]),
-        new("Recherches enregistrées", "quelles fiches une recherche enregistrée peut-elle désigner ?", "LR",
-            ["SavedSearchDesignations", "SavedSearches"]),
-        new("Mesure d'audience", "comment les tables de la mesure d'audience se référencent-elles ?", "TB",
-            ["AudienceCounterObjects", "AudienceCounters", "AudienceUsages", "AudienceVisits"]),
+        new("Albums, séries et auteurs", "comment un album se rattache-t-il à sa série, et une contribution à un album ou à une série et à un auteur ?",
+            Keys: ["Albums", "Contributions"],
+            Tables: ["Series", "Albums", "Authors", "Contributions"]),
+        new("Éditions et éditeurs", "comment une édition se rattache-t-elle à son album, à son éditeur et à sa collection, et qu'est-ce qui la référence ?",
+            Keys: ["EditionSpotlights", "EditionVisuals", "Editions", "PublisherCollections"],
+            Tables: ["Albums", "Publishers", "PublisherCollections", "Editions", "EditionSpotlights", "EditionVisuals"]),
+        new("Intentions d'acquisition", "à quel album et à quelle édition une intention d'acquisition se rapporte-t-elle ?",
+            Keys: ["PurchaseIntents"],
+            Tables: ["Albums", "Editions", "PurchaseIntents"]),
+        new("Valeurs des nouvelles éditions d'une série", "quel éditeur et quelle collection une série peut-elle proposer à ses nouvelles éditions ?",
+            Keys: ["Series"],
+            Tables: ["Publishers", "PublisherCollections", "Series"]),
+        new("Genres", "comment albums et séries sont-ils rattachés à leurs genres ?",
+            Keys: ["AlbumGenres", "SeriesGenres"],
+            Tables: ["Albums", "Genres", "Series", "AlbumGenres", "SeriesGenres"]),
+        new("Univers", "comment albums et séries sont-ils rattachés à leurs univers ?",
+            Keys: ["AlbumUniverses", "SeriesUniverses"],
+            Tables: ["Albums", "Universes", "Series", "AlbumUniverses", "SeriesUniverses"]),
+        new("Hiérarchie des univers", "comment un univers se rattache-t-il à son univers parent ?",
+            Keys: ["Universes"],
+            Tables: ["Universes"]),
+        // Eleven tables side by side above the one that references them all would be wider than the page: half of them
+        // stand below it.
+        new("Recherches enregistrées", "quelles fiches une recherche enregistrée peut-elle désigner ?",
+            Keys: ["SavedSearchDesignations"],
+            Tables: ["SavedSearches", "Albums", "Authors", "Contributions", "Editions", "EditionVisuals", "SavedSearchDesignations", "Genres", "PublisherCollections", "Publishers", "Series", "Universes"],
+            Below: ["Genres", "PublisherCollections", "Publishers", "Series", "Universes"]),
+        new("Mesure d'audience", "comment les tables de la mesure d'audience se référencent-elles ?",
+            Keys: ["AudienceCounterObjects", "AudienceUsages"],
+            Tables: ["AudienceCounters", "AudienceVisits", "AudienceCounterObjects", "AudienceUsages"]),
     ];
+
+    // Mermaid spaces the tables of an entity-relationship diagram by 140 pixels by default, which makes a diagram of a few
+    // tables wider than the page; below 60, the names of two neighbouring keys run into one another. Set in each diagram
+    // rather than by the template of the site, so that GitHub, which renders the page without that template, lays it out
+    // the same.
+    private const string DiagramLayout = "---\nconfig:\n  er:\n    nodeSpacing: 60\n    rankSpacing: 60\n---\n";
 
     // Tables that take part in no relation, hence in no diagram.
     private static readonly string[] Unrelated = ["ApplicationSettings", "ChangeLogEntries", "PendingVisuals", "__EFMigrationsHistory"];
@@ -109,37 +138,79 @@ internal static partial class DatabaseSchemaReference
 
     private static void WriteRelations(StringBuilder page, List<string> tables, List<ForeignKey> foreignKeys)
     {
-        var placed = Groups.SelectMany(group => group.Tables).Concat(Unrelated).ToList();
-        if (tables.Except(placed, StringComparer.Ordinal).ToList() is { Count: > 0 } missing)
-            throw new InvalidOperationException($"Place each table in a diagram of {nameof(DatabaseSchemaReference)}, or among the unrelated ones: {string.Join(", ", missing)}.");
-        var related = foreignKeys.SelectMany(key => new[] { key.Table, key.Referenced }).Intersect(Unrelated, StringComparer.Ordinal).ToList();
-        if (related.Count > 0)
-            throw new InvalidOperationException($"These tables now take part in a relation, and belong in a diagram: {string.Join(", ", related)}.");
+        var diagrams = Groups.Select(group => (Group: group, Keys: KeysOf(group, foreignKeys))).ToList();
+        EnsureEachTablePlaced(tables, foreignKeys, diagrams);
 
         page.Append("""
             ## Relations
 
-            Les schémas de cette section sont générés depuis le catalogue de la base. Chaque clé étrangère y figure une fois, dans le schéma de la table qui la porte, reliée à la table qu'elle référence. Une clé qui admet `NULL` rend la référence facultative, ce que note `|o` ; une clé sur laquelle porte un index unique sans condition désigne au plus une ligne, ce que note `o|`. Les règles `ON DELETE` ne figurent pas sur les schémas : elles se lisent dans les contraintes de chaque table, plus bas.
+            Les schémas de cette section sont générés depuis le catalogue de la base, et chacun ne répond qu'à une question, pour rester lisible. Chaque clé étrangère y figure une fois, sur le schéma consacré à la table qui la porte, reliée à la table qu'elle référence et accompagnée du nom de sa colonne ; une table référencée depuis plusieurs schémas apparaît donc sur chacun d'eux. La table référencée est placée au-dessus de la table qui la référence, sauf quand une table en référence trop pour qu'elles tiennent toutes côte à côte : une partie d'entre elles est alors placée en dessous. Une clé qui admet `NULL` rend la référence facultative, ce que note `|o` ; une clé sur laquelle porte un index unique sans condition désigne au plus une ligne, ce que note `o|`. Les règles `ON DELETE` ne figurent pas sur les schémas : elles se lisent dans les contraintes de chaque table, plus bas.
 
 
             """);
         page.Append(CultureInfo.InvariantCulture,
             $"Certaines tables ne référencent aucune autre table, et aucune ne les référence ; elles n'apparaissent donc sur aucun schéma : {string.Join(", ", Unrelated.Order(StringComparer.Ordinal).Select(Code))}.\n\n");
 
-        foreach (var group in Groups)
+        foreach (var (group, keys) in diagrams)
         {
-            var keys = foreignKeys.Where(key => group.Tables.Contains(key.Table, StringComparer.Ordinal))
-                .OrderBy(key => key.Table, StringComparer.Ordinal).ThenBy(key => key.Columns, StringComparer.Ordinal).ToList();
-            page.Append(CultureInfo.InvariantCulture, $"### {group.Title}\n\nCe schéma généré répond à une question : {group.Question}\n\n```mermaid\nerDiagram\n    direction {group.Direction}\n");
+            page.Append(CultureInfo.InvariantCulture, $"### {group.Title}\n\nCe schéma généré répond à une question : {group.Question}\n\n```mermaid\n{DiagramLayout}erDiagram\n");
+            foreach (var table in group.Tables)
+                page.Append(CultureInfo.InvariantCulture, $"    {table}\n");
             foreach (var key in keys)
             {
                 var referenced = key.Mandatory ? "||" : "|o";
                 var referencing = key.Unique ? "o|" : "o{";
-                page.Append(CultureInfo.InvariantCulture, $"    {key.Referenced} {referenced}--{referencing} {key.Table} : \"{key.Columns}\"\n");
+                // Mermaid places the first table of a relation above the second: a table to stand below is written
+                // second, its relation read from the other end.
+                if (group.Below.Contains(key.Referenced, StringComparer.Ordinal))
+                    page.Append(CultureInfo.InvariantCulture, $"    {key.Table} {Reversed(referencing)}--{Reversed(referenced)} {key.Referenced} : \"{key.Columns}\"\n");
+                else
+                    page.Append(CultureInfo.InvariantCulture, $"    {key.Referenced} {referenced}--{referencing} {key.Table} : \"{key.Columns}\"\n");
             }
 
             page.Append("```\n\n");
         }
+    }
+
+    private static List<ForeignKey> KeysOf(DiagramGroup group, List<ForeignKey> foreignKeys) =>
+        foreignKeys.Where(key => group.Keys.Contains(key.Table, StringComparer.Ordinal))
+            .OrderBy(key => key.Table, StringComparer.Ordinal).ThenBy(key => key.Columns, StringComparer.Ordinal).ToList();
+
+    // The cardinality of one end of a relation, as Mermaid writes it at the other end, mirrored: "|o" on the left is "o|" on
+    // the right, "o{" on the right is "}o" on the left.
+    private static string Reversed(string cardinality) => new([Mirrored(cardinality[1]), Mirrored(cardinality[0])]);
+
+    private static char Mirrored(char symbol) => symbol switch { '{' => '}', '}' => '{', _ => symbol };
+
+    // The placement is made by hand, against a schema that the migrations change: what it no longer matches fails the
+    // generation, rather than a key or a table left out of the page, or a table misplaced, in silence.
+    private static void EnsureEachTablePlaced(List<string> tables, List<ForeignKey> foreignKeys, List<(DiagramGroup Group, List<ForeignKey> Keys)> diagrams)
+    {
+        var problems = new List<string>();
+        foreach (var bearing in foreignKeys.Select(key => key.Table).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal))
+        {
+            var count = Groups.Count(group => group.Keys.Contains(bearing, StringComparer.Ordinal));
+            if (count != 1)
+                problems.Add($"the keys of {bearing} are drawn by {count} diagrams instead of one");
+        }
+
+        foreach (var (group, keys) in diagrams)
+        {
+            var drawn = keys.SelectMany(key => new[] { key.Table, key.Referenced }).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal);
+            if (!drawn.SequenceEqual(group.Tables.Order(StringComparer.Ordinal), StringComparer.Ordinal))
+                problems.Add($"the tables of the diagram \"{group.Title}\" are {string.Join(", ", drawn)}, not {string.Join(", ", group.Tables)}");
+            if (group.Below.Except(keys.Select(key => key.Referenced), StringComparer.Ordinal).ToList() is { Count: > 0 } notReferenced)
+                problems.Add($"the diagram \"{group.Title}\" places below tables that none of its keys references: {string.Join(", ", notReferenced)}");
+        }
+
+        var placed = Groups.SelectMany(group => group.Tables).Concat(Unrelated).ToList();
+        if (tables.Except(placed, StringComparer.Ordinal).ToList() is { Count: > 0 } missing)
+            problems.Add($"these tables are in no diagram, nor among the unrelated ones: {string.Join(", ", missing)}");
+        if (foreignKeys.SelectMany(key => new[] { key.Table, key.Referenced }).Intersect(Unrelated, StringComparer.Ordinal).ToList() is { Count: > 0 } related)
+            problems.Add($"these tables now take part in a relation, and belong in a diagram: {string.Join(", ", related)}");
+
+        if (problems.Count > 0)
+            throw new InvalidOperationException($"Place the tables of {nameof(DatabaseSchemaReference)} again: {string.Join("; ", problems)}.");
     }
 
     private static void WriteTables(StringBuilder page, List<string> tables, List<Column> columns, List<Constraint> constraints, List<Index> indexes)
@@ -290,7 +361,13 @@ internal static partial class DatabaseSchemaReference
     [GeneratedRegex(@"\s+")]
     private static partial Regex Whitespace();
 
-    private sealed record DiagramGroup(string Title, string Question, string Direction, string[] Tables);
+    /// <param name="Keys">The tables whose foreign keys the diagram draws.</param>
+    /// <param name="Tables">Every table of the diagram, from left to right.</param>
+    /// <param name="Below">The referenced tables that stand below the table referencing them, instead of above.</param>
+    private sealed record DiagramGroup(string Title, string Question, string[] Keys, string[] Tables, string[] Below)
+    {
+        public DiagramGroup(string Title, string Question, string[] Keys, string[] Tables) : this(Title, Question, Keys, Tables, []) { }
+    }
 
     private sealed record Collation(string Name, string Provider, string Locale, bool Deterministic);
 
