@@ -138,7 +138,7 @@ Exposée sur Internet, derrière le reverse proxy, l'application demande à la c
 2. Scanner le QR code avec l'application d'authentification, ou y saisir la clé à la main (code basé sur l'heure, 6 chiffres, 30 secondes).
 3. Copier la ligne dans le `.env`, puis recréer les conteneurs (`docker compose up -d`) et effacer la console.
 
-Un téléphone perdu ou changé se remplace par un nouveau secret, créé de la même façon. Changer le secret, l'identifiant ou le mot de passe ferme toutes les sessions ouvertes. Une session se ferme aussi d'elle-même après deux heures sans activité, et au plus tard douze heures après la connexion.
+Pour enregistrer de nouveau l'application d'authentification (téléphone changé, réinstallé, ou second appareil) sans rien changer au déploiement, `dotnet run scripts/New-AdminTotpSecret.cs -- <clé>`, avec la clé actuelle de `ADMIN_TOTP_SECRET`, affiche le QR code de ce même secret. Un téléphone perdu, lui, se remplace par un nouveau secret, créé comme au premier enregistrement, qui retire tout accès à l'ancien. Changer le secret, l'identifiant ou le mot de passe ferme toutes les sessions ouvertes. Une session se ferme aussi d'elle-même après deux heures sans activité, et au plus tard douze heures après la connexion.
 
 ### Dossier des visuels
 
