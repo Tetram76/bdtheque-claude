@@ -1,8 +1,8 @@
 ---
 type: Règle métier
 title: 'Intention d''acquisition'
-description: 'Intention sur un album ou une édition, exclusions, conversion, édition non possédée indissociable, réalisation d''une intention.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T14:00:00Z }
+description: 'Intention sur un album ou une édition, exclusions, conversion, présentation comme intention et résumé de l''édition visée, édition non possédée indissociable, réalisation d''une intention.'
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T15:00:00Z }
 ---
 
 # Intention d'acquisition
@@ -23,6 +23,8 @@ Une intention ne peut porter sur l'**album** que tant qu'il n'a **aucune éditio
 Un cas d'usage permettra de **convertir** une intention portant sur l'album en intention portant sur une édition, et inversement, dans le respect de ces règles : une intention portant sur une édition ne se convertit en intention portant sur l'album que si cette édition est la **seule** de l'album, la conversion la supprimant (cf. ci-dessous).
 
 Une intention d'acquisition est toujours **présentée comme une intention d'acquisition**, jamais comme un album ou une édition : une édition visée ne figure jamais parmi les éditions (d'un album, d'une liste, d'un décompte), mais parmi les intentions d'acquisition, avec ce qu'elle vise. Un album visé reste en revanche un album, dont l'appartenance à la collection signale qu'il fait l'objet d'une intention d'acquisition.
+
+**Résumé de l'édition visée** (décision de l'utilisateur, #632) : partout où une intention sur une édition est présentée, dans la consultation comme dans l'administration (fiche de l'album, liste publique des intentions d'acquisition, page des éditions et intentions d'acquisition de l'album, liste des intentions d'acquisition de l'administration), le libellé de l'édition visée ([Libellé d'une édition](../presentation/libelle-d-une-edition.md)) est suivi, en petit dessous, du même résumé de ses caractéristiques : sa catégorie, son format, sa reliure, son orientation, son sens de lecture et son nombre de pages, dans cet ordre, chacun seulement s'il est renseigné, puis « Noir et blanc » pour une édition qui n'est pas en couleur. Une édition en couleur ne le mentionne pas : c'est le cas courant, et la mention se lirait sur presque toutes les intentions sans rien apprendre. Une édition visée sans aucune de ces caractéristiques n'a rien sous son libellé (exemple : « Édition originale · Normal (A4) · Cartonnée · Italienne · Droite à gauche · 48 pages · Noir et blanc »).
 
 Une édition **non possédée** et l'intention qui la vise sont **indissociables** : l'une ne va pas sans l'autre. Supprimer l'une supprime l'autre, après confirmation (cf. [Suppression des entités](suppression-des-entites.md)) ; de même, convertir une intention portant sur une édition en intention portant sur l'album supprime l'édition visée, après confirmation. Une édition non possédée ne peut donc jamais exister sans intention d'acquisition.
 

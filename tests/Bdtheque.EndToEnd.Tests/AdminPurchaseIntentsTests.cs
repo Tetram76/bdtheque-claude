@@ -176,7 +176,8 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
             "/admin/publishers", new PublisherContent($"Les Éditions du Grand Large et des Archipels réunis {_marker}", null, []));
         var album = await CreateAlbumAsync($"Les Voyages extraordinaires du capitaine Archibald au-delà des mers {_marker}");
         await PostAsync<PurchaseIntentsForm>($"/admin/albums/{album.Id}/purchase-intents", new CreatePurchaseIntentRequest(
-            new PurchaseIntentEditionContent(publisher.Id, null, 2014, "978-2-7234-4567-1", null, null, null, null, null, null, true),
+            new PurchaseIntentEditionContent(publisher.Id, null, 2014, "978-2-7234-4567-1", BindingType.Hardcover, BookOrientation.Landscape,
+                ReadingDirection.RightToLeft, EditionFormat.Large, 48, EditionCategory.SpecialEdition, false),
             await AlbumVersionAsync(album.Id)));
         var page = await NewPageInThemeAsync(theme, new ViewportSize { Width = width, Height = 900 });
         await ApplicationHost.SignInAsync(page, $"{AppPaths.AdminPurchaseIntents}?q={_marker}");
@@ -187,6 +188,8 @@ public sealed class AdminPurchaseIntentsTests(ApplicationHost application) : Bro
 
         Assert.True(label >= 120, $"{theme} at {width}px: the label is {label}px wide.");
         Assert.False(overflow, $"{theme} at {width}px: the page overflows sideways.");
+        // Its unbreakable ISBN and its summary stay in their column (#632).
+        Assert.False(await PurchaseIntentListTests.SpillsAsync(page), $"{theme} at {width}px: what an intent targets spills out of its column.");
         // At the width of the mockups' desktop, the table has all its columns, the membership of the collection included.
         if (width == 1440)
             await Assertions.Expect(page.GetByRole(AriaRole.Columnheader, new() { Name = "Possession" })).ToBeVisibleAsync();

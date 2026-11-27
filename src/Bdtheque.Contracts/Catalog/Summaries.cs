@@ -20,6 +20,19 @@ public sealed record AlbumSummary(
     int? EndVolumeNumber,
     bool IsInCollection);
 
+/// <summary>
+/// What the summary of an edition targeted by a purchase intent is built from, under its label, wherever the intent is presented
+/// (fonctionnel/regles-metier/intention-d-acquisition.md, résumé de l'édition visée).
+/// </summary>
+public sealed record EditionTraits(
+    EditionCategory? Category,
+    EditionFormat? Format,
+    BindingType? Binding,
+    BookOrientation? Orientation,
+    ReadingDirection? ReadingDirection,
+    int? PageCount,
+    bool IsColor);
+
 /// <summary>What the label of an edition is built from (fonctionnel/presentation/libelle-d-une-edition.md).</summary>
 public sealed record EditionSummary(
     Guid Id,

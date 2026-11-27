@@ -244,7 +244,7 @@ public sealed class ConsultationSearchTests : BunitContext, IDisposable
             [new(CollectionId, "Astéroïde", Edition.PublisherId, "Dargaud")], 1, ConsultationSearch.HitCount, 1);
         _api.Answers["/catalog/editions"] = new Page<EditionListItem>([new(Album, Edition, true)], 1, ConsultationSearch.HitCount, 1);
         _api.Answers["/catalog/purchase-intents"] = new PurchaseIntentCatalogList(
-            new Page<PurchaseIntentListItem>([new(IntentId, Album, AlbumCollectionState.InCollection, null, null, null, DateTimeOffset.UnixEpoch)], 1, ConsultationSearch.HitCount, 1),
+            new Page<PurchaseIntentListItem>([new(IntentId, Album, AlbumCollectionState.InCollection, null, null, null, null, DateTimeOffset.UnixEpoch)], 1, ConsultationSearch.HitCount, 1),
             NoAlbumFilters);
         _api.Answers["/catalog/authors"] = new Page<AuthorCatalogListItem>(
             [new(AuthorId, "Dupont", "Anne", "Astrid", null, 3, 1, [])], 1, ConsultationSearch.HitCount, 1);

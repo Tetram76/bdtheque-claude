@@ -53,6 +53,7 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Services.AddScoped<DisplayFormatter>();
         Services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>();
         Services.AddSingleton<ValueLabels>();
+        Services.AddScoped<EditionTraitTexts>();
     }
 
     void IDisposable.Dispose()
@@ -568,6 +569,51 @@ public sealed class AlbumRecordTests : BunitContext, IDisposable
         Assert.Equal("Posée le 10/10/2026", intent.QuerySelector(".intent-date")!.TextContent.Trim());
         // An intent is never one of the editions, which has its own detail.
         Assert.Equal(2, page.FindAll(".edition").Count);
+    }
+
+    [Fact]
+    // The summary of the edition targeted, the same wherever an intent is presented
+    // (fonctionnel/regles-metier/intention-d-acquisition.md, résumé de l'édition visée).
+    public void Intent_OnAnEdition_SummarizesEveryTraitOfIt_ThenBlackAndWhite()
+    {
+        var intended = Intended() with { Orientation = BookOrientation.Landscape, ReadingDirection = ReadingDirection.RightToLeft, IsColor = false };
+        _catalog.Album = Album() with { Editions = [.. Album().Editions.Where(e => e.IsInCollection), intended] };
+
+        var intent = Open().Find(".album-intents li");
+
+        Assert.Equal(
+            "Édition spéciale · Normal (A4) · Cartonnée · Italienne · Droite à gauche · 112 pages · Noir et blanc",
+            intent.QuerySelector(".intent-facts")!.TextContent.Trim());
+    }
+
+    [Fact]
+    // Its visuals, as a strip of thumbnails like an edition, each opening the viewer on the visuals of the edition targeted
+    // (visuel/fiche-album/contenu.md, decision of the user, #632); none without visual.
+    public void Intent_OnAnEditionWithVisuals_PresentsThemAsAnEdition_AndOpensTheViewerOnThem()
+    {
+        var intended = Intended() with
+        {
+            Visuals = [new EditionVisualItem(Guid.NewGuid(), VisualType.Cover, 1, Created, Created), new EditionVisualItem(Guid.NewGuid(), VisualType.BackCover, 1, Created, Created)],
+        };
+        _catalog.Album = Album() with { Editions = [.. Album().Editions.Where(e => e.IsInCollection), intended] };
+
+        var page = Open($"?edition={IntendedEditionId}&visual=2");
+
+        var thumbnails = page.FindAll(".album-intents li .edition-visuals a");
+        Assert.Equal(["Couv.", "4e"], thumbnails.Select(t => t.QuerySelector(".visual-short")!.TextContent.Trim()));
+        Assert.Equal(AlbumRecordQuery.ForVisual(IntendedEditionId, 1).Href(AlbumId), thumbnails[0].GetAttribute("href"));
+        Assert.Equal("true", thumbnails[1].GetAttribute("aria-current"));
+        var dialog = page.Find("dialog.visual-dialog");
+        Assert.Equal("4e de couverture", dialog.QuerySelector(".visual-dialog-title")!.TextContent.Trim());
+        Assert.Equal("Casterman, site externe [2023]", dialog.QuerySelector(".visual-dialog-edition")!.TextContent.Trim());
+    }
+
+    [Fact]
+    public void Intent_OnAnEditionWithoutVisual_HasNoStrip()
+    {
+        _catalog.Album = Album();
+
+        Assert.Empty(Open().FindAll(".album-intents .edition-visuals"));
     }
 
     [Fact]

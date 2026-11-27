@@ -37,20 +37,20 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
 
     // On the whole album, which has no edition.
     private static readonly PurchaseIntentAdminListItem OnAlbum = new(
-        Guid.Parse("01900000-0000-7000-8000-000000000001"), Blacksad, AlbumCollectionState.PurchaseIntent, null, null, true,
+        Guid.Parse("01900000-0000-7000-8000-000000000001"), Blacksad, AlbumCollectionState.PurchaseIntent, null, null, null, true,
         new DateTimeOffset(2026, 10, 8, 8, 0, 0, TimeSpan.Zero), 41);
 
     // On an edition of an album of the collection, which has another one.
     private static readonly PurchaseIntentAdminListItem OnEdition = new(
         Guid.Parse("01900000-0000-7000-8000-000000000002"), Castafiore, AlbumCollectionState.InCollection,
         new EditionSummary(Guid.Parse("01900000-0000-7000-8000-0000000000e2"), Guid.NewGuid(), "Casterman", Guid.NewGuid(), "Fac-similé", 2013, null),
-        Cover, false, new DateTimeOffset(2026, 10, 8, 9, 0, 0, TimeSpan.Zero), 42);
+        new EditionTraits(EditionCategory.SpecialEdition, EditionFormat.Standard, BindingType.Hardcover, null, null, 62, false), Cover, false, new DateTimeOffset(2026, 10, 8, 9, 0, 0, TimeSpan.Zero), 42);
 
     // On the only edition of its album.
     private static readonly PurchaseIntentAdminListItem OnOnlyEdition = new(
         Guid.Parse("01900000-0000-7000-8000-000000000003"), Longway, AlbumCollectionState.PurchaseIntent,
         new EditionSummary(Guid.Parse("01900000-0000-7000-8000-0000000000e3"), Guid.NewGuid(), "Dupuis", null, null, 1974, null),
-        null, true, new DateTimeOffset(2026, 10, 9, 8, 0, 0, TimeSpan.Zero), 43);
+        new EditionTraits(null, null, null, null, null, null, true), null, true, new DateTimeOffset(2026, 10, 9, 8, 0, 0, TimeSpan.Zero), 43);
 
     private readonly CultureInfo _previous = CultureInfo.CurrentCulture;
     private readonly FakeAudienceApi _audience = new();
@@ -141,6 +141,17 @@ public sealed class AdminPurchaseIntentsTests : BunitContext, IDisposable
                 ("Buddy Longway - T. 2", "Édition", "Dupuis [1974]", "Intention", "Posée le 09/10/2026"),
             ],
             rows);
+    }
+
+    [Fact]
+    // The summary of the edition targeted, the same wherever an intent is presented
+    // (fonctionnel/regles-metier/intention-d-acquisition.md); nothing under an intent on the album, or an edition with nothing to say.
+    public void Rows_TheSummaryOfTheEditionTargeted()
+    {
+        var summaries = Open("").FindAll(".intent-row:not(.intent-row-head)")
+            .Select(row => row.QuerySelector(".intent-target-sub") is { } sub ? Text(sub) : null);
+
+        Assert.Equal([null, "Édition spéciale · Normal (A4) · Cartonnée · 62 pages · Noir et blanc", null], summaries);
     }
 
     [Fact]

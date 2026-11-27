@@ -151,6 +151,7 @@ internal static class PurchaseIntentEndpoints
             p.Album.ToSummary(),
             p.Album.CollectionState(),
             p.Edition == null ? null : p.Edition.ToSummary(),
+            p.Edition == null ? null : p.Edition.ToTraits(),
             p.Edition == null ? null : p.Edition.Publisher.Website,
             CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
             p.CreatedAt));
@@ -186,7 +187,7 @@ internal static class PurchaseIntentEndpoints
 
     /// <summary>
     /// The list of the intents of the administration (visuel/listes/liste-par-liste.md). Each row carries the album and what
-    /// the intent targets, the cover of the album, whether the intent can turn into one on the other target, when it was set,
+    /// the intent targets, with the summary of the edition targeted, the cover of the album, whether the intent can turn into one on the other target, when it was set,
     /// and the version of its album, which its removal sends back.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">An entry that is not one of the navigation: a technical error.</exception>
@@ -199,6 +200,7 @@ internal static class PurchaseIntentEndpoints
                 p.Album.ToSummary(),
                 p.Album.CollectionState(),
                 p.Edition == null ? null : p.Edition.ToSummary(),
+                p.Edition == null ? null : p.Edition.ToTraits(),
                 CatalogExpressions.ToCover(p.Album.CoverVisualOf()),
                 // fonctionnel/regles-metier/intention-d-acquisition.md: an intent on an edition turns into one on the album only when
                 // that edition is the only one of the album; one on the album, which has no edition, always into one on an edition.

@@ -7,6 +7,7 @@
 @inject AdminRecordCounts RecordCounts
 @inject RecordLabels Labels
 @inject DisplayFormatter Format
+@inject EditionTraitTexts TraitTexts
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
@@ -79,12 +80,16 @@
                         </span>
                         <span class="intent-meta">
                             @* What the intent targets, told apart at first glance: the whole album, any edition doing, or one
-                               edition, named beside it. *@
+                               edition, named beside it, its summary under it (fonctionnel/regles-metier/intention-d-acquisition.md). *@
                             <span class="intent-target" role="cell">
                                 @if (row.Edition is { } edition)
                                 {
                                     <Tag Text="@L["Target.Edition"]" Variant="TagVariant.Outlined" Icon="IconName.Edition" />
                                     <span class="intent-target-detail intent-target-edition"><LabelText Text="@Labels.Edition(edition)" /></span>
+                                    @if (row.Traits is { } traits && TraitTexts.Summary(traits) is { } summary)
+                                    {
+                                        <span class="intent-target-sub">@summary</span>
+                                    }
                                 }
                                 else
                                 {

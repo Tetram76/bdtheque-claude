@@ -94,6 +94,7 @@ internal sealed class FakeAdminApi(FakeAudienceApi audience) : HttpMessageHandle
         services.AddScoped<DisplayFormatter>();
         services.AddSingleton<IsbnFormatter>().AddSingleton<RecordLabels>().AddSingleton<Citation>();
         services.AddSingleton<ValueLabels>();
+        services.AddScoped<EditionTraitTexts>();
         services.AddSingleton<Bdtheque.Frontend.Audience.AudienceFunctionNames>();
     }
 
