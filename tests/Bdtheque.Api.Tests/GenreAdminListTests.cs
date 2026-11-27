@@ -64,6 +64,16 @@ public sealed class GenreAdminListTests(ApiWebApplicationFactory factory) : ICla
         Assert.Equal([epic.Id], (await ListAsync($"q=EPOPEE {_marker}")).Select(r => r.Id));
     }
 
+    // The label is stored under the case- and accent-insensitive collation of its uniqueness, whose typographic variants are
+    // equivalent in the search all the same (choix-implementation/api/recherche.md).
+    [Fact]
+    public async Task List_SearchesTheLabel_WhateverTheTypographicVariantsOfItsCharacters()
+    {
+        var swashbuckler = await CreateGenreAsync($"Cape\u2013et\u2013d\u2019épée\u00A0{_marker}");
+
+        Assert.Equal([swashbuckler.Id], (await ListAsync($"q={Uri.EscapeDataString($"cape-et-d'epee {_marker}")}")).Select(r => r.Id));
+    }
+
     [Fact]
     public async Task List_FollowsTheNavigationByInitial_OnTheLabel_AsTheListOfTheConsultation()
     {

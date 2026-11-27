@@ -85,6 +85,13 @@ public sealed class AudienceIndicatorsQueryTests
         Assert.True(new AudienceIndicatorsQuery().Presents("Fiche d'un album"));
     }
 
+    [Fact]
+    public void Search_TreatsTheTypographicVariantsOfACharacterAsTheSame()
+    {
+        // As the search of a list (choix-implementation/api/recherche.md).
+        Assert.True(new AudienceIndicatorsQuery(Text: "fiche d\u2019un\u00A0album").Presents("Fiche d'un album"));
+    }
+
     [Theory]
     [InlineData("?page=0")]
     [InlineData("?page=-2")]

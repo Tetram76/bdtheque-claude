@@ -117,6 +117,19 @@ public sealed class ChangeLogEndpointsTests(ApiWebApplicationFactory factory) : 
         Assert.DoesNotContain((await ReadAsync("q=Uderzo%22,&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
     }
 
+    // As in the lists (choix-implementation/api/recherche.md): the typographic variants of an apostrophe, a space or a hyphen
+    // are the same character, on both sides, in a text as in the full name of an author.
+    [Fact]
+    public async Task Search_TreatsTheTypographicVariantsOfACharacterAsTheSame()
+    {
+        var album = await CreateAlbumAsync("L\u2019Étoile\u00A0mystérieuse", null);
+        var author = await PostAsync<CreateAuthorRequest, AuthorForm>("/admin/authors", new("D'Arras", "Jean-Michel", null, null, null));
+
+        Assert.Contains((await ReadAsync("q=l'etoile mysterieuse&pageSize=100")).Entries.Items, e => e.RecordId == album.Id);
+        Assert.Contains(
+            (await ReadAsync($"q={Uri.EscapeDataString("jean\u2011michel d\u2019arras")}&pageSize=100")).Entries.Items, e => e.RecordId == author.Id);
+    }
+
     // The entries of one write share its instant: they come in a fixed order, by the type of their records, never by the
     // random part of their identifiers.
     [Fact]
