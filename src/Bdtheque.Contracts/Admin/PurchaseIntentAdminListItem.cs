@@ -11,6 +11,7 @@ namespace Bdtheque.Contracts.Admin;
 /// (fonctionnel/regles-metier/appartenance-a-la-collection.md#états-dun-album): in the collection, or wished for, never outside it.
 /// </param>
 /// <param name="Edition">The edition targeted; <c>null</c> for an intent on the whole album, any edition doing.</param>
+/// <param name="Traits">What the summary of the edition targeted is built from; <c>null</c> for an intent on the whole album.</param>
 /// <param name="Cover">The cover of the album (fonctionnel/regles-metier/couverture-d-un-album.md); <c>null</c> for the generic visual.</param>
 /// <param name="IsConvertible">
 /// Whether the intent turns into one on the other target (fonctionnel/regles-metier/intention-d-acquisition.md): always for an intent
@@ -23,6 +24,7 @@ public sealed record PurchaseIntentAdminListItem(
     AlbumSummary Album,
     AlbumCollectionState State,
     EditionSummary? Edition,
+    EditionTraits? Traits,
     AlbumCover? Cover,
     bool IsConvertible,
     DateTimeOffset CreatedAt,

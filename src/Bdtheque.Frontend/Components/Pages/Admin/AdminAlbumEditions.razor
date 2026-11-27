@@ -8,6 +8,7 @@
 @inject RecordLabels Labels
 @inject ValueLabels Values
 @inject DisplayFormatter Format
+@inject EditionTraitTexts TraitTexts
 @inject AudienceRecorder Recorder
 @inject NavigationManager Navigation
 
@@ -168,12 +169,14 @@ else if (_page is { } page)
                                         <span class="intent-target-detail">@target</span>
                                     }
                                 </span>
-                                @if (row.Edition is not null && Traits(row.Category, row.Binding, null) is { Length: > 0 } traits)
+                                @if (row.Traits is { } traits && TraitTexts.Summary(traits) is { } summary)
                                 {
-                                    <span class="intent-sub">@traits</span>
+                                    <span class="intent-sub">@summary</span>
                                 }
                             </span>
-                            <span class="intent-created" role="cell">@($"{L["Intent.Created"]} ")<LocalDateTime Value="row.CreatedAt" DateOnly="true" /></span>
+                            @* The date it was set, then the visuals of the edition targeted, as the detail of a row of an edition tells its
+                               own (visuel/editions-album/contenu.md, decision of the user, #632). *@
+                            <span class="intent-created" role="cell">@($"{L["Intent.Created"]} ")<LocalDateTime Value="row.CreatedAt" DateOnly="true" />@(row.VisualCount > 0 ? $" · {Visuals(row.VisualCount)}" : null)</span>
                             <span class="intent-actions" role="cell">
                                 @* The main action, presented as the « Modifier » of an edition: an intent on an edition opens its form; one
                                    on the whole album, which has nothing to modify, turns into one on an edition. The purchase is confirmed
@@ -426,14 +429,15 @@ else if (_page is { } page)
     {
         var mode = Values.Of(row.AcquisitionMode);
         var acquisition = row.AcquisitionYear is { } year ? L["Acquisition.WithYear", mode, year].Value : mode;
-        var visuals = row.VisualCount switch
-        {
-            0 => L["Visuals.None"].Value,
-            1 => L["Visuals.One"].Value,
-            var count => L["Visuals.Other", Format.Number(count)].Value,
-        };
-        return $"{acquisition} · {visuals}";
+        return $"{acquisition} · {Visuals(row.VisualCount)}";
     }
+
+    private string Visuals(int count) => count switch
+    {
+        0 => L["Visuals.None"].Value,
+        1 => L["Visuals.One"].Value,
+        _ => L["Visuals.Other", Format.Number(count)].Value,
+    };
 
     private string EditionCount() => _page!.Editions.Count switch
     {

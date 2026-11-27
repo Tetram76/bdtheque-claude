@@ -4,8 +4,9 @@
    margins of the page and of the block, which a theme sets. Mobile-first, each row holds on two lines, the thumbnail on the
    left: the album, then what the intent targets, the possession of the album, which the consultation always signals
    (fonctionnel/regles-metier/perimetre-de-la-consultation.md), and the date, carrying the name of its column. A list wide
-   enough for its columns, the fixed ones and at least 12rem for the album, is a table, what the intent targets taking the
-   room left and wrapping in it. */
+   enough for its columns, the fixed ones, at least 12rem for the album and 13rem for what the intent targets, whose label
+   ends with an ISBN that never breaks (fonctionnel/presentation/libelle-d-une-edition.md), is a table, what the intent
+   targets taking the room left and wrapping in it, its summary under it (#632). */
 .intent-rows {
     container: intent-rows / inline-size;
 }
@@ -82,6 +83,13 @@
     font-weight: var(--font-weight-strong);
 }
 
+/* The summary of the edition targeted, on its own line under the tag and the label. */
+.intent-target-sub {
+    flex-basis: 100%;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-small);
+}
+
 .intent-row-head .intent-target {
     display: block;
 }
@@ -103,9 +111,9 @@
     font-variant-numeric: tabular-nums;
 }
 
-@container intent-rows (min-width: 42rem) {
+@container intent-rows (min-width: 50rem) {
     .intent-row {
-        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(0, 1.4fr) 10.5rem 6.75rem;
+        grid-template-columns: 2.25rem minmax(12rem, 1fr) minmax(13rem, 1.4fr) 10.5rem 6.75rem;
         grid-template-areas: "cover main target state created";
         align-items: center;
     }

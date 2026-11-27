@@ -117,7 +117,8 @@ else if (_album is { } album)
                         }
                     </ol>
                 }
-                <AlbumIntents AlbumIntent="album.PurchaseIntent" Editions="album.Editions" EditHref="@(_administrator ? edition => AppPaths.AdminEditEditionFromRecord(Id, edition) : null)" />
+                <AlbumIntents AlbumId="Id" AlbumIntent="album.PurchaseIntent" Editions="album.Editions" OpenEdition="@_open?.Edition.Id" OpenPosition="_position"
+                              EditHref="@(_administrator ? edition => AppPaths.AdminEditEditionFromRecord(Id, edition) : null)" />
             </Block>
         }
 
@@ -173,10 +174,11 @@ else if (_album is { } album)
         }
 
         // Only the editions of the collection are editions; an edition targeted by an intent is one of the intents
-        // (fonctionnel/regles-metier/intention-d-acquisition.md). A visual the collection does not have, which only an address
-        // written by hand names, opens no viewer.
+        // (fonctionnel/regles-metier/intention-d-acquisition.md), whose visuals open the same viewer (visuel/fiche-album/contenu.md).
+        // A visual the album does not have, which only an address written by hand names, opens no viewer.
         _owned = [.. _album.Editions.Where(e => e.IsInCollection)];
-        if (_owned.Find(e => e.Edition.Id == query.Edition) is { } edition && query.Visual is { } visual && visual <= edition.Visuals.Count)
+        if (_album.Editions.FirstOrDefault(e => e.Edition.Id == query.Edition) is { } edition && query.Visual is { } visual
+            && visual <= edition.Visuals.Count)
             (_open, _position) = (edition, visual);
 
         if (HttpContext is { } context && HttpMethods.IsGet(context.Request.Method) && query.Action is { } action)

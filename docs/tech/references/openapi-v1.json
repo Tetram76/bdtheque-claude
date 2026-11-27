@@ -12513,8 +12513,8 @@
         "required": [
           "id",
           "edition",
-          "category",
-          "binding",
+          "traits",
+          "visualCount",
           "isConvertible",
           "createdAt"
         ],
@@ -12535,27 +12535,25 @@
               }
             ]
           },
-          "category": {
+          "traits": {
             "oneOf": [
               {
                 "type": "null"
               },
               {
-                "description": "The category of the edition targeted.",
-                "$ref": "#/components/schemas/EditionCategory"
+                "description": "What the summary of the edition targeted is built from; `null` for an intent on the whole album.",
+                "$ref": "#/components/schemas/EditionTraits"
               }
             ]
           },
-          "binding": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "description": "The binding of the edition targeted.",
-                "$ref": "#/components/schemas/BindingType"
-              }
-            ]
+          "visualCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "The number of visuals of the edition targeted; none for an intent on the whole album.",
+            "format": "int32"
           },
           "isConvertible": {
             "type": "boolean",
@@ -15675,6 +15673,83 @@
         },
         "description": "What the label of an edition is built from (fonctionnel/presentation/libelle-d-une-edition.md)."
       },
+      "EditionTraits": {
+        "required": [
+          "category",
+          "format",
+          "binding",
+          "orientation",
+          "readingDirection",
+          "pageCount",
+          "isColor"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EditionCategory"
+              }
+            ]
+          },
+          "format": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EditionFormat"
+              }
+            ]
+          },
+          "binding": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BindingType"
+              }
+            ]
+          },
+          "orientation": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookOrientation"
+              }
+            ]
+          },
+          "readingDirection": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ReadingDirection"
+              }
+            ]
+          },
+          "pageCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "isColor": {
+            "type": "boolean"
+          }
+        },
+        "description": "What the summary of an edition targeted by a purchase intent is built from, under its label, wherever the intent is presented\n(fonctionnel/regles-metier/intention-d-acquisition.md, résumé de l'édition visée)."
+      },
       "EditionVisualEntry": {
         "required": [
           "id",
@@ -18513,6 +18588,7 @@
           "album",
           "state",
           "edition",
+          "traits",
           "cover",
           "isConvertible",
           "createdAt",
@@ -18539,6 +18615,17 @@
               {
                 "description": "The edition targeted; `null` for an intent on the whole album, any edition doing.",
                 "$ref": "#/components/schemas/EditionSummary"
+              }
+            ]
+          },
+          "traits": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "What the summary of the edition targeted is built from; `null` for an intent on the whole album.",
+                "$ref": "#/components/schemas/EditionTraits"
               }
             ]
           },
@@ -18764,6 +18851,7 @@
           "album",
           "state",
           "edition",
+          "traits",
           "publisherWebsite",
           "cover",
           "createdAt"
@@ -18789,6 +18877,17 @@
               {
                 "description": "The edition targeted; `null` for an intent on the whole album.",
                 "$ref": "#/components/schemas/EditionSummary"
+              }
+            ]
+          },
+          "traits": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "What the summary of the edition targeted is built from; `null` for an intent on the whole album.",
+                "$ref": "#/components/schemas/EditionTraits"
               }
             ]
           },

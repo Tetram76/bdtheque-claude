@@ -2,7 +2,7 @@
 type: Référence visuelle
 title: 'Contenu'
 description: 'Contenu de la page des éditions et intentions d''acquisition d''un album.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:42:30Z }
 ---
 
 # Contenu
@@ -22,7 +22,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T09:45:00Z }
     - pour un album qui a une édition, possédée ou visée, seule une édition précise peut l'être : un bouton direct, **Nouvelle intention sur une édition…**, sans choix à faire ; plusieurs éditions d'un même album peuvent être visées, une intention chacune ;
     - dans les deux cas, viser une édition ouvre la fiche de saisie d'une nouvelle intention d'acquisition ([`saisie-edition/`](../saisie-edition/index.md)), sans exemplaire ni valeur ;
     - aucun bouton pour un album lui-même visé ;
-  - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec sa catégorie et sa reliure en petit dessous ; la date où elle a été posée ; puis ses actions, une action principale présentée comme le **Modifier** d'une ligne d'édition, et un menu « ⋯ » (décisions de l'utilisateur, #444) :
+  - chaque **intention**, une ligne, distinguée comme dans la liste des intentions d'acquisition ([`listes/`](../listes/index.md)) par une étiquette : **Album**, pleine, suivie de « toute édition », ou **Édition**, en contour, suivie du libellé de l'édition visée en gras, avec en petit dessous le résumé de ses caractéristiques ([Intention d'acquisition](../../fonctionnel/regles-metier/intention-d-acquisition.md), résumé de l'édition visée) ; la date où elle a été posée, suivie, pour une édition visée qui a des visuels, de leur nombre (« Posée le 8 octobre 2026 · 2 visuels »), comme le détail d'une ligne d'édition (décision de l'utilisateur, #632, maquette à l'appui) ; puis ses actions, une action principale présentée comme le **Modifier** d'une ligne d'édition, et un menu « ⋯ » (décisions de l'utilisateur, #444) :
     - une intention sur une **édition** a pour action principale **Modifier**, qui ouvre sa fiche de saisie ([`saisie-edition/`](../saisie-edition/index.md)) ; son menu propose **Viser plutôt l'album…** pour la seule intention d'un album sans édition, la conversion supprimant l'édition visée, puis, séparée par un filet, **Retirer l'intention…** ;
     - une intention sur l'**album**, qui n'a rien à modifier, n'a pas de **Modifier** : son action principale est **Viser une édition…**, qui la convertit en intention sur une édition, et son menu ne propose que **Retirer l'intention…** ;
     - **Retirer l'intention…** supprime avec elle l'édition visée ([Suppression des entités](../../fonctionnel/regles-metier/suppression-des-entites.md)) ;

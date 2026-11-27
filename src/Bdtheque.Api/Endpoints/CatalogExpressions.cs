@@ -11,7 +11,7 @@ namespace Bdtheque.Api.Endpoints;
 
 /// <summary>
 /// Expressions shared by the lists and records of the consultation — what the labels of an album and of
-/// an edition are built from, the card of an album, the cover of an album or of an edition, the membership
+/// an edition are built from, the summary of an edition targeted by an intent, the card of an album, the cover of an album or of an edition, the membership
 /// of the collection, the purchase intents, the order of the albums —, written once and inserted into each query
 /// (choix-implementation/api/recherche.md).
 /// </summary>
@@ -55,6 +55,12 @@ internal static class CatalogExpressions
 
     /// <summary>Marker of the summary of an edition, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static EditionSummary ToSummary(this Edition edition) => throw NotExpanded();
+
+    /// <summary>
+    /// Marker of what the summary of an edition targeted by a purchase intent is built from, for <see cref="Expand{TSource, TResult}"/>
+    /// only.
+    /// </summary>
+    public static EditionTraits ToTraits(this Edition edition) => throw NotExpanded();
 
     /// <summary>Marker of where an album stands with regard to the collection, for <see cref="Expand{TSource, TResult}"/> only.</summary>
     public static AlbumCollectionState CollectionState(this Album album) => throw NotExpanded();
@@ -114,6 +120,16 @@ internal static class CatalogExpressions
         e.PublisherCollection != null ? e.PublisherCollection.Name : null,
         e.PublicationYear,
         e.Isbn);
+
+    // The summary of an edition targeted, the same wherever an intent is presented (fonctionnel/regles-metier/intention-d-acquisition.md).
+    private static readonly Expression<Func<Edition, EditionTraits>> EditionTraitsOf = e => new EditionTraits(
+        EnumMapping.Map<ContractEnums.EditionCategory>(e.Category),
+        EnumMapping.Map<ContractEnums.EditionFormat>(e.Format),
+        EnumMapping.Map<ContractEnums.BindingType>(e.Binding),
+        EnumMapping.Map<ContractEnums.BookOrientation>(e.Orientation),
+        EnumMapping.Map<ContractEnums.ReadingDirection>(e.ReadingDirection),
+        e.PageCount,
+        e.IsColor);
 
     private static readonly Expression<Func<Album, AlbumCard>> AlbumCardOf = a => new AlbumCard(
         a.ToSummary(),
@@ -283,6 +299,7 @@ internal static class CatalogExpressions
                 nameof(RolesOf) => RolesOfAuthor,
                 nameof(ToSummary) when node.Method.ReturnType == typeof(AlbumSummary) => AlbumSummaryOf,
                 nameof(ToSummary) => EditionSummaryOf,
+                nameof(ToTraits) => EditionTraitsOf,
                 nameof(ToCard) => AlbumCardOf,
                 nameof(CollectionState) => CollectionStateOf,
                 nameof(CoverVisualOf) when node.Method.GetParameters()[0].ParameterType == typeof(Album) => AlbumCoverVisualOf,

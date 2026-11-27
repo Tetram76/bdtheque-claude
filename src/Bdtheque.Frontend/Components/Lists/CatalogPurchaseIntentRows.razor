@@ -3,6 +3,7 @@
 @using Bdtheque.Contracts.Catalog
 @inject IStringLocalizer<CatalogPurchaseIntentRows> L
 @inject RecordLabels Labels
+@inject EditionTraitTexts TraitTexts
 
 @* The rows of purchase intents of the consultation, which its public list of the intents and its search present alike: each
    row leads to the record of the album it targets, with what it targets and the possession of the album. *@
@@ -31,6 +32,11 @@
                         <span class="intent-target-detail intent-target-edition">
                             <EditionLabelText Edition="edition" PublisherWebsite="@row.PublisherWebsite" />
                         </span>
+                        @* Its summary under it, the same wherever an intent is presented (fonctionnel/regles-metier/intention-d-acquisition.md). *@
+                        @if (row.Traits is { } traits && TraitTexts.Summary(traits) is { } summary)
+                        {
+                            <span class="intent-target-sub">@summary</span>
+                        }
                     }
                     else
                     {
