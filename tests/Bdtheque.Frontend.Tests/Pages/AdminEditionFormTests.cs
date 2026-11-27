@@ -1458,6 +1458,38 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Taking_ACollectionEmptied_KeepsThePublisherReloaded()
+    {
+        // An edition of no collection is of no publisher in particular: emptying the collection, the user said nothing of the
+        // publisher, which another modification changed meanwhile.
+        var longCourrier = Guid.Parse("01900000-0000-7000-8000-0000000000e5");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with
+        {
+            Content = Owned.Content with { PublisherCollectionId = FacSimile },
+            References = new(new PublisherListItem(Casterman, "Casterman", null), new PublisherCollectionListItem(FacSimile, "Fac-similé", Casterman, "Casterman")),
+        };
+        _api.Answers[$"/admin/publishers/{Dargaud}/collections"] = new List<PublisherCollectionForm> { new(longCourrier, Dargaud, "Long courrier", 3) };
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await ChooseCollectionAsync(page, 0);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with
+        {
+            AlbumVersion = 13,
+            Content = Owned.Content with { PublisherId = Dargaud, PublisherCollectionId = longCourrier },
+            References = new(new PublisherListItem(Dargaud, "Dargaud", null), new PublisherCollectionListItem(longCourrier, "Long courrier", Dargaud, "Dargaud")),
+        };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Votre saisie : —", page.Find("#edition-collection-redo span").TextContent.Trim());
+
+        await page.ClickAsync(() => page.Find("#edition-collection-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Dargaud", page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher).Instance.Value?.Label);
+        Assert.Equal("—", page.Find("#edition-collection").TextContent.Trim());
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
     public async Task Taking_TheVisualsEntered_PutsTheirListBack()
     {
         var page = OpenOwned();

@@ -497,6 +497,38 @@ public sealed class AdminSeriesFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Taking_ACollectionEmptied_KeepsThePublisherReloaded()
+    {
+        // A template of no collection is of no publisher in particular: emptying the collection, the user said nothing of the
+        // publisher, which another modification changed meanwhile.
+        var page = OpenSeries();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await ChooseCollectionAsync(page, 0);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/series/{SeriesId}"] = Blacksad with
+        {
+            Version = 13,
+            Content = Blacksad.Content with
+            {
+                EditionTemplate = Blacksad.Content.EditionTemplate with { PublisherId = Casterman, PublisherCollectionId = Ecritures },
+            },
+            References = Blacksad.References with
+            {
+                Publisher = new PublisherListItem(Casterman, "Casterman", null),
+                PublisherCollection = new PublisherCollectionListItem(Ecritures, "Écritures", Casterman, "Casterman"),
+            },
+        };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Votre saisie : —", page.Find("#series-collection-redo span").TextContent.Trim());
+
+        await page.ClickAsync(() => page.Find("#series-collection-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Casterman", page.FindComponents<RecordPicker>().Single(p => p.Instance.Kind == RecordKind.Publisher).Instance.Value?.Label);
+        Assert.Equal("—", page.Find("#series-collection").TextContent.Trim());
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
     public async Task TechnicalError_KeepsTheChanges_AndOffersToTryAgain()
     {
         var page = OpenSeries();

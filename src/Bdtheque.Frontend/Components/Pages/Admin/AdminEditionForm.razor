@@ -876,15 +876,17 @@ else
         await ChoosePublisherAsync(publisher);
     }
 
-    // Taking the collection takes its publisher first, when the entry left behind had another: a collection is one of the
-    // collections of its publisher, and choosing the publisher again removes the collection, which is then put back.
+    // Taking a collection takes its publisher first, when the entry left behind had another: a collection is one of the
+    // collections of its publisher, and choosing the publisher again removes the collection, which is then put back. A collection
+    // emptied is that of no publisher: the publisher reloaded stays.
     private EntryDatumState? CollectionState => DatumState("collection") is { } state
         ? state with { Take = EventCallback.Factory.Create(this, TakeCollectionAsync) }
         : null;
 
     private async Task TakeCollectionAsync()
     {
-        if (Tracker.Entered!.Publisher?.Id != Entry!.Publisher?.Id)
+        var entered = Tracker.Entered!;
+        if (entered.PublisherCollection is not null && entered.Publisher?.Id != Entry!.Publisher?.Id)
             await TakePublisherAsync();
         Tracker.Take("collection");
     }
