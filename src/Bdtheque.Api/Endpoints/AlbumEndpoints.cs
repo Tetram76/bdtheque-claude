@@ -310,8 +310,13 @@ internal static class AlbumEndpoints
                 ? Resemblance.Identical
                 : Resemblance.Compare(Texts(a.Title, a.SeriesTitle), Texts(b.Title, b.SeriesTitle), inclusion: true), count);
 
-        static string?[] Texts(string? title, string? seriesTitle) =>
-            title is null ? [] : seriesTitle is null ? [title] : [title, $"{seriesTitle} {title}"];
+        // The title alone, and with its series, as its label reads; none for an album without a title of its own.
+        static string?[] Texts(string? title, string? seriesTitle) => (title, seriesTitle) switch
+        {
+            (null, _) => [],
+            (_, null) => [title],
+            _ => [title, $"{seriesTitle} {title}"],
+        };
     }
 
     /// <summary>
