@@ -1490,6 +1490,28 @@ public sealed class AdminEditionFormTests : BunitContext, IDisposable
     }
 
     [Fact]
+    public async Task Taking_AFreenessEntered_UnderAPurchaseReloaded_TakesBackTheModeThatAllowedIt()
+    {
+        // A purchase is never free: the free box taken alone would leave a free purchase, which the form never allows.
+        var page = OpenOwned();
+        _api.Write = (_, _, _) => FakeAdminApi.Problem(ProblemTypes.Functional, HttpStatusCode.Conflict);
+        await page.ChangeAsync("#edition-mode", "Gift");
+        await page.ChangeAsync("#edition-free", true);
+        await page.SubmitAsync("form");
+        _api.Answers[$"/admin/albums/{AlbumId}/editions/{EditionId}"] = Owned with { AlbumVersion = 13 };
+        await page.ClickAsync(() => page.Find("[role=alert]").QuerySelectorAll("button")[0]);
+        Assert.Equal("Purchase", page.Find("#edition-mode").GetAttribute("value"));
+
+        await page.ClickAsync(() => page.Find("#edition-free-redo").QuerySelectorAll("button")[0]);
+
+        Assert.Equal("Gift", page.Find("#edition-mode").GetAttribute("value"));
+        Assert.True(Free(page).HasAttribute("checked"));
+        Assert.False(Free(page).HasAttribute("disabled"));
+        Assert.All(Amounts, id => Assert.True(string.IsNullOrEmpty(page.Find($"#edition-{id}").GetAttribute("value"))));
+        Assert.Empty(page.FindAll(".redo-line"));
+    }
+
+    [Fact]
     public async Task Taking_TheVisualsEntered_PutsTheirListBack()
     {
         var page = OpenOwned();

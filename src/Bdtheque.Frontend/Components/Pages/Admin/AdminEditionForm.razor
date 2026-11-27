@@ -827,8 +827,14 @@ else
             (from, to) => TakeAmount(to, () => (to.AcquisitionAmount, to.AcquisitionCurrency) = (from.AcquisitionAmount, from.AcquisitionCurrency), from.AcquisitionAmount)),
         new("initialValue", L["InitialValue"], e => AmountValue(e.InitialValueAmount, e.InitialValueCurrency), e => Amount(e.InitialValueAmount, e.InitialValueCurrency),
             (from, to) => TakeAmount(to, () => (to.InitialValueAmount, to.InitialValueCurrency) = (from.InitialValueAmount, from.InitialValueCurrency), from.InitialValueAmount)),
-        // Taken as the user checks it: a free edition has no value.
-        new("free", L["Free"], e => Checked(e.IsFree), e => Checked(e.IsFree), (from, to) => to.SetFree(from.IsFree)),
+        // Taken as the user checks it: a free edition has no value. A purchase is never free, the mode « Achat » disabling the box:
+        // an edition free entered under another mode takes that mode back with it, which allowed it.
+        new("free", L["Free"], e => Checked(e.IsFree), e => Checked(e.IsFree), (from, to) =>
+        {
+            if (from.IsFree && to.AcquisitionMode == AcquisitionMode.Purchase)
+                to.ChooseAcquisitionMode(from.AcquisitionMode);
+            to.SetFree(from.IsFree);
+        }),
         // Les visuels: the ordered list of them, each by what it is (one the edition has, or one added, waiting) and its type. Taken
         // back whole, those added included: one no longer kept is removed by the block, which a dialog tells.
         new("visuals", L["Visuals"], e => string.Join(',', e.Visuals.Select(v => $"{v.Key}:{v.Type}")), e => e.Visuals.Count switch
