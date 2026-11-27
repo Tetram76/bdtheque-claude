@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Bdtheque.Contracts.Search;
 using Bdtheque.Domain.Common;
 using Bdtheque.Domain.Entities;
 using Bdtheque.Infrastructure;
@@ -17,7 +18,8 @@ internal static class CatalogFilters
 
     /// <summary>
     /// Keeps the items one of whose <paramref name="texts"/> contains <paramref name="text"/>, ignoring
-    /// case and accents; all of them if <paramref name="text"/> is blank.
+    /// case, accents and the typographic variants of a character (<see cref="SearchText"/>); all of them if
+    /// <paramref name="text"/> is blank.
     /// </summary>
     public static IQueryable<T> WhereContains<T>(this IQueryable<T> source, string? text, params Expression<Func<T, string?>>[] texts)
     {
@@ -26,9 +28,13 @@ internal static class CatalogFilters
 
         // The wildcards entered are looked for as they are. Captured, the pattern is sent as a parameter:
         // a constant would be written into the SQL, and compile a new query for each search.
-        var pattern = $"%{EscapeLike(text.Trim())}%";
+        var pattern = $"%{EscapeLike(SearchText.Normalize(text.Trim()))}%";
         Expression<Func<string?, bool>> contains = value => EF.Functions.Like(
-            EF.Functions.Collate(value, BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation), pattern, LikeEscapeCharacter);
+            EF.Functions.Collate(
+                DatabaseFunctions.Translate(value, SearchText.Variants, SearchText.Characters),
+                BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation),
+            pattern,
+            LikeEscapeCharacter);
 
         var item = Expression.Parameter(typeof(T), "item");
         var condition = texts

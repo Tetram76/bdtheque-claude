@@ -54,7 +54,7 @@ internal sealed record ChangeLogFilters(
                 SELECT concat_ws(' ', label.part ->> 'lastName', label.part ->> 'firstName'), false
                 WHERE label.part ->> 'kind' = 'author'
             ) AS searched(text, isbn)
-            WHERE searched.text COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
+            WHERE translate(searched.text, {3}, {4}) COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {0} ESCAPE '\'
                 OR (searched.isbn
                     AND translate(searched.text, {2}, '') COLLATE "{{BdthequeDbContext.CaseAndAccentInsensitiveFrenchCollation}}" LIKE {1} ESCAPE '\'))
         """;
@@ -94,7 +94,8 @@ internal sealed record ChangeLogFilters(
     }
 
     /// <summary>
-    /// The entries whose label contains the text searched, ignoring case and accents, by what identifies each record in the
+    /// The entries whose label contains the text searched, ignoring case, accents and the typographic variants of a character
+    /// (<see cref="SearchText"/>), by what identifies each record in the
     /// lists (choix-implementation/api/recherche.md); all of them if it is blank. The label is stored in <c>jsonb</c> by its
     /// components, each text compared on its own, decoded: every text of it, those of the labels it holds too (the album of an
     /// edition or of a purchase intent), never the kinds that tell them apart, nor its numbers and flags; the full name of an
@@ -106,12 +107,12 @@ internal sealed record ChangeLogFilters(
             return context.ChangeLog;
 
         var text = Text.Trim();
-        var pattern = $"%{CatalogFilters.EscapeLike(text)}%";
+        var pattern = $"%{CatalogFilters.EscapeLike(SearchText.Normalize(text))}%";
         // Without a character of its own, the ISBN searched is the text itself: a separator alone finds no ISBN by its absence.
         var isbn = IsbnSearch.Normalize(text);
         var isbnPattern = isbn.Length == 0 ? pattern : $"%{CatalogFilters.EscapeLike(isbn)}%";
         // EF Core translates no JSON path over a converted column: the condition is written in SQL, and the rest of the query
         // composed over it.
-        return context.ChangeLog.FromSqlRaw(SearchSql, pattern, isbnPattern, IsbnSeparators);
+        return context.ChangeLog.FromSqlRaw(SearchSql, pattern, isbnPattern, IsbnSearch.Separators, SearchText.Variants, SearchText.Characters);
     }
 }

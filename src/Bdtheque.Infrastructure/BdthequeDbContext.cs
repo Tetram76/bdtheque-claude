@@ -61,6 +61,11 @@ public sealed class BdthequeDbContext(DbContextOptions<BdthequeDbContext> option
         modelBuilder.HasCollation(
             CaseAndAccentInsensitiveFrenchCollation, locale: "fr-FR-u-ks-level1", provider: "icu", deterministic: false);
 
+        modelBuilder.HasDbFunction(typeof(DatabaseFunctions).GetMethod(nameof(DatabaseFunctions.Translate))!)
+            .HasName("translate")
+            .IsBuiltIn()
+            .HasParameter("text").PropagatesNullability();
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BdthequeDbContext).Assembly);
 
         // EntityBase assigns every Id in the domain, while EF Core's convention treats Guid keys

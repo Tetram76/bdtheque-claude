@@ -170,6 +170,30 @@ public sealed class AdvancedSearchTests(ApiWebApplicationFactory factory) : ICla
         AssertIds([genre.Id], await GenreIdsAsync(new SearchDataComparison("label", StartsWith, new SearchOperand("label"), MatchCaseAndAccents: true)));
     }
 
+    // choix-implementation/api/recherche.md: a text pasted from an office application writes an apostrophe, a space or a hyphen
+    // in one of its typographic variants, on either side, whether case and accents are matched or not.
+    [Fact]
+    public async Task Text_TreatsTheTypographicVariantsOfACharacterAsTheSame()
+    {
+        var typographic = await CreateAlbumAsync($"L\u2019Épée\u00A0de\u2011feu {_marker}");
+        var plain = await CreateAlbumAsync($"L'Aube rouge-sang {_marker}");
+        var series = await CreateSeriesAsync($"L'Épée de-feu {_marker}");
+        var inSeries = await CreateAlbumAsync($"L\u2019Épée de\u2013feu {_marker}", series.Id);
+
+        AssertIds([typographic.Id, inSeries.Id], await AlbumIdsAsync(Text("title", Contains, "l'epee de-feu")));
+        AssertIds([plain.Id], await AlbumIdsAsync(new SearchCriterion("title", EqualTo, [$"L\u2018Aube\u202Frouge\u2014sang {_marker}"], MatchCaseAndAccents: true)));
+        AssertIds([typographic.Id, inSeries.Id], await AlbumIdsAsync(new SearchCriterion("title", StartsWith, ["L'Épée de-feu"], MatchCaseAndAccents: true)));
+        Assert.Empty(await AlbumIdsAsync(new SearchCriterion("title", StartsWith, ["l'épée de-feu"], MatchCaseAndAccents: true)));
+        AssertIds([inSeries.Id], await AlbumIdsAsync(Data("title", EqualTo, new SearchOperand("title", ["series"]))));
+
+        // A label is stored under the case- and accent-insensitive collation of its uniqueness.
+        var genre = await PostAsync<GenreForm>("/admin/genres", new CreateGenreRequest($"Cape et d\u2019épée {_marker}"));
+        AssertIds([genre.Id], Ids(await SearchAsync<GenreListItem>(EntityKind.Genre, Text("label", EqualTo, $"cape et d'epee {_marker}"))));
+        AssertIds(
+            [genre.Id],
+            Ids(await SearchAsync<GenreListItem>(EntityKind.Genre, new SearchCriterion("label", Contains, [$"d'épée {_marker}"], MatchCaseAndAccents: true))));
+    }
+
     [Fact]
     public async Task Text_LooksForTheWildcardsOfLikeAsTheyAre()
     {

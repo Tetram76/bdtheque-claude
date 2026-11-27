@@ -1,5 +1,9 @@
 # Journal des changements du .speckit
 
+## 2026-11-27
+
+* **Choix** : la recherche par texte (listes, choix d'une fiche en tapant son nom, recherche avancée, journal des modifications) tient pour équivalentes les variantes typographiques d'une apostrophe, d'une espace ou d'un tiret, de part et d'autre, par une liste unique des variantes et la fonction `translate` de PostgreSQL ; les séparateurs ignorés d'un ISBN en sont les espaces et les tirets ([Recherche](choix-implementation/api/recherche.md)) (#PR).
+
 ## 2026-11-26
 
 * **Choix** : le point de passage d'un contrôle est garanti par la structure du code, et non par une convention : le remplacement des contributions, qui contrôle chaque rôle, est seul à créer une contribution ([Conventions de persistance (EF Core)](choix-implementation/persistance/conventions-de-persistance-ef-core.md)) (#676).
