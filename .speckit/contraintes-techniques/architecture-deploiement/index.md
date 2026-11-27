@@ -6,6 +6,6 @@
 * [Hébergement](hebergement.md) - NAS Synology, TLS par son reverse proxy, accès direct en HTTP en interne, plusieurs versions sur le NAS et données d'une pré-version.
 * [Stockage des visuels](stockage-des-visuels.md) - Visuels sur un volume Docker, chemin de montage configurable.
 * [Compatibilité multi-supports](compatibilite-multi-supports.md) - Application responsive, mobile-first : PC, tablette, smartphone ; s'applique à tout écran.
-* [Authentification](authentification.md) - Compte administrateur unique pour l'administration, consultation publique.
+* [Authentification](authentification.md) - Compte administrateur unique pour l'administration, protégé par identifiant et mot de passe, et par un second facteur TOTP exigé sur un déploiement exposé en HTTPS ; consultation publique.
 * [Sources de données externes](sources-de-donnees-externes.md) - Données des sources externes (taux de change, inflation) mises en cache.
 * [Statistiques du dashboard](statistiques-du-dashboard.md) - Seules les statistiques présentées par un affichage du dashboard sont calculées : le tirage précède le chargement.

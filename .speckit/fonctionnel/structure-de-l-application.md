@@ -2,7 +2,7 @@
 type: Règle métier
 title: 'Structure de l''application'
 description: 'Consultation publique (fiches, dont celle d''un univers, genre menant à la liste des albums, navigation, retour à une liste, recherches, statistiques), administration authentifiée, aide contextuelle ; à lire pour tout écran ou endpoint.'
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-24T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-27T12:00:00Z }
 ---
 
 # Structure de l'application
@@ -31,7 +31,8 @@ L'application se compose de trois parties distinctes :
    - **Fusion** de deux fiches d'un même type, proposée depuis la liste de leur type, en plus des opérations CRUD (ex. deux albums saisis en double) : elle garde le meilleur des deux fiches ([Fusion de deux fiches](regles-metier/fusion-des-fiches.md)).
    - Les listes n'offrent pas, dans un premier temps, d'opération groupée (plusieurs fiches sélectionnées à la fois) ; l'idée n'est pas écartée, mais rien n'est statué (YAGNI).
    - La **saisie des données est manuelle**, mais assistée par des **imports depuis des sources externes** : APIs, extraction de données de sites web, etc. Cette aide à la saisie permet de **compléter une fiche** à partir de ces sources. Le **[catalogue général de la BnF](https://api.bnf.fr/fr/api-sru-catalogue-general)** (API SRU) en fait partie, comme **source d'information complémentaire** ; les autres sources restent à définir.
-   - L'accès est protégé par un **compte administrateur unique** (login + mot de passe). Pas de gestion multi-utilisateurs.
+   - L'accès est protégé par un **compte administrateur unique** (identifiant et mot de passe, et, sur un déploiement exposé sur Internet, un code à usage unique de son application d'authentification, [Authentification](../contraintes-techniques/architecture-deploiement/authentification.md)). Pas de gestion multi-utilisateurs.
+     - **Connexion en un seul formulaire** (décision de l'utilisateur, #601) : quand le code est exigé, il se saisit dans le même formulaire que l'identifiant et le mot de passe, sous eux ; un refus dit que la connexion a échoué, sans dire lequel des trois était faux. Sans second facteur, le champ du code n'est pas présenté.
 3. **Aide contextuelle** — accessible à tout moment, depuis n'importe quelle page de l'application :
    - Affiche des informations d'aide **relatives à la page en cours** (aide sensible au contexte).
    - Le contenu peut être **riche** : texte, captures d'écran, tableaux, exemples, etc. — pas seulement de courts textes explicatifs.
