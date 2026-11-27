@@ -10,9 +10,11 @@
     gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md).
 
     The description is read just before it is written, and only the lines of the given entries are removed, whatever
-    their section: every other line, entries a session has removed meanwhile included, is written back as read. An
-    entry that the issue does not hold stops the script before any change, as a mistyped entry would otherwise be left
-    in the issue without anyone noticing.
+    their section: every other line is written back as read. GitHub replaces a description whole and supports no
+    conditional write, so two removals at the same instant can still overlap, the last one writing back what the other
+    removed; the next audit, which rewrites the description from what it still finds, drops such an entry. An entry
+    that the issue does not hold stops the script before any change, as a mistyped entry would otherwise be left in the
+    issue without anyone noticing.
 
 .EXAMPLE
     ./scripts/Remove-QualityDebt.ps1 -Entry 'style IDE0005 src/Bdtheque.Domain/Entities/Album.cs'

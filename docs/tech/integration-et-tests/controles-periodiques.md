@@ -72,7 +72,7 @@ Les entrées au fil de l'eau ne sont corrigées que par les chantiers qui modifi
 ./scripts/Get-QualityDebt.ps1
 ```
 
-[`Remove-QualityDebt.ps1`](../../../scripts/Remove-QualityDebt.ps1) retire du ticket, une fois la Pull Request fusionnée, les entrées qu'elle a corrigées ou rejetées. Il relit la description juste avant de la réécrire et n'en retire que les lignes nommées, si bien que deux sessions qui retirent chacune leurs entrées ne s'effacent pas l'une l'autre. Il refuse toute modification si une entrée nommée ne figure pas dans le ticket, ce qui arrive le plus souvent quand elle a été mal recopiée. Il accepte plusieurs entrées, une par chaîne ou une par ligne d'une même chaîne, telles que les liste le premier script.
+[`Remove-QualityDebt.ps1`](../../../scripts/Remove-QualityDebt.ps1) retire du ticket, une fois la Pull Request fusionnée, les entrées qu'elle a corrigées ou rejetées. Il relit la description juste avant de la réécrire et n'en retire que les lignes nommées. Comme GitHub ne réécrit une description qu'en entier, sans écriture conditionnelle, deux retraits faits au même instant peuvent encore se recouvrir ; une entrée ainsi rétablie disparaît à la réécriture du contrôle suivant. Il refuse toute modification si une entrée nommée ne figure pas dans le ticket, ce qui arrive le plus souvent quand elle a été mal recopiée. Il accepte plusieurs entrées, une par chaîne ou une par ligne d'une même chaîne, telles que les liste le premier script.
 
 ```powershell
 ./scripts/Remove-QualityDebt.ps1 -Entry 'style IDE0005 src/Bdtheque.Infrastructure/Migrations/20261028193613_InitialCreate.cs'
