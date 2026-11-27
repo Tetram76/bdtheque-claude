@@ -1,4 +1,7 @@
 #:package QRCoder
+// A file-based app is published with native AOT by default, which restores the ILCompiler package; this script is only
+// ever run, never published.
+#:property PublishAot=false
 
 // Creates the secret of the second factor of the administrator account
 // (contraintes-techniques/architecture-deploiement/authentification.md), and shows it as a QR code that an authenticator
