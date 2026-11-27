@@ -1,10 +1,12 @@
 ---
 title: 'Contrôles périodiques'
-description: 'Cette page explique les deux contrôles planifiés de main, le contrôle qualité hebdomadaire et le contrôle de sécurité quotidien, comment ils tiennent leur ticket de suivi et quand ils échouent, ainsi que le relevé des versions que mène l''agent ; à lire pour comprendre un échec de ces contrôles, une entrée de leur ticket, ou modifier ce qu''ils relèvent.'
+description: 'Cette page explique les deux contrôles planifiés de main, le contrôle qualité hebdomadaire et le contrôle de sécurité quotidien, comment ils tiennent leur ticket de suivi et quand ils échouent, ainsi que le relevé des versions que mène l''agent et les scripts qui relient la dette au fil de l''eau à la branche d''un chantier ; à lire pour comprendre un échec de ces contrôles, une entrée de leur ticket, ou modifier ce qu''ils relèvent.'
 code:
   - '.github/workflows/quality-audit.yml'
   - '.github/workflows/security-audit.yml'
   - 'scripts/Get-DependencyUpdates.ps1'
+  - 'scripts/Get-QualityDebt.ps1'
+  - 'scripts/Remove-QualityDebt.ps1'
 ---
 
 # Contrôles périodiques
@@ -60,6 +62,24 @@ Le job `Report` range chaque entrée dans l'une des trois sections de la descrip
 
 Le contrôle échoue à chaque exécution tant qu'une entrée critique demeure, et une seule fois pour chaque entrée prioritaire nouvelle ; il n'échoue jamais pour une entrée au fil de l'eau. Lors de la toute première exécution, faute de ticket, aucune entrée n'est tenue pour nouvelle.
 
+### La dette au fil de l'eau d'une branche
+
+Les entrées au fil de l'eau ne sont corrigées que par les chantiers qui modifient leurs fichiers ([Dette qualité au fil de l'eau des fichiers modifiés](../../../.speckit/gestion-projet/depot/dette-qualite-au-fil-de-l-eau.md)). Deux scripts relient pour cela le ticket de suivi à la branche d'un chantier ; tous deux demandent un `gh` authentifié et retrouvent le ticket par ses deux étiquettes, comme le job `Report`.
+
+[`Get-QualityDebt.ps1`](../../../scripts/Get-QualityDebt.ps1) lit la section « Au fil de l'eau » du ticket et la confronte aux fichiers que la branche modifie depuis qu'elle a quitté `origin/main`, modifications non commitées et fichiers non suivis compris. Il retrouve le fichier d'une entrée d'après sa forme, en deuxième position pour un mutant et en troisième pour un écart de style. Un fichier déplacé compte à son ancien chemin, où le contrôle a relevé ses entrées, autant qu'au nouveau. Le script écrit chaque entrée en entier sous son fichier, ou dit qu'il n'y en a aucune ; s'il ne peut pas lire le ticket, il échoue au lieu de laisser croire qu'il n'y a rien à corriger.
+
+```powershell
+./scripts/Get-QualityDebt.ps1
+```
+
+[`Remove-QualityDebt.ps1`](../../../scripts/Remove-QualityDebt.ps1) retire du ticket, une fois la Pull Request fusionnée, les entrées qu'elle a corrigées ou rejetées. Il relit la description juste avant de la réécrire et n'en retire que les lignes nommées, si bien que deux sessions qui retirent chacune leurs entrées ne s'effacent pas l'une l'autre. Il refuse toute modification si une entrée nommée ne figure pas dans le ticket, ce qui arrive le plus souvent quand elle a été mal recopiée. Il accepte plusieurs entrées, une par chaîne ou une par ligne d'une même chaîne, telles que les liste le premier script.
+
+```powershell
+./scripts/Remove-QualityDebt.ps1 -Entry 'style IDE0005 src/Bdtheque.Infrastructure/Migrations/20261028193613_InitialCreate.cs'
+```
+
+Les deux scripts décodent la sortie de `gh` en UTF-8, car les entrées des mutants contiennent des caractères non ASCII, comme la flèche entre le code muté et son remplacement, qui doivent se retrouver tels que le ticket les porte.
+
 ## Le contrôle de sécurité quotidien
 
 Ce contrôle s'exécute chaque jour à 6 h 11 en temps universel. Trois jobs relèvent les vulnérabilités connues, et un quatrième en fait la synthèse :
@@ -89,7 +109,7 @@ La colonne `TooRecent` signale une version publiée depuis moins de sept jours, 
 
 ## Invariants à préserver
 
-- Aucun de ces contrôles n'écrit dans le dépôt ni n'ouvre de Pull Request : ils ne tiennent que leur ticket.
+- Aucun de ces contrôles n'écrit dans le dépôt ni n'ouvre de Pull Request : ils ne tiennent que leur ticket. Les scripts de la dette au fil de l'eau n'écrivent pas non plus dans le dépôt ; seul le second modifie le ticket.
 - Une entrée ne porte ni numéro de ligne ni version. Sinon, chaque modification voisine ou chaque montée de version en ferait une entrée nouvelle, et déclencherait une notification.
 - Le ticket de suivi est retrouvé par ses deux étiquettes, jamais par son titre, que l'utilisateur peut changer.
 - Aucun des deux n'est un check requis : une vulnérabilité sans correction ou une dette de qualité ne bloque aucune fusion.
